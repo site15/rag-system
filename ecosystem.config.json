@@ -1,0 +1,12 @@
+{
+  "apps": [
+    {
+      "name": "backend",
+      "script": "cd backend && npm run start:dev"
+    },
+    {
+      "name": "frontend",
+      "script": "cd frontend && npm run dev"
+    }
+  ]
+}
