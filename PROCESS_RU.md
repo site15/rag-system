@@ -12,8 +12,8 @@ npm i --save-dev prisma@latest
 npm install --save pg @prisma/adapter-pg
 
 работа с призмой
-npm run migrate
-npm run generate
+npm run prisma:migrate
+npm run prisma:generate
 npm run prisma:create -- init
 
 запуск в ватч режиме

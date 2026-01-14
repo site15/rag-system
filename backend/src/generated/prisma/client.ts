@@ -12,8 +12,6 @@
 
 import * as process from 'node:process'
 import * as path from 'node:path'
-import { fileURLToPath } from 'node:url'
-globalThis['__dirname'] = path.dirname(fileURLToPath(import.meta.url))
 
 import * as runtime from "@prisma/client/runtime/client"
 import * as $Enums from "./enums.js"
@@ -29,8 +27,8 @@ export * from "./enums.js"
  * @example
  * ```
  * const prisma = new PrismaClient()
- * // Fetch zero or more Users
- * const users = await prisma.user.findMany()
+ * // Fetch zero or more AuthUsers
+ * const authUsers = await prisma.authUser.findMany()
  * ```
  * 
  * Read more in our [docs](https://pris.ly/d/client).
@@ -40,12 +38,47 @@ export type PrismaClient<LogOpts extends Prisma.LogLevel = never, OmitOpts exten
 export { Prisma }
 
 /**
- * Model User
+ * Model AuthUser
  * 
  */
-export type User = Prisma.UserModel
+export type AuthUser = Prisma.AuthUserModel
 /**
- * Model Session
+ * Model AuthSession
  * 
  */
-export type Session = Prisma.SessionModel
+export type AuthSession = Prisma.AuthSessionModel
+/**
+ * Model ChatDocumentEmbedding
+ * 
+ */
+export type ChatDocumentEmbedding = Prisma.ChatDocumentEmbeddingModel
+/**
+ * Model ChatDialog
+ * 
+ */
+export type ChatDialog = Prisma.ChatDialogModel
+/**
+ * Model ChatMessage
+ * 
+ */
+export type ChatMessage = Prisma.ChatMessageModel
+/**
+ * Model ChatMessageDocumentEmbedding
+ * 
+ */
+export type ChatMessageDocumentEmbedding = Prisma.ChatMessageDocumentEmbeddingModel
+/**
+ * Model ChatLlmRequest
+ * 
+ */
+export type ChatLlmRequest = Prisma.ChatLlmRequestModel
+/**
+ * Model ChatLlmModel
+ * 
+ */
+export type ChatLlmModel = Prisma.ChatLlmModelModel
+/**
+ * Model EmbeddingModel
+ * 
+ */
+export type EmbeddingModel = Prisma.EmbeddingModelModel

@@ -35,13 +35,12 @@ pull_if_missing () {
 pull_if_missing mistral
 pull_if_missing nomic-embed-text
 
-
 echo "▶ Running Prisma migrations"
 cd ./backend
 ./node_modules/.bin/prisma migrate deploy
 cd ..
 
-echo "✅ Done"
 npx -y pm2 start ./ecosystem.config.json
+echo "✅ Done"
 
 

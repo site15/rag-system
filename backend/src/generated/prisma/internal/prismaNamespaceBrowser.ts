@@ -51,8 +51,15 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
-  User: 'User',
-  Session: 'Session'
+  AuthUser: 'AuthUser',
+  AuthSession: 'AuthSession',
+  ChatDocumentEmbedding: 'ChatDocumentEmbedding',
+  ChatDialog: 'ChatDialog',
+  ChatMessage: 'ChatMessage',
+  ChatMessageDocumentEmbedding: 'ChatMessageDocumentEmbedding',
+  ChatLlmRequest: 'ChatLlmRequest',
+  ChatLlmModel: 'ChatLlmModel',
+  EmbeddingModel: 'EmbeddingModel'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -71,26 +78,143 @@ export const TransactionIsolationLevel = {
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
 
 
-export const UserScalarFieldEnum = {
+export const AuthUserScalarFieldEnum = {
   id: 'id',
   anonymousId: 'anonymousId',
   supabaseUserId: 'supabaseUserId',
   supabaseUserData: 'supabaseUserData',
+  isActive: 'isActive',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
-export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+export type AuthUserScalarFieldEnum = (typeof AuthUserScalarFieldEnum)[keyof typeof AuthUserScalarFieldEnum]
 
 
-export const SessionScalarFieldEnum = {
+export const AuthSessionScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
+  isActive: 'isActive',
   createdAt: 'createdAt',
-  deletedAt: 'deletedAt'
+  updatedAt: 'updatedAt'
 } as const
 
-export type SessionScalarFieldEnum = (typeof SessionScalarFieldEnum)[keyof typeof SessionScalarFieldEnum]
+export type AuthSessionScalarFieldEnum = (typeof AuthSessionScalarFieldEnum)[keyof typeof AuthSessionScalarFieldEnum]
+
+
+export const ChatDocumentEmbeddingScalarFieldEnum = {
+  id: 'id',
+  content: 'content',
+  metadata: 'metadata',
+  contentHash: 'contentHash',
+  embeddingModelId: 'embeddingModelId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ChatDocumentEmbeddingScalarFieldEnum = (typeof ChatDocumentEmbeddingScalarFieldEnum)[keyof typeof ChatDocumentEmbeddingScalarFieldEnum]
+
+
+export const ChatDialogScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  title: 'title',
+  summary: 'summary',
+  consecutiveFailures: 'consecutiveFailures',
+  isFailed: 'isFailed',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ChatDialogScalarFieldEnum = (typeof ChatDialogScalarFieldEnum)[keyof typeof ChatDialogScalarFieldEnum]
+
+
+export const ChatMessageScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  question: 'question',
+  answer: 'answer',
+  dialogId: 'dialogId',
+  isFound: 'isFound',
+  category: 'category',
+  transformedQuestion: 'transformedQuestion',
+  transformedEmbeddingQuery: 'transformedEmbeddingQuery',
+  provider: 'provider',
+  model: 'model',
+  temperature: 'temperature',
+  isGoodResponse: 'isGoodResponse',
+  isBadResponse: 'isBadResponse',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ChatMessageScalarFieldEnum = (typeof ChatMessageScalarFieldEnum)[keyof typeof ChatMessageScalarFieldEnum]
+
+
+export const ChatMessageDocumentEmbeddingScalarFieldEnum = {
+  id: 'id',
+  chatHistoryId: 'chatHistoryId',
+  embeddingDocumentId: 'embeddingDocumentId',
+  isFound: 'isFound',
+  relevanceScore: 'relevanceScore',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ChatMessageDocumentEmbeddingScalarFieldEnum = (typeof ChatMessageDocumentEmbeddingScalarFieldEnum)[keyof typeof ChatMessageDocumentEmbeddingScalarFieldEnum]
+
+
+export const ChatLlmRequestScalarFieldEnum = {
+  id: 'id',
+  request: 'request',
+  response: 'response',
+  requestLength: 'requestLength',
+  responseLength: 'responseLength',
+  executionTimeMs: 'executionTimeMs',
+  provider: 'provider',
+  model: 'model',
+  temperature: 'temperature',
+  isSuccess: 'isSuccess',
+  errorMessage: 'errorMessage',
+  dialogId: 'dialogId',
+  historyId: 'historyId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ChatLlmRequestScalarFieldEnum = (typeof ChatLlmRequestScalarFieldEnum)[keyof typeof ChatLlmRequestScalarFieldEnum]
+
+
+export const ChatLlmModelScalarFieldEnum = {
+  id: 'id',
+  provider: 'provider',
+  model: 'model',
+  temperature: 'temperature',
+  chunkSize: 'chunkSize',
+  startTime: 'startTime',
+  endTime: 'endTime',
+  status: 'status',
+  requestId: 'requestId',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ChatLlmModelScalarFieldEnum = (typeof ChatLlmModelScalarFieldEnum)[keyof typeof ChatLlmModelScalarFieldEnum]
+
+
+export const EmbeddingModelScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  provider: 'provider',
+  model: 'model',
+  dimension: 'dimension',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EmbeddingModelScalarFieldEnum = (typeof EmbeddingModelScalarFieldEnum)[keyof typeof EmbeddingModelScalarFieldEnum]
 
 
 export const SortOrder = {

@@ -14,24 +14,208 @@ generator client {
   moduleFormat = "cjs"
 }
 
-model User {
-  id               String    @id(map: "PK_USER") @default(uuid()) @db.Uuid
+model AuthUser {
+  id               String   @id(map: "PK_AUTH_USER") @default(uuid()) @db.Uuid
   anonymousId      String?
   supabaseUserId   String?
   supabaseUserData Json?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @default(now())
-  Session          Session[]
+  isActive         Boolean?
 
-  @@unique([supabaseUserId], map: "UQ_USER_SUPABASE")
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @default(now()) @db.Timestamp(6)
+
+  AuthSession AuthSession[]
+  ChatDialog  ChatDialog[]
+  ChatMessage ChatMessage[]
+
+  @@unique([supabaseUserId], map: "UQ_AUTH_USER__SUPABASE_USER_ID")
 }
 
-model Session {
-  id        String    @id(map: "PK_SESSION") @default(uuid()) @db.Uuid
-  userId    String    @db.Uuid
-  User      User      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_SESSION__USER_ID")
-  createdAt DateTime  @default(now())
-  deletedAt DateTime?
+model AuthSession {
+  id       String   @id(map: "PK_AUTH_SESSION") @default(uuid()) @db.Uuid
+  userId   String   @db.Uuid
+  isActive Boolean?
 
-  @@index([userId], map: "IDX_SESSION__USER_ID")
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @default(now()) @db.Timestamp(6)
+
+  AuthUser AuthUser @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_AUTH_SESSION__USER_ID")
+
+  @@index([userId], map: "IDX_AUTH_SESSION__USER_ID")
+}
+
+model ChatDocumentEmbedding {
+  id               String                       @id(map: "PK_CHAT_DOCUMENT_EMBEDDINGS") @default(uuid()) @db.Uuid
+  content          String                       @db.Text
+  embedding384     Unsupported("vector(384)")?
+  embedding768     Unsupported("vector(768)")?
+  embedding1024    Unsupported("vector(1024)")?
+  embedding1536    Unsupported("vector(1536)")?
+  embedding3072    Unsupported("vector(3072)")?
+  metadata         Json?
+  contentHash      String                       @db.VarChar(64)
+  embeddingModelId String?                      @db.Uuid
+
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @default(now()) @db.Timestamp(6)
+
+  embeddingModel               EmbeddingModel?                @relation(fields: [embeddingModelId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_CHAT_DOCUMENT_EMBEDDINGS__EMBEDDING_MODEL_ID")
+  ChatMessageDocumentEmbedding ChatMessageDocumentEmbedding[]
+
+  @@index([contentHash], map: "IDX_CHAT_DOCUMENT_EMBEDDINGS__CONTENT_HASH")
+  @@index([embeddingModelId], map: "IDX_CHAT_DOCUMENT_EMBEDDINGS__EMBEDDING_MODEL_ID")
+}
+
+model ChatDialog {
+  id                  String  @id(map: "PK_CHAT_DIALOGS") @default(uuid()) @db.Uuid
+  userId              String  @db.Uuid
+  title               String? @db.VarChar(255)
+  summary             String? @db.Text
+  consecutiveFailures Int     @default(0)
+  isFailed            Boolean @default(false)
+
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @default(now()) @db.Timestamp(6)
+
+  AuthUser       AuthUser         @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_CHAT_DIALOGS__USER_ID")
+  ChatMessage    ChatMessage[]
+  ChatLlmRequest ChatLlmRequest[]
+
+  @@index([userId], map: "IDX_CHAT_DIALOGS__USER_ID")
+  @@index([consecutiveFailures], map: "IDX_CHAT_DIALOGS__CONSECUTIVE_FAILURES")
+  @@index([isFailed], map: "IDX_CHAT_DIALOGS__IS_FAILED")
+}
+
+model ChatMessage {
+  id                        String   @id(map: "PK_CHAT_MESSAGES") @default(uuid()) @db.Uuid
+  userId                    String   @db.Uuid
+  question                  String   @db.Text
+  answer                    String   @db.Text
+  dialogId                  String?  @db.Uuid
+  isFound                   Boolean  @default(true)
+  category                  String?  @db.VarChar(50)
+  transformedQuestion       String?  @db.Text
+  transformedEmbeddingQuery String?  @db.Text
+  provider                  String?  @db.VarChar(50)
+  model                     String?  @db.VarChar(100)
+  temperature               Decimal? @db.Decimal(3, 2)
+  isGoodResponse            Boolean  @default(false)
+  isBadResponse             Boolean  @default(false)
+
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @default(now()) @db.Timestamp(6)
+
+  AuthUser AuthUser    @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_CHAT_MESSAGES__USER_ID")
+  dialog   ChatDialog? @relation(fields: [dialogId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_CHAT_MESSAGES__DIALOG_ID")
+
+  ChatMessageDocumentEmbedding ChatMessageDocumentEmbedding[]
+  ChatLlmRequest               ChatLlmRequest[]
+
+  @@index([userId], map: "IDX_CHAT_MESSAGES__USER_ID")
+  @@index([dialogId], map: "IDX_CHAT_MESSAGES__DIALOG_ID")
+  @@index([isFound], map: "IDX_CHAT_MESSAGES__IS_FOUND")
+  @@index([category], map: "IDX_CHAT_MESSAGES__CATEGORY")
+  @@index([provider], map: "IDX_CHAT_MESSAGES__PROVIDER")
+  @@index([model], map: "IDX_CHAT_MESSAGES__MODEL")
+  @@index([isGoodResponse], map: "IDX_CHAT_MESSAGES__IS_GOOD_RESPONSE")
+  @@index([isBadResponse], map: "IDX_CHAT_MESSAGES__IS_BAD_RESPONSE")
+}
+
+model ChatMessageDocumentEmbedding {
+  id                  String  @id(map: "PK_CHAT_MESSAGE_DOCUMENT_EMBEDDINGS") @default(uuid()) @db.Uuid
+  chatHistoryId       String  @db.Uuid
+  embeddingDocumentId String  @db.Uuid
+  isFound             Boolean @default(false)
+  relevanceScore      Float?
+
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @default(now()) @db.Timestamp(6)
+
+  chatHistory       ChatMessage           @relation(fields: [chatHistoryId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_CHAT_MESSAGE_DOCUMENT_EMBEDDINGS__CHAT_HISTORY_ID")
+  embeddingDocument ChatDocumentEmbedding @relation(fields: [embeddingDocumentId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_CHAT_MESSAGE_DOCUMENT_EMBEDDINGS__EMBEDDING_DOCUMENT_ID")
+
+  @@index([chatHistoryId], map: "IDX_CHAT_MESSAGE_DOCUMENT_EMBEDDINGS__CHAT_HISTORY_ID")
+  @@index([embeddingDocumentId], map: "IDX_CHAT_MESSAGE_DOCUMENT_EMBEDDINGS__EMBEDDING_DOCUMENT_ID")
+  @@index([isFound], map: "IDX_CHAT_MESSAGE_DOCUMENT_EMBEDDINGS__IS_FOUND")
+}
+
+model ChatLlmRequest {
+  id              String   @id(map: "PK_CHAT_LLM_REQUESTS") @default(uuid()) @db.Uuid
+  request         String   @db.Text
+  response        String   @db.Text
+  requestLength   Int
+  responseLength  Int
+  executionTimeMs Int
+  provider        String   @db.VarChar(50)
+  model           String   @db.VarChar(100)
+  temperature     Decimal? @db.Decimal(3, 2)
+  isSuccess       Boolean  @default(true) @map("success")
+  errorMessage    String?  @db.Text
+  dialogId        String?  @db.Uuid
+  historyId       String?  @db.Uuid
+
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @default(now()) @db.Timestamp(6)
+
+  dialog       ChatDialog?    @relation(fields: [dialogId], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "FK_CHAT_LLM_REQUESTS__DIALOG_ID")
+  history      ChatMessage?   @relation(fields: [historyId], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "FK_CHAT_LLM_REQUESTS__HISTORY_ID")
+  ChatLlmModel ChatLlmModel[]
+
+  @@index([createdAt], map: "IDX_CHAT_LLM_REQUESTS__CREATED_AT")
+  @@index([provider], map: "IDX_CHAT_LLM_REQUESTS__PROVIDER")
+  @@index([model], map: "IDX_CHAT_LLM_REQUESTS__MODEL")
+  @@index([isSuccess], map: "IDX_CHAT_LLM_REQUESTS__IS_SUCCESS")
+  @@index([provider, model], map: "IDX_CHAT_LLM_REQUESTS__PROVIDER_MODEL")
+  @@index([dialogId], map: "IDX_CHAT_LLM_REQUESTS__DIALOG_ID")
+  @@index([historyId], map: "IDX_CHAT_LLM_REQUESTS__HISTORY_ID")
+  @@index([dialogId, historyId], map: "IDX_CHAT_LLM_REQUESTS__DIALOG_HISTORY")
+  @@index([createdAt, dialogId], map: "IDX_CHAT_LLM_REQUESTS__CREATED_DIALOG")
+}
+
+model ChatLlmModel {
+  id          String    @id(map: "PK_CHAT_LLM_MODELS") @default(uuid()) @db.Uuid
+  provider    String    @db.VarChar(50)
+  model       String    @db.VarChar(100)
+  temperature Decimal?  @db.Decimal(3, 2)
+  chunkSize   Int?
+  startTime   DateTime? @default(now()) @db.Timestamptz(6)
+  endTime     DateTime? @db.Timestamptz(6)
+  status      String    @default("running") @db.VarChar(20)
+  requestId   String?   @unique @db.Uuid
+  isActive    Boolean?
+
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @default(now()) @db.Timestamp(6)
+
+  chatLlmRequest ChatLlmRequest? @relation(fields: [requestId], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "FK_CHAT_LLM_MODELS__CHAT_LLM_REQUEST_ID")
+
+  @@unique([provider, model, temperature, chunkSize], map: "UK_CHAT_LLM_MODELS__CONFIG")
+  @@index([provider], map: "IDX_CHAT_LLM_MODELS__PROVIDER")
+  @@index([model], map: "IDX_CHAT_LLM_MODELS__MODEL")
+  @@index([status], map: "IDX_CHAT_LLM_MODELS__STATUS")
+  @@index([startTime], map: "IDX_CHAT_LLM_MODELS__START_TIME")
+  @@index([endTime], map: "IDX_CHAT_LLM_MODELS__END_TIME")
+  @@index([provider, model], map: "IDX_CHAT_LLM_MODELS__PROVIDER_MODEL")
+  @@index([status, startTime], map: "IDX_CHAT_LLM_MODELS__STATUS_TIME")
+  @@index([requestId], map: "IDX_CHAT_LLM_MODELS__REQUEST_ID")
+  @@index([status, requestId], map: "IDX_CHAT_LLM_MODELS__STATUS_REQUEST_ID")
+}
+
+model EmbeddingModel {
+  id        String  @id(map: "PK_EMBEDDING_MODELS") @default(uuid()) @db.Uuid
+  name      String  @db.VarChar(100)
+  provider  String  @db.VarChar(50)
+  model     String  @db.VarChar(100)
+  dimension Int
+  isActive  Boolean @default(true)
+
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @default(now()) @db.Timestamp(6)
+
+  chatDocumentEmbeddings ChatDocumentEmbedding[]
+
+  @@unique([dimension], map: "UK_EMBEDDING_MODELS__DIMENSION")
+  @@index([provider], map: "IDX_EMBEDDING_MODELS__PROVIDER")
+  @@index([isActive], map: "IDX_EMBEDDING_MODELS__IS_ACTIVE")
+  @@index([provider, model], map: "IDX_EMBEDDING_MODELS__PROVIDER_MODEL")
 }
