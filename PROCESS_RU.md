@@ -4,3 +4,5 @@ nest new backend --package-manager=pnpm --strict --skip-install --skip-git
 cd backend
 npm i --save-dev @swc/cli @swc/core
 npm i --save @nestjs/swagger
+npm i --save @nestjs/platform-fastify
+npm i --save class-validator class-transformer
