@@ -1,0 +1,37 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+model User {
+  id               String    @id(map: "PK_USER") @default(uuid()) @db.Uuid
+  anonymousId      String?
+  supabaseUserId   String?
+  supabaseUserData Json?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @default(now())
+  Session          Session[]
+
+  @@unique([supabaseUserId], map: "UQ_USER_SUPABASE")
+}
+
+model Session {
+  id        String    @id(map: "PK_SESSION") @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  User      User      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_SESSION__USER_ID")
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  @@index([userId], map: "IDX_SESSION__USER_ID")
+}

@@ -1,0 +1,50 @@
+version: "3.8"
+
+services:
+  ollama:
+    image: ollama/ollama
+    container_name: rag_system_ollama
+    ports:
+      - "21434:11434"
+    environment:
+      OLLAMA_NUM_PARALLEL: 2
+      OLLAMA_NUM_THREADS: 1
+      OLLAMA_MAX_LOADED_MODELS: 2
+      OLLAMA_KEEP_ALIVE: 30m
+      OLLAMA_VULKAN: 1
+    volumes:
+      - ./data/ollama:/root/.ollama
+    restart: always
+    healthcheck:
+      test:  [ "CMD-SHELL", "bash", "-c", "{ printf >&3 'GET / HTTP/1.0\\r\\n\\r\\n'; cat <&3; } 3<>/dev/tcp/localhost/11434 | grep 'Ollama is' || exit 1"  ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        # reservations:
+        #   devices:
+        #     - driver: nvidia
+        #       count: all
+        #       capabilities: [gpu]
+        limits:
+          cpus: "4"
+          memory: 8G
+
+  postgres:
+    image: pgvector/pgvector:pg18
+    container_name: rag_system_postgres
+    environment:
+      POSTGRES_DB: rag_system_db
+      POSTGRES_USER: rag_system_user
+      POSTGRES_PASSWORD: c9pc5fQ81ME03VgfpU1Wuhlb3EjX069gC4QQ
+    ports:
+      - "25432:5432"
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rag_system_user -d rag_system_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
