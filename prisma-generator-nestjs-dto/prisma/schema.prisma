@@ -1,0 +1,204 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client"
+  output = "../src/@generated/prisma"
+}
+
+generator nestjsDto {
+  provider                        = "node -r ts-node/register/transpile-only src/cli.ts"
+  output                          = "../src/@generated/prisma-generator-nestjs-dto"
+  outputToNestJsResourceStructure = "true"
+  flatResourceStructure           = "true"
+  exportRelationModifierClasses   = "true"
+  reExport                        = "true"
+  generateFileTypes               = "all"
+  createDtoPrefix                 = "Create"
+  updateDtoPrefix                 = "Update"
+  dtoSuffix                       = "Dto"
+  entityPrefix                    = ""
+  entitySuffix                    = "Entity"
+  fileNamingStyle                 = "camel"
+  classValidation                 = "true"
+  noDependencies                  = "false"
+  outputType                      = "class"
+  definiteAssignmentAssertion     = "true"
+  prettier                        = "true"
+  outputApiPropertyType           = "true"
+  wrapRelationsAsType             = "true"
+}
+
+model Product {
+  /// @description Product ID
+  id              String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// @Contains('Product')
+  /// @description Project's name
+  /// @example My first product
+  /// @DtoUpdateRequired
+  name            String        @db.VarChar(255)
+  description     String        @db.VarChar(1024)
+  /// @maxItems 5
+  images          Json[]        @db.Json
+  highlighted     Boolean       @default(false)
+  /// @DtoCreateOptional
+  /// @description Number of reviews
+  /// @minimum 9
+  /// @example 12
+  reviewCount     Int           @default(0)
+  type            ProductType[]
+  /// @DtoCreateOptional
+  /// @ArrayNotEmpty
+  /// @MinLength(3)
+  tags            String[]      @default(["hello"])
+  /// @DtoCastType(MyType, my-package)
+  attributes      Json?
+  /// @DtoCastType(SomeType, ../types, CustomType)
+  someAttributes  Json
+  /// @DtoCastType(OtherType, other-package, default)
+  otherAttributes Json
+  /// @DtoCastType(OtherType, other-package, default)
+  finalAttributes Json?
+  optAttributes   Json?
+  /// @DtoUpdateHidden
+  score           Float?
+  /// @DtoCreateHidden
+  lastOrder       DateTime?
+  /// @DtoCreateOptional
+  /// @DtoUpdateOptional
+  note            String        @default("")
+  /// @DtoRelationIncludeId
+  categoryId      String        @db.Uuid
+  companyId       String        @db.Uuid
+
+  /// @DtoRelationRequired
+  /// @DtoRelationCanCreateOnCreate
+  category Category @relation(fields: [categoryId], references: [id])
+
+  /// @DtoRelationRequired
+  /// @DtoRelationCanConnectOnCreate
+  /// @DtoRelationCanCreateOnCreate
+  /// @DtoRelationCanConnectOnUpdate
+  /// @DtoRelationCanCreateOnUpdate
+  company Company @relation(fields: [companyId], references: [id])
+
+  /// @DtoRelationIncludeId
+  /// @DtoCreateRequired
+  photoId String?
+  /// @DtoRelationCanDisconnectOnUpdate
+  photo   Photo?  @relation(fields: [photoId], references: [id])
+
+  price Decimal
+
+  /// @DtoEntityHidden
+  /// @DtoCreateRequired
+  /// @DtoUpdateOptional
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+
+  /// @DtoEntityHidden
+  /// @DtoCreateOptional
+  /// @DtoUpdateRequired
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+
+  bikeId String?
+  /// @DtoRelationCanConnectOnCreate
+  /// @DtoRelationCanUpdateOnUpdate
+  bike   Bike?   @relation(fields: [bikeId], references: [id])
+
+  @@map("products")
+}
+
+model Category {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String
+  updatedAt DateTime  @updatedAt
+  /// @DtoRelationCanCreateOnCreate
+  /// @DtoRelationCanConnectOnUpdate
+  /// @DtoOverrideType(ProductFoo2, ./product.foo2)
+  /// @DtoOverrideApiPropertyType(ProductFoo3, ./product.foo3)
+  product   Product[]
+
+  parentCategoryId String?
+  parentCategory   Category?  @relation(name: "ParentCategory", fields: [parentCategoryId], references: [id])
+  childCategories  Category[] @relation("ParentCategory")
+}
+
+model Company {
+  id      String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// @DtoRelationCanDisconnectOnUpdate
+  product Product[]
+
+  companyUserRoles CompanyUserRole[]
+}
+
+model Photo {
+  id      String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  file    Bytes
+  product Product[]
+}
+
+enum ProductType {
+  digital
+  analogue
+}
+
+model User {
+  id   String @id
+  name String
+
+  companyUserRoles CompanyUserRole[]
+}
+
+model Role {
+  id        String @id
+  name      Json
+  attribute String
+
+  companyUserRoles CompanyUserRole[]
+
+  @@unique([name, attribute])
+}
+
+model CompanyUserRole {
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+  userId    String
+  user      User    @relation(fields: [userId], references: [id])
+  roleId    String
+  role      Role    @relation(fields: [roleId], references: [id])
+
+  @@id([companyId, userId, roleId])
+}
+
+model Bike {
+  id             String    @id @default(uuid())
+  chassis_number String
+  model          String
+  /// @DtoApiHidden
+  /// @DtoOverrideType(VendorType, @config/vendors)
+  vendor         String
+  year_from      Int
+  year_to        Int
+  products       Product[]
+
+  @@unique([vendor, chassis_number], map: "My_Bike_Unique")
+}
+
+model Post {
+  id String @id
+
+  /// @DtoConnectHidden
+  otherProperty String @unique
+
+  /// @ValidateIf(o => o.otherProperty === 'value')
+  general String
+
+  /// @DtoCreateValidateIf(o => o.otherProperty)
+  /// @IsNotEmpty()
+  exampleCreate String
+
+  /// @DtoUpdateValidateIf(o => o.otherProperty === 'someValue')
+  /// @Contains('something')
+  exampleUpdate String
+}

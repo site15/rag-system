@@ -1,0 +1,89 @@
+{
+  "name": "@brakebein/prisma-generator-nestjs-dto",
+  "description": "Generates DTO and Entity classes from Prisma Schema for NestJS",
+  "version": "1.29.0",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "Benjamin Kroeger",
+    "email": "bk@vegardit.com",
+    "url": "https://vegardit.com/"
+  },
+  "contributors": [
+    {
+      "name": "Brakebein",
+      "url": "https://github.com/Brakebein"
+    }
+  ],
+  "main": "dist/index.js",
+  "keywords": [
+    "prisma",
+    "generator",
+    "nestjs",
+    "dto",
+    "typescript",
+    "swagger",
+    "openapi"
+  ],
+  "scripts": {
+    "prebuild": "npm run cleanup:generated",
+    "build": "tsc --project tsconfig.build.json",
+    "format": "prettier --write \"{src,test}/**/*.{js,ts}\"",
+    "prelint": "npm run format -- --loglevel error",
+    "lint": "eslint \"{src,test}/**/*.{js,ts}\" --fix",
+    "pretest": "npm run lint",
+    "test": "vitest --run",
+    "test:watch": "vitest",
+    "cleanup:generated": "rimraf src/@generated",
+    "pregenerate": "npm run cleanup:generated",
+    "generate": "npx prisma generate",
+    "generate:mongo": "npx prisma generate --schema ./prisma/mongodb.prisma",
+    "prepare": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Brakebein/prisma-generator-nestjs-dto"
+  },
+  "bin": {
+    "prisma-generator-nestjs-dto": "dist/cli.js"
+  },
+  "engines": {
+    "node": ">=14"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "@prisma/client": "^5.16.0 || ^6.0.0 || ^7.0.0",
+    "prisma": "^5.16.0 || ^6.0.0 || ^7.0.0"
+  },
+  "dependencies": {
+    "@prisma/generator-helper": "^7.0.0",
+    "case": "^1.6.3",
+    "chalk": "^4.1.2",
+    "make-dir": "^3.1.0",
+    "prettier": "^3.0.0",
+    "slash": "^3.0.0",
+    "type-fest": "^4.37.0"
+  },
+  "devDependencies": {
+    "@nestjs/common": "^11.0.0",
+    "@nestjs/swagger": "^11.0.0",
+    "@prisma/client": "^7.0.0",
+    "@types/node": "^20.19.26",
+    "@vitest/coverage-v8": "^4.0.15",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.1",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "prisma": "^7.0.0",
+    "rimraf": "^4.0.0",
+    "ts-node": "^10.9.1",
+    "typescript": "5.4.3",
+    "typescript-eslint": "^8.49.0",
+    "vitest": "^4.0.15"
+  }
+}

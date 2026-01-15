@@ -14,6 +14,28 @@ generator client {
   moduleFormat = "cjs"
 }
 
+generator prismaClassGenerator {
+  prismaClientImportPath          = "../prisma/client"
+  provider                        = "ts-node ../prisma-generator-nestjs-dto/src/cli.ts"
+  output                          = "../src/generated/rest"
+  annotateAllDtoProperties        = "true"
+  classValidation                 = "true"
+  createDtoPrefix                 = "Create"
+  definiteAssignmentAssertion     = "true"
+  dtoSuffix                       = "Dto"
+  entityPrefix                    = ""
+  entitySuffix                    = ""
+  exportRelationModifierClasses   = "true"
+  fileNamingStyle                 = "kebab"
+  flatResourceStructure           = "false"
+  moduleName                      = "metrics"
+  noDependencies                  = "false"
+  outputToNestJsResourceStructure = "false"
+  prettier                        = "true"
+  reExport                        = "false"
+  updateDtoPrefix                 = "Update"
+}
+
 model AuthUser {
   id               String   @id(map: "PK_AUTH_USER") @default(uuid()) @db.Uuid
   anonymousId      String?
