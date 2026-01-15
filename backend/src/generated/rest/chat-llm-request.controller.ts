@@ -24,6 +24,7 @@ import {
   PrismaService,
 } from '../../services/prisma.service';
 import { StatusResponse } from '../../types/status-response';
+import { Prisma } from '../prisma/client';
 import { ChatLlmRequestDto } from './chat-llm-request.dto';
 import { ChatLlmRequest } from './chat-llm-request.entity';
 import { CreateChatLlmRequestDto } from './create-chat-llm-request.dto';
@@ -44,14 +45,14 @@ export class FindManyChatLlmRequestResponseMeta {
 
 export class FindManyChatLlmRequestResponse {
   @ApiProperty({ type: () => [ChatLlmRequest] })
-  chatllmrequests!: ChatLlmRequest[];
+  items!: ChatLlmRequest[];
 
   @ApiProperty({ type: () => FindManyChatLlmRequestResponseMeta })
   meta!: FindManyChatLlmRequestResponseMeta;
 }
 
-@ApiTags('chatllmrequest')
-@Controller('chatllmrequests')
+@ApiTags('chat')
+@Controller('chat/llm-request')
 export class ChatLlmRequestController {
   constructor(private readonly prismaservice: PrismaService) {}
 
@@ -75,41 +76,32 @@ export class ChatLlmRequestController {
         }),
         {},
       );
+
+    const chatLlmRequestWhereInput: Prisma.ChatLlmRequestWhereInput = {
+      ...(searchText
+        ? {
+            OR: [
+              ...(isUUID(searchText) ? [{ id: { equals: searchText } }] : []),
+            ],
+          }
+        : {}),
+    };
+
     const result = await this.prismaservice.$transaction(async (prisma) => {
       return {
-        chatllmrequests: await prisma.chatLlmRequest.findMany({
-          where: {
-            ...(searchText
-              ? {
-                  OR: [
-                    ...(isUUID(searchText)
-                      ? [{ id: { equals: searchText } }]
-                      : []),
-                  ],
-                }
-              : {}),
-          },
+        items: await prisma.chatLlmRequest.findMany({
+          where: chatLlmRequestWhereInput,
           take,
           skip,
           orderBy,
         }),
         totalResults: await prisma.chatLlmRequest.count({
-          where: {
-            ...(searchText
-              ? {
-                  OR: [
-                    ...(isUUID(searchText)
-                      ? [{ id: { equals: searchText } }]
-                      : []),
-                  ],
-                }
-              : {}),
-          },
+          where: chatLlmRequestWhereInput,
         }),
       };
     });
     return {
-      chatllmrequests: result.chatllmrequests,
+      items: result.items,
       meta: {
         totalResults: result.totalResults,
         curPage,

@@ -23,16 +23,13 @@ import {
   PrismaSdk,
   PrismaService,
 } from '../../services/prisma.service';
-import { AppRequest, CurrentAppRequest } from '../../types/request';
 import { StatusResponse } from '../../types/status-response';
+import { Prisma } from '../prisma/client';
 import { AuthUserDto } from './auth-user.dto';
 import { AuthUser } from './auth-user.entity';
 import { CreateAuthUserDto } from './create-auth-user.dto';
 import { UpdateAuthUserDto } from './update-auth-user.dto';
 
-/**
- * DO_NOT_CHANGE_WHEN_GENERATING_CODE
- */
 export class FindManyAuthUserArgs extends FindManyArgs {}
 
 export class FindManyAuthUserResponseMeta {
@@ -48,14 +45,14 @@ export class FindManyAuthUserResponseMeta {
 
 export class FindManyAuthUserResponse {
   @ApiProperty({ type: () => [AuthUser] })
-  authusers!: AuthUser[];
+  items!: AuthUser[];
 
   @ApiProperty({ type: () => FindManyAuthUserResponseMeta })
   meta!: FindManyAuthUserResponseMeta;
 }
 
-@ApiTags('authuser')
-@Controller('authusers')
+@ApiTags('auth')
+@Controller('auth/user')
 export class AuthUserController {
   constructor(private readonly prismaservice: PrismaService) {}
 
@@ -79,41 +76,32 @@ export class AuthUserController {
         }),
         {},
       );
+
+    const authUserWhereInput: Prisma.AuthUserWhereInput = {
+      ...(searchText
+        ? {
+            OR: [
+              ...(isUUID(searchText) ? [{ id: { equals: searchText } }] : []),
+            ],
+          }
+        : {}),
+    };
+
     const result = await this.prismaservice.$transaction(async (prisma) => {
       return {
-        authusers: await prisma.authUser.findMany({
-          where: {
-            ...(searchText
-              ? {
-                  OR: [
-                    ...(isUUID(searchText)
-                      ? [{ id: { equals: searchText } }]
-                      : []),
-                  ],
-                }
-              : {}),
-          },
+        items: await prisma.authUser.findMany({
+          where: authUserWhereInput,
           take,
           skip,
           orderBy,
         }),
         totalResults: await prisma.authUser.count({
-          where: {
-            ...(searchText
-              ? {
-                  OR: [
-                    ...(isUUID(searchText)
-                      ? [{ id: { equals: searchText } }]
-                      : []),
-                  ],
-                }
-              : {}),
-          },
+          where: authUserWhereInput,
         }),
       };
     });
     return {
-      authusers: result.authusers,
+      items: result.items,
       meta: {
         totalResults: result.totalResults,
         curPage,

@@ -25,6 +25,7 @@ import {
 } from '../../services/prisma.service';
 import { AppRequest, CurrentAppRequest } from '../../types/request';
 import { StatusResponse } from '../../types/status-response';
+import { Prisma } from '../prisma/client';
 import { ChatDialogDto } from './chat-dialog.dto';
 import { ChatDialog } from './chat-dialog.entity';
 import { CreateChatDialogDto } from './create-chat-dialog.dto';
@@ -45,14 +46,14 @@ export class FindManyChatDialogResponseMeta {
 
 export class FindManyChatDialogResponse {
   @ApiProperty({ type: () => [ChatDialog] })
-  chatdialogs!: ChatDialog[];
+  items!: ChatDialog[];
 
   @ApiProperty({ type: () => FindManyChatDialogResponseMeta })
   meta!: FindManyChatDialogResponseMeta;
 }
 
-@ApiTags('chatdialog')
-@Controller('chatdialogs')
+@ApiTags('chat')
+@Controller('chat/dialog')
 export class ChatDialogController {
   constructor(private readonly prismaservice: PrismaService) {}
 
@@ -76,41 +77,32 @@ export class ChatDialogController {
         }),
         {},
       );
+
+    const chatDialogWhereInput: Prisma.ChatDialogWhereInput = {
+      ...(searchText
+        ? {
+            OR: [
+              ...(isUUID(searchText) ? [{ id: { equals: searchText } }] : []),
+            ],
+          }
+        : {}),
+    };
+
     const result = await this.prismaservice.$transaction(async (prisma) => {
       return {
-        chatdialogs: await prisma.chatDialog.findMany({
-          where: {
-            ...(searchText
-              ? {
-                  OR: [
-                    ...(isUUID(searchText)
-                      ? [{ id: { equals: searchText } }]
-                      : []),
-                  ],
-                }
-              : {}),
-          },
+        items: await prisma.chatDialog.findMany({
+          where: chatDialogWhereInput,
           take,
           skip,
           orderBy,
         }),
         totalResults: await prisma.chatDialog.count({
-          where: {
-            ...(searchText
-              ? {
-                  OR: [
-                    ...(isUUID(searchText)
-                      ? [{ id: { equals: searchText } }]
-                      : []),
-                  ],
-                }
-              : {}),
-          },
+          where: chatDialogWhereInput,
         }),
       };
     });
     return {
-      chatdialogs: result.chatdialogs,
+      items: result.items,
       meta: {
         totalResults: result.totalResults,
         curPage,

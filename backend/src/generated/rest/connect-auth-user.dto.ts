@@ -7,7 +7,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class AuthUserSupabaseUserIdUniqueInputDto {
+export class AuthUserUqSupabaseUserIdUniqueInputDto {
   @ApiProperty({
     type: 'string',
   })
@@ -16,7 +16,7 @@ export class AuthUserSupabaseUserIdUniqueInputDto {
   supabaseUserId!: string;
 }
 
-@ApiExtraModels(AuthUserSupabaseUserIdUniqueInputDto)
+@ApiExtraModels(AuthUserUqSupabaseUserIdUniqueInputDto)
 export class ConnectAuthUserDto {
   @ApiProperty({
     type: 'string',
@@ -33,11 +33,11 @@ export class ConnectAuthUserDto {
   @IsString()
   supabaseUserId?: string;
   @ApiProperty({
-    type: AuthUserSupabaseUserIdUniqueInputDto,
+    type: AuthUserUqSupabaseUserIdUniqueInputDto,
     required: false,
   })
   @IsOptional()
   @ValidateNested()
-  @Type(() => AuthUserSupabaseUserIdUniqueInputDto)
-  supabaseUserId?: AuthUserSupabaseUserIdUniqueInputDto;
+  @Type(() => AuthUserUqSupabaseUserIdUniqueInputDto)
+  uqSupabaseUserId?: AuthUserUqSupabaseUserIdUniqueInputDto;
 }

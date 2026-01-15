@@ -51,7 +51,7 @@ model AuthUser {
   ChatDialog  ChatDialog[]
   ChatMessage ChatMessage[]
 
-  @@unique([supabaseUserId], map: "UQ_AUTH_USER__SUPABASE_USER_ID")
+  @@unique(name: "uqSupabaseUserId", [supabaseUserId], map: "UQ_AUTH_USER__SUPABASE_USER_ID")
 }
 
 model AuthSession {
@@ -82,7 +82,7 @@ model ChatDocumentEmbedding {
   createdAt DateTime @default(now()) @db.Timestamp(6)
   updatedAt DateTime @default(now()) @db.Timestamp(6)
 
-  embeddingModel               EmbeddingModel?                @relation(fields: [embeddingModelId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_CHAT_DOCUMENT_EMBEDDINGS__EMBEDDING_MODEL_ID")
+  embeddingModel               ChatEmbeddingModel?            @relation(fields: [embeddingModelId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_CHAT_DOCUMENT_EMBEDDINGS__EMBEDDING_MODEL_ID")
   ChatMessageDocumentEmbedding ChatMessageDocumentEmbedding[]
 
   @@index([contentHash], map: "IDX_CHAT_DOCUMENT_EMBEDDINGS__CONTENT_HASH")
@@ -145,17 +145,17 @@ model ChatMessage {
 }
 
 model ChatMessageDocumentEmbedding {
-  id                  String  @id(map: "PK_CHAT_MESSAGE_DOCUMENT_EMBEDDINGS") @default(uuid()) @db.Uuid
-  chatHistoryId       String  @db.Uuid
-  embeddingDocumentId String  @db.Uuid
-  isFound             Boolean @default(false)
-  relevanceScore      Float?
+  id                  String   @id(map: "PK_CHAT_MESSAGE_DOCUMENT_EMBEDDINGS") @default(uuid()) @db.Uuid
+  chatHistoryId       String?   @db.Uuid
+  embeddingDocumentId String?   @db.Uuid
+  isFound             Boolean  @default(false)
+  relevanceScore      Decimal? @db.Decimal(3, 2)
 
   createdAt DateTime @default(now()) @db.Timestamp(6)
   updatedAt DateTime @default(now()) @db.Timestamp(6)
 
-  chatHistory       ChatMessage           @relation(fields: [chatHistoryId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_CHAT_MESSAGE_DOCUMENT_EMBEDDINGS__CHAT_HISTORY_ID")
-  embeddingDocument ChatDocumentEmbedding @relation(fields: [embeddingDocumentId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_CHAT_MESSAGE_DOCUMENT_EMBEDDINGS__EMBEDDING_DOCUMENT_ID")
+  chatHistory       ChatMessage?           @relation(fields: [chatHistoryId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_CHAT_MESSAGE_DOCUMENT_EMBEDDINGS__CHAT_HISTORY_ID")
+  embeddingDocument ChatDocumentEmbedding? @relation(fields: [embeddingDocumentId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_CHAT_MESSAGE_DOCUMENT_EMBEDDINGS__EMBEDDING_DOCUMENT_ID")
 
   @@index([chatHistoryId], map: "IDX_CHAT_MESSAGE_DOCUMENT_EMBEDDINGS__CHAT_HISTORY_ID")
   @@index([embeddingDocumentId], map: "IDX_CHAT_MESSAGE_DOCUMENT_EMBEDDINGS__EMBEDDING_DOCUMENT_ID")
@@ -212,7 +212,7 @@ model ChatLlmModel {
 
   chatLlmRequest ChatLlmRequest? @relation(fields: [requestId], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "FK_CHAT_LLM_MODELS__CHAT_LLM_REQUEST_ID")
 
-  @@unique([provider, model, temperature, chunkSize], map: "UK_CHAT_LLM_MODELS__CONFIG")
+  @@unique(name: "uqConfig", [provider, model, temperature, chunkSize], map: "UK_CHAT_LLM_MODELS__CONFIG")
   @@index([provider], map: "IDX_CHAT_LLM_MODELS__PROVIDER")
   @@index([model], map: "IDX_CHAT_LLM_MODELS__MODEL")
   @@index([status], map: "IDX_CHAT_LLM_MODELS__STATUS")
@@ -224,8 +224,8 @@ model ChatLlmModel {
   @@index([status, requestId], map: "IDX_CHAT_LLM_MODELS__STATUS_REQUEST_ID")
 }
 
-model EmbeddingModel {
-  id        String  @id(map: "PK_EMBEDDING_MODELS") @default(uuid()) @db.Uuid
+model ChatEmbeddingModel {
+  id        String  @id(map: "PK_CHAT_EMBEDDING_MODELS") @default(uuid()) @db.Uuid
   name      String  @db.VarChar(100)
   provider  String  @db.VarChar(50)
   model     String  @db.VarChar(100)
@@ -237,8 +237,8 @@ model EmbeddingModel {
 
   chatDocumentEmbeddings ChatDocumentEmbedding[]
 
-  @@unique([dimension], map: "UK_EMBEDDING_MODELS__DIMENSION")
-  @@index([provider], map: "IDX_EMBEDDING_MODELS__PROVIDER")
-  @@index([isActive], map: "IDX_EMBEDDING_MODELS__IS_ACTIVE")
-  @@index([provider, model], map: "IDX_EMBEDDING_MODELS__PROVIDER_MODEL")
+  @@unique(name: "uqDimension", [dimension], map: "UK_CHAT_EMBEDDING_MODELS__DIMENSION")
+  @@index([provider], map: "IDX_CHAT_EMBEDDING_MODELS__PROVIDER")
+  @@index([isActive], map: "IDX_CHAT_EMBEDDING_MODELS__IS_ACTIVE")
+  @@index([provider, model], map: "IDX_CHAT_EMBEDDING_MODELS__PROVIDER_MODEL")
 }

@@ -25,6 +25,7 @@ import {
 } from '../../services/prisma.service';
 import { AppRequest, CurrentAppRequest } from '../../types/request';
 import { StatusResponse } from '../../types/status-response';
+import { Prisma } from '../prisma/client';
 import { AuthSessionDto } from './auth-session.dto';
 import { AuthSession } from './auth-session.entity';
 import { CreateAuthSessionDto } from './create-auth-session.dto';
@@ -45,14 +46,14 @@ export class FindManyAuthSessionResponseMeta {
 
 export class FindManyAuthSessionResponse {
   @ApiProperty({ type: () => [AuthSession] })
-  authsessions!: AuthSession[];
+  items!: AuthSession[];
 
   @ApiProperty({ type: () => FindManyAuthSessionResponseMeta })
   meta!: FindManyAuthSessionResponseMeta;
 }
 
-@ApiTags('authsession')
-@Controller('authsessions')
+@ApiTags('auth')
+@Controller('auth/session')
 export class AuthSessionController {
   constructor(private readonly prismaservice: PrismaService) {}
 
@@ -76,41 +77,32 @@ export class AuthSessionController {
         }),
         {},
       );
+
+    const authSessionWhereInput: Prisma.AuthSessionWhereInput = {
+      ...(searchText
+        ? {
+            OR: [
+              ...(isUUID(searchText) ? [{ id: { equals: searchText } }] : []),
+            ],
+          }
+        : {}),
+    };
+
     const result = await this.prismaservice.$transaction(async (prisma) => {
       return {
-        authsessions: await prisma.authSession.findMany({
-          where: {
-            ...(searchText
-              ? {
-                  OR: [
-                    ...(isUUID(searchText)
-                      ? [{ id: { equals: searchText } }]
-                      : []),
-                  ],
-                }
-              : {}),
-          },
+        items: await prisma.authSession.findMany({
+          where: authSessionWhereInput,
           take,
           skip,
           orderBy,
         }),
         totalResults: await prisma.authSession.count({
-          where: {
-            ...(searchText
-              ? {
-                  OR: [
-                    ...(isUUID(searchText)
-                      ? [{ id: { equals: searchText } }]
-                      : []),
-                  ],
-                }
-              : {}),
-          },
+          where: authSessionWhereInput,
         }),
       };
     });
     return {
-      authsessions: result.authsessions,
+      items: result.items,
       meta: {
         totalResults: result.totalResults,
         curPage,

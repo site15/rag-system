@@ -10,7 +10,7 @@ import {
 import { Type } from 'class-transformer';
 import { Prisma } from '../prisma/client';
 
-export class ChatLlmModelProviderModelTemperatureChunkSizeUniqueInputDto {
+export class ChatLlmModelUqConfigUniqueInputDto {
   @ApiProperty({
     type: 'string',
   })
@@ -39,7 +39,7 @@ export class ChatLlmModelProviderModelTemperatureChunkSizeUniqueInputDto {
   chunkSize!: number;
 }
 
-@ApiExtraModels(ChatLlmModelProviderModelTemperatureChunkSizeUniqueInputDto)
+@ApiExtraModels(ChatLlmModelUqConfigUniqueInputDto)
 export class ConnectChatLlmModelDto {
   @ApiProperty({
     type: 'string',
@@ -56,11 +56,11 @@ export class ConnectChatLlmModelDto {
   @IsString()
   requestId?: string;
   @ApiProperty({
-    type: ChatLlmModelProviderModelTemperatureChunkSizeUniqueInputDto,
+    type: ChatLlmModelUqConfigUniqueInputDto,
     required: false,
   })
   @IsOptional()
   @ValidateNested()
-  @Type(() => ChatLlmModelProviderModelTemperatureChunkSizeUniqueInputDto)
-  provider_model_temperature_chunkSize?: ChatLlmModelProviderModelTemperatureChunkSizeUniqueInputDto;
+  @Type(() => ChatLlmModelUqConfigUniqueInputDto)
+  uqConfig?: ChatLlmModelUqConfigUniqueInputDto;
 }

@@ -24,6 +24,7 @@ import {
   PrismaService,
 } from '../../services/prisma.service';
 import { StatusResponse } from '../../types/status-response';
+import { Prisma } from '../prisma/client';
 import { ChatMessageDocumentEmbeddingDto } from './chat-message-document-embedding.dto';
 import { ChatMessageDocumentEmbedding } from './chat-message-document-embedding.entity';
 import { CreateChatMessageDocumentEmbeddingDto } from './create-chat-message-document-embedding.dto';
@@ -44,14 +45,14 @@ export class FindManyChatMessageDocumentEmbeddingResponseMeta {
 
 export class FindManyChatMessageDocumentEmbeddingResponse {
   @ApiProperty({ type: () => [ChatMessageDocumentEmbedding] })
-  chatmessagedocumentembeddings!: ChatMessageDocumentEmbedding[];
+  items!: ChatMessageDocumentEmbedding[];
 
   @ApiProperty({ type: () => FindManyChatMessageDocumentEmbeddingResponseMeta })
   meta!: FindManyChatMessageDocumentEmbeddingResponseMeta;
 }
 
-@ApiTags('chatmessagedocumentembedding')
-@Controller('chatmessagedocumentembeddings')
+@ApiTags('chat')
+@Controller('chat/message-document-embedding')
 export class ChatMessageDocumentEmbeddingController {
   constructor(private readonly prismaservice: PrismaService) {}
 
@@ -76,42 +77,33 @@ export class ChatMessageDocumentEmbeddingController {
         }),
         {},
       );
+
+    const chatMessageDocumentEmbeddingWhereInput: Prisma.ChatMessageDocumentEmbeddingWhereInput =
+      {
+        ...(searchText
+          ? {
+              OR: [
+                ...(isUUID(searchText) ? [{ id: { equals: searchText } }] : []),
+              ],
+            }
+          : {}),
+      };
+
     const result = await this.prismaservice.$transaction(async (prisma) => {
       return {
-        chatmessagedocumentembeddings:
-          await prisma.chatMessageDocumentEmbedding.findMany({
-            where: {
-              ...(searchText
-                ? {
-                    OR: [
-                      ...(isUUID(searchText)
-                        ? [{ id: { equals: searchText } }]
-                        : []),
-                    ],
-                  }
-                : {}),
-            },
-            take,
-            skip,
-            orderBy,
-          }),
+        items: await prisma.chatMessageDocumentEmbedding.findMany({
+          where: chatMessageDocumentEmbeddingWhereInput,
+          take,
+          skip,
+          orderBy,
+        }),
         totalResults: await prisma.chatMessageDocumentEmbedding.count({
-          where: {
-            ...(searchText
-              ? {
-                  OR: [
-                    ...(isUUID(searchText)
-                      ? [{ id: { equals: searchText } }]
-                      : []),
-                  ],
-                }
-              : {}),
-          },
+          where: chatMessageDocumentEmbeddingWhereInput,
         }),
       };
     });
     return {
-      chatmessagedocumentembeddings: result.chatmessagedocumentembeddings,
+      items: result.items,
       meta: {
         totalResults: result.totalResults,
         curPage,

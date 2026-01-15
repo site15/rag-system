@@ -6,7 +6,7 @@ import { ChatMessageController } from './chat-message.controller';
 import { ChatMessageDocumentEmbeddingController } from './chat-message-document-embedding.controller';
 import { ChatLlmRequestController } from './chat-llm-request.controller';
 import { ChatLlmModelController } from './chat-llm-model.controller';
-import { EmbeddingModelController } from './embedding-model.controller';
+import { ChatEmbeddingModelController } from './chat-embedding-model.controller';
 
 export const CONTROLLERS = [
   AuthUserController,
@@ -17,5 +17,5 @@ export const CONTROLLERS = [
   ChatMessageDocumentEmbeddingController,
   ChatLlmRequestController,
   ChatLlmModelController,
-  EmbeddingModelController,
+  ChatEmbeddingModelController,
 ];

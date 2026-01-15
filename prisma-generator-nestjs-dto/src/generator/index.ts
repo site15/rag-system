@@ -196,7 +196,7 @@ export const run = ({
   });
 
   const controllerInfo: { name: string; fileName: string }[] = [];
-  
+
   const modelFiles = filteredModels.map((model) => {
     logger(`Processing Model ${model.name}`);
 
@@ -283,24 +283,28 @@ export const run = ({
         templateHelpers,
       }),
     };
-    
+
     // Collect controller class name and filename for controllers.ts export
     if (generateControllers) {
       const controllerClassName = `${templateHelpers.entityName(model.name)}Controller`;
-      const controllerFileName = templateHelpers.controllerFilename(model.name, false).replace('.ts', '');
+      const controllerFileName = templateHelpers
+        .controllerFilename(model.name, false)
+        .replace('.ts', '');
       controllerInfo.push({
         name: controllerClassName,
-        fileName: controllerFileName
+        fileName: controllerFileName,
       });
     }
 
     const baseFiles = [connectDto, createDto, updateDto, entity, plainDto];
-    
+
     switch (generateFileTypes) {
       case 'all':
         return generateControllers ? [...baseFiles, controller] : baseFiles;
       case 'dto':
-        return generateControllers ? [connectDto, createDto, updateDto, plainDto, controller] : [connectDto, createDto, updateDto, plainDto];
+        return generateControllers
+          ? [connectDto, createDto, updateDto, plainDto, controller]
+          : [connectDto, createDto, updateDto, plainDto];
       case 'entity':
         return generateControllers ? [entity, controller] : [entity];
       default:
@@ -312,23 +316,23 @@ export const run = ({
   const additionalFiles = [];
   if (generateControllers && controllerInfo.length > 0) {
     // Generate individual imports for each controller
-    const importStatements = controllerInfo.map(info => 
-      `import { ${info.name} } from './${info.fileName}';`
-    ).join('\n');
-    
-    const controllerNames = controllerInfo.map(info => info.name);
+    const importStatements = controllerInfo
+      .map((info) => `import { ${info.name} } from './${info.fileName}';`)
+      .join('\n');
+
+    const controllerNames = controllerInfo.map((info) => info.name);
     const controllersExport = `${importStatements}
 
 export const CONTROLLERS = [
   ${controllerNames.join(',\n  ')},
 ];
 `;
-    
+
     additionalFiles.push({
       fileName: path.join(output, 'controllers.ts'),
       content: controllersExport,
     });
   }
-  
+
   return [...typeFiles, ...modelFiles, ...enumFiles, ...additionalFiles].flat();
 };

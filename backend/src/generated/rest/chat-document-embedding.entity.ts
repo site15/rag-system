@@ -1,6 +1,6 @@
 import { Prisma } from '../prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
-import { EmbeddingModel } from './embedding-model.entity';
+import { ChatEmbeddingModel } from './chat-embedding-model.entity';
 import { ChatMessageDocumentEmbedding } from './chat-message-document-embedding.entity';
 
 export class ChatDocumentEmbedding {
@@ -37,11 +37,11 @@ export class ChatDocumentEmbedding {
   })
   updatedAt!: Date;
   @ApiProperty({
-    type: () => EmbeddingModel,
+    type: () => ChatEmbeddingModel,
     required: false,
     nullable: true,
   })
-  embeddingModel?: EmbeddingModel | null;
+  embeddingModel?: ChatEmbeddingModel | null;
   @ApiProperty({
     type: () => ChatMessageDocumentEmbedding,
     isArray: true,

@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsInt, IsOptional, IsString } from 'class-validator';
 
-export class UpdateEmbeddingModelDto {
+export class UpdateChatEmbeddingModelDto {
   @ApiProperty({
     type: 'string',
     required: false,

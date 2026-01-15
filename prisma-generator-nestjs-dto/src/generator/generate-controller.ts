@@ -1,3 +1,4 @@
+import { kebab } from 'case';
 import { TemplateHelpers } from './template-helpers';
 import { ControllerParams } from './types';
 
@@ -23,9 +24,11 @@ export const generateController = ({
   const findManyResponseName = `FindMany${entityClassName}Response`;
   const findManyResponseMetaName = `FindMany${entityClassName}ResponseMeta`;
 
-  // Determine base path for controller (pluralize and format appropriately)
-  const basePath = modelName.toLowerCase() + 's'; // Simple pluralization
-  const apiTagName = modelName.toLowerCase();
+  // Determine base path for controller
+  const kebabModelName = kebab(modelName).toLowerCase();
+  const kebabModelNameArray = kebabModelName.split('-');
+  const apiTagName = kebabModelNameArray[0];
+  const basePath = `${apiTagName}/${kebabModelNameArray.slice(1).join('-')}`;
 
   // Convert PascalCase model name to camelCase for Prisma calls
   const prismaModelName =
@@ -61,6 +64,7 @@ ${
     ? `import { AppRequest, CurrentAppRequest } from '../../types/request';`
     : ''
 }import { StatusResponse } from '../../types/status-response';
+import { Prisma } from '../prisma/client';
 import { ${plainDtoClassName} } from './${templateHelpers.plainDtoFilename(modelName, false).replace('.ts', '')}';
 import { ${entityClassName} } from './${templateHelpers.entityFilename(modelName, false).replace('.ts', '')}';
 import { ${createDtoClassName} } from './${templateHelpers.createDtoFilename(modelName, false).replace('.ts', '')}';
@@ -81,7 +85,7 @@ export class ${findManyResponseMetaName} {
 
 export class ${findManyResponseName} {
   @ApiProperty({ type: () => [${entityClassName}] })
-  ${modelName.toLowerCase()}s!: ${entityClassName}[];
+  items!: ${entityClassName}[];
 
   @ApiProperty({ type: () => ${findManyResponseMetaName} })
   meta!: ${findManyResponseMetaName};
@@ -112,41 +116,32 @@ export class ${controllerName} {
         }),
         {},
       );
+
+    const ${prismaModelName}WhereInput: Prisma.${entityClassName}WhereInput = {
+      ...(searchText
+        ? {
+            OR: [
+              ...(isUUID(searchText) ? [{ id: { equals: searchText } }] : []),
+            ],
+          }
+        : {}),
+    };
+
     const result = await this.${serviceName.toLowerCase()}.$transaction(async (prisma) => {
       return {
-        ${modelName.toLowerCase()}s: await prisma.${prismaModelName}.findMany({
-          where: {
-            ...(searchText
-              ? {
-                  OR: [
-                    ...(isUUID(searchText)
-                      ? [{ id: { equals: searchText } }]
-                      : []),
-                  ],
-                }
-              : {}),
-          },
+        items: await prisma.${prismaModelName}.findMany({
+          where: ${prismaModelName}WhereInput,
           take,
           skip,
           orderBy,
         }),
         totalResults: await prisma.${prismaModelName}.count({
-          where: {
-            ...(searchText
-              ? {
-                  OR: [
-                    ...(isUUID(searchText)
-                      ? [{ id: { equals: searchText } }]
-                      : []),
-                  ],
-                }
-              : {}),
-          },
+          where: ${prismaModelName}WhereInput,
         }),
       };
     });
     return {
-      ${modelName.toLowerCase()}s: result.${modelName.toLowerCase()}s,
+      items: result.items,
       meta: {
         totalResults: result.totalResults,
         curPage,

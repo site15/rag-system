@@ -1,3 +1,4 @@
+import { Prisma } from '../prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
 import { ChatMessage } from './chat-message.entity';
 import { ChatDocumentEmbedding } from './chat-document-embedding.entity';
@@ -9,22 +10,24 @@ export class ChatMessageDocumentEmbedding {
   id!: string;
   @ApiProperty({
     type: 'string',
+    nullable: true,
   })
-  chatHistoryId!: string;
+  chatHistoryId!: string | null;
   @ApiProperty({
     type: 'string',
+    nullable: true,
   })
-  embeddingDocumentId!: string;
+  embeddingDocumentId!: string | null;
   @ApiProperty({
     type: 'boolean',
   })
   isFound!: boolean;
   @ApiProperty({
-    type: 'number',
-    format: 'float',
+    type: 'string',
+    format: 'Decimal.js',
     nullable: true,
   })
-  relevanceScore!: number | null;
+  relevanceScore!: Prisma.Decimal | null;
   @ApiProperty({
     type: 'string',
     format: 'date-time',
@@ -38,11 +41,13 @@ export class ChatMessageDocumentEmbedding {
   @ApiProperty({
     type: () => ChatMessage,
     required: false,
+    nullable: true,
   })
-  chatHistory?: ChatMessage;
+  chatHistory?: ChatMessage | null;
   @ApiProperty({
     type: () => ChatDocumentEmbedding,
     required: false,
+    nullable: true,
   })
-  embeddingDocument?: ChatDocumentEmbedding;
+  embeddingDocument?: ChatDocumentEmbedding | null;
 }

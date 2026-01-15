@@ -8,7 +8,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class EmbeddingModelDimensionUniqueInputDto {
+export class ChatEmbeddingModelUqDimensionUniqueInputDto {
   @ApiProperty({
     type: 'integer',
     format: 'int32',
@@ -18,8 +18,8 @@ export class EmbeddingModelDimensionUniqueInputDto {
   dimension!: number;
 }
 
-@ApiExtraModels(EmbeddingModelDimensionUniqueInputDto)
-export class ConnectEmbeddingModelDto {
+@ApiExtraModels(ChatEmbeddingModelUqDimensionUniqueInputDto)
+export class ConnectChatEmbeddingModelDto {
   @ApiProperty({
     type: 'string',
     required: false,
@@ -36,11 +36,11 @@ export class ConnectEmbeddingModelDto {
   @IsInt()
   dimension?: number;
   @ApiProperty({
-    type: EmbeddingModelDimensionUniqueInputDto,
+    type: ChatEmbeddingModelUqDimensionUniqueInputDto,
     required: false,
   })
   @IsOptional()
   @ValidateNested()
-  @Type(() => EmbeddingModelDimensionUniqueInputDto)
-  dimension?: EmbeddingModelDimensionUniqueInputDto;
+  @Type(() => ChatEmbeddingModelUqDimensionUniqueInputDto)
+  uqDimension?: ChatEmbeddingModelUqDimensionUniqueInputDto;
 }
