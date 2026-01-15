@@ -18,3 +18,6 @@ npm run prisma:create -- init
 
 запуск в ватч режиме
 ./start-dev.sh
+
+создание пустого проекта на react
+npx create-react-admin@latest frontend
