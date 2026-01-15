@@ -13,6 +13,10 @@ import { generateEntity } from './generate-entity';
 import { generatePlainDto } from './generate-plain-dto';
 import { generateEnums } from './generate-enums';
 import { generateController } from './generate-controller';
+import { generateDataProvider } from './generate-data-provider';
+import { generateList } from './generate-list';
+import { generateForm } from './generate-form';
+import { generateResourcesIndex } from './generate-resources';
 import { DTO_IGNORE_MODEL } from './annotations';
 import { isAnnotatedWith } from './field-classifiers';
 import { NamingStyle, Model, WriteableFileSpecs } from './types';
@@ -39,6 +43,10 @@ interface RunParam {
   outputApiPropertyType: boolean;
   generateFileTypes: string;
   generateControllers: boolean;
+  generateDataProviders: boolean;
+  generateForms: boolean;
+  generateLists: boolean;
+  frontendOutput?: string;
   wrapRelationsAsType: boolean;
   showDefaultValues: boolean;
 }
@@ -62,6 +70,9 @@ export const run = ({
     outputApiPropertyType,
     generateFileTypes,
     generateControllers = false,
+    generateForms = false,
+    generateLists = false,
+    frontendOutput,
     wrapRelationsAsType,
     showDefaultValues,
     ...preAndSuffixes
@@ -131,6 +142,9 @@ export const run = ({
             ? path.join(output, transformFileNameCase(model.name))
             : path.join(output, transformFileNameCase(model.name), 'entities')
           : output,
+        frontend: frontendOutput
+          ? path.join(frontendOutput, 'resource')
+          : undefined,
       },
     }));
 
@@ -284,6 +298,57 @@ export const run = ({
       }),
     };
 
+    // generate model.data-provider.ts
+    const dataProvider = {
+      fileName: model.output.frontend
+        ? path.join(
+            model.output.frontend,
+            templateHelpers.dataProviderFilename(model.name, true),
+          )
+        : path.join(
+            model.output.dto,
+            templateHelpers.dataProviderFilename(model.name, true),
+          ),
+      content: generateDataProvider({
+        ...modelParams,
+        templateHelpers,
+      }),
+    };
+
+    // generate model.list.tsx
+    const list = {
+      fileName: model.output.frontend
+        ? path.join(
+            model.output.frontend,
+            templateHelpers.listFilename(model.name, true),
+          )
+        : path.join(
+            model.output.dto,
+            templateHelpers.listFilename(model.name, true),
+          ),
+      content: generateList({
+        ...modelParams,
+        templateHelpers,
+      }),
+    };
+
+    // generate model.form.tsx
+    const form = {
+      fileName: model.output.frontend
+        ? path.join(
+            model.output.frontend,
+            templateHelpers.formFilename(model.name, true),
+          )
+        : path.join(
+            model.output.dto,
+            templateHelpers.formFilename(model.name, true),
+          ),
+      content: generateForm({
+        ...modelParams,
+        templateHelpers,
+      }),
+    };
+
     // Collect controller class name and filename for controllers.ts export
     if (generateControllers) {
       const controllerClassName = `${templateHelpers.entityName(model.name)}Controller`;
@@ -297,23 +362,65 @@ export const run = ({
     }
 
     const baseFiles = [connectDto, createDto, updateDto, entity, plainDto];
+    const filesWithController = generateControllers
+      ? [...baseFiles, controller]
+      : baseFiles;
+    const filesWithDataProvider = [...filesWithController, dataProvider];
+    const filesWithList = generateLists
+      ? [...filesWithDataProvider, list]
+      : filesWithDataProvider;
+    const filesWithForm = generateForms
+      ? [...filesWithList, form]
+      : filesWithList;
 
     switch (generateFileTypes) {
       case 'all':
-        return generateControllers ? [...baseFiles, controller] : baseFiles;
+        return filesWithForm;
       case 'dto':
-        return generateControllers
-          ? [connectDto, createDto, updateDto, plainDto, controller]
+        return generateForms || generateLists || generateControllers
+          ? [
+              connectDto,
+              createDto,
+              updateDto,
+              plainDto,
+              ...(generateControllers ? [controller] : []),
+              ...[dataProvider],
+              ...(generateLists ? [list] : []),
+              ...(generateForms ? [form] : []),
+            ]
           : [connectDto, createDto, updateDto, plainDto];
       case 'entity':
-        return generateControllers ? [entity, controller] : [entity];
+        return generateForms || generateLists || generateControllers
+          ? [
+              entity,
+              ...(generateControllers ? [controller] : []),
+              ...[dataProvider],
+              ...(generateLists ? [list] : []),
+              ...(generateForms ? [form] : []),
+            ]
+          : [entity];
       default:
         throw new Error(`Unknown 'generateFileTypes' value.`);
     }
   });
 
-  // Generate controllers.ts file if controllers were generated
+  // Generate additional files
   const additionalFiles = [];
+
+  // Generate resources.ts file if Forms and Lists were generated
+  if (generateForms && generateLists && frontendOutput) {
+    const resourcesFile = {
+      fileName: path.join(frontendOutput, 'resource', 'resources.ts'),
+      content: generateResourcesIndex({
+        models: filteredModels.map((m) => m),
+        templateHelpers,
+        frontendOutput,
+      }),
+    };
+    additionalFiles.push(resourcesFile);
+  }
+
+  // Generate controllers.ts file if controllers were generated
   if (generateControllers && controllerInfo.length > 0) {
     // Generate individual imports for each controller
     const importStatements = controllerInfo

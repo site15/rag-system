@@ -181,6 +181,15 @@ export const makeHelpers = ({
   const controllerFilename = (name: string, withExtension = false) =>
     fileName(name, undefined, '.controller', withExtension);
 
+  const dataProviderFilename = (name: string, withExtension = false) =>
+    `${entityName(name)}DataProvider${when(withExtension, '.ts')}`;
+
+  const listFilename = (name: string, withExtension = false) =>
+    `${entityName(name)}List${when(withExtension, '.tsx')}`;
+
+  const formFilename = (name: string, withExtension = false) =>
+    `${entityName(name)}Form${when(withExtension, '.tsx')}`;
+
   const fieldType = (
     field: ParsedField,
     dtoType: 'create' | 'update' | 'plain' = 'plain',
@@ -293,6 +302,9 @@ export const makeHelpers = ({
     entityFilename,
     plainDtoFilename,
     controllerFilename,
+    dataProviderFilename,
+    listFilename,
+    formFilename,
     each,
     echo,
     fieldsToDtoProps,

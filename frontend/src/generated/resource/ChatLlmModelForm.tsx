@@ -17,23 +17,23 @@ export const ChatLlmModelEditForm = () => (
         source={Prisma.ChatLlmModelScalarFieldEnum.id}
         readOnly={true}
       />
+      <DateTimeInput
+        source={Prisma.ChatLlmModelScalarFieldEnum.createdAt}
+        readOnly={true}
+      />
+      <DateTimeInput
+        source={Prisma.ChatLlmModelScalarFieldEnum.updatedAt}
+        readOnly={true}
+      />
       <TextInput source={Prisma.ChatLlmModelScalarFieldEnum.provider} />
       <TextInput source={Prisma.ChatLlmModelScalarFieldEnum.model} />
       <NumberInput source={Prisma.ChatLlmModelScalarFieldEnum.temperature} />
       <NumberInput source={Prisma.ChatLlmModelScalarFieldEnum.chunkSize} />
+      <DateTimeInput source={Prisma.ChatLlmModelScalarFieldEnum.startTime} />
+      <DateTimeInput source={Prisma.ChatLlmModelScalarFieldEnum.endTime} />
+      <TextInput source={Prisma.ChatLlmModelScalarFieldEnum.status} />
+      <TextInput source={Prisma.ChatLlmModelScalarFieldEnum.lastRequestId} />
       <BooleanInput source={Prisma.ChatLlmModelScalarFieldEnum.isActive} />
-      <DateTimeInput
-        source={Prisma.ChatLlmModelScalarFieldEnum.startTime}
-        readOnly={true}
-      />
-      <DateTimeInput
-        source={Prisma.ChatLlmModelScalarFieldEnum.endTime}
-        readOnly={true}
-      />
-      <TextInput
-        source={Prisma.ChatLlmModelScalarFieldEnum.status}
-        readOnly={true}
-      />
     </SimpleForm>
   </Edit>
 );
@@ -45,38 +45,23 @@ export const ChatLlmModelShowForm = () => (
         source={Prisma.ChatLlmModelScalarFieldEnum.id}
         readOnly={true}
       />
-      <TextInput
-        source={Prisma.ChatLlmModelScalarFieldEnum.provider}
-        readOnly={true}
-      />
-      <TextInput
-        source={Prisma.ChatLlmModelScalarFieldEnum.model}
-        readOnly={true}
-      />
-      <NumberInput
-        source={Prisma.ChatLlmModelScalarFieldEnum.temperature}
-        readOnly={true}
-      />
-      <NumberInput
-        source={Prisma.ChatLlmModelScalarFieldEnum.chunkSize}
-        readOnly={true}
-      />
-      <BooleanInput
-        source={Prisma.ChatLlmModelScalarFieldEnum.isActive}
+      <DateTimeInput
+        source={Prisma.ChatLlmModelScalarFieldEnum.createdAt}
         readOnly={true}
       />
       <DateTimeInput
-        source={Prisma.ChatLlmModelScalarFieldEnum.startTime}
+        source={Prisma.ChatLlmModelScalarFieldEnum.updatedAt}
         readOnly={true}
       />
-      <DateTimeInput
-        source={Prisma.ChatLlmModelScalarFieldEnum.endTime}
-        readOnly={true}
-      />
-      <TextInput
-        source={Prisma.ChatLlmModelScalarFieldEnum.status}
-        readOnly={true}
-      />
+      <TextInput source={Prisma.ChatLlmModelScalarFieldEnum.provider} />
+      <TextInput source={Prisma.ChatLlmModelScalarFieldEnum.model} />
+      <NumberInput source={Prisma.ChatLlmModelScalarFieldEnum.temperature} />
+      <NumberInput source={Prisma.ChatLlmModelScalarFieldEnum.chunkSize} />
+      <DateTimeInput source={Prisma.ChatLlmModelScalarFieldEnum.startTime} />
+      <DateTimeInput source={Prisma.ChatLlmModelScalarFieldEnum.endTime} />
+      <TextInput source={Prisma.ChatLlmModelScalarFieldEnum.status} />
+      <TextInput source={Prisma.ChatLlmModelScalarFieldEnum.lastRequestId} />
+      <BooleanInput source={Prisma.ChatLlmModelScalarFieldEnum.isActive} />
     </SimpleForm>
   </Edit>
 );
@@ -88,6 +73,10 @@ export const ChatLlmModelCreateForm = () => (
       <TextInput source={Prisma.ChatLlmModelScalarFieldEnum.model} />
       <NumberInput source={Prisma.ChatLlmModelScalarFieldEnum.temperature} />
       <NumberInput source={Prisma.ChatLlmModelScalarFieldEnum.chunkSize} />
+      <DateTimeInput source={Prisma.ChatLlmModelScalarFieldEnum.startTime} />
+      <DateTimeInput source={Prisma.ChatLlmModelScalarFieldEnum.endTime} />
+      <TextInput source={Prisma.ChatLlmModelScalarFieldEnum.status} />
+      <TextInput source={Prisma.ChatLlmModelScalarFieldEnum.lastRequestId} />
       <BooleanInput source={Prisma.ChatLlmModelScalarFieldEnum.isActive} />
     </SimpleForm>
   </Create>

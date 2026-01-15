@@ -12,6 +12,9 @@ export const ChatLlmModelList = () => (
       <DataTable.Col source={Prisma.ChatLlmModelScalarFieldEnum.startTime} />
       <DataTable.Col source={Prisma.ChatLlmModelScalarFieldEnum.endTime} />
       <DataTable.Col source={Prisma.ChatLlmModelScalarFieldEnum.status} />
+      <DataTable.Col
+        source={Prisma.ChatLlmModelScalarFieldEnum.lastRequestId}
+      />
       <DataTable.Col source={Prisma.ChatLlmModelScalarFieldEnum.isActive} />
     </DataTable>
   </List>

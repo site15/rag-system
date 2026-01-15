@@ -1,16 +1,16 @@
 /* eslint-disable no-useless-escape */
+import { generatorHandler, GeneratorOptions } from '@prisma/generator-helper';
+import makeDir from 'make-dir';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import makeDir from 'make-dir';
-import slash from 'slash';
-import { generatorHandler, GeneratorOptions } from '@prisma/generator-helper';
-import { WritableDeep } from 'type-fest';
 import prettier from 'prettier';
-import { logger, parseEnvValue, warn } from './utils';
+import slash from 'slash';
+import { WritableDeep } from 'type-fest';
 import { run } from './generator';
-import type { WriteableFileSpecs, NamingStyle } from './generator/types';
-import { isAnnotatedWith } from './generator/field-classifiers';
 import { DTO_CAST_TYPE } from './generator/annotations';
+import { isAnnotatedWith } from './generator/field-classifiers';
+import type { NamingStyle, WriteableFileSpecs } from './generator/types';
+import { logger, parseEnvValue, warn } from './utils';
 
 const stringToBoolean = (
   input: string | string[] | undefined,
@@ -177,6 +177,25 @@ export const generate = async (options: WritableDeep<GeneratorOptions>) => {
     false,
   );
 
+  const generateDataProviders = stringToBoolean(
+    options.generator.config['generateDataProviders'],
+    false,
+  );
+
+  const generateForms = stringToBoolean(
+    options.generator.config['generateForms'],
+    false,
+  );
+
+  const generateLists = stringToBoolean(
+    options.generator.config['generateLists'],
+    false,
+  );
+
+  const frontendOutput = options.generator.config['frontendOutput'] as
+    | string
+    | undefined;
+
   const results = run({
     output,
     dmmf: options.dmmf,
@@ -199,6 +218,10 @@ export const generate = async (options: WritableDeep<GeneratorOptions>) => {
     outputApiPropertyType,
     generateFileTypes: generateFileTypes as string,
     generateControllers,
+    generateDataProviders,
+    generateForms,
+    generateLists,
+    frontendOutput: frontendOutput as string | undefined,
     wrapRelationsAsType,
     showDefaultValues,
   });

@@ -19,11 +19,8 @@ import {
   chatLlmModelControllerUpdateOne,
 } from "../client/sdk.gen";
 
-export const chatLlmModelDataProvider: DataProvider<any> = {
+export const ChatLlmModelDataProvider: DataProvider<any> = {
   getList: async (_, params) => {
-    console.log({
-      getList: params,
-    });
     const { page, perPage } = params.pagination || {};
     const result = await chatLlmModelControllerFindMany({
       query: { curPage: page, perPage },
@@ -36,9 +33,6 @@ export const chatLlmModelDataProvider: DataProvider<any> = {
   },
 
   getOne: async (_, params) => {
-    console.log({
-      getOne: params,
-    });
     const result = await chatLlmModelControllerFindOne({
       path: { id: String(params.id) },
       signal: params.signal,
@@ -47,9 +41,6 @@ export const chatLlmModelDataProvider: DataProvider<any> = {
   },
 
   getMany: async (_, params) => {
-    console.log({
-      getMany: params,
-    });
     const promises = params.ids.map((id) =>
       chatLlmModelControllerFindOne({
         path: { id: String(id) },
@@ -61,9 +52,6 @@ export const chatLlmModelDataProvider: DataProvider<any> = {
   },
 
   getManyReference: async (_, params) => {
-    console.log({
-      getManyReference: params,
-    });
     const { page, perPage } = params.pagination;
     const query = {
       curPage: page,
@@ -84,9 +72,6 @@ export const chatLlmModelDataProvider: DataProvider<any> = {
   },
 
   create: async (_, params) => {
-    console.log({
-      create: params,
-    });
     const result = await chatLlmModelControllerCreateOne({
       body: params.data as CreateChatLlmModelDto,
     });
@@ -94,9 +79,6 @@ export const chatLlmModelDataProvider: DataProvider<any> = {
   },
 
   update: async (_, params) => {
-    console.log({
-      update: params,
-    });
     const result = await chatLlmModelControllerUpdateOne({
       path: { id: params.id },
       body: params.data,
@@ -105,9 +87,6 @@ export const chatLlmModelDataProvider: DataProvider<any> = {
   },
 
   updateMany: async (_, params) => {
-    console.log({
-      updateMany: params,
-    });
     const promises = params.ids.map((id) =>
       chatLlmModelControllerUpdateOne({
         path: { id: String(id) },
@@ -121,9 +100,6 @@ export const chatLlmModelDataProvider: DataProvider<any> = {
   },
 
   delete: async (_: any, params) => {
-    console.log({
-      delete: params,
-    });
     const result = await chatLlmModelControllerDeleteOne({
       path: { id: String(params.id) },
     });
@@ -131,9 +107,6 @@ export const chatLlmModelDataProvider: DataProvider<any> = {
   },
 
   deleteMany: async (_, params) => {
-    console.log({
-      deleteMany: params,
-    });
     const promises = params.ids.map((id) =>
       chatLlmModelControllerDeleteOne({
         path: { id: String(id) },

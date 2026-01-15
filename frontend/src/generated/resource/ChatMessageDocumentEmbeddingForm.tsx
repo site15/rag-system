@@ -1,0 +1,110 @@
+import {
+  BooleanInput,
+  Create,
+  DateTimeInput,
+  Edit,
+  NumberInput,
+  SimpleForm,
+  TextInput,
+} from "react-admin";
+
+import { Prisma } from "../prisma/browser";
+
+export const ChatMessageDocumentEmbeddingEditForm = () => (
+  <Edit>
+    <SimpleForm>
+      <TextInput
+        source={Prisma.ChatMessageDocumentEmbeddingScalarFieldEnum.id}
+        readOnly={true}
+      />
+      <DateTimeInput
+        source={Prisma.ChatMessageDocumentEmbeddingScalarFieldEnum.createdAt}
+        readOnly={true}
+      />
+      <DateTimeInput
+        source={Prisma.ChatMessageDocumentEmbeddingScalarFieldEnum.updatedAt}
+        readOnly={true}
+      />
+      <TextInput
+        source={
+          Prisma.ChatMessageDocumentEmbeddingScalarFieldEnum.chatHistoryId
+        }
+      />
+      <TextInput
+        source={
+          Prisma.ChatMessageDocumentEmbeddingScalarFieldEnum.embeddingDocumentId
+        }
+      />
+      <BooleanInput
+        source={Prisma.ChatMessageDocumentEmbeddingScalarFieldEnum.isFound}
+      />
+      <NumberInput
+        source={
+          Prisma.ChatMessageDocumentEmbeddingScalarFieldEnum.relevanceScore
+        }
+      />
+    </SimpleForm>
+  </Edit>
+);
+
+export const ChatMessageDocumentEmbeddingShowForm = () => (
+  <Edit>
+    <SimpleForm>
+      <TextInput
+        source={Prisma.ChatMessageDocumentEmbeddingScalarFieldEnum.id}
+        readOnly={true}
+      />
+      <DateTimeInput
+        source={Prisma.ChatMessageDocumentEmbeddingScalarFieldEnum.createdAt}
+        readOnly={true}
+      />
+      <DateTimeInput
+        source={Prisma.ChatMessageDocumentEmbeddingScalarFieldEnum.updatedAt}
+        readOnly={true}
+      />
+      <TextInput
+        source={
+          Prisma.ChatMessageDocumentEmbeddingScalarFieldEnum.chatHistoryId
+        }
+      />
+      <TextInput
+        source={
+          Prisma.ChatMessageDocumentEmbeddingScalarFieldEnum.embeddingDocumentId
+        }
+      />
+      <BooleanInput
+        source={Prisma.ChatMessageDocumentEmbeddingScalarFieldEnum.isFound}
+      />
+      <NumberInput
+        source={
+          Prisma.ChatMessageDocumentEmbeddingScalarFieldEnum.relevanceScore
+        }
+      />
+    </SimpleForm>
+  </Edit>
+);
+
+export const ChatMessageDocumentEmbeddingCreateForm = () => (
+  <Create>
+    <SimpleForm>
+      <TextInput
+        source={
+          Prisma.ChatMessageDocumentEmbeddingScalarFieldEnum.chatHistoryId
+        }
+      />
+      <TextInput
+        source={
+          Prisma.ChatMessageDocumentEmbeddingScalarFieldEnum.embeddingDocumentId
+        }
+      />
+      <BooleanInput
+        source={Prisma.ChatMessageDocumentEmbeddingScalarFieldEnum.isFound}
+      />
+      <NumberInput
+        source={
+          Prisma.ChatMessageDocumentEmbeddingScalarFieldEnum.relevanceScore
+        }
+      />
+    </SimpleForm>
+  </Create>
+);

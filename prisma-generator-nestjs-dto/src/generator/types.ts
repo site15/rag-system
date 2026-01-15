@@ -5,6 +5,7 @@ export interface Model extends WritableDeep<DMMF.Model> {
   output: {
     dto: string;
     entity: string;
+    frontend?: string;
   };
 }
 

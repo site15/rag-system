@@ -1,6 +1,6 @@
 import { DataProvider } from "react-admin";
 import { Prisma } from "./generated/prisma/browser";
-import { DataProviders } from "./generated/resource/DataProviders";
+import { resources } from "./generated/resource/resources";
 
 export const appDataProvider: DataProvider<any> = {
   getList: async (resource, params) => {
@@ -8,8 +8,7 @@ export const appDataProvider: DataProvider<any> = {
       resource,
       params,
     });
-    const dataProvider =
-      DataProviders[resource as Prisma.ModelName] || undefined;
+    const dataProvider = resources[resource as Prisma.ModelName]?.dataProvider;
 
     if (!dataProvider) {
       throw new Error(`No data provider found for resource ${resource}`);
@@ -22,8 +21,7 @@ export const appDataProvider: DataProvider<any> = {
       resource,
       params,
     });
-    const dataProvider =
-      DataProviders[resource as Prisma.ModelName] || undefined;
+    const dataProvider = resources[resource as Prisma.ModelName]?.dataProvider;
 
     if (!dataProvider) {
       throw new Error(`No data provider found for resource ${resource}`);
@@ -36,8 +34,7 @@ export const appDataProvider: DataProvider<any> = {
       resource,
       params,
     });
-    const dataProvider =
-      DataProviders[resource as Prisma.ModelName] || undefined;
+    const dataProvider = resources[resource as Prisma.ModelName]?.dataProvider;
 
     if (!dataProvider) {
       throw new Error(`No data provider found for resource ${resource}`);
@@ -50,8 +47,7 @@ export const appDataProvider: DataProvider<any> = {
       resource,
       params,
     });
-    const dataProvider =
-      DataProviders[resource as Prisma.ModelName] || undefined;
+    const dataProvider = resources[resource as Prisma.ModelName]?.dataProvider;
 
     if (!dataProvider) {
       throw new Error(`No data provider found for resource ${resource}`);
@@ -64,8 +60,7 @@ export const appDataProvider: DataProvider<any> = {
       resource,
       params,
     });
-    const dataProvider =
-      DataProviders[resource as Prisma.ModelName] || undefined;
+    const dataProvider = resources[resource as Prisma.ModelName]?.dataProvider;
 
     if (!dataProvider) {
       throw new Error(`No data provider found for resource ${resource}`);
@@ -78,8 +73,7 @@ export const appDataProvider: DataProvider<any> = {
       resource,
       params,
     });
-    const dataProvider =
-      DataProviders[resource as Prisma.ModelName] || undefined;
+    const dataProvider = resources[resource as Prisma.ModelName]?.dataProvider;
 
     if (!dataProvider) {
       throw new Error(`No data provider found for resource ${resource}`);
@@ -92,8 +86,7 @@ export const appDataProvider: DataProvider<any> = {
       resource,
       params,
     });
-    const dataProvider =
-      DataProviders[resource as Prisma.ModelName] || undefined;
+    const dataProvider = resources[resource as Prisma.ModelName]?.dataProvider;
 
     if (!dataProvider) {
       throw new Error(`No data provider found for resource ${resource}`);
@@ -106,8 +99,7 @@ export const appDataProvider: DataProvider<any> = {
       resource,
       params,
     });
-    const dataProvider =
-      DataProviders[resource as Prisma.ModelName] || undefined;
+    const dataProvider = resources[resource as Prisma.ModelName]?.dataProvider;
 
     if (!dataProvider) {
       throw new Error(`No data provider found for resource ${resource}`);
@@ -120,8 +112,7 @@ export const appDataProvider: DataProvider<any> = {
       resource,
       params,
     });
-    const dataProvider =
-      DataProviders[resource as Prisma.ModelName] || undefined;
+    const dataProvider = resources[resource as Prisma.ModelName]?.dataProvider;
 
     if (!dataProvider) {
       throw new Error(`No data provider found for resource ${resource}`);
