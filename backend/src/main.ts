@@ -6,6 +6,7 @@ import {
 } from '@nestjs/platform-fastify';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { writeFileSync } from 'fs';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -26,7 +27,17 @@ async function bootstrap() {
     .setDescription('The RAG-system API description')
     .setVersion('1.0')
     .build();
-  const documentFactory = () => SwaggerModule.createDocument(app, config);
+  const documentFactory = () => {
+    const document = SwaggerModule.createDocument(app, config);
+    try {
+      writeFileSync('./swagger.json', JSON.stringify(document));
+    } catch (error) {
+      //
+      Logger.error(error, error.stack);
+    }
+    return document;
+  };
+
   SwaggerModule.setup('swagger', app, documentFactory);
 
   await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
