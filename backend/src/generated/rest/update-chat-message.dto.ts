@@ -1,6 +1,5 @@
-import { Prisma } from '../prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDecimal, IsOptional, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class UpdateChatMessageDto {
   @ApiProperty({
@@ -58,12 +57,12 @@ export class UpdateChatMessageDto {
   @IsString()
   model?: string | null;
   @ApiProperty({
-    type: 'string',
-    format: 'Decimal.js',
+    type: 'number',
+    format: 'float',
     required: false,
     nullable: true,
   })
   @IsOptional()
-  @IsDecimal()
-  temperature?: Prisma.Decimal | null;
+  @IsNumber()
+  temperature?: number | null;
 }

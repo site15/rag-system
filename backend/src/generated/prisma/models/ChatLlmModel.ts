@@ -45,7 +45,7 @@ export type ChatLlmModelMinAggregateOutputType = {
   startTime: Date | null;
   endTime: Date | null;
   status: string | null;
-  requestId: string | null;
+  lastRequestId: string | null;
   isActive: boolean | null;
   createdAt: Date | null;
   updatedAt: Date | null;
@@ -60,7 +60,7 @@ export type ChatLlmModelMaxAggregateOutputType = {
   startTime: Date | null;
   endTime: Date | null;
   status: string | null;
-  requestId: string | null;
+  lastRequestId: string | null;
   isActive: boolean | null;
   createdAt: Date | null;
   updatedAt: Date | null;
@@ -75,7 +75,7 @@ export type ChatLlmModelCountAggregateOutputType = {
   startTime: number;
   endTime: number;
   status: number;
-  requestId: number;
+  lastRequestId: number;
   isActive: number;
   createdAt: number;
   updatedAt: number;
@@ -101,7 +101,7 @@ export type ChatLlmModelMinAggregateInputType = {
   startTime?: true;
   endTime?: true;
   status?: true;
-  requestId?: true;
+  lastRequestId?: true;
   isActive?: true;
   createdAt?: true;
   updatedAt?: true;
@@ -116,7 +116,7 @@ export type ChatLlmModelMaxAggregateInputType = {
   startTime?: true;
   endTime?: true;
   status?: true;
-  requestId?: true;
+  lastRequestId?: true;
   isActive?: true;
   createdAt?: true;
   updatedAt?: true;
@@ -131,7 +131,7 @@ export type ChatLlmModelCountAggregateInputType = {
   startTime?: true;
   endTime?: true;
   status?: true;
-  requestId?: true;
+  lastRequestId?: true;
   isActive?: true;
   createdAt?: true;
   updatedAt?: true;
@@ -241,7 +241,7 @@ export type ChatLlmModelGroupByOutputType = {
   startTime: Date | null;
   endTime: Date | null;
   status: string;
-  requestId: string | null;
+  lastRequestId: string | null;
   isActive: boolean | null;
   createdAt: Date;
   updatedAt: Date;
@@ -291,7 +291,7 @@ export type ChatLlmModelWhereInput = {
     | string
     | null;
   status?: Prisma.StringFilter<'ChatLlmModel'> | string;
-  requestId?: Prisma.UuidNullableFilter<'ChatLlmModel'> | string | null;
+  lastRequestId?: Prisma.UuidNullableFilter<'ChatLlmModel'> | string | null;
   isActive?: Prisma.BoolNullableFilter<'ChatLlmModel'> | boolean | null;
   createdAt?: Prisma.DateTimeFilter<'ChatLlmModel'> | Date | string;
   updatedAt?: Prisma.DateTimeFilter<'ChatLlmModel'> | Date | string;
@@ -310,7 +310,7 @@ export type ChatLlmModelOrderByWithRelationInput = {
   startTime?: Prisma.SortOrderInput | Prisma.SortOrder;
   endTime?: Prisma.SortOrderInput | Prisma.SortOrder;
   status?: Prisma.SortOrder;
-  requestId?: Prisma.SortOrderInput | Prisma.SortOrder;
+  lastRequestId?: Prisma.SortOrderInput | Prisma.SortOrder;
   isActive?: Prisma.SortOrderInput | Prisma.SortOrder;
   createdAt?: Prisma.SortOrder;
   updatedAt?: Prisma.SortOrder;
@@ -320,7 +320,7 @@ export type ChatLlmModelOrderByWithRelationInput = {
 export type ChatLlmModelWhereUniqueInput = Prisma.AtLeast<
   {
     id?: string;
-    requestId?: string;
+    lastRequestId?: string;
     uqConfig?: Prisma.ChatLlmModelUqConfigCompoundUniqueInput;
     AND?: Prisma.ChatLlmModelWhereInput | Prisma.ChatLlmModelWhereInput[];
     OR?: Prisma.ChatLlmModelWhereInput[];
@@ -354,7 +354,7 @@ export type ChatLlmModelWhereUniqueInput = Prisma.AtLeast<
       Prisma.ChatLlmRequestWhereInput
     > | null;
   },
-  'id' | 'requestId' | 'uqConfig'
+  'id' | 'lastRequestId' | 'uqConfig'
 >;
 
 export type ChatLlmModelOrderByWithAggregationInput = {
@@ -366,7 +366,7 @@ export type ChatLlmModelOrderByWithAggregationInput = {
   startTime?: Prisma.SortOrderInput | Prisma.SortOrder;
   endTime?: Prisma.SortOrderInput | Prisma.SortOrder;
   status?: Prisma.SortOrder;
-  requestId?: Prisma.SortOrderInput | Prisma.SortOrder;
+  lastRequestId?: Prisma.SortOrderInput | Prisma.SortOrder;
   isActive?: Prisma.SortOrderInput | Prisma.SortOrder;
   createdAt?: Prisma.SortOrder;
   updatedAt?: Prisma.SortOrder;
@@ -410,7 +410,7 @@ export type ChatLlmModelScalarWhereWithAggregatesInput = {
     | string
     | null;
   status?: Prisma.StringWithAggregatesFilter<'ChatLlmModel'> | string;
-  requestId?:
+  lastRequestId?:
     | Prisma.UuidNullableWithAggregatesFilter<'ChatLlmModel'>
     | string
     | null;
@@ -462,7 +462,7 @@ export type ChatLlmModelUncheckedCreateInput = {
   startTime?: Date | string | null;
   endTime?: Date | string | null;
   status?: string;
-  requestId?: string | null;
+  lastRequestId?: string | null;
   isActive?: boolean | null;
   createdAt?: Date | string;
   updatedAt?: Date | string;
@@ -520,7 +520,10 @@ export type ChatLlmModelUncheckedUpdateInput = {
     | string
     | null;
   status?: Prisma.StringFieldUpdateOperationsInput | string;
-  requestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  lastRequestId?:
+    | Prisma.NullableStringFieldUpdateOperationsInput
+    | string
+    | null;
   isActive?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -540,7 +543,7 @@ export type ChatLlmModelCreateManyInput = {
   startTime?: Date | string | null;
   endTime?: Date | string | null;
   status?: string;
-  requestId?: string | null;
+  lastRequestId?: string | null;
   isActive?: boolean | null;
   createdAt?: Date | string;
   updatedAt?: Date | string;
@@ -597,7 +600,10 @@ export type ChatLlmModelUncheckedUpdateManyInput = {
     | string
     | null;
   status?: Prisma.StringFieldUpdateOperationsInput | string;
-  requestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  lastRequestId?:
+    | Prisma.NullableStringFieldUpdateOperationsInput
+    | string
+    | null;
   isActive?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -629,7 +635,7 @@ export type ChatLlmModelCountOrderByAggregateInput = {
   startTime?: Prisma.SortOrder;
   endTime?: Prisma.SortOrder;
   status?: Prisma.SortOrder;
-  requestId?: Prisma.SortOrder;
+  lastRequestId?: Prisma.SortOrder;
   isActive?: Prisma.SortOrder;
   createdAt?: Prisma.SortOrder;
   updatedAt?: Prisma.SortOrder;
@@ -649,7 +655,7 @@ export type ChatLlmModelMaxOrderByAggregateInput = {
   startTime?: Prisma.SortOrder;
   endTime?: Prisma.SortOrder;
   status?: Prisma.SortOrder;
-  requestId?: Prisma.SortOrder;
+  lastRequestId?: Prisma.SortOrder;
   isActive?: Prisma.SortOrder;
   createdAt?: Prisma.SortOrder;
   updatedAt?: Prisma.SortOrder;
@@ -664,7 +670,7 @@ export type ChatLlmModelMinOrderByAggregateInput = {
   startTime?: Prisma.SortOrder;
   endTime?: Prisma.SortOrder;
   status?: Prisma.SortOrder;
-  requestId?: Prisma.SortOrder;
+  lastRequestId?: Prisma.SortOrder;
   isActive?: Prisma.SortOrder;
   createdAt?: Prisma.SortOrder;
   updatedAt?: Prisma.SortOrder;
@@ -908,7 +914,7 @@ export type ChatLlmModelScalarWhereInput = {
     | string
     | null;
   status?: Prisma.StringFilter<'ChatLlmModel'> | string;
-  requestId?: Prisma.UuidNullableFilter<'ChatLlmModel'> | string | null;
+  lastRequestId?: Prisma.UuidNullableFilter<'ChatLlmModel'> | string | null;
   isActive?: Prisma.BoolNullableFilter<'ChatLlmModel'> | boolean | null;
   createdAt?: Prisma.DateTimeFilter<'ChatLlmModel'> | Date | string;
   updatedAt?: Prisma.DateTimeFilter<'ChatLlmModel'> | Date | string;
@@ -1030,7 +1036,7 @@ export type ChatLlmModelSelect<
     startTime?: boolean;
     endTime?: boolean;
     status?: boolean;
-    requestId?: boolean;
+    lastRequestId?: boolean;
     isActive?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
@@ -1052,7 +1058,7 @@ export type ChatLlmModelSelectCreateManyAndReturn<
     startTime?: boolean;
     endTime?: boolean;
     status?: boolean;
-    requestId?: boolean;
+    lastRequestId?: boolean;
     isActive?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
@@ -1074,7 +1080,7 @@ export type ChatLlmModelSelectUpdateManyAndReturn<
     startTime?: boolean;
     endTime?: boolean;
     status?: boolean;
-    requestId?: boolean;
+    lastRequestId?: boolean;
     isActive?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
@@ -1092,7 +1098,7 @@ export type ChatLlmModelSelectScalar = {
   startTime?: boolean;
   endTime?: boolean;
   status?: boolean;
-  requestId?: boolean;
+  lastRequestId?: boolean;
   isActive?: boolean;
   createdAt?: boolean;
   updatedAt?: boolean;
@@ -1110,7 +1116,7 @@ export type ChatLlmModelOmit<
   | 'startTime'
   | 'endTime'
   | 'status'
-  | 'requestId'
+  | 'lastRequestId'
   | 'isActive'
   | 'createdAt'
   | 'updatedAt',
@@ -1153,7 +1159,7 @@ export type $ChatLlmModelPayload<
       startTime: Date | null;
       endTime: Date | null;
       status: string;
-      requestId: string | null;
+      lastRequestId: string | null;
       isActive: boolean | null;
       createdAt: Date;
       updatedAt: Date;
@@ -1778,7 +1784,7 @@ export interface ChatLlmModelFieldRefs {
   readonly startTime: Prisma.FieldRef<'ChatLlmModel', 'DateTime'>;
   readonly endTime: Prisma.FieldRef<'ChatLlmModel', 'DateTime'>;
   readonly status: Prisma.FieldRef<'ChatLlmModel', 'String'>;
-  readonly requestId: Prisma.FieldRef<'ChatLlmModel', 'String'>;
+  readonly lastRequestId: Prisma.FieldRef<'ChatLlmModel', 'String'>;
   readonly isActive: Prisma.FieldRef<'ChatLlmModel', 'Boolean'>;
   readonly createdAt: Prisma.FieldRef<'ChatLlmModel', 'DateTime'>;
   readonly updatedAt: Prisma.FieldRef<'ChatLlmModel', 'DateTime'>;

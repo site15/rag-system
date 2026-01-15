@@ -1,4 +1,3 @@
-import { Prisma } from '../prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
 import { ChatLlmRequest } from './chat-llm-request.entity';
 
@@ -16,11 +15,11 @@ export class ChatLlmModel {
   })
   model!: string;
   @ApiProperty({
-    type: 'string',
-    format: 'Decimal.js',
+    type: 'number',
+    format: 'float',
     nullable: true,
   })
-  temperature!: Prisma.Decimal | null;
+  temperature!: number | null;
   @ApiProperty({
     type: 'integer',
     format: 'int32',
@@ -47,7 +46,7 @@ export class ChatLlmModel {
     type: 'string',
     nullable: true,
   })
-  requestId!: string | null;
+  lastRequestId!: string | null;
   @ApiProperty({
     type: 'boolean',
     nullable: true,

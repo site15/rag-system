@@ -1,4 +1,3 @@
-import { Prisma } from '../prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
 import { ChatMessage } from './chat-message.entity';
 import { ChatDocumentEmbedding } from './chat-document-embedding.entity';
@@ -23,11 +22,11 @@ export class ChatMessageDocumentEmbedding {
   })
   isFound!: boolean;
   @ApiProperty({
-    type: 'string',
-    format: 'Decimal.js',
+    type: 'number',
+    format: 'float',
     nullable: true,
   })
-  relevanceScore!: Prisma.Decimal | null;
+  relevanceScore!: number | null;
   @ApiProperty({
     type: 'string',
     format: 'date-time',

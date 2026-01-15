@@ -23,7 +23,7 @@ const PrismaScalarToFormat: Record<string, { type: string; format?: string }> =
     Int: { type: 'integer', format: 'int32' },
     BigInt: { type: 'integer', format: 'int64' },
     Float: { type: 'number', format: 'float' },
-    Decimal: { type: 'string', format: 'Decimal.js' },
+    Decimal: { type: 'string', format: 'float' },
     DateTime: { type: 'string', format: 'date-time' },
     Bytes: { type: 'string', format: 'binary' },
   };

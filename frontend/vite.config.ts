@@ -7,7 +7,7 @@ export default defineConfig(({ mode }) => ({
   plugins: [react()],
   server: {
     host: true,
-    port: parseInt(process.env.PORT ?? "3000", 10) || 3000,
+    port: parseInt(process.env.PORT ?? "3000", 10),
   },
   build: {
     sourcemap: mode === "development",

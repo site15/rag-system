@@ -1,15 +1,14 @@
-import { Prisma } from '../prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDecimal, IsOptional } from 'class-validator';
+import { IsNumber, IsOptional } from 'class-validator';
 
 export class UpdateChatMessageDocumentEmbeddingDto {
   @ApiProperty({
-    type: 'string',
-    format: 'Decimal.js',
+    type: 'number',
+    format: 'float',
     required: false,
     nullable: true,
   })
   @IsOptional()
-  @IsDecimal()
-  relevanceScore?: Prisma.Decimal | null;
+  @IsNumber()
+  relevanceScore?: number | null;
 }

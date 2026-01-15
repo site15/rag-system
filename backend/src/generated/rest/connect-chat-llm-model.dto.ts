@@ -8,7 +8,6 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { Prisma } from '../prisma/client';
 
 export class ChatLlmModelUqConfigUniqueInputDto {
   @ApiProperty({
@@ -25,11 +24,11 @@ export class ChatLlmModelUqConfigUniqueInputDto {
   model!: string;
   @ApiProperty({
     type: 'string',
-    format: 'Decimal.js',
+    format: 'float',
   })
   @IsNotEmpty()
   @IsDecimal()
-  temperature!: Prisma.Decimal;
+  temperature!: number;
   @ApiProperty({
     type: 'integer',
     format: 'int32',
@@ -54,7 +53,7 @@ export class ConnectChatLlmModelDto {
   })
   @IsOptional()
   @IsString()
-  requestId?: string;
+  lastRequestId?: string;
   @ApiProperty({
     type: ChatLlmModelUqConfigUniqueInputDto,
     required: false,

@@ -143,6 +143,7 @@ export const computePlainDtoParams = ({
         });
       }
     }
+    if (field.type === 'Decimal') field.type = 'Float';
 
     return [
       ...result,

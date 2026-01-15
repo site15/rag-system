@@ -16,7 +16,7 @@ const PrismaScalarToTypeScript: Record<string, string> = {
   BigInt: 'bigint',
   Float: 'number',
   // [Working with Decimal](https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields#working-with-decimal)
-  Decimal: 'Prisma.Decimal',
+  Decimal: 'number',
   DateTime: 'Date',
   // [working with JSON fields](https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields)
   Json: 'Prisma.JsonValue',

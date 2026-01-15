@@ -168,6 +168,7 @@ export const computeConnectDtoParams = ({
         });
       }
     }
+    if (field.type === 'Decimal') field.type = 'Float';
 
     return mapDMMFToParsedField(
       field,

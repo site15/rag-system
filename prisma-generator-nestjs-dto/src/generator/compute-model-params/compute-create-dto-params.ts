@@ -267,6 +267,7 @@ export const computeCreateDtoParams = ({
         });
       }
     }
+    if (field.type === 'Decimal') field.type = 'Float';
 
     return [
       ...result,

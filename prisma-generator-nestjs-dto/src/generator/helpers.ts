@@ -694,6 +694,7 @@ export const generateUniqueInput = ({
       if (field.type === 'Json') field.type = 'Object';
       else if (field.type === 'Decimal') field.type = 'String';
     }
+    if (field.type === 'Decimal') field.type = 'Float';
 
     return mapDMMFToParsedField(field, overrides, decorators);
   });

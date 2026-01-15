@@ -1294,7 +1294,7 @@ export const ChatLlmModelScalarFieldEnum = {
   startTime: 'startTime',
   endTime: 'endTime',
   status: 'status',
-  requestId: 'requestId',
+  lastRequestId: 'lastRequestId',
   isActive: 'isActive',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',

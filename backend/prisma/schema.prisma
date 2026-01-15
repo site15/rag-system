@@ -8,9 +8,15 @@ datasource db {
   provider = "postgresql"
 }
 
-generator client {
+generator backendClient {
   provider     = "prisma-client"
   output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+generator frontendClient {
+  provider     = "prisma-client"
+  output       = "../../frontend/src/generated/prisma"
   moduleFormat = "cjs"
 }
 
@@ -146,8 +152,8 @@ model ChatMessage {
 
 model ChatMessageDocumentEmbedding {
   id                  String   @id(map: "PK_CHAT_MESSAGE_DOCUMENT_EMBEDDINGS") @default(uuid()) @db.Uuid
-  chatHistoryId       String?   @db.Uuid
-  embeddingDocumentId String?   @db.Uuid
+  chatHistoryId       String?  @db.Uuid
+  embeddingDocumentId String?  @db.Uuid
   isFound             Boolean  @default(false)
   relevanceScore      Decimal? @db.Decimal(3, 2)
 
@@ -196,21 +202,21 @@ model ChatLlmRequest {
 }
 
 model ChatLlmModel {
-  id          String    @id(map: "PK_CHAT_LLM_MODELS") @default(uuid()) @db.Uuid
-  provider    String    @db.VarChar(50)
-  model       String    @db.VarChar(100)
-  temperature Decimal?  @db.Decimal(3, 2)
-  chunkSize   Int?
-  startTime   DateTime? @default(now()) @db.Timestamptz(6)
-  endTime     DateTime? @db.Timestamptz(6)
-  status      String    @default("running") @db.VarChar(20)
-  requestId   String?   @unique @db.Uuid
-  isActive    Boolean?
+  id            String    @id(map: "PK_CHAT_LLM_MODELS") @default(uuid()) @db.Uuid
+  provider      String    @db.VarChar(50)
+  model         String    @db.VarChar(100)
+  temperature   Decimal?  @db.Decimal(3, 2)
+  chunkSize     Int?
+  startTime     DateTime? @default(now()) @db.Timestamptz(6)
+  endTime       DateTime? @db.Timestamptz(6)
+  status        String    @default("running") @db.VarChar(20)
+  lastRequestId String?   @unique @db.Uuid
+  isActive      Boolean?
 
   createdAt DateTime @default(now()) @db.Timestamp(6)
   updatedAt DateTime @default(now()) @db.Timestamp(6)
 
-  chatLlmRequest ChatLlmRequest? @relation(fields: [requestId], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "FK_CHAT_LLM_MODELS__CHAT_LLM_REQUEST_ID")
+  chatLlmRequest ChatLlmRequest? @relation(fields: [lastRequestId], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "FK_CHAT_LLM_MODELS__CHAT_LLM_REQUEST_ID")
 
   @@unique(name: "uqConfig", [provider, model, temperature, chunkSize], map: "UK_CHAT_LLM_MODELS__CONFIG")
   @@index([provider], map: "IDX_CHAT_LLM_MODELS__PROVIDER")
@@ -220,8 +226,8 @@ model ChatLlmModel {
   @@index([endTime], map: "IDX_CHAT_LLM_MODELS__END_TIME")
   @@index([provider, model], map: "IDX_CHAT_LLM_MODELS__PROVIDER_MODEL")
   @@index([status, startTime], map: "IDX_CHAT_LLM_MODELS__STATUS_TIME")
-  @@index([requestId], map: "IDX_CHAT_LLM_MODELS__REQUEST_ID")
-  @@index([status, requestId], map: "IDX_CHAT_LLM_MODELS__STATUS_REQUEST_ID")
+  @@index([lastRequestId], map: "IDX_CHAT_LLM_MODELS__LAST_REQUEST_ID")
+  @@index([status, lastRequestId], map: "IDX_CHAT_LLM_MODELS__STATUS_LAST_REQUEST_ID")
 }
 
 model ChatEmbeddingModel {
