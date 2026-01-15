@@ -56,8 +56,11 @@ import {
   PrismaSdk,
   PrismaService,
 } from '../../services/prisma.service';
-import { AppRequest, CurrentAppRequest } from '../../types/request';
-import { StatusResponse } from '../../types/status-response';
+${
+  fields.find((f) => f.name === 'userId')
+    ? `import { AppRequest, CurrentAppRequest } from '../../types/request';`
+    : ''
+}import { StatusResponse } from '../../types/status-response';
 import { ${plainDtoClassName} } from './${templateHelpers.plainDtoFilename(modelName, false).replace('.ts', '')}';
 import { ${entityClassName} } from './${templateHelpers.entityFilename(modelName, false).replace('.ts', '')}';
 import { ${createDtoClassName} } from './${templateHelpers.createDtoFilename(modelName, false).replace('.ts', '')}';

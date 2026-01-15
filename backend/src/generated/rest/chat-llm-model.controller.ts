@@ -23,7 +23,6 @@ import {
   PrismaSdk,
   PrismaService,
 } from '../../services/prisma.service';
-import { AppRequest, CurrentAppRequest } from '../../types/request';
 import { StatusResponse } from '../../types/status-response';
 import { ChatLlmModelDto } from './chat-llm-model.dto';
 import { ChatLlmModel } from './chat-llm-model.entity';

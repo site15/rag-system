@@ -23,7 +23,6 @@ import {
   PrismaSdk,
   PrismaService,
 } from '../../services/prisma.service';
-import { AppRequest, CurrentAppRequest } from '../../types/request';
 import { StatusResponse } from '../../types/status-response';
 import { ChatDocumentEmbeddingDto } from './chat-document-embedding.dto';
 import { ChatDocumentEmbedding } from './chat-document-embedding.entity';

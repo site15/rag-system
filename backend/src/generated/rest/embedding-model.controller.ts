@@ -23,7 +23,6 @@ import {
   PrismaSdk,
   PrismaService,
 } from '../../services/prisma.service';
-import { AppRequest, CurrentAppRequest } from '../../types/request';
 import { StatusResponse } from '../../types/status-response';
 import { EmbeddingModelDto } from './embedding-model.dto';
 import { EmbeddingModel } from './embedding-model.entity';

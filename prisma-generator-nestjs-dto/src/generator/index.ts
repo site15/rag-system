@@ -195,6 +195,8 @@ export const run = ({
     return [createDto, updateDto, plainDto];
   });
 
+  const controllerInfo: { name: string; fileName: string }[] = [];
+  
   const modelFiles = filteredModels.map((model) => {
     logger(`Processing Model ${model.name}`);
 
@@ -281,6 +283,16 @@ export const run = ({
         templateHelpers,
       }),
     };
+    
+    // Collect controller class name and filename for controllers.ts export
+    if (generateControllers) {
+      const controllerClassName = `${templateHelpers.entityName(model.name)}Controller`;
+      const controllerFileName = templateHelpers.controllerFilename(model.name, false).replace('.ts', '');
+      controllerInfo.push({
+        name: controllerClassName,
+        fileName: controllerFileName
+      });
+    }
 
     const baseFiles = [connectDto, createDto, updateDto, entity, plainDto];
     
@@ -296,5 +308,27 @@ export const run = ({
     }
   });
 
-  return [...typeFiles, ...modelFiles, ...enumFiles].flat();
+  // Generate controllers.ts file if controllers were generated
+  const additionalFiles = [];
+  if (generateControllers && controllerInfo.length > 0) {
+    // Generate individual imports for each controller
+    const importStatements = controllerInfo.map(info => 
+      `import { ${info.name} } from './${info.fileName}';`
+    ).join('\n');
+    
+    const controllerNames = controllerInfo.map(info => info.name);
+    const controllersExport = `${importStatements}
+
+export const CONTROLLERS = [
+  ${controllerNames.join(',\n  ')},
+];
+`;
+    
+    additionalFiles.push({
+      fileName: path.join(output, 'controllers.ts'),
+      content: controllersExport,
+    });
+  }
+  
+  return [...typeFiles, ...modelFiles, ...enumFiles, ...additionalFiles].flat();
 };
