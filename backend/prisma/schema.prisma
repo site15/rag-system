@@ -28,6 +28,7 @@ generator prismaClassGenerator {
   exportRelationModifierClasses   = "true"
   fileNamingStyle                 = "kebab"
   flatResourceStructure           = "false"
+  generateControllers             = "true"
   moduleName                      = "metrics"
   noDependencies                  = "false"
   outputToNestJsResourceStructure = "false"

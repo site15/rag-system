@@ -178,6 +178,9 @@ export const makeHelpers = ({
   const plainDtoFilename = (name: string, withExtension = false) =>
     fileName(name, undefined, '.dto', withExtension);
 
+  const controllerFilename = (name: string, withExtension = false) =>
+    fileName(name, undefined, '.controller', withExtension);
+
   const fieldType = (
     field: ParsedField,
     dtoType: 'create' | 'update' | 'plain' = 'plain',
@@ -289,6 +292,7 @@ export const makeHelpers = ({
     updateDtoFilename,
     entityFilename,
     plainDtoFilename,
+    controllerFilename,
     each,
     echo,
     fieldsToDtoProps,

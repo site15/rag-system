@@ -25,14 +25,14 @@ import {
 } from '../../services/prisma.service';
 import { AppRequest, CurrentAppRequest } from '../../types/request';
 import { StatusResponse } from '../../types/status-response';
-import { ChatDialogDto } from './chat-dialog.dto';
-import { ChatDialog } from './chat-dialog.entity';
-import { CreateChatDialogDto } from './create-chat-dialog.dto';
-import { UpdateChatDialogDto } from './update-chat-dialog.dto';
+import { AuthSessionDto } from './auth-session.dto';
+import { AuthSession } from './auth-session.entity';
+import { CreateAuthSessionDto } from './create-auth-session.dto';
+import { UpdateAuthSessionDto } from './update-auth-session.dto';
 
-export class FindManyChatDialogArgs extends FindManyArgs {}
+export class FindManyAuthSessionArgs extends FindManyArgs {}
 
-export class FindManyChatDialogResponseMeta {
+export class FindManyAuthSessionResponseMeta {
   @ApiPropertyOptional({ type: Number })
   curPage?: number;
 
@@ -43,22 +43,22 @@ export class FindManyChatDialogResponseMeta {
   totalResults!: number;
 }
 
-export class FindManyChatDialogResponse {
-  @ApiProperty({ type: () => [ChatDialog] })
-  chatdialogs!: ChatDialog[];
+export class FindManyAuthSessionResponse {
+  @ApiProperty({ type: () => [AuthSession] })
+  authsessions!: AuthSession[];
 
-  @ApiProperty({ type: () => FindManyChatDialogResponseMeta })
-  meta!: FindManyChatDialogResponseMeta;
+  @ApiProperty({ type: () => FindManyAuthSessionResponseMeta })
+  meta!: FindManyAuthSessionResponseMeta;
 }
 
-@ApiTags('chatdialog')
-@Controller('chatdialogs')
-export class ChatDialogController {
+@ApiTags('authsession')
+@Controller('authsessions')
+export class AuthSessionController {
   constructor(private readonly prismaservice: PrismaService) {}
 
   @Get()
-  @ApiOkResponse({ type: FindManyChatDialogResponse })
-  async findMany(@Query() args: FindManyChatDialogArgs) {
+  @ApiOkResponse({ type: FindManyAuthSessionResponse })
+  async findMany(@Query() args: FindManyAuthSessionArgs) {
     const { skip, take, curPage, perPage } = getFirstSkipFromCurPerPage(args);
     const searchText = args.searchText;
 
@@ -68,7 +68,7 @@ export class ChatDialogController {
       .reduce(
         (all, [key, value]) => ({
           ...all,
-          ...(key in PrismaSdk.Prisma.ChatDialogScalarFieldEnum
+          ...(key in PrismaSdk.Prisma.AuthSessionScalarFieldEnum
             ? {
                 [key]: value === 'desc' ? 'desc' : 'asc',
               }
@@ -78,7 +78,7 @@ export class ChatDialogController {
       );
     const result = await this.prismaservice.$transaction(async (prisma) => {
       return {
-        chatdialogs: await prisma.chatDialog.findMany({
+        authsessions: await prisma.authSession.findMany({
           where: {
             ...(searchText
               ? {
@@ -94,7 +94,7 @@ export class ChatDialogController {
           skip,
           orderBy,
         }),
-        totalResults: await prisma.chatDialog.count({
+        totalResults: await prisma.authSession.count({
           where: {
             ...(searchText
               ? {
@@ -110,7 +110,7 @@ export class ChatDialogController {
       };
     });
     return {
-      chatdialogs: result.chatdialogs,
+      authsessions: result.authsessions,
       meta: {
         totalResults: result.totalResults,
         curPage,
@@ -120,12 +120,12 @@ export class ChatDialogController {
   }
 
   @Post()
-  @ApiCreatedResponse({ type: ChatDialogDto })
+  @ApiCreatedResponse({ type: AuthSessionDto })
   async createOne(
     @CurrentAppRequest() req: AppRequest,
-    @Body() args: CreateChatDialogDto,
+    @Body() args: CreateAuthSessionDto,
   ) {
-    return await this.prismaservice.chatDialog.create({
+    return await this.prismaservice.authSession.create({
       data: {
         ...args,
         userId: req.user.id,
@@ -134,12 +134,12 @@ export class ChatDialogController {
   }
 
   @Put(':id')
-  @ApiOkResponse({ type: ChatDialogDto })
+  @ApiOkResponse({ type: AuthSessionDto })
   async updateOne(
     @Param('id', new ParseUUIDPipe()) id: string,
-    @Body() args: UpdateChatDialogDto,
+    @Body() args: UpdateAuthSessionDto,
   ) {
-    return await this.prismaservice.chatDialog.update({
+    return await this.prismaservice.authSession.update({
       data: {
         ...args,
         updatedAt: new Date(),
@@ -153,7 +153,7 @@ export class ChatDialogController {
   @Delete(':id')
   @ApiOkResponse({ type: StatusResponse })
   async deleteOne(@Param('id', new ParseUUIDPipe()) id: string) {
-    await this.prismaservice.chatDialog.delete({
+    await this.prismaservice.authSession.delete({
       where: {
         id,
       },
@@ -162,9 +162,9 @@ export class ChatDialogController {
   }
 
   @Get(':id')
-  @ApiOkResponse({ type: ChatDialogDto })
+  @ApiOkResponse({ type: AuthSessionDto })
   async findOne(@Param('id', new ParseUUIDPipe()) id: string) {
-    return await this.prismaservice.chatDialog.findFirstOrThrow({
+    return await this.prismaservice.authSession.findFirstOrThrow({
       where: {
         id,
       },

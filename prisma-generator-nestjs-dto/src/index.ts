@@ -172,6 +172,11 @@ export const generate = async (options: WritableDeep<GeneratorOptions>) => {
     false,
   );
 
+  const generateControllers = stringToBoolean(
+    options.generator.config['generateControllers'],
+    false,
+  );
+
   const results = run({
     output,
     dmmf: options.dmmf,
@@ -193,6 +198,7 @@ export const generate = async (options: WritableDeep<GeneratorOptions>) => {
     prismaClientImportPath: prismaClientImportPath as string,
     outputApiPropertyType,
     generateFileTypes: generateFileTypes as string,
+    generateControllers,
     wrapRelationsAsType,
     showDefaultValues,
   });
@@ -289,7 +295,13 @@ export const generate = async (options: WritableDeep<GeneratorOptions>) => {
           content = await prettier.format(content, prettierConfig);
         }
 
-        return fs.writeFile(fileName, content);
+        const currentContent = await fs
+          .readFile(fileName, 'utf8')
+          .catch(() => '');
+
+        if (!currentContent.includes('DO_NOT_CHANGE_WHEN_GENERATING_CODE')) {
+          return fs.writeFile(fileName, content);
+        }
       }),
   );
 };

@@ -4,6 +4,7 @@ import { computeCreateDtoParams } from './compute-create-dto-params';
 import { computeUpdateDtoParams } from './compute-update-dto-params';
 import { computeEntityParams } from './compute-entity-params';
 import { computePlainDtoParams } from './compute-plain-dto-params';
+import { computeControllerParams } from './compute-controller-params';
 
 import type { Model, ModelParams } from '../types';
 
@@ -37,6 +38,10 @@ export const computeModelParams = ({
   plain: computePlainDtoParams({
     model,
     allModels,
+    templateHelpers,
+  }),
+  controller: computeControllerParams({
+    model,
     templateHelpers,
   }),
 });

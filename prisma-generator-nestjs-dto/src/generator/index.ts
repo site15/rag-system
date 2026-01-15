@@ -12,6 +12,7 @@ import { generateUpdateDto } from './generate-update-dto';
 import { generateEntity } from './generate-entity';
 import { generatePlainDto } from './generate-plain-dto';
 import { generateEnums } from './generate-enums';
+import { generateController } from './generate-controller';
 import { DTO_IGNORE_MODEL } from './annotations';
 import { isAnnotatedWith } from './field-classifiers';
 import { NamingStyle, Model, WriteableFileSpecs } from './types';
@@ -37,6 +38,7 @@ interface RunParam {
   prismaClientImportPath: string;
   outputApiPropertyType: boolean;
   generateFileTypes: string;
+  generateControllers: boolean;
   wrapRelationsAsType: boolean;
   showDefaultValues: boolean;
 }
@@ -59,6 +61,7 @@ export const run = ({
     prismaClientImportPath,
     outputApiPropertyType,
     generateFileTypes,
+    generateControllers = false,
     wrapRelationsAsType,
     showDefaultValues,
     ...preAndSuffixes
@@ -267,13 +270,27 @@ export const run = ({
       }),
     };
 
+    // generate model.controller.ts
+    const controller = {
+      fileName: path.join(
+        model.output.dto,
+        templateHelpers.controllerFilename(model.name, true),
+      ),
+      content: generateController({
+        ...modelParams.controller,
+        templateHelpers,
+      }),
+    };
+
+    const baseFiles = [connectDto, createDto, updateDto, entity, plainDto];
+    
     switch (generateFileTypes) {
       case 'all':
-        return [connectDto, createDto, updateDto, entity, plainDto];
+        return generateControllers ? [...baseFiles, controller] : baseFiles;
       case 'dto':
-        return [connectDto, createDto, updateDto, plainDto];
+        return generateControllers ? [connectDto, createDto, updateDto, plainDto, controller] : [connectDto, createDto, updateDto, plainDto];
       case 'entity':
-        return [entity];
+        return generateControllers ? [entity, controller] : [entity];
       default:
         throw new Error(`Unknown 'generateFileTypes' value.`);
     }

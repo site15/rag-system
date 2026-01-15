@@ -25,14 +25,14 @@ import {
 } from '../../services/prisma.service';
 import { AppRequest, CurrentAppRequest } from '../../types/request';
 import { StatusResponse } from '../../types/status-response';
-import { ChatDialogDto } from './chat-dialog.dto';
-import { ChatDialog } from './chat-dialog.entity';
-import { CreateChatDialogDto } from './create-chat-dialog.dto';
-import { UpdateChatDialogDto } from './update-chat-dialog.dto';
+import { ChatDocumentEmbeddingDto } from './chat-document-embedding.dto';
+import { ChatDocumentEmbedding } from './chat-document-embedding.entity';
+import { CreateChatDocumentEmbeddingDto } from './create-chat-document-embedding.dto';
+import { UpdateChatDocumentEmbeddingDto } from './update-chat-document-embedding.dto';
 
-export class FindManyChatDialogArgs extends FindManyArgs {}
+export class FindManyChatDocumentEmbeddingArgs extends FindManyArgs {}
 
-export class FindManyChatDialogResponseMeta {
+export class FindManyChatDocumentEmbeddingResponseMeta {
   @ApiPropertyOptional({ type: Number })
   curPage?: number;
 
@@ -43,22 +43,22 @@ export class FindManyChatDialogResponseMeta {
   totalResults!: number;
 }
 
-export class FindManyChatDialogResponse {
-  @ApiProperty({ type: () => [ChatDialog] })
-  chatdialogs!: ChatDialog[];
+export class FindManyChatDocumentEmbeddingResponse {
+  @ApiProperty({ type: () => [ChatDocumentEmbedding] })
+  chatdocumentembeddings!: ChatDocumentEmbedding[];
 
-  @ApiProperty({ type: () => FindManyChatDialogResponseMeta })
-  meta!: FindManyChatDialogResponseMeta;
+  @ApiProperty({ type: () => FindManyChatDocumentEmbeddingResponseMeta })
+  meta!: FindManyChatDocumentEmbeddingResponseMeta;
 }
 
-@ApiTags('chatdialog')
-@Controller('chatdialogs')
-export class ChatDialogController {
+@ApiTags('chatdocumentembedding')
+@Controller('chatdocumentembeddings')
+export class ChatDocumentEmbeddingController {
   constructor(private readonly prismaservice: PrismaService) {}
 
   @Get()
-  @ApiOkResponse({ type: FindManyChatDialogResponse })
-  async findMany(@Query() args: FindManyChatDialogArgs) {
+  @ApiOkResponse({ type: FindManyChatDocumentEmbeddingResponse })
+  async findMany(@Query() args: FindManyChatDocumentEmbeddingArgs) {
     const { skip, take, curPage, perPage } = getFirstSkipFromCurPerPage(args);
     const searchText = args.searchText;
 
@@ -68,7 +68,7 @@ export class ChatDialogController {
       .reduce(
         (all, [key, value]) => ({
           ...all,
-          ...(key in PrismaSdk.Prisma.ChatDialogScalarFieldEnum
+          ...(key in PrismaSdk.Prisma.ChatDocumentEmbeddingScalarFieldEnum
             ? {
                 [key]: value === 'desc' ? 'desc' : 'asc',
               }
@@ -78,7 +78,7 @@ export class ChatDialogController {
       );
     const result = await this.prismaservice.$transaction(async (prisma) => {
       return {
-        chatdialogs: await prisma.chatDialog.findMany({
+        chatdocumentembeddings: await prisma.chatDocumentEmbedding.findMany({
           where: {
             ...(searchText
               ? {
@@ -94,7 +94,7 @@ export class ChatDialogController {
           skip,
           orderBy,
         }),
-        totalResults: await prisma.chatDialog.count({
+        totalResults: await prisma.chatDocumentEmbedding.count({
           where: {
             ...(searchText
               ? {
@@ -110,7 +110,7 @@ export class ChatDialogController {
       };
     });
     return {
-      chatdialogs: result.chatdialogs,
+      chatdocumentembeddings: result.chatdocumentembeddings,
       meta: {
         totalResults: result.totalResults,
         curPage,
@@ -120,26 +120,22 @@ export class ChatDialogController {
   }
 
   @Post()
-  @ApiCreatedResponse({ type: ChatDialogDto })
-  async createOne(
-    @CurrentAppRequest() req: AppRequest,
-    @Body() args: CreateChatDialogDto,
-  ) {
-    return await this.prismaservice.chatDialog.create({
+  @ApiCreatedResponse({ type: ChatDocumentEmbeddingDto })
+  async createOne(@Body() args: CreateChatDocumentEmbeddingDto) {
+    return await this.prismaservice.chatDocumentEmbedding.create({
       data: {
         ...args,
-        userId: req.user.id,
       },
     });
   }
 
   @Put(':id')
-  @ApiOkResponse({ type: ChatDialogDto })
+  @ApiOkResponse({ type: ChatDocumentEmbeddingDto })
   async updateOne(
     @Param('id', new ParseUUIDPipe()) id: string,
-    @Body() args: UpdateChatDialogDto,
+    @Body() args: UpdateChatDocumentEmbeddingDto,
   ) {
-    return await this.prismaservice.chatDialog.update({
+    return await this.prismaservice.chatDocumentEmbedding.update({
       data: {
         ...args,
         updatedAt: new Date(),
@@ -153,7 +149,7 @@ export class ChatDialogController {
   @Delete(':id')
   @ApiOkResponse({ type: StatusResponse })
   async deleteOne(@Param('id', new ParseUUIDPipe()) id: string) {
-    await this.prismaservice.chatDialog.delete({
+    await this.prismaservice.chatDocumentEmbedding.delete({
       where: {
         id,
       },
@@ -162,9 +158,9 @@ export class ChatDialogController {
   }
 
   @Get(':id')
-  @ApiOkResponse({ type: ChatDialogDto })
+  @ApiOkResponse({ type: ChatDocumentEmbeddingDto })
   async findOne(@Param('id', new ParseUUIDPipe()) id: string) {
-    return await this.prismaservice.chatDialog.findFirstOrThrow({
+    return await this.prismaservice.chatDocumentEmbedding.findFirstOrThrow({
       where: {
         id,
       },
