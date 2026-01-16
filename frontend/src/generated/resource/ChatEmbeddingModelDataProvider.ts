@@ -24,7 +24,13 @@ export const ChatEmbeddingModelDataProvider: DataProvider<any> = {
   getList: async (_, params) => {
     const { page, perPage } = params.pagination || {};
     const result = await chatEmbeddingModelControllerFindMany({
-      query: { curPage: page, perPage },
+      query: {
+        curPage: page,
+        perPage,
+        sort: params.sort
+          ? `${params.sort?.field}:${params.sort?.order.toLowerCase()}`
+          : undefined,
+      },
       signal: params.signal,
     });
     return {
@@ -57,6 +63,9 @@ export const ChatEmbeddingModelDataProvider: DataProvider<any> = {
     const query = {
       curPage: page,
       perPage,
+      sort: params.sort
+        ? `${params.sort?.field}:${params.sort?.order.toLowerCase()}`
+        : undefined,
       [params.target]: params.id,
       ...params.filter,
     };
