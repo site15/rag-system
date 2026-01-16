@@ -86,7 +86,8 @@ export const generateResourcesIndex = ({
     })
     .join('\n');
 
-  return `import { DataProvider } from "react-admin";
+  return `/* eslint-disable @typescript-eslint/no-explicit-any */
+import { DataProvider } from "react-admin";
 import { Prisma } from "../prisma/browser";
 ${dataProviderImports}
 ${formImports}

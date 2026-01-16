@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { DataProvider } from "react-admin";
 import { Prisma } from "../prisma/browser";
 import { AuthUserDataProvider } from "./AuthUserDataProvider";

@@ -18,7 +18,8 @@ export const generateDataProvider = ({
   // Convert to camelCase for SDK method names
   const camelModelName = modelName.charAt(0).toLowerCase() + modelName.slice(1);
 
-  return `import {
+  return `/* eslint-disable @typescript-eslint/no-explicit-any */
+  import {
   CreateResult,
   DataProvider,
   DeleteManyResult,

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { DataProvider } from "react-admin";
 import { Prisma } from "./generated/prisma/browser";
 import { resources } from "./generated/resource/resources";
