@@ -1,0 +1,59 @@
+#!/bin/sh
+# Pre-commit hook for formatting files in different directories
+
+# Get list of staged files
+STAGED_FILES=$(git diff --cached --name-only)
+
+# Check if there are any staged files
+if [ -z "$STAGED_FILES" ]; then
+    echo "No staged files to format"
+    exit 0
+fi
+
+echo "Running formatting on staged files..."
+
+# Variables to track which directories need formatting
+FORMAT_FRONTEND=false
+FORMAT_BACKEND=false
+FORMAT_GENERATOR=false
+
+# Check each staged file and determine which directories need formatting
+for file in $STAGED_FILES; do
+    case "$file" in
+        frontend/*)
+            FORMAT_FRONTEND=true
+            ;;
+        backend/*)
+            FORMAT_BACKEND=true
+            ;;
+        prisma-generator-nestjs-dto/*)
+            FORMAT_GENERATOR=true
+            ;;
+    esac
+done
+
+# Format frontend files if needed
+if [ "$FORMAT_FRONTEND" = true ]; then
+    echo "Formatting frontend files..."
+    cd frontend && npm run format
+    # Add any formatted files back to staging
+    cd .. && git add frontend/
+fi
+
+# Format backend files if needed
+if [ "$FORMAT_BACKEND" = true ]; then
+    echo "Formatting backend files..."
+    cd backend && npm run format
+    # Add any formatted files back to staging
+    cd .. && git add backend/
+fi
+
+# Format generator files if needed
+if [ "$FORMAT_GENERATOR" = true ]; then
+    echo "Formatting prisma-generator-nestjs-dto files..."
+    cd prisma-generator-nestjs-dto && npm run format
+    # Add any formatted files back to staging
+    cd .. && git add prisma-generator-nestjs-dto/
+fi
+
+echo "Formatting completed!"
