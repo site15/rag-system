@@ -1,4 +1,5 @@
-import { kebab, pascal } from 'case';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { kebab } from 'case';
 import { TemplateHelpers } from './template-helpers';
 import { ModelParams } from './types';
 

@@ -1,13 +1,14 @@
 // messageController.ts - Main controller for handling chat message requests
 // Implements retry logic, provider failover, and comprehensive error handling
 
+import { OllamaEmbeddings } from '@langchain/community/embeddings/ollama';
+import { OpenAIEmbeddings } from '@langchain/openai';
 import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
 import { ConfigManager } from '../llm/config';
 import {
   ERROR_MESSAGES,
   RAG_SEARCH_CONFIG,
   createDocumentInfo,
-  createSourceReference,
 } from '../llm/constants';
 import { DialogManager } from '../llm/dialogManager';
 import { DialogSummary } from '../llm/dialogSummary';
@@ -21,10 +22,10 @@ import { FailureTracker } from '../llm/services/failureTracker';
 import { LLMQueryLogger } from '../llm/services/llmQueryLogger';
 import { PromptLogData } from '../llm/services/promptLogger';
 import {
+  CategorizedQuestion,
   Category,
   QuestionTransformer,
 } from '../llm/services/questionTransformer';
-import { RequestManager } from '../llm/services/requestManager';
 import { SummarizationService } from '../llm/services/summarizationService';
 import { TextHelpers } from '../llm/textHelpers';
 import { DocWithMetadataAndId } from '../llm/types';
@@ -41,6 +42,18 @@ export interface MessageRequest {
   chunkSize?: number;
 }
 
+type ProcessMessageArgs = {
+  messageRequest: MessageRequest;
+  userId: string;
+  overrideProvider?: string;
+  overrideModel?: string;
+};
+
+type ProcessMessageResponse = {
+  dialogId: string;
+  response: string;
+};
+
 @Injectable()
 export class LlmSendMessageService {
   async processMessageWithRetry({
@@ -51,13 +64,215 @@ export class LlmSendMessageService {
     messageRequest: MessageRequest;
     userId: string;
     maxRetries: number;
-  }) {
+  }): Promise<ProcessMessageResponse> {
     let currentAttempt = 0;
+
+    let { currentProvider, currentModel } =
+      await this.prepareProcessMessageWithRetry(messageRequest);
+
+    while (currentAttempt < maxRetries) {
+      try {
+        this.logBeforeProcessMessage(
+          currentAttempt,
+          maxRetries,
+          currentProvider,
+          currentModel,
+        );
+
+        return await this.processMessage({
+          messageRequest,
+          userId,
+        });
+      } catch (error: any) {
+        currentAttempt++;
+
+        if (error.message.includes('403')) {
+          throw error;
+        }
+
+        this.logAfterProcessMessage(
+          currentAttempt,
+          error,
+          currentProvider,
+          currentModel,
+        );
+
+        this.throwErrorIfCurrentAttemptGreatOrEqualsThanMaxRetries({
+          currentAttempt,
+          maxRetries,
+          messageRequest,
+          error,
+        });
+
+        const nextProvider = await this.swithToNextProvider(
+          messageRequest,
+          currentProvider,
+          currentModel,
+        );
+
+        if (nextProvider) {
+          currentProvider = nextProvider.currentProvider;
+          currentModel = nextProvider.currentModel;
+
+          await new Promise((resolve) =>
+            setTimeout(resolve, 1000 * currentAttempt),
+          );
+
+          continue;
+        } else {
+          this.throwErrorIfNoActiveProvidersAvailableForRetry(
+            currentAttempt,
+            maxRetries,
+          );
+        }
+      }
+    }
+
+    throw new HttpException({ error: 'Unexpected error in retry logic' }, 500);
+  }
+
+  private throwErrorIfNoActiveProvidersAvailableForRetry(
+    currentAttempt: number,
+    maxRetries: number,
+  ) {
+    Logger.logError('No active providers available for retry', {
+      currentAttempt,
+      maxRetries: maxRetries,
+    });
+    throw new HttpException(
+      {
+        error: 'No active providers available',
+        details: 'All configured providers are currently unavailable',
+      },
+      500,
+    );
+  }
+
+  private throwErrorIfCurrentAttemptGreatOrEqualsThanMaxRetries({
+    currentAttempt,
+    maxRetries,
+    messageRequest,
+    error,
+  }: {
+    currentAttempt: number;
+    maxRetries: number;
+    messageRequest: MessageRequest;
+    error: any;
+  }) {
+    if (currentAttempt >= maxRetries) {
+      Logger.logError('Max retry attempts reached, returning error', {
+        maxRetries: maxRetries,
+        originalProvider: messageRequest.provider,
+        originalModel: messageRequest.model,
+      });
+      throw new HttpException(
+        {
+          error: ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+          details: `Failed after ${maxRetries} attempts`,
+          lastError: error.message,
+        },
+        500,
+      );
+    }
+  }
+
+  async swithToNextProvider(
+    messageRequest: MessageRequest,
+    currentProvider: string | undefined,
+    currentModel: string | undefined,
+  ) {
+    const originalMessageRequest = messageRequest;
+
+    // If no provider was specified originally, try to get the next active provider
+    if (!originalMessageRequest.provider) {
+      const nextProvider =
+        await DefaultProvidersInitializer.getNextActiveProvider(
+          currentProvider || '',
+          currentModel || '',
+        );
+
+      if (nextProvider) {
+        Logger.logInfo('Switching to next active provider', {
+          fromProvider: currentProvider,
+          fromModel: currentModel,
+          toProvider: nextProvider.provider,
+          toModel: nextProvider.model,
+        });
+
+        currentProvider = nextProvider.provider;
+        currentModel = nextProvider.model;
+
+        // Update request body for the next attempt
+        messageRequest = {
+          ...originalMessageRequest,
+          provider: nextProvider.provider,
+          model: nextProvider.model,
+          temperature: nextProvider.temperature,
+          chunkSize:
+            nextProvider.chunkSize !== null
+              ? nextProvider.chunkSize
+              : undefined,
+        };
+
+        return {
+          currentProvider,
+          currentModel,
+        };
+      }
+    } else {
+      // If a specific provider was requested and it failed, don't retry with different providers
+      Logger.logError(
+        'Specific provider failed, not retrying with different provider',
+        {
+          provider: originalMessageRequest.provider,
+          model: originalMessageRequest.model,
+        },
+      );
+      throw new HttpException(
+        {
+          error: ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+          details: `Provider ${originalMessageRequest.provider} failed and no fallback available`,
+          provider: originalMessageRequest.provider,
+        },
+        500,
+      );
+    }
+    return null;
+  }
+
+  private logAfterProcessMessage(
+    currentAttempt: number,
+    error: any,
+    currentProvider: string | undefined,
+    currentModel: string | undefined,
+  ) {
+    Logger.logError(`Message processing failed on attempt ${currentAttempt}`, {
+      error: error.message,
+      provider: currentProvider,
+      model: currentModel,
+      attempt: currentAttempt,
+    });
+  }
+
+  private logBeforeProcessMessage(
+    currentAttempt: number,
+    maxRetries: number,
+    currentProvider: string | undefined,
+    currentModel: string | undefined,
+  ) {
+    Logger.logInfo(
+      `Processing message attempt ${currentAttempt + 1}/${maxRetries}`,
+      {
+        provider: currentProvider,
+        model: currentModel,
+        attempt: currentAttempt + 1,
+      },
+    );
+  }
+
+  private async prepareProcessMessageWithRetry(messageRequest: MessageRequest) {
     let currentProvider = messageRequest.provider;
     let currentModel = messageRequest.model;
-
-    // Store original request body for reference
-    const originalRequestBody = { ...messageRequest };
 
     const activeProviders =
       await DefaultProvidersInitializer.getSortedActiveProviders();
@@ -76,126 +291,10 @@ export class LlmSendMessageService {
         currentModel = nextProvider?.model;
       }
     }
-
-    while (currentAttempt < maxRetries) {
-      try {
-        Logger.logInfo(
-          `Processing message attempt ${currentAttempt + 1}/${maxRetries}`,
-          {
-            provider: currentProvider,
-            model: currentModel,
-            attempt: currentAttempt + 1,
-          },
-        );
-
-        // Process the message with current provider configuration
-        const result = await this.processMessage({
-          messageRequest,
-          userId,
-          overrideProvider: currentProvider,
-          overrideModel: currentModel,
-        });
-        return result;
-      } catch (error: any) {
-        currentAttempt++;
-        Logger.logError(
-          `Message processing failed on attempt ${currentAttempt}`,
-          {
-            error: error.message,
-            provider: currentProvider,
-            model: currentModel,
-            attempt: currentAttempt,
-          },
-        );
-
-        // If this was the last attempt, return the error
-        if (currentAttempt >= maxRetries) {
-          Logger.logError('Max retry attempts reached, returning error', {
-            maxRetries: maxRetries,
-            originalProvider: originalRequestBody.provider,
-            originalModel: originalRequestBody.model,
-          });
-          throw new HttpException(
-            {
-              error: ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
-              details: `Failed after ${maxRetries} attempts`,
-              lastError: error.message,
-            },
-            500,
-          );
-        }
-
-        // If no provider was specified originally, try to get the next active provider
-        if (!originalRequestBody.provider) {
-          const nextProvider =
-            await DefaultProvidersInitializer.getNextActiveProvider(
-              currentProvider || '',
-              currentModel || '',
-            );
-
-          if (nextProvider) {
-            Logger.logInfo('Switching to next active provider', {
-              fromProvider: currentProvider,
-              fromModel: currentModel,
-              toProvider: nextProvider.provider,
-              toModel: nextProvider.model,
-            });
-
-            currentProvider = nextProvider.provider;
-            currentModel = nextProvider.model;
-
-            // Update request body for the next attempt
-            messageRequest = {
-              ...originalRequestBody,
-              provider: nextProvider.provider,
-              model: nextProvider.model,
-              temperature: nextProvider.temperature,
-              chunkSize:
-                nextProvider.chunkSize !== null
-                  ? nextProvider.chunkSize
-                  : undefined,
-            };
-
-            // Wait a bit before retrying
-            await new Promise((resolve) =>
-              setTimeout(resolve, 1000 * currentAttempt),
-            );
-            continue;
-          } else {
-            Logger.logError('No active providers available for retry', {
-              currentAttempt,
-              maxRetries: maxRetries,
-            });
-            throw new HttpException(
-              {
-                error: 'No active providers available',
-                details: 'All configured providers are currently unavailable',
-              },
-              500,
-            );
-          }
-        } else {
-          // If a specific provider was requested and it failed, don't retry with different providers
-          Logger.logError(
-            'Specific provider failed, not retrying with different provider',
-            {
-              provider: originalRequestBody.provider,
-              model: originalRequestBody.model,
-            },
-          );
-          throw new HttpException(
-            {
-              error: ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
-              details: `Provider ${originalRequestBody.provider} failed and no fallback available`,
-              provider: originalRequestBody.provider,
-            },
-            500,
-          );
-        }
-      }
-    }
-
-    throw new HttpException({ error: 'Unexpected error in retry logic' }, 500);
+    return {
+      currentProvider,
+      currentModel,
+    };
   }
 
   async processMessage({
@@ -203,111 +302,26 @@ export class LlmSendMessageService {
     userId,
     overrideProvider,
     overrideModel,
-  }: {
-    messageRequest: MessageRequest;
-    userId: string;
-    overrideProvider?: string;
-    overrideModel?: string;
-  }) {
+  }: ProcessMessageArgs): Promise<{ dialogId: string; response: string }> {
     const foundLogIds: (string | undefined)[] = [];
-    let dialogId: string | undefined;
 
     let docsWithMeta: DocWithMetadataAndId[] = [];
     try {
       // === REQUEST VALIDATION AND DIALOG MANAGEMENT ===
       const { message, goodResponse, badResponse } = messageRequest;
 
-      dialogId = messageRequest.dialogId;
-
       // Create new dialog if dialogId is not provided
-      if (!dialogId || typeof dialogId !== 'number') {
-        dialogId = await DialogManager.createDialog(userId);
-        Logger.logInfo('New dialog created', { dialogId });
-      } else {
-        // Check if the dialog has reached max consecutive failures
-        const consecutiveFailures =
-          await FailureTracker.getConsecutiveFailures(dialogId);
-        const maxFailures = FailureTracker.getMaxConsecutiveFailures();
-        if (consecutiveFailures >= maxFailures - 1) {
-          dialogId = await DialogManager.createDialog(userId);
-          Logger.logInfo('New dialog created', { dialogId });
-          // -1 because this will be the next failure
-          // This is likely to be the 5th consecutive failure, so we'll create a new dialog
-          // and include information about the failed dialog
-          const answer =
-            'Извините, но по текущему диалогу невозможно получить ответ. Пришлось создать новый диалог, так как старый диалог больше не может быть продолжен из-за неудачных попыток.';
-          Logger.logInfo(
-            'Dialog reached max failures, new dialog will be created',
-            {
-              dialogId,
-              consecutiveFailures,
-              maxFailures,
-            },
-          );
-          return {
-            success: false,
-            dialogId,
-            response: answer || 'No response generated',
-            consecutiveFailures,
-            maxFailures,
-          };
-        }
-      }
-
-      // === CONFIGURATION AND MODEL INITIALIZATION ===
-      // Register this request and cancel any existing request for this dialog
-      const abortController = RequestManager.registerRequest(dialogId);
-
-      // Check if request was aborted during registration
-      if (abortController.signal.aborted) {
-        Logger.logInfo('Request was aborted during registration', { dialogId });
-        throw new BadRequestException({
-          error: 'Request cancelled due to newer request',
-        });
-      }
+      let dialogId = await this.prepareDialog({
+        dialogId: messageRequest.dialogId,
+        userId,
+      });
 
       // Get LLM configuration - use request parameters if provided, otherwise use defaults
-      const userOptions = messageRequest;
-
-      // Use override parameters if provided (from retry logic)
-      const effectiveProvider = overrideProvider || userOptions.provider;
-      const effectiveModel = overrideModel || userOptions.model;
-
-      const appConfig = {
-        ...ConfigManager.getAppConfig(),
-        chatProvider:
-          effectiveProvider || ConfigManager.getAppConfig().chatProvider,
-        embeddingsProvider: ConfigManager.getAppConfig().embeddingsProvider,
-      };
-
-      const fullConfig = {
-        providers: {
-          chat: ConfigManager.getChatConfig(appConfig.chatProvider),
-          embeddings: ConfigManager.getEmbeddingsConfig(
-            appConfig.embeddingsProvider,
-          ),
-        },
-      };
-
-      if (effectiveModel) {
-        fullConfig.providers.chat.model = effectiveModel;
-      }
-
-      if (userOptions.temperature) {
-        fullConfig.providers.chat.temperature = userOptions.temperature;
-      }
-
-      if (userOptions.chunkSize) {
-        fullConfig.providers.chat.chunkSize = userOptions.chunkSize;
-      }
-
-      // Initialize models with configuration
-      if (!fullConfig.providers.embeddings || !fullConfig.providers.chat) {
-        const errorMsg =
-          'Provider configurations are required in messageController';
-        Logger.logError(errorMsg);
-        throw new Error(errorMsg);
-      }
+      const { appConfig, fullConfig } = this.prepareConfigs({
+        messageRequest,
+        overrideProvider,
+        overrideModel,
+      });
 
       const embeddings = EmbeddingsFactory.createEmbeddings(
         appConfig.embeddingsProvider,
@@ -321,11 +335,7 @@ export class LlmSendMessageService {
 
       const history = await DialogManager.getDialogHistory(dialogId);
 
-      Logger.logInfo('Создание эмбеддинга для вопроса', {
-        questionLength: message.length,
-      });
-
-      Logger.logInfo('Начало обработки чата', { message });
+      this.logBeforeTransformQuestion(message);
 
       // Transform the question using the QuestionTransformer to categorize and optimize it
       const categorizedQuestion = await QuestionTransformer.transformQuestion({
@@ -338,69 +348,32 @@ export class LlmSendMessageService {
       });
       const processedQuestion = categorizedQuestion.transformedQuestion;
 
-      // Prepare prompt log data
-      const promptLogData: PromptLogData = {
+      this.logAfterTransformQuestion(
         dialogId,
-        question: message,
-        transformedQuestion: processedQuestion,
-        category: categorizedQuestion.category,
-        sourceFilter: categorizedQuestion.sourceFilter?.pattern,
-        contextDocs: [], // Will be filled after RAG search
+        message,
+        processedQuestion,
+        categorizedQuestion,
         history,
-        llmModel: (llm as any).modelName || (llm as any).model,
-        llmProvider: appConfig.chatProvider,
-        timestamp: new Date(),
-        // todo: move to controller
-        // userAgent: request.headers['user-agent'] as string,
-        // clientIp: request.ip,
-      };
-
-      Logger.logInfo('Question transformation completed', {
-        original: message,
-        transformed: processedQuestion,
-        category: categorizedQuestion.category,
-        sourceFilter: categorizedQuestion.sourceFilter,
-      });
+        llm,
+        appConfig,
+      );
 
       const normalizedQuestionArray = TextHelpers.normalizeTextMy(
         categorizedQuestion.transformedEmbedded,
       ).split(', ');
 
-      promptLogData.contextDocs = [];
+      let contextDocs: DocWithMetadataAndId[] = [];
 
       for (let index = 0; index < normalizedQuestionArray.length; index++) {
-        const normalizedQuestion = normalizedQuestionArray[index];
-
-        const qEmbedding = await embeddings.embedQuery(normalizedQuestion);
-
-        Logger.logInfo('Поиск похожих документов', {
-          embeddingLength: qEmbedding.length,
-          normalizedQuestion,
+        docsWithMeta = await this.searchContextDocs({
+          embeddings,
+          normalizedQuestion: normalizedQuestionArray[index],
+          categorizedQuestion,
+          docsWithMeta,
         });
 
-        /**
-         * GLOBAL MODE
-         */
-        // Use the transformed question and apply category-based filtering if available
-        if (categorizedQuestion.sourceFilter) {
-          docsWithMeta = await RAGSearcher.similaritySearch({
-            queryEmbedding: qEmbedding,
-            limit: categorizedQuestion.searchLimit,
-            filterBySource: categorizedQuestion.sourceFilter.pattern,
-            filterBySourceRule: categorizedQuestion.sourceFilter.rule,
-          });
-        } else {
-          docsWithMeta = await RAGSearcher.similaritySearch({
-            queryEmbedding: qEmbedding,
-            limit: RAG_SEARCH_CONFIG.TELEGRAM_SEARCH_LIMIT,
-            filterBySource: RAG_SEARCH_CONFIG.GLOBAL_TELEGRAM_EXCLUDE_PATTERN,
-            filterBySourceRule: RAG_SEARCH_CONFIG.GLOBAL_TELEGRAM_EXCLUDE_RULE,
-          });
-        }
-
         // Update prompt log data with context documents
-        promptLogData.contextDocs =
-          promptLogData.contextDocs.concat(docsWithMeta);
+        contextDocs = contextDocs.concat(docsWithMeta);
       }
 
       // Create prompt log file with all context information
@@ -411,13 +384,7 @@ export class LlmSendMessageService {
       //    });
       //  });
 
-      Logger.logInfo('[GLOBAL] Отправка запроса к LLM', {
-        contextDocsCount: docsWithMeta.length,
-        historyLength: history.length,
-      });
-
-      // Measure LLM execution time
-      const startTime = Date.now();
+      this.logBeforeAskLLMChunked(docsWithMeta, history);
 
       const globalResult = await LLMChunkProcessor.askLLMChunked({
         llm,
@@ -426,23 +393,11 @@ export class LlmSendMessageService {
         contextDocs: docsWithMeta,
         question: processedQuestion,
         category: categorizedQuestion.category,
-        frendlyFound: false,
-        frendlyNotFound: false,
         provider: appConfig.chatProvider,
         chatChunkSize: fullConfig.providers.chat.chunkSize,
-        parallelThreads: parseInt(process.env.PARALLEL_THREADS || '1', 10),
-        abortController,
         detectedCategory: categorizedQuestion.detectedCategory,
       });
 
-      Logger.logInfo('[GLOBAL] Получен ответ от LLM', {
-        answerLength: globalResult.response?.length,
-        documentCount: docsWithMeta.length,
-        logIds: globalResult.logIds,
-      });
-
-      const endTime = Date.now();
-      const executionTimeMs = endTime - startTime;
       let answer = globalResult.response;
       let telegramResult:
         | { response: string | null; answerDocumentId?: string }
@@ -455,11 +410,7 @@ export class LlmSendMessageService {
         .map((doc, index) => createDocumentInfo({ doc, index }))
         .reduce((acc, curr) => ({ ...acc, ...curr }), {});
 
-      Logger.logInfo('[GLOBAL] Получен ответ от LLM', {
-        answerLength: answer?.length,
-        documentCount: docsWithMeta.length,
-        ...documentInfo,
-      });
+      this.logAfterAskLLMChunked(globalResult, docsWithMeta, documentInfo);
 
       /**
        * NOT FOUND
@@ -473,7 +424,6 @@ export class LlmSendMessageService {
           question: message,
           llm,
           provider: appConfig.chatProvider,
-          abortController,
           detectedCategory: categorizedQuestion.detectedCategory,
         });
 
@@ -483,77 +433,25 @@ export class LlmSendMessageService {
         // docsWithMeta = [];
       }
 
-      // Prepare document info for logging
-      const finalDocumentInfo = docsWithMeta
-        .map((doc, index) => createDocumentInfo({ doc, index }))
-        .reduce((acc, curr) => ({ ...acc, ...curr }), {});
-
-      Logger.logInfo('Получен ответ от LLM', {
-        answerLength: answer?.length,
-        documentCount: docsWithMeta.length,
-        ...finalDocumentInfo,
-      });
-
       ///
 
-      Logger.logInfo('Сохранение сообщения', {
-        dialogId,
-        userId: userId,
-      });
-
-      // Extract document IDs from the docsWithMeta array
-      const selectedDocumentIds = docsWithMeta.map((doc) => doc.id);
-
-      // Determine the answer document ID based on which mode provided the answer
-      let answerDocumentId: string | undefined;
-      if (globalResult.answerDocumentId) {
-        answerDocumentId = globalResult.answerDocumentId;
-      } else if (telegramResult && telegramResult.answerDocumentId) {
-        answerDocumentId = telegramResult.answerDocumentId;
-      }
-
-      // Determine if the response was successful
-      let isSuccess = false;
-      if (
-        isGlobalSuccess ||
-        (telegramResult &&
-          telegramResult.response !== null &&
-          telegramResult.response !== undefined &&
-          telegramResult.response.trim() !== '')
-      ) {
-        isSuccess = true;
-      } else {
-        // If no answer was found in both modes, check if it's a "not found" response vs no response
-        // A "not found" response from frendlyNotFound is considered a response, but not a successful one
-        // since no actual information was found in the documents
-        isSuccess = false;
-      }
-
-      const saveResult = await DialogManager.saveMessage({
-        dialogId,
-        userId: userId,
-        question: message,
-        answer,
-        selectedDocumentIds,
-        answerDocumentId,
-        isSuccess,
-        detectedCategory: categorizedQuestion.detectedCategory,
-        transformedQuestion: categorizedQuestion.transformedQuestion,
-        transformedEmbeddingQuery: categorizedQuestion.transformedEmbedded,
-        llmProvider: appConfig.chatProvider,
-        llmModel: fullConfig.providers.chat.model,
-        llmTemperature: fullConfig.providers.chat.temperature,
-        goodResponse,
-        badResponse,
-      });
-
-      dialogId = saveResult.dialogId;
-      const historyId = saveResult.historyId;
-
-      Logger.logInfo('Сохранение сообщения завершено', {
-        dialogId,
-        historyId,
-      });
+      const { historyId, ...saveDialogMessageResult } =
+        await this.saveDialogMessage(
+          dialogId,
+          userId,
+          isGlobalSuccess,
+          telegramResult,
+          docsWithMeta,
+          globalResult,
+          message,
+          answer,
+          categorizedQuestion,
+          appConfig,
+          fullConfig,
+          goodResponse,
+          badResponse,
+        );
+      dialogId = saveDialogMessageResult.dialogId;
 
       LLMQueryLogger.updateQueryReferences(
         [
@@ -565,86 +463,68 @@ export class LlmSendMessageService {
         historyId,
       ).catch((err) => Logger.logError(err));
 
-      // Always get failure tracking info for the response (after saveMessage may have updated dialogId)
-      const finalConsecutiveFailures =
-        await FailureTracker.getConsecutiveFailures(dialogId);
-      const finalMaxFailures = FailureTracker.getMaxConsecutiveFailures();
+      await this.summarizeIfNeeded(dialogId, historyId, llm, appConfig);
 
-      if (await DialogSummary.shouldSummarize(dialogId)) {
-        Logger.logInfo('Диалог требует суммаризации', { dialogId });
-        // Run summarization in background to avoid blocking user request
-        SummarizationService.queueSummarizationWithoutBlocking({
-          historyId,
-          dialogId,
-          llm,
-          provider: appConfig.chatProvider,
-        });
-      } else {
-        Logger.logInfo('Суммаризация не требуется', { dialogId });
-      }
-
-      Logger.logInfo('Ответ пользователю сформирован');
-      console.log('\n🧠 Ответ:\n', answer);
-      console.log('\n📂 Источники:');
-      docsWithMeta.forEach((d, i) =>
-        console.log(`  ${i + 1}) ${d.source}:${d.fromLine}-${d.toLine}`),
-      );
+      this.logSuccessResult(answer, docsWithMeta);
 
       // Prepare source references for the response
-      const sourceReferences = docsWithMeta.map((doc, index) =>
-        createSourceReference({
-          doc,
-          index,
-          type: LLMChunkProcessor.getDocTypeBySource(doc.source),
-        }),
-      );
-
-      // Unregister the completed request
-      RequestManager.unregisterRequest(dialogId);
+      // const sourceReferences = docsWithMeta.map((doc, index) =>
+      //   createSourceReference({
+      //     doc,
+      //     index,
+      //     type: LLMChunkProcessor.getDocTypeBySource(doc.source),
+      //   }),
+      // );
 
       return {
-        success: true,
+        //  success: true,
         dialogId,
         response: answer || 'No response generated',
-        consecutiveFailures: finalConsecutiveFailures,
-        maxFailures: finalMaxFailures,
-        sources: sourceReferences,
+        //  consecutiveFailures: finalConsecutiveFailures,
+        //  maxFailures: finalMaxFailures,
+        //  sources: sourceReferences,
       };
     } catch (error: any) {
-      // Clean up request on error
-      if (dialogId) {
-        RequestManager.unregisterRequest(dialogId);
-      }
-
       // Check if it's a rate limit error
-      if (error.code === 'RATE_LIMIT_EXCEEDED') {
-        // Prepare source references for the response
-        const sourceReferences = docsWithMeta.map((doc, index) => ({
-          id: doc.id,
-          source: doc.source,
-          fromLine: doc.fromLine,
-          toLine: doc.toLine,
-          position: index + 1,
-          type: LLMChunkProcessor.getDocTypeBySource(doc.source),
-        }));
+      this.handleAfterProcessMessageError(error, docsWithMeta);
+      throw error;
+    }
+  }
 
-        Logger.logError(
-          'Rate limit exceeded',
-          {
-            model: error.model,
-            provider: error.provider,
-            delaySeconds: error.delaySeconds,
-            limit: error.limit,
-            used: error.used,
-            requested: error.requested,
-            error: error.message,
-          },
-          (error as Error).stack,
-        );
+  private handleAfterProcessMessageError(
+    error: any,
+    docsWithMeta: DocWithMetadataAndId[],
+  ) {
+    if (
+      error.code === 'RATE_LIMIT_EXCEEDED' ||
+      error.message?.includes('403')
+    ) {
+      // Prepare source references for the response
+      const sourceReferences = docsWithMeta.map((doc, index) => ({
+        id: doc.id,
+        source: doc.source,
+        fromLine: doc.fromLine,
+        toLine: doc.toLine,
+        position: index + 1,
+        type: LLMChunkProcessor.getDocTypeBySource(doc.source),
+      }));
 
-        throw error;
-      }
+      Logger.logError(
+        'Rate limit exceeded',
+        {
+          model: error.model,
+          provider: error.provider,
+          delaySeconds: error.delaySeconds,
+          limit: error.limit,
+          used: error.used,
+          requested: error.requested,
+          error: error.message,
+        },
+        (error as Error).stack,
+      );
 
+      throw error;
+    } else {
       Logger.logError(
         'Error processing message request',
         {
@@ -652,7 +532,361 @@ export class LlmSendMessageService {
         },
         (error as Error).stack,
       );
-      throw error;
     }
+  }
+
+  private logSuccessResult(
+    answer: string,
+    docsWithMeta: DocWithMetadataAndId[],
+  ) {
+    Logger.logInfo('Ответ пользователю сформирован');
+    console.log('\n🧠 Ответ:\n', answer);
+    console.log('\n📂 Источники:');
+    docsWithMeta.forEach((d, i) =>
+      console.log(`  ${i + 1}) ${d.source}:${d.fromLine}-${d.toLine}`),
+    );
+  }
+
+  private async summarizeIfNeeded(
+    dialogId: string,
+    historyId: string,
+    llm: any,
+    appConfig: { chatProvider: string; embeddingsProvider: string },
+  ) {
+    if (await DialogSummary.shouldSummarize(dialogId)) {
+      Logger.logInfo('Диалог требует суммаризации', { dialogId });
+      // Run summarization in background to avoid blocking user request
+      SummarizationService.queueSummarizationWithoutBlocking({
+        historyId,
+        dialogId,
+        llm,
+        provider: appConfig.chatProvider,
+      });
+    } else {
+      Logger.logInfo('Суммаризация не требуется', { dialogId });
+    }
+  }
+
+  private async saveDialogMessage(
+    dialogId: string,
+    userId: string,
+    isGlobalSuccess: boolean,
+    telegramResult:
+      | { response: string | null; answerDocumentId?: string }
+      | undefined,
+    docsWithMeta: DocWithMetadataAndId[],
+    globalResult:
+      | {
+          response: string;
+          answerDocumentId: string | undefined;
+          logIds: (string | undefined)[];
+        }
+      | {
+          response: null;
+          answerDocumentId: undefined;
+          logIds: (string | undefined)[];
+        },
+    message: string,
+    answer: string,
+    categorizedQuestion: CategorizedQuestion,
+    appConfig: { chatProvider: string; embeddingsProvider: string },
+    fullConfig: {
+      providers: {
+        chat: {
+          provider: string;
+          model: string;
+          temperature: number;
+          baseUrl: string;
+          apiKey: string | undefined;
+          chunkSize: number;
+        };
+        embeddings: {
+          provider: string;
+          model: string;
+          baseUrl: string;
+          apiKey: string | undefined;
+        };
+      };
+    },
+    goodResponse: boolean | undefined,
+    badResponse: boolean | undefined,
+  ) {
+    Logger.logInfo('Сохранение сообщения', {
+      dialogId,
+      userId: userId,
+    });
+
+    // Determine if the response was successful
+    let isSuccess = false;
+    if (
+      isGlobalSuccess ||
+      (telegramResult &&
+        telegramResult.response !== null &&
+        telegramResult.response !== undefined &&
+        telegramResult.response.trim() !== '')
+    ) {
+      isSuccess = true;
+    } else {
+      // If no answer was found in both modes, check if it's a "not found" response vs no response
+      // A "not found" response from frendlyNotFound is considered a response, but not a successful one
+      // since no actual information was found in the documents
+      isSuccess = false;
+    }
+
+    // Extract document IDs from the docsWithMeta array
+    const selectedDocumentIds = docsWithMeta.map((doc) => doc.id);
+
+    // Determine the answer document ID based on which mode provided the answer
+    let answerDocumentId: string | undefined;
+    if (globalResult.answerDocumentId) {
+      answerDocumentId = globalResult.answerDocumentId;
+    } else if (telegramResult && telegramResult.answerDocumentId) {
+      answerDocumentId = telegramResult.answerDocumentId;
+    }
+
+    const saveResult = await DialogManager.saveMessage({
+      dialogId,
+      userId: userId,
+      question: message,
+      answer,
+      selectedDocumentIds,
+      answerDocumentId,
+      isSuccess,
+      detectedCategory: categorizedQuestion.detectedCategory,
+      transformedQuestion: categorizedQuestion.transformedQuestion,
+      transformedEmbeddingQuery: categorizedQuestion.transformedEmbedded,
+      llmProvider: appConfig.chatProvider,
+      llmModel: fullConfig.providers.chat.model,
+      llmTemperature: fullConfig.providers.chat.temperature,
+      goodResponse,
+      badResponse,
+    });
+
+    dialogId = saveResult.dialogId;
+    const historyId = saveResult.historyId;
+
+    Logger.logInfo('Сохранение сообщения завершено', {
+      dialogId,
+      historyId,
+    });
+
+    return { historyId, dialogId };
+  }
+
+  private logAfterAskLLMChunked(
+    globalResult:
+      | {
+          response: string;
+          answerDocumentId: string | undefined;
+          logIds: (string | undefined)[];
+        }
+      | {
+          response: null;
+          answerDocumentId: undefined;
+          logIds: (string | undefined)[];
+        },
+    docsWithMeta: DocWithMetadataAndId[],
+    documentInfo: { [x: string]: string },
+  ) {
+    Logger.logInfo('[GLOBAL] Получен ответ от LLM', {
+      answerLength: globalResult.response?.length,
+      documentCount: docsWithMeta.length,
+      logIds: globalResult.logIds,
+      ...documentInfo,
+    });
+  }
+
+  private logBeforeAskLLMChunked(
+    docsWithMeta: DocWithMetadataAndId[],
+    history: string[],
+  ) {
+    Logger.logInfo('[GLOBAL] Отправка запроса к LLM', {
+      contextDocsCount: docsWithMeta.length,
+      historyLength: history.length,
+    });
+  }
+
+  private async searchContextDocs({
+    embeddings,
+    normalizedQuestion,
+    categorizedQuestion,
+    docsWithMeta,
+  }: {
+    embeddings: OpenAIEmbeddings | OllamaEmbeddings;
+    normalizedQuestion: string;
+    categorizedQuestion: CategorizedQuestion;
+    docsWithMeta: DocWithMetadataAndId[];
+  }) {
+    const qEmbedding = await embeddings.embedQuery(normalizedQuestion);
+
+    this.logBeforeSimilaritySearch(qEmbedding, normalizedQuestion);
+
+    /**
+     * GLOBAL MODE
+     */
+    // Use the transformed question and apply category-based filtering if available
+    if (categorizedQuestion.sourceFilter) {
+      docsWithMeta = await RAGSearcher.similaritySearch({
+        queryEmbedding: qEmbedding,
+        limit: categorizedQuestion.searchLimit,
+        filterBySource: categorizedQuestion.sourceFilter.pattern,
+        filterBySourceRule: categorizedQuestion.sourceFilter.rule,
+      });
+    } else {
+      docsWithMeta = await RAGSearcher.similaritySearch({
+        queryEmbedding: qEmbedding,
+        limit: RAG_SEARCH_CONFIG.TELEGRAM_SEARCH_LIMIT,
+        filterBySource: RAG_SEARCH_CONFIG.GLOBAL_TELEGRAM_EXCLUDE_PATTERN,
+        filterBySourceRule: RAG_SEARCH_CONFIG.GLOBAL_TELEGRAM_EXCLUDE_RULE,
+      });
+    }
+    return docsWithMeta;
+  }
+
+  private logBeforeSimilaritySearch(
+    qEmbedding: number[],
+    normalizedQuestion: string,
+  ) {
+    Logger.logInfo('Поиск похожих документов', {
+      embeddingLength: qEmbedding.length,
+      normalizedQuestion,
+    });
+  }
+
+  private logAfterTransformQuestion(
+    dialogId: string,
+    message: string,
+    processedQuestion: string,
+    categorizedQuestion: CategorizedQuestion,
+    history: string[],
+    llm: any,
+    appConfig: { chatProvider: string; embeddingsProvider: string },
+  ) {
+    const promptLogData: PromptLogData = {
+      dialogId,
+      question: message,
+      transformedQuestion: processedQuestion,
+      category: categorizedQuestion.category,
+      sourceFilter: categorizedQuestion.sourceFilter?.pattern,
+      contextDocs: [], // Will be filled after RAG search
+      history,
+      llmModel: (llm as any).modelName || (llm as any).model,
+      llmProvider: appConfig.chatProvider,
+      timestamp: new Date(),
+      // todo: move to controller
+      // userAgent: request.headers['user-agent'] as string,
+      // clientIp: request.ip,
+    };
+
+    Logger.logInfo('Question transformation completed', {
+      original: message,
+      transformed: processedQuestion,
+      category: categorizedQuestion.category,
+      sourceFilter: categorizedQuestion.sourceFilter,
+    });
+    return promptLogData;
+  }
+
+  private logBeforeTransformQuestion(message: string) {
+    Logger.logInfo('Создание эмбеддинга для вопроса', {
+      messageLength: message.length,
+      message,
+    });
+  }
+
+  private prepareConfigs({
+    messageRequest,
+    overrideProvider,
+    overrideModel,
+  }: {
+    messageRequest: MessageRequest;
+    overrideProvider: string | undefined;
+    overrideModel: string | undefined;
+  }) {
+    const userOptions = messageRequest;
+
+    // Use override parameters if provided (from retry logic)
+    const effectiveProvider = overrideProvider || userOptions.provider;
+    const effectiveModel = overrideModel || userOptions.model;
+
+    const appConfig = {
+      ...ConfigManager.getAppConfig(),
+      chatProvider:
+        effectiveProvider || ConfigManager.getAppConfig().chatProvider,
+      embeddingsProvider: ConfigManager.getAppConfig().embeddingsProvider,
+    };
+
+    const fullConfig = {
+      providers: {
+        chat: ConfigManager.getChatConfig(appConfig.chatProvider),
+        embeddings: ConfigManager.getEmbeddingsConfig(
+          appConfig.embeddingsProvider,
+        ),
+      },
+    };
+
+    if (effectiveModel) {
+      fullConfig.providers.chat.model = effectiveModel;
+    }
+
+    if (userOptions.temperature) {
+      fullConfig.providers.chat.temperature = userOptions.temperature;
+    }
+
+    if (userOptions.chunkSize) {
+      fullConfig.providers.chat.chunkSize = userOptions.chunkSize;
+    }
+
+    // Initialize models with configuration
+    if (!fullConfig.providers.embeddings || !fullConfig.providers.chat) {
+      const errorMsg =
+        'Provider configurations are required in messageController';
+      Logger.logError(errorMsg);
+      throw new Error(errorMsg);
+    }
+    return { appConfig, fullConfig };
+  }
+
+  private async prepareDialog({
+    dialogId,
+    userId,
+  }: {
+    dialogId: string | undefined;
+    userId: string;
+  }) {
+    if (!dialogId || typeof dialogId !== 'number') {
+      dialogId = await DialogManager.createDialog(userId);
+      Logger.logInfo('New dialog created', { dialogId });
+    } else {
+      // Check if the dialog has reached max consecutive failures
+      const consecutiveFailures =
+        await FailureTracker.getConsecutiveFailures(dialogId);
+      const maxFailures = FailureTracker.getMaxConsecutiveFailures();
+      if (consecutiveFailures >= maxFailures - 1) {
+        dialogId = await DialogManager.createDialog(userId);
+        Logger.logInfo('New dialog created', { dialogId });
+        // -1 because this will be the next failure
+        // This is likely to be the 5th consecutive failure, so we'll create a new dialog
+        // and include information about the failed dialog
+        const answer =
+          'Извините, но по текущему диалогу невозможно получить ответ. Пришлось создать новый диалог, так как старый диалог больше не может быть продолжен из-за неудачных попыток.';
+        Logger.logInfo(
+          'Dialog reached max failures, new dialog will be created',
+          {
+            dialogId,
+            consecutiveFailures,
+            maxFailures,
+          },
+        );
+        throw new BadRequestException({
+          //  success: false,
+          dialogId,
+          response: answer || 'No response generated',
+          //    consecutiveFailures,
+          //    maxFailures,
+        });
+      }
+    }
+    return dialogId;
   }
 }

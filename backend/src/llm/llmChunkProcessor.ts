@@ -18,7 +18,6 @@ import { RAGSearcher } from './ragSearcher';
 import { FailureTracker } from './services/failureTracker';
 import { Category } from './services/questionTransformer';
 import { DocWithMetadataAndId } from './types';
-import { getCategoryByDetectedCategory } from './getCategoryByDetectedCategory';
 
 // Question types for classification
 enum QuestionType {
@@ -424,19 +423,16 @@ export class LLMChunkProcessor {
     }
     return chunk; // Return original chunk if no Author Message section
   }
+
   public static async askLLMChunked({
     llm,
     dialogId,
     history,
     contextDocs,
     question,
-    frendlyNotFound,
-    frendlyFound,
     category,
     provider,
     chatChunkSize,
-    parallelThreads,
-    abortController,
     detectedCategory,
   }: {
     llm:
@@ -450,52 +446,12 @@ export class LLMChunkProcessor {
     history: string[];
     contextDocs: DocWithMetadataAndId[];
     question: string;
-    frendlyNotFound?: boolean;
-    frendlyFound?: boolean;
     category: Category;
     provider: string;
     chatChunkSize: number;
-    parallelThreads?: number;
-    abortController?: AbortController;
     detectedCategory: Category;
   }) {
     const foundLogIds: (string | undefined)[] = [];
-    frendlyNotFound = frendlyNotFound ?? true;
-    frendlyFound = frendlyFound ?? true;
-    Logger.logInfo('Начало обработки запроса с чанками', {
-      dialogId,
-      contextDocsCount: contextDocs.length,
-      historyLength: history.length,
-      question,
-    });
-    if (category === 'telegram') {
-      const combinedContent = contextDocs
-        .map(
-          (doc) =>
-            `[id: ${doc.id}, source: ${doc.source}, fromLine: ${doc.fromLine}, toLine: ${doc.toLine}, distance: ${doc.distance}]\n${doc.content}`,
-        )
-        .join('\n');
-      contextDocs = [
-        {
-          id: 'empty',
-          content: combinedContent,
-          source: 'Combined',
-          fromLine: 0,
-          toLine: 0,
-          distance: 0,
-        },
-      ];
-    }
-
-    // Classify the question to determine processing strategy
-    const questionType = LLMChunkProcessor.classifyQuestion(question);
-    Logger.logInfo('Классификация вопроса', { questionType, question });
-
-    // Get the number of parallel threads from parameters, default to 1
-    const effectiveParallelThreads =
-      parseInt(process.env.PARALLEL_THREADS || '1', 10) || 1;
-    Logger.logInfo('Количество параллельных потоков', { parallelThreads });
-
     // Process contextDocs in parallel
     const results = await LLMChunkProcessor.processContextDocsInParallel({
       provider,
@@ -504,13 +460,8 @@ export class LLMChunkProcessor {
       question,
       history,
       category,
-      questionType,
-      maxParallelThreads: effectiveParallelThreads,
-      frendlyNotFound,
-      frendlyFound,
       dialogId,
       chatChunkSize,
-      abortController,
       detectedCategory,
     });
 
@@ -519,91 +470,14 @@ export class LLMChunkProcessor {
       (result) => result.success && result.foundText,
     );
 
-    if (successfulResult && successfulResult.foundText) {
+    if (successfulResult?.foundText) {
       Logger.logInfo('Найден успешный результат', {
         contextIndex: successfulResult.contextIndex,
         foundText: successfulResult.foundText,
       });
 
-      // If the result already contains a friendly response (generated during parallel processing), return it directly
-      if (successfulResult.alreadyProcessed && successfulResult.foundText) {
-        // The friendly response was already generated during parallel processing
-        return {
-          response: successfulResult.foundText,
-          answerDocumentId: successfulResult.documentId,
-          logIds: [
-            ...results.map((r) => r.foundLogIds).flat(),
-            ...foundLogIds,
-          ].filter(Boolean),
-        };
-      }
-
-      if (!frendlyFound) {
-        return {
-          response: successfulResult.foundText,
-          answerDocumentId: successfulResult.documentId,
-          logIds: [
-            ...results.map((r) => r.foundLogIds).flat(),
-            ...foundLogIds,
-          ].filter(Boolean),
-        };
-      }
-
-      // Generate friendly response using the chunks and foundChunkIndex from successful result
-      let friendlyText;
-      if (
-        successfulResult.chunks &&
-        successfulResult.foundChunkIndex !== undefined
-      ) {
-        const currentChunk =
-          successfulResult.chunks[successfulResult.foundChunkIndex];
-
-        // Extract only Author Message content for friendly response
-        const authorContent =
-          LLMChunkProcessor.extractAuthorMessageContent(currentChunk);
-
-        // Limit context to Author Message only
-        const surroundingChunks = authorContent;
-
-        const ret = await LLMChunkProcessor.frendlyFound({
-          category,
-          surroundingChunks,
-          question,
-          llm,
-          provider,
-          dialogId,
-          abortController,
-        });
-        friendlyText = ret.foundText;
-        foundLogIds.push(ret.logId);
-
-        Logger.logInfo('Дружеский ответ LLM', {
-          foundText: friendlyText,
-          chunk: currentChunk,
-        });
-      } else {
-        // Fallback if chunks or foundChunkIndex are not available
-        // Use the found text directly
-        const ret = await LLMChunkProcessor.frendlyFound({
-          category,
-          surroundingChunks: successfulResult.foundText,
-          question,
-          llm,
-          provider,
-          dialogId,
-          abortController,
-        });
-        friendlyText = ret.foundText;
-        foundLogIds.push(ret.logId);
-
-        Logger.logInfo('Дружеский ответ LLM', {
-          foundText: friendlyText,
-        });
-      }
-
-      // Return the document ID of the source that provided the answer
       return {
-        response: friendlyText,
+        response: successfulResult.foundText,
         answerDocumentId: successfulResult.documentId,
         logIds: [
           ...results.map((r) => r.foundLogIds).flat(),
@@ -613,35 +487,8 @@ export class LLMChunkProcessor {
     }
 
     Logger.logInfo('Информация по вопросу не найдена в контексте');
-    if (!frendlyNotFound) {
-      return {
-        response: null,
-        answerDocumentId: undefined,
-        logIds: [
-          ...results.map((r) => r.foundLogIds).flat(),
-          ...foundLogIds,
-        ].filter(Boolean),
-      };
-    }
-
-    const notFoundText = await LLMChunkProcessor.frendlyNotFound({
-      category,
-      question,
-      llm,
-      provider,
-      dialogId,
-      abortController,
-      detectedCategory,
-    });
-
-    Logger.logInfo('Дружеский отрицательный ответ LLM', {
-      foundText: notFoundText,
-    });
-
-    foundLogIds.push(notFoundText.logId);
-
     return {
-      response: notFoundText.foundText,
+      response: null,
       answerDocumentId: undefined,
       logIds: [
         ...results.map((r) => r.foundLogIds).flat(),
@@ -656,14 +503,9 @@ export class LLMChunkProcessor {
     question,
     history,
     category,
-    questionType,
-    maxParallelThreads,
-    frendlyNotFound,
-    frendlyFound,
     dialogId,
     provider,
     chatChunkSize,
-    abortController: externalAbortController,
     detectedCategory,
   }: {
     llm:
@@ -677,16 +519,23 @@ export class LLMChunkProcessor {
     question: string;
     history: string[];
     category: Category;
-    questionType: QuestionType;
-    maxParallelThreads: number;
-    frendlyNotFound: boolean;
-    frendlyFound: boolean;
     dialogId: string;
     provider: string;
     chatChunkSize: number;
-    abortController?: AbortController;
     detectedCategory: Category;
   }) {
+    let frendlyFound = false;
+    Logger.logInfo('Начало обработки запроса с чанками', {
+      dialogId,
+      contextDocsCount: contextDocs.length,
+      historyLength: history.length,
+      question,
+    });
+
+    // Classify the question to determine processing strategy
+    const { maxParallelThreads, questionType } =
+      LLMChunkProcessor.getProcessContextDocsInParallelOptions(question);
+
     const foundLogIds: (string | undefined)[] = [];
     // Process each context doc in parallel, up to maxParallelThreads at a time
     const results: Array<{
@@ -697,27 +546,11 @@ export class LLMChunkProcessor {
       chunks?: string[];
       contextIndex?: number;
       documentId?: string;
-      alreadyProcessed?: boolean;
     }> = [];
 
     // Process in batches using a proper worker pool
     for (let i = 0; i < contextDocs.length; i += maxParallelThreads) {
       const batch = contextDocs.slice(i, i + maxParallelThreads);
-
-      // Create abort controller for this batch to allow cancellation when first success is found
-      // Combine with external abort controller if provided
-      const abortController = new AbortController();
-
-      // If external abort controller signals abortion, abort our local controller too
-      if (externalAbortController) {
-        if (externalAbortController.signal.aborted) {
-          abortController.abort();
-        } else {
-          externalAbortController.signal.addEventListener('abort', () => {
-            abortController.abort();
-          });
-        }
-      }
 
       // Process batch in parallel
       const batchPromises = batch.map(async (doc, batchIndex) => {
@@ -728,7 +561,6 @@ export class LLMChunkProcessor {
           history,
           category,
           questionType,
-          abortController,
           contextIndex: i + batchIndex,
           dialogId,
           contextDocs,
@@ -739,15 +571,13 @@ export class LLMChunkProcessor {
         });
       });
 
-      // Use Promise.race to detect first success faster and generate friendly response immediately
-      const racePromise = Promise.race(
-        batchPromises.map((p, idx) =>
-          p.then((result) => ({ result, batchIndex: idx, completed: true })),
-        ),
-      );
-
       try {
-        const firstSuccess = await racePromise;
+        const firstSuccess = await Promise.race(
+          batchPromises.map((p, idx) =>
+            p.then((result) => ({ result, batchIndex: idx, completed: true })),
+          ),
+        );
+
         if (
           firstSuccess &&
           firstSuccess.result.success &&
@@ -756,7 +586,6 @@ export class LLMChunkProcessor {
           Logger.logInfo('Найден успешный результат, отмена остальных', {
             contextIndex: firstSuccess.result.contextIndex,
           });
-          abortController.abort(); // Cancel other ongoing operations in this batch
 
           // Generate friendly response immediately using the question and found answer
           let friendlyText = firstSuccess.result.foundText;
@@ -782,7 +611,6 @@ export class LLMChunkProcessor {
                 llm,
                 provider,
                 dialogId,
-                abortController: externalAbortController,
               });
               friendlyText = ret.foundText;
               foundLogIds.push(ret.logId);
@@ -800,7 +628,6 @@ export class LLMChunkProcessor {
                 llm,
                 provider,
                 dialogId,
-                abortController: externalAbortController,
               });
               friendlyText = ret.foundText;
               foundLogIds.push(ret.logId);
@@ -824,12 +651,14 @@ export class LLMChunkProcessor {
               chunks: firstSuccess.result.chunks,
               contextIndex: firstSuccess.result.contextIndex,
               documentId: firstSuccess.result.documentId, // Include the document ID
-              alreadyProcessed: true, // Flag to indicate the friendly response was already generated
             },
           ];
         }
       } catch (error) {
-        if ((error as any).code === 'RATE_LIMIT_EXCEEDED') {
+        if (
+          (error as any).code === 'RATE_LIMIT_EXCEEDED' ||
+          error.message?.includes('403')
+        ) {
           throw error;
         }
         // If race fails, continue with normal processing
@@ -856,7 +685,6 @@ export class LLMChunkProcessor {
               chunks: undefined,
               contextIndex: -1,
               documentId: undefined,
-              alreadyProcessed: undefined,
             },
       );
 
@@ -871,12 +699,22 @@ export class LLMChunkProcessor {
         Logger.logInfo('Найден успешный результат, отмена остальных', {
           contextIndex: successfulResult.contextIndex,
         });
-        abortController.abort(); // Cancel other ongoing operations
         break; // Stop processing further batches
       }
     }
 
     return results;
+  }
+
+  private static getProcessContextDocsInParallelOptions(question: string) {
+    const questionType = LLMChunkProcessor.classifyQuestion(question);
+    Logger.logInfo('Классификация вопроса', { questionType, question });
+
+    // Get the number of parallel threads from parameters, default to 1
+    const maxParallelThreads =
+      parseInt(process.env.PARALLEL_THREADS || '1', 10) || 1;
+    Logger.logInfo('Количество параллельных потоков', { maxParallelThreads });
+    return { maxParallelThreads, questionType };
   }
 
   private static async processSingleContextDoc({
@@ -886,7 +724,6 @@ export class LLMChunkProcessor {
     history,
     category,
     questionType,
-    abortController,
     contextIndex,
     dialogId,
     contextDocs,
@@ -907,7 +744,6 @@ export class LLMChunkProcessor {
     history: string[];
     category: Category;
     questionType: QuestionType;
-    abortController: AbortController;
     contextIndex: number;
     dialogId: string;
     contextDocs: DocWithMetadataAndId[];
@@ -923,23 +759,9 @@ export class LLMChunkProcessor {
     chunks?: string[];
     contextIndex: number;
     documentId: string;
-    alreadyProcessed?: boolean;
   }> {
     let foundLogIds: (string | undefined)[] = [];
     try {
-      // Check if we should abort
-      if (abortController.signal.aborted) {
-        return {
-          success: false,
-          foundLogIds,
-          foundChunkIndex: undefined,
-          chunks: undefined,
-          contextIndex,
-          documentId: contextDoc.id,
-          alreadyProcessed: undefined,
-        };
-      }
-
       // --- Разделяем контент на Semantic Search Content и Author Message ---
       let processedContent = '';
       if (category === 'telegram') {
@@ -1027,11 +849,6 @@ export class LLMChunkProcessor {
       let foundText = '';
 
       for (let i = 0; i < totalChunks; i++) {
-        // Check if we should abort
-        if (abortController.signal.aborted) {
-          break;
-        }
-
         if (foundChunkIndex === -1) {
           const chunk = chunks[i];
 
@@ -1140,9 +957,6 @@ export class LLMChunkProcessor {
               foundText = text.replace(/^\[FOUND]\s*/, '');
               foundChunkIndex = i;
 
-              // Cancel other operations since we found a valid result
-              abortController.abort();
-
               const { content, logId } = await LLMLogger.callWithLogging({
                 provider,
                 llm,
@@ -1190,7 +1004,10 @@ export class LLMChunkProcessor {
         documentId: contextDoc.id, // Include the document ID for tracking
       };
     } catch (error) {
-      if ((error as any).code === 'RATE_LIMIT_EXCEEDED') {
+      if (
+        (error as any).code === 'RATE_LIMIT_EXCEEDED' ||
+        error.message?.includes('403')
+      ) {
         throw error;
       }
       Logger.logError(`Ошибка при обработке контекста ${contextIndex}`, {
@@ -1216,7 +1033,6 @@ export class LLMChunkProcessor {
     llm,
     provider,
     dialogId,
-    abortController,
   }: {
     category: Category;
     surroundingChunks: string;
@@ -1230,7 +1046,6 @@ export class LLMChunkProcessor {
       | ChatGroq;
     provider: string;
     dialogId?: string;
-    abortController?: AbortController;
   }) {
     const prompt = createFriendlyFoundPrompt({
       category,
@@ -1248,7 +1063,6 @@ export class LLMChunkProcessor {
       },
       dialogId,
       historyId: undefined,
-      abortController,
     });
     return { foundText, logId };
   }
@@ -1260,7 +1074,6 @@ export class LLMChunkProcessor {
     llm,
     provider,
     dialogId,
-    abortController,
     detectedCategory,
   }: {
     category: Category;
@@ -1275,7 +1088,6 @@ export class LLMChunkProcessor {
       | ChatGroq;
     provider: string;
     dialogId?: string;
-    abortController?: AbortController;
     detectedCategory: Category;
   }) {
     const prompt = createFriendlyNotFoundPrompt({ category, chunk, question });
@@ -1290,7 +1102,6 @@ export class LLMChunkProcessor {
       },
       dialogId,
       historyId: undefined,
-      abortController,
     });
 
     return { foundText, logId };

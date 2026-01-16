@@ -111,7 +111,6 @@ export class LLMLogger {
     provider,
     dialogId,
     historyId,
-    abortController,
   }: {
     llm:
       | ChatOllama
@@ -125,7 +124,6 @@ export class LLMLogger {
     provider: string;
     dialogId: string | undefined;
     historyId: string | undefined;
-    abortController?: AbortController;
   }): Promise<{ logId: string | undefined; content: string }> {
     const startTime = Date.now();
     let timeoutId: NodeJS.Timeout | null = null;
@@ -205,17 +203,11 @@ export class LLMLogger {
       }
 
       // Call the LLM with abort signal if provided
-      const llmCallPromise = abortController
-        ? llm
-            .invoke(prompt, { signal: abortController.signal })
-            .then(async (result) =>
-              typeof result === 'string' ? result.trim() : result,
-            )
-        : llm
-            .invoke(prompt)
-            .then(async (result) =>
-              typeof result === 'string' ? result.trim() : result,
-            );
+      const llmCallPromise = llm
+        .invoke(prompt)
+        .then(async (result) =>
+          typeof result === 'string' ? result.trim() : result,
+        );
 
       // Race between LLM call and timeout
       const result = await Promise.race([llmCallPromise, timeoutPromise]);

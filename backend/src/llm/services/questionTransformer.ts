@@ -474,7 +474,10 @@ ${question}
         },
         (error as Error).stack,
       );
-      if ((error as any).code === 'RATE_LIMIT_EXCEEDED') {
+      if (
+        (error as any).code === 'RATE_LIMIT_EXCEEDED' ||
+        error.message?.includes('403')
+      ) {
         throw error;
       }
       // Return original question if transformation fails
@@ -541,7 +544,12 @@ ${question}
         { error: (error as Error).message, question },
         (error as Error).stack,
       );
-      if ((error as any).code === 'RATE_LIMIT_EXCEEDED') throw error;
+      if (
+        (error as any).code === 'RATE_LIMIT_EXCEEDED' ||
+        error.message?.includes('403')
+      ) {
+        throw error;
+      }
       return { question, logId: undefined };
     }
   }
@@ -679,7 +687,10 @@ ${text}
         return { category: reconstructed as Category, logId };
       }
     } catch (error) {
-      if ((error as any).code === 'RATE_LIMIT_EXCEEDED') {
+      if (
+        (error as any).code === 'RATE_LIMIT_EXCEEDED' ||
+        error.message?.includes('403')
+      ) {
         throw error;
       }
       Logger.logError('Error detecting question type', {

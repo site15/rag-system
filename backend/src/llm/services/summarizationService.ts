@@ -191,7 +191,10 @@ export class SummarizationService {
         },
         (error as Error).stack,
       );
-      if ((error as any).code === 'RATE_LIMIT_EXCEEDED') {
+      if (
+        (error as any).code === 'RATE_LIMIT_EXCEEDED' ||
+        error.message?.includes('403')
+      ) {
         throw error;
       }
     }
