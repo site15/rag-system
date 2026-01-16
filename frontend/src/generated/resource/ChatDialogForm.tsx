@@ -8,13 +8,37 @@ import {
   TextInput,
 } from "react-admin";
 
+import ReactJson from "react-json-view";
+import { useRecordContext, Labeled } from "react-admin";
+
 import { Prisma } from "../prisma/browser";
+
+const JsonViewerField = ({ source, label }) => {
+  const record = useRecordContext();
+  const value = record?.[source];
+
+  if (!value) return null;
+
+  return (
+    <Labeled label={label}>
+      <div style={{ marginTop: "8px", marginBottom: "16px" }}>
+        <ReactJson
+          src={value}
+          collapsed={1}
+          theme="monokai"
+          displayDataTypes={false}
+          name={false}
+        />
+      </div>
+    </Labeled>
+  );
+};
 
 export const ChatDialogEditForm = () => (
   <Edit>
     <SimpleForm>
       <TextInput source={Prisma.ChatDialogScalarFieldEnum.title} />
-      <TextInput source={Prisma.ChatDialogScalarFieldEnum.summary} />
+      <TextInput source={Prisma.ChatDialogScalarFieldEnum.summary} multiline />
     </SimpleForm>
   </Edit>
 );
@@ -34,6 +58,7 @@ export const ChatDialogShowForm = () => (
       <TextInput
         source={Prisma.ChatDialogScalarFieldEnum.summary}
         readOnly={true}
+        multiline
       />
       <NumberInput
         source={Prisma.ChatDialogScalarFieldEnum.consecutiveFailures}
@@ -59,7 +84,7 @@ export const ChatDialogCreateForm = () => (
   <Create>
     <SimpleForm>
       <TextInput source={Prisma.ChatDialogScalarFieldEnum.title} />
-      <TextInput source={Prisma.ChatDialogScalarFieldEnum.summary} />
+      <TextInput source={Prisma.ChatDialogScalarFieldEnum.summary} multiline />
     </SimpleForm>
   </Create>
 );

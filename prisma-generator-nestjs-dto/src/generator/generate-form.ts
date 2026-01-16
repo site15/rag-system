@@ -30,6 +30,8 @@ export const generateForm = ({
   // Map Prisma types to React Admin input components
   const getInputComponent = (field: (typeof allFields)[0]): string => {
     switch (field.type) {
+      case 'Json':
+        return 'JsonViewerField';
       case 'String':
         return 'TextInput';
       case 'Int':
@@ -49,8 +51,9 @@ export const generateForm = ({
   const createFormFields = editableFields
     .filter((field) => create.fields.find((f) => f.name === field.name))
     .map((field) => {
+      const multiline = field.nativeType?.[0] === 'Text' ? ' multiline' : '';
       const component = getInputComponent(field);
-      return `      <${component} source={Prisma.${entityClassName}ScalarFieldEnum.${field.name}} />`;
+      return `      <${component} source={Prisma.${entityClassName}ScalarFieldEnum.${field.name}}${multiline} />`;
     })
     .join('\n');
 
@@ -59,26 +62,29 @@ export const generateForm = ({
     ...readOnlyFields
       .filter((field) => update.fields.find((f) => f.name === field.name))
       .map((field) => {
+        const multiline = field.nativeType?.[0] === 'Text' ? ' multiline' : '';
         const component = getInputComponent(field);
         return `      <${component}
         source={Prisma.${entityClassName}ScalarFieldEnum.${field.name}}
-        readOnly={true}
+        readOnly={true}${multiline}
       />`;
       }),
     ...editableFields
       .filter((field) => update.fields.find((f) => f.name === field.name))
       .map((field) => {
+        const multiline = field.nativeType?.[0] === 'Text' ? ' multiline' : '';
         const component = getInputComponent(field);
-        return `      <${component} source={Prisma.${entityClassName}ScalarFieldEnum.${field.name}} />`;
+        return `      <${component} source={Prisma.${entityClassName}ScalarFieldEnum.${field.name}}${multiline} />`;
       }),
   ].join('\n');
 
   const showFormFields = [
     ...allFields.map((field) => {
+      const multiline = field.nativeType?.[0] === 'Text' ? ' multiline' : '';
       const component = getInputComponent(field);
       return `      <${component}
         source={Prisma.${entityClassName}ScalarFieldEnum.${field.name}}
-        readOnly={true}
+        readOnly={true}${multiline}
       />`;
     }),
   ].join('\n');
@@ -93,7 +99,31 @@ export const generateForm = ({
   TextInput,
 } from "react-admin";
 
+import ReactJson from 'react-json-view';
+import { useRecordContext, Labeled } from 'react-admin';
+
 import { Prisma } from "../prisma/browser";
+
+const JsonViewerField = ({ source, label }) => {
+    const record = useRecordContext();
+    const value = record?.[source];
+
+    if (!value) return null;
+
+    return (
+        <Labeled label={label}>
+            <div style={{ marginTop: '8px', marginBottom: '16px' }}>
+                <ReactJson 
+                    src={value} 
+                    collapsed={1}
+                    theme="monokai"
+                    displayDataTypes={false}
+                    name={false}
+                />
+            </div>
+        </Labeled>
+    );
+};
 
 export const ${editFormName} = () => (
   <Edit>

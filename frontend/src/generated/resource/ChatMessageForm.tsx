@@ -8,19 +8,48 @@ import {
   TextInput,
 } from "react-admin";
 
+import ReactJson from "react-json-view";
+import { useRecordContext, Labeled } from "react-admin";
+
 import { Prisma } from "../prisma/browser";
+
+const JsonViewerField = ({ source, label }) => {
+  const record = useRecordContext();
+  const value = record?.[source];
+
+  if (!value) return null;
+
+  return (
+    <Labeled label={label}>
+      <div style={{ marginTop: "8px", marginBottom: "16px" }}>
+        <ReactJson
+          src={value}
+          collapsed={1}
+          theme="monokai"
+          displayDataTypes={false}
+          name={false}
+        />
+      </div>
+    </Labeled>
+  );
+};
 
 export const ChatMessageEditForm = () => (
   <Edit>
     <SimpleForm>
-      <TextInput source={Prisma.ChatMessageScalarFieldEnum.question} />
-      <TextInput source={Prisma.ChatMessageScalarFieldEnum.answer} />
+      <TextInput
+        source={Prisma.ChatMessageScalarFieldEnum.question}
+        multiline
+      />
+      <TextInput source={Prisma.ChatMessageScalarFieldEnum.answer} multiline />
       <TextInput source={Prisma.ChatMessageScalarFieldEnum.category} />
       <TextInput
         source={Prisma.ChatMessageScalarFieldEnum.transformedQuestion}
+        multiline
       />
       <TextInput
         source={Prisma.ChatMessageScalarFieldEnum.transformedEmbeddingQuery}
+        multiline
       />
       <TextInput source={Prisma.ChatMessageScalarFieldEnum.provider} />
       <TextInput source={Prisma.ChatMessageScalarFieldEnum.model} />
@@ -43,10 +72,12 @@ export const ChatMessageShowForm = () => (
       <TextInput
         source={Prisma.ChatMessageScalarFieldEnum.question}
         readOnly={true}
+        multiline
       />
       <TextInput
         source={Prisma.ChatMessageScalarFieldEnum.answer}
         readOnly={true}
+        multiline
       />
       <TextInput
         source={Prisma.ChatMessageScalarFieldEnum.dialogId}
@@ -63,10 +94,12 @@ export const ChatMessageShowForm = () => (
       <TextInput
         source={Prisma.ChatMessageScalarFieldEnum.transformedQuestion}
         readOnly={true}
+        multiline
       />
       <TextInput
         source={Prisma.ChatMessageScalarFieldEnum.transformedEmbeddingQuery}
         readOnly={true}
+        multiline
       />
       <TextInput
         source={Prisma.ChatMessageScalarFieldEnum.provider}
@@ -103,14 +136,19 @@ export const ChatMessageShowForm = () => (
 export const ChatMessageCreateForm = () => (
   <Create>
     <SimpleForm>
-      <TextInput source={Prisma.ChatMessageScalarFieldEnum.question} />
-      <TextInput source={Prisma.ChatMessageScalarFieldEnum.answer} />
+      <TextInput
+        source={Prisma.ChatMessageScalarFieldEnum.question}
+        multiline
+      />
+      <TextInput source={Prisma.ChatMessageScalarFieldEnum.answer} multiline />
       <TextInput source={Prisma.ChatMessageScalarFieldEnum.category} />
       <TextInput
         source={Prisma.ChatMessageScalarFieldEnum.transformedQuestion}
+        multiline
       />
       <TextInput
         source={Prisma.ChatMessageScalarFieldEnum.transformedEmbeddingQuery}
+        multiline
       />
       <TextInput source={Prisma.ChatMessageScalarFieldEnum.provider} />
       <TextInput source={Prisma.ChatMessageScalarFieldEnum.model} />

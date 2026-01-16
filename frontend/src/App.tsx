@@ -9,7 +9,7 @@ client.setConfig({
 
 export const App = () => {
   const resourceNames = Object.keys(resources);
-  console.log(resources);
+
   return (
     <Admin dataProvider={appDataProvider}>
       {resourceNames.map((resourceName, index) => (
@@ -18,6 +18,7 @@ export const App = () => {
           name={resourceName}
           options={{ label: resources[resourceName]?.label }}
           list={resources[resourceName]?.list}
+          show={resources[resourceName]?.show}
           create={resources[resourceName]?.create}
           edit={resources[resourceName]?.edit}
         />
