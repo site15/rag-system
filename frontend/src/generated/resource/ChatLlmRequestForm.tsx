@@ -6,9 +6,9 @@ import {
   NumberInput,
   SimpleForm,
   TextInput,
-} from 'react-admin';
+} from "react-admin";
 
-import { Prisma } from '../prisma/browser';
+import { Prisma } from "../prisma/browser";
 
 export const ChatLlmRequestEditForm = () => (
   <Edit>

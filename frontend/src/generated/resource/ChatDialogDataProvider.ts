@@ -10,15 +10,15 @@ import {
   GetOneResult,
   UpdateManyResult,
   UpdateResult,
-} from 'react-admin';
-import { CreateChatDialogDto } from '../client';
+} from "react-admin";
+import { CreateChatDialogDto } from "../client";
 import {
   chatDialogControllerCreateOne,
   chatDialogControllerDeleteOne,
   chatDialogControllerFindMany,
   chatDialogControllerFindOne,
   chatDialogControllerUpdateOne,
-} from '../client/sdk.gen';
+} from "../client/sdk.gen";
 
 export const ChatDialogDataProvider: DataProvider<any> = {
   getList: async (_, params) => {

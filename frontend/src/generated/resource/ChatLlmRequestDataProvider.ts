@@ -10,15 +10,15 @@ import {
   GetOneResult,
   UpdateManyResult,
   UpdateResult,
-} from 'react-admin';
-import { CreateChatLlmRequestDto } from '../client';
+} from "react-admin";
+import { CreateChatLlmRequestDto } from "../client";
 import {
   chatLlmRequestControllerCreateOne,
   chatLlmRequestControllerDeleteOne,
   chatLlmRequestControllerFindMany,
   chatLlmRequestControllerFindOne,
   chatLlmRequestControllerUpdateOne,
-} from '../client/sdk.gen';
+} from "../client/sdk.gen";
 
 export const ChatLlmRequestDataProvider: DataProvider<any> = {
   getList: async (_, params) => {
