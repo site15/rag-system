@@ -134,7 +134,7 @@ export interface CategorizedQuestion {
     rule: 'ilike' | 'not ilike';
   } | null;
   searchLimit: number;
-  logIds: (number | undefined)[];
+  logIds: (string | undefined)[];
 }
 
 export class QuestionTransformer {
@@ -191,8 +191,8 @@ export class QuestionTransformer {
     dialogId,
     historyId,
   }: {
-    dialogId: number | undefined;
-    historyId: number | undefined;
+    dialogId: string | undefined;
+    historyId: string | undefined;
     question: string;
     llm:
       | ChatOllama
@@ -418,8 +418,8 @@ ${question}
     dialogId,
     historyId,
   }: {
-    dialogId: number | undefined;
-    historyId: number | undefined;
+    dialogId: string | undefined;
+    historyId: string | undefined;
     question: string;
     llm:
       | ChatOllama
@@ -494,8 +494,8 @@ ${question}
     historyId,
     prompt,
   }: {
-    dialogId: number | undefined;
-    historyId: number | undefined;
+    dialogId: string | undefined;
+    historyId: string | undefined;
     question: string;
     llm:
       | ChatOllama
@@ -554,8 +554,8 @@ ${question}
     dialogId,
     historyId,
   }: {
-    dialogId: number | undefined;
-    historyId: number | undefined;
+    dialogId: string | undefined;
+    historyId: string | undefined;
     llm:
       | ChatOllama
       | ChatOpenAI

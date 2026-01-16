@@ -18,7 +18,7 @@ export interface DocWithMetadata {
 }
 
 export interface DocWithMetadataAndId {
-  id: number;
+  id: string;
   content: string;
   source: string;
   fromLine?: number;
@@ -27,13 +27,8 @@ export interface DocWithMetadataAndId {
 }
 
 export type AppConfig = {
-  port: number;
-  host: string;
   chatProvider: string;
   embeddingsProvider: string;
-  parallelThreads: number;
-  maxConsecutiveFailures: number;
-  enableFileLogging: boolean;
 };
 
 export type ChatConfig = {

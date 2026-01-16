@@ -1,5 +1,5 @@
 // dialogSummary.ts
-import { Database } from './database';
+import { PrismaService } from '../services/prisma.service';
 import { Logger } from './logger';
 import { ChatOllama } from '@langchain/community/chat_models/ollama';
 import { ChatOpenAI } from '@langchain/openai';
@@ -12,22 +12,20 @@ import { LLMLogger } from './llmLogger';
 import { createDialogSummaryPrompt } from './prompt';
 
 export class DialogSummary {
-  public static async shouldSummarize(dialogId: number): Promise<boolean> {
+  public static async shouldSummarize(dialogId: string): Promise<boolean> {
     Logger.logInfo('Проверка необходимости суммаризации', { dialogId });
-    const r = await Database.getInstance().query(
-      `
-      SELECT COUNT(*)::int AS cnt
-      FROM new_chat_history
-      WHERE dialog_id = $1
-        AND ignored = false
-      `,
-      [dialogId],
-    );
-    const should = r.rows[0].cnt >= 1;
+
+    const messageCount = await PrismaService.instance.chatMessage.count({
+      where: {
+        dialogId: dialogId,
+      },
+    });
+
+    const should = messageCount >= 1;
     Logger.logInfo('Проверка завершена', {
       dialogId,
       shouldSummarize: should,
-      messageCount: r.rows[0].cnt,
+      messageCount: messageCount,
     });
     return should;
   }
@@ -38,7 +36,7 @@ export class DialogSummary {
     provider,
     historyId,
   }: {
-    dialogId: number;
+    dialogId: string;
     llm:
       | ChatOllama
       | ChatOpenAI
@@ -47,7 +45,7 @@ export class DialogSummary {
       | HuggingFaceInference
       | ChatGroq;
     provider: string;
-    historyId: number;
+    historyId: string;
   }) {
     Logger.logInfo('Начало суммаризации диалога', { dialogId, historyId });
     const history = await DialogManager.getDialogHistory(dialogId);
@@ -69,18 +67,17 @@ export class DialogSummary {
       // responseLength: typeof r.content === "string" ? r.content.length : JSON.stringify(r.content).length,
     });
 
-    await Database.getInstance().query(
-      `
-      UPDATE new_chat_dialogs
-      SET summary = $1,
-          updated_at = now()
-      WHERE id = $2
-      `,
-      [
-        typeof content === 'string' ? content.trim() : JSON.stringify(content),
-        dialogId,
-      ],
-    );
+    await PrismaService.instance.chatDialog.update({
+      where: {
+        id: dialogId,
+      },
+      data: {
+        summary:
+          typeof content === 'string'
+            ? content.trim()
+            : JSON.stringify(content),
+      },
+    });
     Logger.logInfo('Суммаризация сохранена в БД', { dialogId });
     return { content, logId };
   }

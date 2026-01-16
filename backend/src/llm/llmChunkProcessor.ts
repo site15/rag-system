@@ -446,7 +446,7 @@ export class LLMChunkProcessor {
       | ChatGoogleGenerativeAI
       | HuggingFaceInference
       | ChatGroq;
-    dialogId: number;
+    dialogId: string;
     history: string[];
     contextDocs: DocWithMetadataAndId[];
     question: string;
@@ -459,7 +459,7 @@ export class LLMChunkProcessor {
     abortController?: AbortController;
     detectedCategory: Category;
   }) {
-    const foundLogIds: (number | undefined)[] = [];
+    const foundLogIds: (string | undefined)[] = [];
     frendlyNotFound = frendlyNotFound ?? true;
     frendlyFound = frendlyFound ?? true;
     Logger.logInfo('Начало обработки запроса с чанками', {
@@ -477,7 +477,7 @@ export class LLMChunkProcessor {
         .join('\n');
       contextDocs = [
         {
-          id: -1,
+          id: 'empty',
           content: combinedContent,
           source: 'Combined',
           fromLine: 0,
@@ -492,7 +492,8 @@ export class LLMChunkProcessor {
     Logger.logInfo('Классификация вопроса', { questionType, question });
 
     // Get the number of parallel threads from parameters, default to 1
-    const effectiveParallelThreads = parallelThreads || 1;
+    const effectiveParallelThreads =
+      parseInt(process.env.PARALLEL_THREADS || '1', 10) || 1;
     Logger.logInfo('Количество параллельных потоков', { parallelThreads });
 
     // Process contextDocs in parallel
@@ -680,22 +681,22 @@ export class LLMChunkProcessor {
     maxParallelThreads: number;
     frendlyNotFound: boolean;
     frendlyFound: boolean;
-    dialogId: number;
+    dialogId: string;
     provider: string;
     chatChunkSize: number;
     abortController?: AbortController;
     detectedCategory: Category;
   }) {
-    const foundLogIds: (number | undefined)[] = [];
+    const foundLogIds: (string | undefined)[] = [];
     // Process each context doc in parallel, up to maxParallelThreads at a time
     const results: Array<{
       success: boolean;
       foundText?: string;
-      foundLogIds: (number | undefined)[];
+      foundLogIds: (string | undefined)[];
       foundChunkIndex?: number;
       chunks?: string[];
       contextIndex?: number;
-      documentId?: number;
+      documentId?: string;
       alreadyProcessed?: boolean;
     }> = [];
 
@@ -908,7 +909,7 @@ export class LLMChunkProcessor {
     questionType: QuestionType;
     abortController: AbortController;
     contextIndex: number;
-    dialogId: number;
+    dialogId: string;
     contextDocs: DocWithMetadataAndId[];
     index: number;
     provider: string;
@@ -917,14 +918,14 @@ export class LLMChunkProcessor {
   }): Promise<{
     success: boolean;
     foundText?: string;
-    foundLogIds?: (number | undefined)[];
+    foundLogIds?: (string | undefined)[];
     foundChunkIndex?: number;
     chunks?: string[];
     contextIndex: number;
-    documentId: number;
+    documentId: string;
     alreadyProcessed?: boolean;
   }> {
-    let foundLogIds: (number | undefined)[] = [];
+    let foundLogIds: (string | undefined)[] = [];
     try {
       // Check if we should abort
       if (abortController.signal.aborted) {
@@ -984,7 +985,7 @@ export class LLMChunkProcessor {
           .join('\n');
         contextDocs = [
           {
-            id: -1,
+            id: 'empty',
             content: combinedContent,
             source: 'Combined',
             fromLine: 0,
@@ -1228,7 +1229,7 @@ export class LLMChunkProcessor {
       | HuggingFaceInference
       | ChatGroq;
     provider: string;
-    dialogId?: number;
+    dialogId?: string;
     abortController?: AbortController;
   }) {
     const prompt = createFriendlyFoundPrompt({
@@ -1273,7 +1274,7 @@ export class LLMChunkProcessor {
       | HuggingFaceInference
       | ChatGroq;
     provider: string;
-    dialogId?: number;
+    dialogId?: string;
     abortController?: AbortController;
     detectedCategory: Category;
   }) {
@@ -1308,7 +1309,7 @@ export class LLMChunkProcessor {
     question: string;
     source: string;
     detectedCategory: Category;
-    dialogId: number;
+    dialogId: string;
   }) {
     if (
       detectedCategory === Category.clarification ||

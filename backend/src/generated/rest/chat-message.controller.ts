@@ -19,6 +19,7 @@ import {
 import { isUUID } from 'class-validator';
 import {
   FindManyArgs,
+  FindManyResponseMeta,
   getFirstSkipFromCurPerPage,
   PrismaSdk,
   PrismaService,
@@ -33,16 +34,7 @@ import { UpdateChatMessageDto } from './update-chat-message.dto';
 
 export class FindManyChatMessageArgs extends FindManyArgs {}
 
-export class FindManyChatMessageResponseMeta {
-  @ApiPropertyOptional({ type: Number })
-  curPage?: number;
-
-  @ApiPropertyOptional({ type: Number })
-  perPage?: number;
-
-  @ApiProperty({ type: Number })
-  totalResults!: number;
-}
+export class FindManyChatMessageResponseMeta extends FindManyResponseMeta {}
 
 export class FindManyChatMessageResponse {
   @ApiProperty({ type: () => [ChatMessage] })

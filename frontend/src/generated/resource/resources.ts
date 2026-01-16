@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DataProvider } from "react-admin";
-import { Prisma } from "../prisma/browser";
 import { AuthUserDataProvider } from "./AuthUserDataProvider";
 import { AuthSessionDataProvider } from "./AuthSessionDataProvider";
 import { ChatDocumentEmbeddingDataProvider } from "./ChatDocumentEmbeddingDataProvider";
@@ -67,7 +66,7 @@ import { ChatEmbeddingModelList } from "./ChatEmbeddingModelList";
 
 export const resources: Partial<
   Record<
-    Prisma.ModelName,
+    string,
     {
       dataProvider: DataProvider<any>;
       label: string;

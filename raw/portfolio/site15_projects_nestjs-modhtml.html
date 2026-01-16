@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>site15.ru - NestJS-mod | Ильшат Хамитов | Software Engineer | site15.ru</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; }
+    .header { border-bottom: 1px solid #ccc; padding-bottom: 10px; margin-bottom: 20px; }
+    .title { font-size: 24px; font-weight: bold; margin: 0; }
+    .url { color: #666; font-size: 14px; margin: 5px 0; }
+    .content { line-height: 1.6; }
+    .timestamp { color: #999; font-size: 12px; margin: 5px 0; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1 class="title">NestJS-mod | Ильшат Хамитов | Software Engineer | site15.ru</h1>
+    <div class="url">URL: https://site15.ru/projects/nestjs-mod.html</div>
+    <div class="timestamp">Downloaded: 2025-12-29T19:49:45.530Z</div>
+  </div>
+  <div class="content">
+    <!DOCTYPE html>
+<html lang="ru" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NestJS-mod | Ильшат Хамитов | Software Engineer | site15.ru</title>
+    <meta name="description"
+        content="Моя fullstack-платформа для NestJS с инженерной экосистемой библиотек и архитектурных соглашений.">
+
+    <link rel="icon" type="image/png" href="/favicon/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Site15" />
+    <link rel="manifest" href="/favicon/site.webmanifest" />
+    
+    <!-- Sitemap and RSS Links -->
+    <link rel="sitemap" type="application/xml" title="Sitemap" href="../sitemap.xml" />
+    <link rel="alternate" type="application/rss+xml" title="site15.ru - Ilshat Khamitov | Software Engineer" href="../rss.xml" />
+
+    <!-- Open Graph Generated: a.pr-cy.ru -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="NestJS-mod - Ilshat Khamitov">
+    <meta property="og:description"
+        content="Моя fullstack-платформа для NestJS с инженерной экосистемой библиотек и архитектурных соглашений.">
+    <meta property="og:url" content="https://site15.ru/projects/nestjs-mod">
+    <meta property="og:image" content="https://site15.ru/ilshat.jpg">
+    <meta property="og:site_name" content="Ilshat Khamitov Portfolio">
+    <!-- Open Graph: Article -->
+    <meta name="twitter:card" content="https://site15.ru/ilshat.jpg" />
+
+    <!-- Yandex.Metrika counter -->
+    <script type="text/javascript">
+        (function (m, e, t, r, i, k, a) {
+            m[i] = m[i] || function () { (m[i].a = m[i].a || []).push(arguments) };
+            m[i].l = 1 * new Date();
+            for (var j = 0; j < document.scripts.length; j++) { if (document.scripts[j].src === r) { return; } }
+            k = e.createElement(t), a = e.getElementsByTagName(t)[0], k.async = 1, k.src = r, a.parentNode.insertBefore(k, a)
+        })(window, document, 'script', 'https://mc.yandex.ru/metrika/tag.js?id=23044594', 'ym');
+
+        ym(23044594, 'init', { ssr: true, webvisor: true, clickmap: true, ecommerce: "dataLayer", accurateTrackBounce: true, trackLinks: true });
+    </script>
+    <noscript>
+        <div><img src="https://mc.yandex.ru/watch/23044594" style="position:absolute; left:-9999px;" alt="" /></div>
+    </noscript>
+    <!-- /Yandex.Metrika counter -->
+
+    <script src="../js/tailwind.min.js"></script>
+    <link href="../fonts/fonts.css" rel="stylesheet">
+    <!-- Using unpkg as an alternative reliable CDN for lucide -->
+    <script src="../js/lucide.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'neo-bg': '#fdfbf7',
+                        'neo-black': '#0a0a0a',
+                        'neo-yellow': '#ffeb3b',
+                        'neo-pink': '#ff7eb6',
+                        'neo-green': '#7afc50',
+                        'neo-blue': '#82caff',
+                        'neo-purple': '#b388ff',
+                    },
+                    fontFamily: {
+                        sans: ['Space Grotesk', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    boxShadow: {
+                        'neo': '5px 5px 0px 0px #0a0a0a',
+                        'neo-sm': '3px 3px 0px 0px #0a0a0a',
+                        'neo-lg': '8px 8px 0px 0px #0a0a0a',
+                        'neo-hover': '0px 0px 0px 0px #0a0a0a',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom Styles for nuances Tailwind can't easily catch */
+        body {
+            background-color: #f3f3f3;
+            background-image: radial-gradient(#0a0a0a 1px, transparent 1px);
+            background-size: 24px 24px;
+            overflow-x: hidden;
+        }
+
+        .neo-border {
+            border: 3px solid #0a0a0a;
+        }
+
+        .text-stroke {
+            -webkit-text-stroke: 1px #0a0a0a;
+        }
+
+        .text-stroke-2 {
+            -webkit-text-stroke: 2px #0a0a0a;
+            color: transparent;
+        }
+
+        /* Marquee Animation */
+        .marquee-container {
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .marquee-content {
+            display: inline-block;
+            animation: marquee 120s linear infinite;
+        }
+
+        @keyframes marquee {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        /* Coin Flip Animation */
+        .coin-container {
+            perspective: 1000px;
+        }
+
+        .coin-front,
+        .coin-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 9999px;
+        }
+
+        .coin-back {
+            transform: rotateY(180deg);
+        }
+
+        /* Scroll Reveal Animation */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #fdfbf7;
+            border-left: 3px solid #0a0a0a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #ff7eb6;
+            border: 3px solid #0a0a0a;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ffeb3b;
+        }
+
+        /* Pattern classes */
+        .bg-lines {
+            background-image: repeating-linear-gradient(45deg, #0a0a0a 0, #0a0a0a 1px, transparent 0, transparent 50%);
+            background-size: 10px 10px;
+            opacity: 0.1;
+        }
+
+        /* Breadcrumb styles */
+        .breadcrumb {
+            background-color: #fdfbf7;
+            padding: 1rem 0;
+            border-bottom: 3px solid #0a0a0a;
+        }
+
+        .breadcrumb ul {
+            display: flex;
+            align-items: center;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .breadcrumb li {
+            display: flex;
+            align-items: center;
+        }
+
+        .breadcrumb li:not(:last-child)::after {
+            content: '>';
+            margin: 0 0.5rem;
+            color: #0a0a0a;
+        }
+
+        .breadcrumb a {
+            color: #0a0a0a;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .breadcrumb a:hover {
+            color: #ff7eb6;
+        }
+
+        .breadcrumb .current {
+            color: #ff7eb6;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body class="text-neo-black font-sans selection:bg-neo-black selection:text-neo-yellow">
+    <!-- Navbar -->
+    <nav class="fixed top-0 w-full z-50 bg-neo-bg neo-border border-t-0 border-x-0">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16 sm:h-20">
+                <div class="flex-shrink-0 flex items-center gap-2">
+                    <a href="../" class="w-8 h-8 bg-neo-black text-neo-yellow flex items-center justify-center font-bold text-xl neo-border">
+                        <img src="../ezhik.jpg" alt="Profile Photo" class="w-full h-full object-cover">
+                    </a>
+                    <a href="../" class="font-bold text-xl tracking-tighter uppercase hidden sm:block">site15.ru</a>
+                </div>
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex space-x-4">
+                    <a href="../#about"
+                        class="px-4 py-2 font-bold hover:bg-neo-yellow transition-colors border-2 border-transparent hover:border-neo-black">О
+                        себе</a>
+                    <a href="../#projects"
+                        class="px-4 py-2 font-bold hover:bg-neo-pink transition-colors border-2 border-transparent hover:border-neo-black">15
+                        Проектов</a>
+                    <a href="../#experience"
+                        class="px-4 py-2 font-bold hover:bg-neo-green transition-colors border-2 border-transparent hover:border-neo-black">Опыт</a>
+                    <a href="../#skills"
+                        class="px-4 py-2 font-bold hover:bg-neo-blue transition-colors border-2 border-transparent hover:border-neo-black">Навыки</a>
+                    <a href="../#open-source-community"
+                        class="px-4 py-2 font-bold hover:bg-neo-purple transition-colors border-2 border-transparent hover:border-neo-black">Open
+                        Source</a>
+                    <a href="../#contact"
+                        class="px-4 py-2 bg-neo-black text-white font-bold hover:bg-neo-pink hover:text-neo-black hover:shadow-neo transition-all border-2 border-neo-black">Связаться</a>
+                </div>
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden">
+                    <button id="mobile-menu-btn"
+                        class="p-2 neo-border bg-white active:shadow-neo-hover shadow-neo transition-all">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu"
+            class="hidden md:hidden bg-neo-yellow border-t-2 border-neo-black p-4 space-y-2 absolute w-full">
+            <a href="../#about" class="block px-4 py-2 font-bold neo-border bg-white hover:bg-neo-green">О себе</a>
+            <a href="../#projects" class="block px-4 py-2 font-bold neo-border bg-white hover:bg-neo-green">15 Проектов</a>
+            <a href="../#experience" class="block px-4 py-2 font-bold neo-border bg-white hover:bg-neo-green">Опыт</a>
+            <a href="../#skills" class="block px-4 py-2 font-bold neo-border bg-white hover:bg-neo-green">Навыки</a>
+            <a href="../#open-source-community"
+                class="block px-4 py-2 font-bold neo-border bg-white hover:bg-neo-purple">Open Source</a>
+            <a href="../#contact" class="block px-4 py-2 font-bold neo-border bg-neo-black text-white">Связаться</a>
+        </div>
+    </nav>
+    <section class="py-24 px-4 bg-neo-pink/10 border-b-4 border-neo-black" style="padding-bottom: 0px !important;">
+        <div class="max-w-7xl mx-auto">
+            <nav class="mb-8">
+                <div class="container mx-auto px-20">
+                    <ul class="flex items-center justify-center">
+                        <li><a href="/" class="px-4 py-2 bg-white neo-border font-bold hover:bg-neo-yellow transition-colors border-2 border-transparent hover:border-neo-black">Главная</a></li>
+                        
+                        <li><a href="/index.html#projects" class="px-4 py-2 bg-white neo-border font-bold hover:bg-neo-yellow transition-colors border-2 border-transparent hover:border-neo-black">Проекты</a></li>
+                        
+                        <li class="px-4 py-2 bg-neo-pink text-white font-bold">NestJS-mod</li>
+                    </ul>
+                </div>
+            </nav>
+            
+            <div class="text-center mb-12">
+                <h1 class="text-5xl font-black uppercase mb-4 text-neo-black">NestJS-mod</h1>
+                <p class="inline-block px-4 py-1 mb-4 bg-neo-green neo-border font-mono font-bold text-sm shadow-neo-sm">Моя fullstack-платформа для NestJS с инженерной экосистемой библиотек и архитектурных соглашений.</p>
+            </div>
+        </div>
+    </section>
+    
+    <div class="container mx-auto px-4 py-12 max-w-6xl">
+        <div class="prose max-w-none space-y-6">
+            
+            <div class="space-y-6">
+                <!-- Introduction -->
+                <article class="p-6 neo-border bg-white shadow-neo-sm">
+                    <h2 class="text-2xl font-bold mb-4 flex items-center gap-2"><i data-lucide="target" class="w-6 h-6 text-neo-blue"></i> Моя fullstack-платформа для NestJS</h2>
+                    <p class="mb-4"><strong>NestJS-mod</strong> — это мой инженерный проект и активная платформа для разработки backend- и fullstack-приложений на NestJS.</p>
+                    <p class="mb-4">Это не эксперимент и не учебная библиотека, а живой инструмент, который я использую как в личных проектах, так и на работе. Проект решает проблему разрозненной архитектуры, хаотичных подходов в разных командах и высоких затрат на масштабирование приложений.</p>
+                    <p class="mb-4">NestJS-mod подходит для продуктовых и B2B-команд, где важны единый подход, воспроизводимое качество и предсказуемость архитектурных решений.</p>
+                </article>
+
+                <!-- Project Goals -->
+                <article class="p-6 neo-border bg-white shadow-neo-sm">
+                    <h2 class="text-2xl font-bold mb-4 flex items-center gap-2"><i data-lucide="flag" class="w-6 h-6 text-neo-green"></i> Цели проекта</h2>
+                    <p class="mb-4">Проект создан для решения следующих задач:</p>
+                    <ul class="list-disc pl-6 mb-4 space-y-2">
+                        <li>Зафиксировать архитектуру NestJS-приложений на уровне кода</li>
+                        <li>Упростить старт новых сервисов и fullstack-продуктов</li>
+                        <li>Снизить количество архитектурных ошибок при росте команды</li>
+                        <li>Стандартизировать конфигурацию, инфраструктуру и интеграции</li>
+                        <li>Предоставить готовые production-ready шаблоны</li>
+                    </ul>
+                </article>
+
+                <!-- How the Project Was Born -->
+                <article class="p-6 neo-border bg-white shadow-neo-sm">
+                    <h2 class="text-2xl font-bold mb-4 flex items-center gap-2"><i data-lucide="lightbulb" class="w-6 h-6 text-neo-yellow"></i> Как появился проект</h2>
+                    <p class="mb-4">Я всегда старался строить общие архитектурные решения на базе существующих возможностей фреймворков. Но столкнувшись с ограничениями DI в NestJS, я создал кастомную реализацию подключения провайдеров. Параллельно я работал в команде, где писали платформенные решения — обёртки над NestJS и Node.js библиотеками, решающие проблемы разношерстного кода в проектах и командах организации.</p>
+                    <p class="mb-4">Там я увидел, какие задачи реально решают такие платформы:</p>
+                    <ul class="list-disc pl-6 mb-4 space-y-2">
+                        <li>единый способ подключения env и конфигураций для модулей</li>
+                        <li>стандартизация архитектуры и снижение хаоса между проектами</li>
+                        <li>автоматическая генерация документации по структуре проекта через декораторы</li>
+                    </ul>
+                    <p class="mb-4">Имея многолетний опыт проектирования NestJS-приложений, я видел, что подобную платформу можно реализовать иначе — проще, гибче и ближе к реальной разработке. Так и родился <strong>NestJS-mod</strong>.</p>
+                </article>
+
+                <!-- Development Approach -->
+                <article class="p-6 neo-border bg-white shadow-neo-sm">
+                    <h2 class="text-2xl font-bold mb-4 flex items-center gap-2"><i data-lucide="zap" class="w-6 h-6 text-neo-pink"></i> Подход к разработке</h2>
+                    <h3 class="text-xl font-bold mb-3 mt-4">Скорость важнее идеального кода</h3>
+                    <ul class="list-disc pl-6 mb-4 space-y-2">
+                        <li>проект развивается быстро, код может выглядеть неидеально</li>
+                        <li>все ключевые логики покрыты тестами</li>
+                        <li>безопасный рефакторинг возможен в любой момент</li>
+                        <li>развитие идёт по мере появления реальной потребности</li>
+                    </ul>
+                    <p class="mb-4">Проект — практический инструмент, а не эталон «красивого» кода.</p>
+                </article>
+
+                <!-- Architectural Core -->
+                <article class="p-6 neo-border bg-white shadow-neo-sm">
+                    <h2 class="text-2xl font-bold mb-4 flex items-center gap-2"><i data-lucide="layers-3" class="w-6 h-6 text-neo-blue"></i> Архитектурное ядро</h2>
+                    <ul class="list-disc pl-6 mb-4 space-y-2">
+                        <li>Формализованная модель слоёв: Core, Feature, Integration, Infrastructure, System</li>
+                        <li>Чёткое разделение ответственности между модулями</li>
+                        <li>Архитектура фиксируется кодом, а не документацией</li>
+                        <li>Типобезопасная работа с конфигурацией и env-переменными</li>
+                        <li>Расширенный bootstrap приложений</li>
+                    </ul>
+                </article>
+
+                <!-- Fullstack and Infrastructure -->
+                <article class="p-6 neo-border bg-white shadow-neo-sm">
+                    <h2 class="text-2xl font-bold mb-4 flex items-center gap-2"><i data-lucide="server" class="w-6 h-6 text-neo-green"></i> Fullstack и инфраструктура</h2>
+                    <ul class="list-disc pl-6 mb-4 space-y-2">
+                        <li>Включает шаблоны frontend-библиотек и проект админ-панели</li>
+                        <li>Возможность переиспользования частей фронтенда и backend</li>
+                        <li>CLI-схемы для генерации приложений и библиотек</li>
+                        <li>Поддержка Nx и монорепозиториев</li>
+                        <li>Интеграции с логированием, health-checks и markdown-отчётами</li>
+                        <li>Production-ready подход «из коробки»</li>
+                    </ul>
+                    <p class="mb-4">По сути, NestJS-mod — это полноценная fullstack-платформа, концептуально близкая к моему прежнему проекту Rucken, но с другим подходом к реализации.</p>
+                </article>
+
+                <!-- Migrations and Databases -->
+                <article class="p-6 neo-border bg-white shadow-neo-sm">
+                    <h2 class="text-2xl font-bold mb-4 flex items-center gap-2"><i data-lucide="database" class="w-6 h-6 text-neo-purple"></i> Миграции и базы данных</h2>
+                    <ul class="list-disc pl-6 mb-4 space-y-2">
+                        <li>Каждая feature-библиотека обязана иметь свои миграции</li>
+                        <li>Первая миграция всегда создаёт таблицу пользователей</li>
+                        <li>Фичи разрабатываются так, чтобы их можно было:
+                        <ul class="list-disc pl-6 mb-2 ml-6 space-y-1">
+                            <li>задеплоить в отдельную базу</li>
+                            <li>или подключить к общей базе через один connection string</li>
+                        </ul>
+                        <li>Декомпозиция по доменам закладывается с самого начала</li>
+                    </ul>
+                    <p class="mb-4">Даже если в итоге используется одна база, проект изначально проектируется для масштабирования и изоляции фич.</p>
+                </article>
+
+                <!-- Ecosystem -->
+                <article class="p-6 neo-border bg-white shadow-neo-sm">
+                    <h2 class="text-2xl font-bold mb-4 flex items-center gap-2"><i data-lucide="package" class="w-6 h-6 text-neo-yellow"></i> Экосистема</h2>
+                    
+                    <h3 class="text-xl font-bold mb-3 mt-4">Core</h3>
+                    <p class="mb-2"><strong>nestjs-mod</strong> — ядро и архитектурные утилиты</p>
+                    
+                    <h3 class="text-xl font-bold mb-3">Contrib</h3>
+                    <p class="mb-2"><strong>nestjs-mod-contrib</strong> — дополнительные библиотеки, создаваемые по необходимости</p>
+                    
+                    <h3 class="text-xl font-bold mb-3">Шаблоны</h3>
+                    <p class="mb-2"><strong>nestjs-mod-fullstack</strong> — production-ready fullstack boilerplate (NestJS + Angular)</p>
+                    <p class="mb-2"><strong>nestjs-mod-sso</strong> — пример SSO и webhook-интеграций</p>
+                    <p class="mb-4"><strong>nestjs-mod-example</strong> — демонстрационное приложение</p>
+                </article>
+
+                <!-- Practical Application -->
+                <article class="p-6 neo-border bg-white shadow-neo-sm">
+                    <h2 class="text-2xl font-bold mb-4 flex items-center gap-2"><i data-lucide="briefcase" class="w-6 h-6 text-neo-blue"></i> Практическое применение</h2>
+                    <ul class="list-disc pl-6 mb-4 space-y-2">
+                        <li>все мои текущие проекты на NestJS строятся через NestJS-mod</li>
+                        <li>платформа используется на работе</li>
+                        <li>критические баги исправляются сразу</li>
+                        <li>служит эталоном архитектуры и обучающим материалом</li>
+                    </ul>
+                    <p class="mb-4">Проект постоянно проверяется реальной эксплуатацией, и я продолжаю его развивать.</p>
+                </article>
+
+                <!-- Development Plans -->
+                <article class="p-6 neo-border bg-white shadow-neo-sm">
+                    <h2 class="text-2xl font-bold mb-4 flex items-center gap-2"><i data-lucide="rocket" class="w-6 h-6 text-neo-pink"></i> Планы развития</h2>
+                    <ul class="list-disc pl-6 mb-4 space-y-2">
+                        <li>скрипты и tooling для AI-агентов для лучшего понимания контекста проекта</li>
+                        <li>генерация приложений NestJS-mod через нейросети</li>
+                        <li>консольная утилита для работы с платформой</li>
+                        <li>генераторы frontend-кода</li>
+                    </ul>
+                    <p class="mb-4">NestJS-mod — это мой основной долгоживущий pet-проект.</p>
+                </article>
+
+                <!-- Conclusion -->
+                <article class="p-6 neo-border bg-white shadow-neo-sm">
+                    <h2 class="text-2xl font-bold mb-4 flex items-center gap-2"><i data-lucide="award" class="w-6 h-6 text-neo-green"></i> Итог</h2>
+                    <p class="mb-4"><strong>NestJS-mod</strong> — это не просто обёртка над NestJS и не учебная библиотека.</p>
+                    <p class="mb-4">Это практическая, активно используемая платформа, отражающая мой подход к архитектуре:</p>
+                    <ul class="list-disc pl-6 mb-4 space-y-2">
+                        <li>прагматично</li>
+                        <li>ориентировано на практику</li>
+                        <li>с фокусом на долгосрочную поддержку проектов</li>
+                        <li>с возможностью безопасного рефакторинга и масштабирования</li>
+                    </ul>
+                </article>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize lucide icons
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+    </script>
+    <!-- Footer -->
+    <footer class="bg-neo-black text-white py-12 px-4 border-t-4 border-white mt-10">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+            <div class="text-center md:text-left">
+                <h4 class="font-black text-2xl uppercase mb-2">site15.ru</h4>
+                <p class="font-mono text-sm text-gray-400">© 2025 Все права защищены (или нет).</p>
+            </div>
+            <div class="flex flex-col items-center md:items-end font-mono text-sm gap-2">
+                <!-- Footer Badges -->
+                <div class="flex flex-wrap justify-center md:justify-end gap-2">
+                    <a href="https://career.habr.com/endykaufman" target="_blank"
+                        class="px-3 py-1 bg-gray-500 text-white text-xs font-bold neo-border shadow-neo hover:shadow-neo-hover transition-all text-center">
+                        ХабрКарьера
+                    </a>
+                    <a href="https://ufa.hh.ru/resume/2615ca8cff019da3eb0039ed1f6732786f4533" target="_blank"
+                        class="px-3 py-1 bg-red-600 text-white text-xs font-bold neo-border shadow-neo hover:shadow-neo-hover transition-all text-center">
+                        HeadHunter
+                    </a>
+                    <a href="https://www.linkedin.com/in/ilshatkhamitov/" target="_blank"
+                        class="px-3 py-1 bg-blue-700 text-white text-xs font-bold neo-border shadow-neo hover:shadow-neo-hover transition-all text-center">
+                        LinkedIn
+                    </a>
+                    <a href="../rss.xml" target="_blank"
+                        class="px-3 py-1 bg-orange-500 text-white text-xs font-bold neo-border shadow-neo hover:shadow-neo-hover transition-all text-center">
+                        RSS
+                    </a>
+                </div>
+                <a href="mailto:admin@site15.ru" class="hover:text-neo-pink transition-colors flex items-center gap-2">
+                    <i data-lucide="mail" class="w-4 h-4"></i> admin@site15.ru
+                </a>
+                <p class="text-gray-500">Уфа, Россия</p>
+            </div>
+        </div>
+    </footer>
+</body>
+
+</html>
+  </div>
+</body>
+</html>

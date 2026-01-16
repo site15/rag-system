@@ -1,0 +1,959 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How I Deployed a Full-Stack Application with "NestJS" with "Angular" on "Supabase" and "Vercel"</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+    .article-header { border-bottom: 1px solid #ccc; padding-bottom: 10px; margin-bottom: 20px; }
+    .title { font-size: 24px; font-weight: bold; margin: 0; }
+    .pub-date { color: #666; font-size: 14px; margin: 5px 0; }
+    .tags { color: #666; font-size: 14px; margin: 5px 0; }
+    .link { color: #007bff; font-size: 14px; margin: 5px 0; }
+    .description { color: #555; font-style: italic; margin: 10px 0; padding: 10px; background-color: #f9f9f9; }
+    .content { line-height: 1.6; }
+  </style>
+</head>
+<body>
+  <div class="article-header">
+    <h1 class="title">How I Deployed a Full-Stack Application with "NestJS" with "Angular" on "Supabase" and "Vercel"</h1>
+    <div class="pub-date">Published: 2025-02-14T18:49:20.933Z</div>
+    <div class="tags">Tags: angular, nestjs, supabase, vercel</div>
+    <div class="link"><a href="https://dev.to/endykaufman/how-i-deployed-a-full-stack-application-with-nestjs-with-angular-on-supabase-and-vercel-6nk" target="_blank">Original Article</a></div>
+  </div>
+  <div class="description">
+    <strong>Description from API:</strong>
+    I developed a small full-stack application as an example of a REST + WebSockets boilerplate using...
+  </div>
+  <div class="content">
+    
+          <script>
+            try {
+              if(localStorage) {
+                let currentUser = localStorage.getItem('current_user');
+
+                if (currentUser) {
+                  currentUser = JSON.parse(currentUser);
+                  if (currentUser.id === 188852) {
+                    document.getElementById('article-show-container').classList.add('current-user-is-article-author');
+                  }
+                }
+              }
+            } catch (e) {
+              console.error(e);
+            }
+          </script>
+          <header class="crayons-article__header" id="main-title">
+
+            <div class="crayons-article__header__meta">
+              <div class="flex s:items-start flex-col s:flex-row">
+                <div id="action-space" class="crayons-article__actions mb-4 s:mb-0 s:order-last"></div>
+                <div class="flex flex-1 mb-5 items-start">
+                  <div class="relative">
+                      <a href="/endykaufman"><img class="radius-full align-middle" src="https://media2.dev.to/dynamic/image/width=50,height=50,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.amazonaws.com%2Fuploads%2Fuser%2Fprofile_image%2F188852%2F79924ec7-d82d-4e4d-b23b-6c3e84c951bd.jpeg" width="40" height="40" alt="ILshat Khamitov"></a>
+                  </div>
+                  <div class="pl-3 flex-1">
+                    <a href="/endykaufman" class="crayons-link fw-bold">ILshat Khamitov</a>
+                    
+                    <p class="fs-xs color-base-60">
+                        Posted on <time datetime="2025-02-14T18:49:20Z" class="date-no-year">Feb 14</time>
+
+
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              
+
+              <h1 class=" fs-3xl m:fs-4xl l:fs-5xl fw-bold s:fw-heavy lh-tight mb-2 longer">
+                How I Deployed a Full-Stack Application with "NestJS" with "Angular" on "Supabase" and "Vercel"
+              </h1>
+              
+                  <div class="spec__tags flex flex-wrap">
+                      <a class="crayons-tag   " style="
+        --tag-bg: rgba(169, 2, 42, 0.10);
+        --tag-prefix: #A9022A;
+        --tag-bg-hover: rgba(169, 2, 42, 0.10);
+        --tag-prefix-hover: #A9022A;
+      " href="/t/angular"><span class="crayons-tag__prefix">#</span>angular</a>
+                      <a class="crayons-tag   " style="
+        --tag-bg: rgba(59, 73, 223, 0.10);
+        --tag-prefix: #3b49df;
+        --tag-bg-hover: rgba(59, 73, 223, 0.10);
+        --tag-prefix-hover: #3b49df;
+      " href="/t/nestjs"><span class="crayons-tag__prefix">#</span>nestjs</a>
+                      <a class="crayons-tag   " style="
+        --tag-bg: rgba(59, 73, 223, 0.10);
+        --tag-prefix: #3b49df;
+        --tag-bg-hover: rgba(59, 73, 223, 0.10);
+        --tag-prefix-hover: #3b49df;
+      " href="/t/supabase"><span class="crayons-tag__prefix">#</span>supabase</a>
+                      <a class="crayons-tag   " style="
+        --tag-bg: rgba(59, 73, 223, 0.10);
+        --tag-prefix: #3b49df;
+        --tag-bg-hover: rgba(59, 73, 223, 0.10);
+        --tag-prefix-hover: #3b49df;
+      " href="/t/vercel"><span class="crayons-tag__prefix">#</span>vercel</a>
+                  </div>
+            </div>
+          </header>
+
+          <div class="crayons-article__main ">
+              
+  <nav class="series-switcher crayons-card crayons-card--secondary">
+    <header class="crayons-card__header">
+      <h2 class="crayons-subtitle-2">
+        <a href="/endykaufman/series/26183">nestjs-mod (29 Part Series)</a>
+      </h2>
+    </header>
+
+    <div class="series-switcher__list">
+
+          <a href="/endykaufman/collection-of-nestjs-mod-utilities-for-unifying-applications-and-modules-on-nestjs-5256" class="crayons-link crayons-link--contentful series-switcher__link  " data-preload-image="" title="Published Jan 24 '24">
+            <span class="series-switcher__num">1</span>
+            <span class="series-switcher__title">Collection of NestJS-mod utilities for unifying applications and modules on NestJS</span>
+          </a>
+
+          <a href="/endykaufman/nestjs-mod-updated-for-work-with-nx-v1953-42p0" class="crayons-link crayons-link--contentful series-switcher__link  " data-preload-image="" title="Published Jul 29 '24">
+            <span class="series-switcher__num">2</span>
+            <span class="series-switcher__title">NestJs-mod updated for work with NX v.19.5.3</span>
+          </a>
+            <a href="/endykaufman/website-for-nestjs-mod-httpsnestjs-modcom-56mj" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--inbetween" data-preload-image="https://media2.dev.to/dynamic/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.amazonaws.com%2Fuploads%2Farticles%2F31xvbduakcewtrw2bdb5.png" id="collection-link-inbetween" data-no-instant="" title="View more">
+              <span class="series-switcher__num">...</span>
+              <span class="series-switcher__title">25 more parts...</span>
+            </a>
+
+          <a href="/endykaufman/website-for-nestjs-mod-httpsnestjs-modcom-56mj" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="https://media2.dev.to/dynamic/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.amazonaws.com%2Fuploads%2Farticles%2F31xvbduakcewtrw2bdb5.png" title="Published Aug 8 '24">
+            <span class="series-switcher__num">3</span>
+            <span class="series-switcher__title">Website for NestJS-mod - https://nestjs-mod.com</span>
+          </a>
+
+          <a href="/endykaufman/creating-an-empty-project-using-nestjs-mod-2dgo" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="https://media2.dev.to/dynamic/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.amazonaws.com%2Fuploads%2Farticles%2Fv20mq403dveznuokg5ue.png" title="Published Aug 8 '24">
+            <span class="series-switcher__num">4</span>
+            <span class="series-switcher__title">Creating an empty project using NestJS-mod</span>
+          </a>
+
+          <a href="/endykaufman/creating-an-empty-angular-project-and-linking-it-to-an-existing-server-on-nestjs-1bbi" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="" title="Published Aug 10 '24">
+            <span class="series-switcher__num">5</span>
+            <span class="series-switcher__title">Creating an empty Angular project and linking it to an existing server on NestJS</span>
+          </a>
+
+          <a href="/endykaufman/adding-the-postgres-database-to-the-project-and-running-migrations-via-flyway-for-the-nestjs-mod-application-1fao" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="" title="Published Aug 11 '24">
+            <span class="series-switcher__num">6</span>
+            <span class="series-switcher__title">Adding the Postgres database to the project and running migrations via Flyway for the NestJS-mod application</span>
+          </a>
+
+          <a href="/endykaufman/connecting-prismaorm-to-the-nestjs-mod-application-and-checking-its-operation-via-rest-4bbp" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="" title="Published Aug 14 '24">
+            <span class="series-switcher__num">7</span>
+            <span class="series-switcher__title">Connecting PrismaORM to the NestJS-mod application and checking its operation via REST</span>
+          </a>
+
+          <a href="/endykaufman/adding-swagger-documentation-to-the-nestjs-mod-application-and-generating-a-rest-client-for-the-angular-application-2187" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="" title="Published Aug 15 '24">
+            <span class="series-switcher__num">8</span>
+            <span class="series-switcher__title">Adding Swagger documentation to the NestJS-mod application and generating a REST client for the Angular application</span>
+          </a>
+
+          <a href="/endykaufman/an-example-of-a-simple-update-of-nestjs-mod-libraries-3509" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="" title="Published Aug 15 '24">
+            <span class="series-switcher__num">9</span>
+            <span class="series-switcher__title">An example of a simple update of NestJS-mod libraries</span>
+          </a>
+
+          <a href="/endykaufman/build-applications-on-nestjs-and-angular-and-run-them-in-two-versions-via-pm2-and-via-docker-compose-1g1e" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="" title="Published Aug 20 '24">
+            <span class="series-switcher__num">10</span>
+            <span class="series-switcher__title">Build applications on NestJS and Angular and run them in two versions: via PM2 and via Docker Compose</span>
+          </a>
+
+          <a href="/endykaufman/manual-deployment-of-nestjs-and-angular-applications-on-a-dedicated-server-via-docker-compose-and-pm2-2o8a" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="" title="Published Aug 22 '24">
+            <span class="series-switcher__num">11</span>
+            <span class="series-switcher__title">Manual deployment of NestJS and Angular applications on a dedicated server via "Docker Compose" and "PM2"</span>
+          </a>
+
+          <a href="/endykaufman/adding-the-cicd-config-for-deployment-to-a-dedicated-server-using-github-actions-46e0" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="" title="Published Aug 26 '24">
+            <span class="series-switcher__num">12</span>
+            <span class="series-switcher__title">Adding the CI/CD config for deployment NestJS and Angular applications to a dedicated server using GitHub Actions</span>
+          </a>
+
+          <a href="/endykaufman/adding-the-cicd-config-for-deploying-nestjs-and-angular-applications-to-a-dedicated-server-using-github-actions-p3k" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="https://media2.dev.to/dynamic/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.amazonaws.com%2Fuploads%2Farticles%2Fyg1tkoa5i0dwut9tp6x4.png" title="Published Sep 8 '24">
+            <span class="series-switcher__num">13</span>
+            <span class="series-switcher__title">Accelerating the deployment of NestJS and Angular using public Github runners and creating intermediate Docker images</span>
+          </a>
+
+          <a href="/endykaufman/installing-kubernetes-via-microk8s-and-configuring-the-deployment-of-nestjs-and-angular-applications-goe" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="" title="Published Sep 14 '24">
+            <span class="series-switcher__num">14</span>
+            <span class="series-switcher__title">Installing Kubernetes via MicroK8s and configuring the deployment of NestJS and Angular applications</span>
+          </a>
+
+          <a href="/endykaufman/access-to-the-site-on-nestjs-and-angular-by-domain-name-with-ssl-certificate-in-kubernetes-via-ingress-4p6e" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="" title="Published Sep 16 '24">
+            <span class="series-switcher__num">15</span>
+            <span class="series-switcher__title">Access to the site on NestJS and Angular by domain name with SSL certificate in Kubernetes via Ingress</span>
+          </a>
+
+          <a href="/endykaufman/semantic-versioning-of-nestjs-and-angular-applications-in-the-nx-monorepository-3bjg" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="" title="Published Sep 16 '24">
+            <span class="series-switcher__num">16</span>
+            <span class="series-switcher__title">Semantic versioning of NestJS and Angular applications in the NX monorepository</span>
+          </a>
+
+          <a href="/endykaufman/adding-lint-staged-to-nestjs-and-angular-applications-enabling-semantic-versioning-of-the-frontend-4hpo" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="https://media2.dev.to/dynamic/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.amazonaws.com%2Fuploads%2Farticles%2Fhky7au7keptr1sv8ccwq.png" title="Published Sep 17 '24">
+            <span class="series-switcher__num">17</span>
+            <span class="series-switcher__title">Adding lint-staged to NestJS and Angular applications, enabling semantic versioning of the frontend</span>
+          </a>
+
+          <a href="/endykaufman/creating-a-configurable-webhook-module-for-a-nestjs-application-49o9" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="" title="Published Oct 6 '24">
+            <span class="series-switcher__num">18</span>
+            <span class="series-switcher__title">Creating a configurable Webhook module for a NestJS application</span>
+          </a>
+
+          <a href="/endykaufman/creating-a-user-interface-for-the-webhook-module-using-angular-40id" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="https://media2.dev.to/dynamic/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.amazonaws.com%2Fuploads%2Farticles%2Fr74b4fsnxtsspi0fxibg.png" title="Published Oct 25 '24">
+            <span class="series-switcher__num">19</span>
+            <span class="series-switcher__title">Creating a user interface for the Webhook module using Angular</span>
+          </a>
+
+          <a href="/endykaufman/integration-of-external-authorization-server-httpsauthorizerdev-into-a-full-stack-application-on-nestjs-and-angular-1apj" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="" title="Published Nov 7 '24">
+            <span class="series-switcher__num">20</span>
+            <span class="series-switcher__title">Integration of external authorization server https://authorizer.dev into a full-stack application on NestJS and Angular</span>
+          </a>
+
+          <a href="/endykaufman/integrating-an-external-file-server-httpsminio-into-a-full-stack-application-on-nestjs-and-1l32" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="" title="Published Nov 15 '24">
+            <span class="series-switcher__num">21</span>
+            <span class="series-switcher__title">Integrating an external file server https://min.io into a full-stack application on NestJS and Angular</span>
+          </a>
+
+          <a href="/endykaufman/caching-information-in-redis-on-nestjs-8po" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="" title="Published Nov 20 '24">
+            <span class="series-switcher__num">22</span>
+            <span class="series-switcher__title">Caching information in Redis on NestJS</span>
+          </a>
+
+          <a href="/endykaufman/getting-server-time-via-websockets-and-displaying-it-in-angular-application-leh" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="" title="Published Nov 20 '24">
+            <span class="series-switcher__num">23</span>
+            <span class="series-switcher__title">Getting server time via WebSockets and displaying It in Angular application</span>
+          </a>
+
+          <a href="/endykaufman/validating-rest-requests-in-a-nestjs-application-and-displaying-errors-in-angular-application-forms-2gp1" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="" title="Published Nov 24 '24">
+            <span class="series-switcher__num">24</span>
+            <span class="series-switcher__title">Validating REST requests in a NestJS application and displaying errors in Angular application forms</span>
+          </a>
+
+          <a href="/endykaufman/adding-multi-language-support-to-nestjs-and-angular-applications-1f69" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="https://media2.dev.to/dynamic/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.amazonaws.com%2Fuploads%2Farticles%2F9898xdiaww616n7ebqck.png" title="Published Dec 3 '24">
+            <span class="series-switcher__num">25</span>
+            <span class="series-switcher__title">Adding multi-language support to NestJS and Angular applications</span>
+          </a>
+
+          <a href="/endykaufman/timezone-support-in-a-full-stack-application-based-on-nestjs-and-angular-working-with-rest-and-2pd6" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="https://media2.dev.to/dynamic/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.amazonaws.com%2Fuploads%2Farticles%2Foxqifry2bux2j601wno1.png" title="Published Dec 12 '24">
+            <span class="series-switcher__num">26</span>
+            <span class="series-switcher__title">Timezone support in a full-stack application based on NestJS and Angular: working with REST and WebSockets</span>
+          </a>
+
+          <a href="/endykaufman/integrating-and-storing-the-selected-user-language-into-the-database-in-a-full-stack-application-on-4l2i" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="https://media2.dev.to/dynamic/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.amazonaws.com%2Fuploads%2Farticles%2F09huc9rb6hhnjlgun3j4.png" title="Published Dec 16 '24">
+            <span class="series-switcher__num">27</span>
+            <span class="series-switcher__title">Integrating and storing the selected user language into the database in a full-stack application on "Angular" and "NestJS"</span>
+          </a>
+
+          <a href="/endykaufman/converting-date-by-user-time-zone-in-nestjs-and-entering-and-displaying-date-in-angular-2195" class="crayons-link crayons-link--contentful series-switcher__link  " data-preload-image="https://media2.dev.to/dynamic/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.amazonaws.com%2Fuploads%2Farticles%2Fhpagkuvys7cs08vhj5n2.png" title="Published Dec 29 '24">
+            <span class="series-switcher__num">28</span>
+            <span class="series-switcher__title">Converting date by user time zone in "NestJS", and entering and displaying date in "Angular"</span>
+          </a>
+
+          <a href="/endykaufman/how-i-deployed-a-full-stack-application-with-nestjs-with-angular-on-supabase-and-vercel-6nk" class="crayons-link crayons-link--contentful series-switcher__link series-switcher__link--active " data-preload-image="" title="Published Feb 14">
+            <span class="series-switcher__num">29</span>
+            <span class="series-switcher__title">How I Deployed a Full-Stack Application with "NestJS" with "Angular" on "Supabase" and "Vercel"</span>
+          </a>
+    </div>
+  </nav>
+
+            <div class="crayons-article__body text-styles spec__body" data-article-id="2278295" id="article-body">
+                <p>I developed a small <a href="https://github.com/nestjs-mod/nestjs-mod-fullstack" target="_blank" rel="noopener noreferrer">full-stack</a> application as an example of a <code>REST</code> + <code>WebSockets</code> boilerplate using <code>NestJS</code> and <code>Angular</code>. The application uses <code>PostgreSQL</code> for data storage, <code>Redis</code> for caching, and <code>Minio</code> for file handling. Initially, the target deployment environment was <code>Kubernetes</code>, but to speed up development and MVP testing, I decided to use free cloud services: <code>Supabase</code> for infrastructure and <code>Vercel</code> for deploying the backend and frontend.</p>
+
+<h2>
+  <a name="1-problems" href="#1-problems">
+  </a>
+  1. Problems
+</h2>
+
+<ul>
+<li>
+<strong>Development Infrastructure</strong>: For local development, it was necessary to set up <code>PostgreSQL</code>, <code>Redis</code>, <code>Minio</code>, and an authorization server (<code>Authorizer.dev</code>). This was time-consuming and resource-intensive.</li>
+<li>
+<strong>Complexity of Deployment in <code>Kubernetes</code></strong>: Configuring Docker image builds and deploying to <code>Kubernetes</code> took a lot of time, especially if the Docker images were large.</li>
+<li>
+<strong>Limited Budget</strong>: For small projects or MVP testing, there was no budget for dedicated servers or a full-fledged <code>Kubernetes</code> infrastructure.</li>
+</ul>
+
+<h2>
+  <a name="2-solution" href="#2-solution">
+  </a>
+  2. Solution
+</h2>
+
+<p>I decided to add the ability to deploy the application not only to <code>Kubernetes</code> but also to free cloud services like <code>Supabase</code> (for databases, storage, and authentication) and <code>Vercel</code> (for backend and frontend deployment). This allowed me to speed up the development and testing process while reducing infrastructure costs.</p>
+
+<h2>
+  <a name="3-initial-state" href="#3-initial-state">
+  </a>
+  3. Initial State
+</h2>
+
+<ul>
+<li>
+<strong>Backend</strong>: <code>NestJS</code> with <code>REST API</code> and <code>WebSockets</code> for broadcasting events (e.g., current server time).</li>
+<li>
+<strong>Frontend</strong>: <code>Angular</code> for interacting with the backend via <code>REST</code> and <code>WebSockets</code>.</li>
+<li>
+<strong>Infrastructure</strong>:
+
+<ul>
+<li>Locally running services: <code>Authorizer.dev</code> for authentication, <code>PostgreSQL</code> for the database, <code>Redis</code> for caching, and <code>Minio</code> for file storage.</li>
+<li>Deployment to <code>Kubernetes</code> using Docker images for the backend and frontend.</li>
+<li>
+<code>PostgreSQL</code> and migrations were run via <code>Docker Compose</code>.</li>
+<li>
+<code>E2E</code> tests were also run via <code>Docker Compose</code>.</li>
+</ul>
+
+
+</li>
+
+</ul>
+
+<h2>
+  <a name="4-current-state" href="#4-current-state">
+  </a>
+  4. Current State
+</h2>
+
+<ul>
+<li>
+<strong>Backend and Frontend</strong>: Work locally, but the infrastructure has been fully migrated to <code>Supabase</code>.</li>
+<li>
+<strong>Cloud Services Used</strong>:
+
+<ul>
+<li>
+<strong><code>Supabase Auth</code></strong>: Replaced the local <code>Authorizer.dev</code>.</li>
+<li>
+<strong><code>Supabase Database</code></strong>: Replaced the local <code>PostgreSQL</code> and <code>Redis</code>.</li>
+<li>
+<strong><code>Supabase Storage</code></strong>: Replaced the local <code>Minio</code>.</li>
+</ul>
+
+
+</li>
+
+<li>
+
+<strong>Deployment</strong>: The backend and frontend are deployed to <code>Vercel</code>. Due to <code>Vercel</code>'s serverless architecture, <code>WebSockets</code> do not work, so related tests have been disabled.</li>
+
+<li>
+
+<strong><code>CI/CD</code></strong>: Build and deployment are done via <code>GitHub Actions</code>, including applying migrations and running <code>E2E</code> tests.</li>
+
+</ul>
+
+<h2>
+  <a name="5-implementation-steps" href="#5-implementation-steps">
+  </a>
+  5. Implementation Steps
+</h2>
+
+<h3>
+  <a name="51-transition-to-raw-supabase-database-endraw-" href="#51-transition-to-raw-supabase-database-endraw-">
+  </a>
+  5.1. Transition to <code>Supabase Database</code>
+</h3>
+
+<ul>
+<li>Local <code>PostgreSQL</code> was replaced with <code>Supabase Database</code>.</li>
+<li>For migrations, <code>pg-flyway</code> (a mini-version of <code>Flyway</code> without <code>Java</code>) was used. I didn’t want to lose the functionality of <code>Flyway</code> but also didn’t want to install <code>Java</code> during deployment. As a result, I created a mini-version of <code>flyway</code> — <a href="https://www.npmjs.com/package/pg-flyway" target="_blank" rel="noopener noreferrer"><code>pg-flyway</code></a>.</li>
+<li>In <code>Supabase</code>, you cannot create multiple databases, so migrations are run in a single database using different tables to track migrations. To solve this issue, the migration table name can be passed when running the migrator.</li>
+<li>A single user is used for all databases since <code>Supabase</code> does not allow creating new users with database creation rights. This limitation required rethinking the database logic.</li>
+</ul>
+
+<h3>
+  <a name="52-transition-to-raw-supabase-endraw-instead-of-raw-redis-endraw-" href="#52-transition-to-raw-supabase-endraw-instead-of-raw-redis-endraw-">
+  </a>
+  5.2. Transition to <code>Supabase</code> Instead of <code>Redis</code>
+</h3>
+
+<ul>
+<li>
+<code>Redis</code> was replaced with <code>Keyv</code> with <code>PostgreSQL</code> support. Since the current project did not have any <code>Redis</code>-specific tasks, I decided to replace <code>Redis</code> with an alternative implementation.</li>
+<li>During my research, I noticed that the <code>CacheModule</code> for <code>NestJS</code> was transitioning to using <code>Keyv</code>, so I created my own wrapper, <a href="https://nestjs-mod.com/docs/packages/core/keyv" target="_blank" rel="noopener noreferrer"><code>nestjs-mod/keyv</code></a>, which supports both <code>Redis</code> and <code>PostgreSQL</code>.</li>
+<li>This is not a full replacement; it only works for simple applications where we cache some data.</li>
+</ul>
+
+<h3>
+  <a name="53-transition-to-raw-supabase-storage-endraw-" href="#53-transition-to-raw-supabase-storage-endraw-">
+  </a>
+  5.3. Transition to <code>Supabase Storage</code>
+</h3>
+
+<ul>
+<li>
+<code>Minio</code> was replaced with <code>Supabase Storage</code>.</li>
+<li>The main changes involved the logic for generating file upload links. Unlike <code>Minio</code>, in <code>Supabase</code>, buckets and policies are created via the <code>GUI</code>, which complicates automation (this was the only method I could find).</li>
+<li>One issue in the code was that the <code>FilesModule</code> was tightly coupled with <code>Minio</code>. I had to decouple it and create a configuration to override methods at the application level through integration configuration.</li>
+</ul>
+
+<h3>
+  <a name="54-transition-to-raw-supabase-auth-endraw-" href="#54-transition-to-raw-supabase-auth-endraw-">
+  </a>
+  5.4. Transition to <code>Supabase Auth</code>
+</h3>
+
+<ul>
+<li>The local <code>Authorizer.dev</code> was replaced with <code>Supabase Auth</code>.</li>
+<li>Problems arose immediately since the <code>AuthModule</code> was previously based entirely on the logic and code for working with <code>Authorizer</code>.</li>
+<li>A new <code>NestJS</code> module for working with <code>Supabase Auth</code> was written, compatible with the previous implementation. This module was not written from scratch but by copying code from the existing <a href="https://nestjs-mod.com/docs/packages/core/authorizer" target="_blank" rel="noopener noreferrer"><code>nestjs-mod/authorizer</code></a>.</li>
+<li>Currently, this new module resides in this project, but it will eventually be moved to <a href="https://github.com/nestjs-mod/nestjs-mod-contrib" target="_blank" rel="noopener noreferrer"><code>nestjs-mod/nestjs-mod-contrib</code></a>. I’ve had too many issues with existing authorization servers, so I need to write my own custom implementation. Once it’s written and tested for backward compatibility with <code>Supabase</code> and <code>Authorizer</code>, the <code>Supabase</code> implementation will be published as a public <code>npm</code> package.</li>
+</ul>
+
+<h3>
+  <a name="55-deployment-to-raw-vercel-endraw-" href="#55-deployment-to-raw-vercel-endraw-">
+  </a>
+  5.5. Deployment to <code>Vercel</code>
+</h3>
+
+<ul>
+<li>This step consumed a lot of time. I won’t describe all the issues I encountered, but there were many. Here’s a link to example configurations I found useful: <a href="https://github.com/vercel/vercel/tree/main/packages/node/test/fixtures" target="_blank" rel="noopener noreferrer">Vercel configuration examples</a>, and here’s my config for <a href="https://github.com/nestjs-mod/nestjs-mod-fullstack/blob/master/vercel.json" target="_blank" rel="noopener noreferrer"><code>vercel.json</code></a>.</li>
+<li>After setting up deployment to <code>Vercel</code>, if you have <code>e2e</code> tests, some of them will fail because <code>Vercel</code> spins up the application for each request. If the application is not optimized for serverless, like mine, the tests will fail due to slow response times. I solved this by increasing the timeout in the tests.</li>
+</ul>
+
+<h3>
+  <a name="56-environment-variables" href="#56-environment-variables">
+  </a>
+  5.6. Environment Variables
+</h3>
+
+<ul>
+<li>This isn’t a major issue, but it exists. When deploying to your own virtual server, the server is impersonal and can be destroyed at any time, and it doesn’t store environment variables. They are all stored in <code>CI/CD</code>.</li>
+<li>When using <code>Vercel</code> and <code>Supabase</code>, there are two additional places where environment variables can be stored. Designing the deployment and launch to account for these variations took a lot of time.</li>
+</ul>
+
+<h3>
+  <a name="57-registration-and-authorization-in-the-cloud" href="#57-registration-and-authorization-in-the-cloud">
+  </a>
+  5.7. Registration and Authorization in the Cloud
+</h3>
+
+<ul>
+<li>I won’t describe the registration process for <a href="https://supabase.com/dashboard/new" target="_blank" rel="noopener noreferrer"><code>Supabase</code></a> and <a href="https://vercel.com/new" target="_blank" rel="noopener noreferrer"><code>Vercel</code></a>. Instead, I’ll share a short <a href="https://github.com/nestjs-mod/nestjs-mod-fullstack/raw/refs/heads/master/steps/2025-02-12/create-supabase-project-and-link-it-to-vercel.mp4" target="_blank" rel="noopener noreferrer">video</a> on how to create applications on <code>Supabase</code> and set environment variables in <code>Vercel</code>.</li>
+</ul>
+
+<h2>
+  <a name="6-instructions-for-running-local-code-with-external-infrastructure-on-raw-supabase-endraw-" href="#6-instructions-for-running-local-code-with-external-infrastructure-on-raw-supabase-endraw-">
+  </a>
+  6. Instructions for Running Local Code with External Infrastructure on <code>Supabase</code>
+</h2>
+
+<h3>
+  <a name="61-initialization" href="#61-initialization">
+  </a>
+  6.1. Initialization
+</h3>
+
+
+
+<div class="highlight js-code-highlight">
+<pre class="highlight shell"><code>git clone git@github.com:nestjs-mod/nestjs-mod-fullstack.git
+<span class="nb">cd </span>nestjs-mod-fullstack
+npm i
+<span class="nb">cp</span> ./example-supabase.env ./.env
+</code></pre>
+<div class="highlight__panel js-actions-panel">
+<div class="highlight__panel-action js-fullscreen-code-action">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 24 24" class="highlight-action crayons-icon highlight-action--fullscreen-on"><title>Enter fullscreen mode</title>
+    <path d="M16 3h6v6h-2V5h-4V3zM2 3h6v2H4v4H2V3zm18 16v-4h2v6h-6v-2h4zM4 19h4v2H2v-6h2v4z"></path>
+</svg>
+
+    <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 24 24" class="highlight-action crayons-icon highlight-action--fullscreen-off"><title>Exit fullscreen mode</title>
+    <path d="M18 7h4v2h-6V3h2v4zM8 9H2V7h4V3h2v6zm10 8v4h-2v-6h6v2h-4zM8 15v6H6v-4H2v-2h6z"></path>
+</svg>
+
+</div>
+</div>
+</div>
+
+
+
+<h3>
+  <a name="62-preparation" href="#62-preparation">
+  </a>
+  6.2. Preparation
+</h3>
+
+<ol>
+<li>Create an organization and project on <a href="https://supabase.com/" target="_blank" rel="noopener noreferrer">Supabase</a>.</li>
+<li>Create a bucket named "images" in the storage (example link: <a href="https://supabase.com/dashboard/project/XXX/storage/buckets" target="_blank" rel="noopener noreferrer">https://supabase.com/dashboard/project/XXX/storage/buckets</a>).</li>
+<li>Create new "S3 Access Keys" with "Access key ID" and "Secret access key" (example link: <a href="https://supabase.com/dashboard/project/gustcjgbrmmipkizqzso/settings/storage" target="_blank" rel="noopener noreferrer">https://supabase.com/dashboard/project/gustcjgbrmmipkizqzso/settings/storage</a>).</li>
+<li>Open <code>.env</code> and fill in the empty values.
+</li>
+</ol>
+
+<div class="highlight js-code-highlight">
+<pre class="highlight shell"><code>   <span class="c"># https://supabase.com/dashboard/project/XXX/settings/api - API Settings - Project URL - URL</span>
+   <span class="nv">SUPABASE_URL</span><span class="o">=</span>empty_value
+   <span class="c"># https://supabase.com/dashboard/project/XXX/settings/database?showConnect=true - Connection String - Direct connection</span>
+   <span class="nv">POSTGRES_URL</span><span class="o">=</span>empty_value
+   <span class="c"># https://supabase.com/dashboard/project/XXX/settings/api - API Settings - Project API Keys - anon public</span>
+   <span class="nv">SUPABASE_ANON_KEY</span><span class="o">=</span>empty_value
+   <span class="c"># https://supabase.com/dashboard/project/gustcjgbrmmipkizqzso/settings/storage - S3 Access Keys - New access key - Access key ID</span>
+   <span class="nv">SERVER_MINIO_ACCESS_KEY</span><span class="o">=</span>empty_value
+   <span class="c"># https://supabase.com/dashboard/project/gustcjgbrmmipkizqzso/settings/storage - S3 Access Keys - New access key - Secret access key</span>
+   <span class="nv">SERVER_MINIO_SECRET_KEY</span><span class="o">=</span>empty_value
+</code></pre>
+<div class="highlight__panel js-actions-panel">
+<div class="highlight__panel-action js-fullscreen-code-action">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 24 24" class="highlight-action crayons-icon highlight-action--fullscreen-on"><title>Enter fullscreen mode</title>
+    <path d="M16 3h6v6h-2V5h-4V3zM2 3h6v2H4v4H2V3zm18 16v-4h2v6h-6v-2h4zM4 19h4v2H2v-6h2v4z"></path>
+</svg>
+
+    <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 24 24" class="highlight-action crayons-icon highlight-action--fullscreen-off"><title>Exit fullscreen mode</title>
+    <path d="M18 7h4v2h-6V3h2v4zM8 9H2V7h4V3h2v6zm10 8v4h-2v-6h6v2h-4zM8 15v6H6v-4H2v-2h6z"></path>
+</svg>
+
+</div>
+</div>
+</div>
+
+
+
+<ol>
+<li>Create and fill in all necessary new environment keys.
+</li>
+</ol>
+
+<div class="highlight js-code-highlight">
+<pre class="highlight shell"><code>   npx <span class="nt">--yes</span> tsx update-files-for-vercel.ts
+</code></pre>
+<div class="highlight__panel js-actions-panel">
+<div class="highlight__panel-action js-fullscreen-code-action">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 24 24" class="highlight-action crayons-icon highlight-action--fullscreen-on"><title>Enter fullscreen mode</title>
+    <path d="M16 3h6v6h-2V5h-4V3zM2 3h6v2H4v4H2V3zm18 16v-4h2v6h-6v-2h4zM4 19h4v2H2v-6h2v4z"></path>
+</svg>
+
+    <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 24 24" class="highlight-action crayons-icon highlight-action--fullscreen-off"><title>Exit fullscreen mode</title>
+    <path d="M18 7h4v2h-6V3h2v4zM8 9H2V7h4V3h2v6zm10 8v4h-2v-6h6v2h-4zM8 15v6H6v-4H2v-2h6z"></path>
+</svg>
+
+</div>
+</div>
+</div>
+
+
+
+<h3>
+  <a name="63-running" href="#63-running">
+  </a>
+  6.3. Running
+</h3>
+
+
+
+<div class="highlight js-code-highlight">
+<pre class="highlight shell"><code>npm run pm2-supabase-full:dev:start
+</code></pre>
+<div class="highlight__panel js-actions-panel">
+<div class="highlight__panel-action js-fullscreen-code-action">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 24 24" class="highlight-action crayons-icon highlight-action--fullscreen-on"><title>Enter fullscreen mode</title>
+    <path d="M16 3h6v6h-2V5h-4V3zM2 3h6v2H4v4H2V3zm18 16v-4h2v6h-6v-2h4zM4 19h4v2H2v-6h2v4z"></path>
+</svg>
+
+    <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 24 24" class="highlight-action crayons-icon highlight-action--fullscreen-off"><title>Exit fullscreen mode</title>
+    <path d="M18 7h4v2h-6V3h2v4zM8 9H2V7h4V3h2v6zm10 8v4h-2v-6h6v2h-4zM8 15v6H6v-4H2v-2h6z"></path>
+</svg>
+
+</div>
+</div>
+</div>
+
+
+
+<h3>
+  <a name="64-open-the-browser" href="#64-open-the-browser">
+  </a>
+  6.4. Open the Browser
+</h3>
+
+<p><a href="http://localhost:4200" target="_blank" rel="noopener noreferrer">http://localhost:4200</a></p>
+
+<h3>
+  <a name="65-testing" href="#65-testing">
+  </a>
+  6.5. Testing
+</h3>
+
+
+
+<div class="highlight js-code-highlight">
+<pre class="highlight shell"><code>npm run pm2-supabase-full:dev:test:e2e
+</code></pre>
+<div class="highlight__panel js-actions-panel">
+<div class="highlight__panel-action js-fullscreen-code-action">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 24 24" class="highlight-action crayons-icon highlight-action--fullscreen-on"><title>Enter fullscreen mode</title>
+    <path d="M16 3h6v6h-2V5h-4V3zM2 3h6v2H4v4H2V3zm18 16v-4h2v6h-6v-2h4zM4 19h4v2H2v-6h2v4z"></path>
+</svg>
+
+    <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 24 24" class="highlight-action crayons-icon highlight-action--fullscreen-off"><title>Exit fullscreen mode</title>
+    <path d="M18 7h4v2h-6V3h2v4zM8 9H2V7h4V3h2v6zm10 8v4h-2v-6h6v2h-4zM8 15v6H6v-4H2v-2h6z"></path>
+</svg>
+
+</div>
+</div>
+</div>
+
+
+
+<h3>
+  <a name="66-stopping" href="#66-stopping">
+  </a>
+  6.6. Stopping
+</h3>
+
+
+
+<div class="highlight js-code-highlight">
+<pre class="highlight shell"><code>npm run pm2-supabase-full:dev:stop
+</code></pre>
+<div class="highlight__panel js-actions-panel">
+<div class="highlight__panel-action js-fullscreen-code-action">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 24 24" class="highlight-action crayons-icon highlight-action--fullscreen-on"><title>Enter fullscreen mode</title>
+    <path d="M16 3h6v6h-2V5h-4V3zM2 3h6v2H4v4H2V3zm18 16v-4h2v6h-6v-2h4zM4 19h4v2H2v-6h2v4z"></path>
+</svg>
+
+    <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 24 24" class="highlight-action crayons-icon highlight-action--fullscreen-off"><title>Exit fullscreen mode</title>
+    <path d="M18 7h4v2h-6V3h2v4zM8 9H2V7h4V3h2v6zm10 8v4h-2v-6h6v2h-4zM8 15v6H6v-4H2v-2h6z"></path>
+</svg>
+
+</div>
+</div>
+</div>
+
+
+
+<h2>
+  <a name="conclusion" href="#conclusion">
+  </a>
+  Conclusion
+</h2>
+
+<p>Designing and developing the code for this article took me almost two months of part-time work. This makes you think about the necessity of supporting multiple environments for running an application.</p>
+
+<p>I won’t provide code examples here because there were too many <a href="https://github.com/nestjs-mod/nestjs-mod-fullstack/compare/ac8ce1e94a24f912f73c5eb1950458ebc77c12d4..2c4ae81cd32a7b186e4b63c567a30ad7e0c2a239" target="_blank" rel="noopener noreferrer">changes</a>.</p>
+
+<p>Backward compatibility is achieved by substituting the necessary implementation of configurations and different service implementations, both in the <a href="https://github.com/nestjs-mod/nestjs-mod-fullstack/tree/master/apps/server/src/app/integrations" target="_blank" rel="noopener noreferrer">backend</a> and the <a href="https://github.com/nestjs-mod/nestjs-mod-fullstack/tree/master/apps/client/src/app/integrations" target="_blank" rel="noopener noreferrer">frontend</a>.</p>
+
+<p>The free version of the cloud infrastructure from <code>Supabase</code> is limited in resources and responds slowly. Deployment to such an environment can only be used during the development of the <code>MVP</code> version.</p>
+
+<p>Since the version deployed to <code>Vercel</code> works as <code>serverless</code>, we don’t have the ability to use internal <code>EventEmitter</code>s or <code>RxJS Subject</code>s that we could emit using background global <code>setInterval</code>s in the code. Such logic needs to be solved differently, using <code>Supabase Cron</code>, <code>Supabase Queues</code>, or <code>Supabase Realtime</code>.</p>
+
+<p>Implementing support for multiple deployment and launch options is very labor-intensive, and it’s always better to choose a single deployment path for your application.</p>
+
+<h2>
+  <a name="plans" href="#plans">
+  </a>
+  Plans
+</h2>
+
+<p>Since I need to write a custom authorization service for work that can be extended as needed, in the next post, I will describe the creation of a basic, simple version...</p>
+
+<h2>
+  <a name="links" href="#links">
+  </a>
+  Links
+</h2>
+
+<ul>
+<li>
+<a href="https://nestjs.com" target="_blank" rel="noopener noreferrer">https://nestjs.com</a> - official framework website</li>
+<li>
+<a href="https://nestjs-mod.com" target="_blank" rel="noopener noreferrer">https://nestjs-mod.com</a> - official website for additional utilities</li>
+<li>
+<a href="https://fullstack.nestjs-mod.com" target="_blank" rel="noopener noreferrer">https://fullstack.nestjs-mod.com</a> - website from the post</li>
+<li>
+<a href="https://nestjs-mod-fullstack.vercel.app" target="_blank" rel="noopener noreferrer">https://nestjs-mod-fullstack.vercel.app</a> - website from the post on Vercel</li>
+<li>
+<a href="https://github.com/nestjs-mod/nestjs-mod-fullstack" target="_blank" rel="noopener noreferrer">https://github.com/nestjs-mod/nestjs-mod-fullstack</a> - project from the post</li>
+<li>
+<a href="https://github.com/nestjs-mod/nestjs-mod-fullstack/compare/ac8ce1e94a24f912f73c5eb1950458ebc77c12d4..2c4ae81cd32a7b186e4b63c567a30ad7e0c2a239" target="_blank" rel="noopener noreferrer">https://github.com/nestjs-mod/nestjs-mod-fullstack/compare/ac8ce1e94a24f912f73c5eb1950458ebc77c12d4..2c4ae81cd32a7b186e4b63c567a30ad7e0c2a239</a> - changes</li>
+<li>
+<a href="https://github.com/nestjs-mod/nestjs-mod-fullstack/actions/runs/13308995633/artifacts/2585972924" target="_blank" rel="noopener noreferrer">https://github.com/nestjs-mod/nestjs-mod-fullstack/actions/runs/13308995633/artifacts/2585972924</a> - video of frontend E2E tests</li>
+</ul>
+
+
+            </div>
+
+              
+  <nav class="series-switcher crayons-card crayons-card--secondary">
+    <header class="crayons-card__header">
+      <h2 class="crayons-subtitle-2">
+        <a href="/endykaufman/series/26183">nestjs-mod (29 Part Series)</a>
+      </h2>
+    </header>
+
+    <div class="series-switcher__list">
+
+          <a href="/endykaufman/collection-of-nestjs-mod-utilities-for-unifying-applications-and-modules-on-nestjs-5256" class="crayons-link crayons-link--contentful series-switcher__link  " data-preload-image="" title="Published Jan 24 '24">
+            <span class="series-switcher__num">1</span>
+            <span class="series-switcher__title">Collection of NestJS-mod utilities for unifying applications and modules on NestJS</span>
+          </a>
+
+          <a href="/endykaufman/nestjs-mod-updated-for-work-with-nx-v1953-42p0" class="crayons-link crayons-link--contentful series-switcher__link  " data-preload-image="" title="Published Jul 29 '24">
+            <span class="series-switcher__num">2</span>
+            <span class="series-switcher__title">NestJs-mod updated for work with NX v.19.5.3</span>
+          </a>
+            <a href="/endykaufman/website-for-nestjs-mod-httpsnestjs-modcom-56mj" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--inbetween" data-preload-image="https://media2.dev.to/dynamic/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.amazonaws.com%2Fuploads%2Farticles%2F31xvbduakcewtrw2bdb5.png" id="collection-link-inbetween" data-no-instant="" title="View more">
+              <span class="series-switcher__num">...</span>
+              <span class="series-switcher__title">25 more parts...</span>
+            </a>
+
+          <a href="/endykaufman/website-for-nestjs-mod-httpsnestjs-modcom-56mj" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="https://media2.dev.to/dynamic/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.amazonaws.com%2Fuploads%2Farticles%2F31xvbduakcewtrw2bdb5.png" title="Published Aug 8 '24">
+            <span class="series-switcher__num">3</span>
+            <span class="series-switcher__title">Website for NestJS-mod - https://nestjs-mod.com</span>
+          </a>
+
+          <a href="/endykaufman/creating-an-empty-project-using-nestjs-mod-2dgo" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="https://media2.dev.to/dynamic/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.amazonaws.com%2Fuploads%2Farticles%2Fv20mq403dveznuokg5ue.png" title="Published Aug 8 '24">
+            <span class="series-switcher__num">4</span>
+            <span class="series-switcher__title">Creating an empty project using NestJS-mod</span>
+          </a>
+
+          <a href="/endykaufman/creating-an-empty-angular-project-and-linking-it-to-an-existing-server-on-nestjs-1bbi" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="" title="Published Aug 10 '24">
+            <span class="series-switcher__num">5</span>
+            <span class="series-switcher__title">Creating an empty Angular project and linking it to an existing server on NestJS</span>
+          </a>
+
+          <a href="/endykaufman/adding-the-postgres-database-to-the-project-and-running-migrations-via-flyway-for-the-nestjs-mod-application-1fao" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="" title="Published Aug 11 '24">
+            <span class="series-switcher__num">6</span>
+            <span class="series-switcher__title">Adding the Postgres database to the project and running migrations via Flyway for the NestJS-mod application</span>
+          </a>
+
+          <a href="/endykaufman/connecting-prismaorm-to-the-nestjs-mod-application-and-checking-its-operation-via-rest-4bbp" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="" title="Published Aug 14 '24">
+            <span class="series-switcher__num">7</span>
+            <span class="series-switcher__title">Connecting PrismaORM to the NestJS-mod application and checking its operation via REST</span>
+          </a>
+
+          <a href="/endykaufman/adding-swagger-documentation-to-the-nestjs-mod-application-and-generating-a-rest-client-for-the-angular-application-2187" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="" title="Published Aug 15 '24">
+            <span class="series-switcher__num">8</span>
+            <span class="series-switcher__title">Adding Swagger documentation to the NestJS-mod application and generating a REST client for the Angular application</span>
+          </a>
+
+          <a href="/endykaufman/an-example-of-a-simple-update-of-nestjs-mod-libraries-3509" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="" title="Published Aug 15 '24">
+            <span class="series-switcher__num">9</span>
+            <span class="series-switcher__title">An example of a simple update of NestJS-mod libraries</span>
+          </a>
+
+          <a href="/endykaufman/build-applications-on-nestjs-and-angular-and-run-them-in-two-versions-via-pm2-and-via-docker-compose-1g1e" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="" title="Published Aug 20 '24">
+            <span class="series-switcher__num">10</span>
+            <span class="series-switcher__title">Build applications on NestJS and Angular and run them in two versions: via PM2 and via Docker Compose</span>
+          </a>
+
+          <a href="/endykaufman/manual-deployment-of-nestjs-and-angular-applications-on-a-dedicated-server-via-docker-compose-and-pm2-2o8a" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="" title="Published Aug 22 '24">
+            <span class="series-switcher__num">11</span>
+            <span class="series-switcher__title">Manual deployment of NestJS and Angular applications on a dedicated server via "Docker Compose" and "PM2"</span>
+          </a>
+
+          <a href="/endykaufman/adding-the-cicd-config-for-deployment-to-a-dedicated-server-using-github-actions-46e0" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="" title="Published Aug 26 '24">
+            <span class="series-switcher__num">12</span>
+            <span class="series-switcher__title">Adding the CI/CD config for deployment NestJS and Angular applications to a dedicated server using GitHub Actions</span>
+          </a>
+
+          <a href="/endykaufman/adding-the-cicd-config-for-deploying-nestjs-and-angular-applications-to-a-dedicated-server-using-github-actions-p3k" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="https://media2.dev.to/dynamic/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.amazonaws.com%2Fuploads%2Farticles%2Fyg1tkoa5i0dwut9tp6x4.png" title="Published Sep 8 '24">
+            <span class="series-switcher__num">13</span>
+            <span class="series-switcher__title">Accelerating the deployment of NestJS and Angular using public Github runners and creating intermediate Docker images</span>
+          </a>
+
+          <a href="/endykaufman/installing-kubernetes-via-microk8s-and-configuring-the-deployment-of-nestjs-and-angular-applications-goe" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="" title="Published Sep 14 '24">
+            <span class="series-switcher__num">14</span>
+            <span class="series-switcher__title">Installing Kubernetes via MicroK8s and configuring the deployment of NestJS and Angular applications</span>
+          </a>
+
+          <a href="/endykaufman/access-to-the-site-on-nestjs-and-angular-by-domain-name-with-ssl-certificate-in-kubernetes-via-ingress-4p6e" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="" title="Published Sep 16 '24">
+            <span class="series-switcher__num">15</span>
+            <span class="series-switcher__title">Access to the site on NestJS and Angular by domain name with SSL certificate in Kubernetes via Ingress</span>
+          </a>
+
+          <a href="/endykaufman/semantic-versioning-of-nestjs-and-angular-applications-in-the-nx-monorepository-3bjg" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="" title="Published Sep 16 '24">
+            <span class="series-switcher__num">16</span>
+            <span class="series-switcher__title">Semantic versioning of NestJS and Angular applications in the NX monorepository</span>
+          </a>
+
+          <a href="/endykaufman/adding-lint-staged-to-nestjs-and-angular-applications-enabling-semantic-versioning-of-the-frontend-4hpo" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="https://media2.dev.to/dynamic/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.amazonaws.com%2Fuploads%2Farticles%2Fhky7au7keptr1sv8ccwq.png" title="Published Sep 17 '24">
+            <span class="series-switcher__num">17</span>
+            <span class="series-switcher__title">Adding lint-staged to NestJS and Angular applications, enabling semantic versioning of the frontend</span>
+          </a>
+
+          <a href="/endykaufman/creating-a-configurable-webhook-module-for-a-nestjs-application-49o9" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="" title="Published Oct 6 '24">
+            <span class="series-switcher__num">18</span>
+            <span class="series-switcher__title">Creating a configurable Webhook module for a NestJS application</span>
+          </a>
+
+          <a href="/endykaufman/creating-a-user-interface-for-the-webhook-module-using-angular-40id" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="https://media2.dev.to/dynamic/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.amazonaws.com%2Fuploads%2Farticles%2Fr74b4fsnxtsspi0fxibg.png" title="Published Oct 25 '24">
+            <span class="series-switcher__num">19</span>
+            <span class="series-switcher__title">Creating a user interface for the Webhook module using Angular</span>
+          </a>
+
+          <a href="/endykaufman/integration-of-external-authorization-server-httpsauthorizerdev-into-a-full-stack-application-on-nestjs-and-angular-1apj" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="" title="Published Nov 7 '24">
+            <span class="series-switcher__num">20</span>
+            <span class="series-switcher__title">Integration of external authorization server https://authorizer.dev into a full-stack application on NestJS and Angular</span>
+          </a>
+
+          <a href="/endykaufman/integrating-an-external-file-server-httpsminio-into-a-full-stack-application-on-nestjs-and-1l32" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="" title="Published Nov 15 '24">
+            <span class="series-switcher__num">21</span>
+            <span class="series-switcher__title">Integrating an external file server https://min.io into a full-stack application on NestJS and Angular</span>
+          </a>
+
+          <a href="/endykaufman/caching-information-in-redis-on-nestjs-8po" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="" title="Published Nov 20 '24">
+            <span class="series-switcher__num">22</span>
+            <span class="series-switcher__title">Caching information in Redis on NestJS</span>
+          </a>
+
+          <a href="/endykaufman/getting-server-time-via-websockets-and-displaying-it-in-angular-application-leh" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="" title="Published Nov 20 '24">
+            <span class="series-switcher__num">23</span>
+            <span class="series-switcher__title">Getting server time via WebSockets and displaying It in Angular application</span>
+          </a>
+
+          <a href="/endykaufman/validating-rest-requests-in-a-nestjs-application-and-displaying-errors-in-angular-application-forms-2gp1" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="" title="Published Nov 24 '24">
+            <span class="series-switcher__num">24</span>
+            <span class="series-switcher__title">Validating REST requests in a NestJS application and displaying errors in Angular application forms</span>
+          </a>
+
+          <a href="/endykaufman/adding-multi-language-support-to-nestjs-and-angular-applications-1f69" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="https://media2.dev.to/dynamic/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.amazonaws.com%2Fuploads%2Farticles%2F9898xdiaww616n7ebqck.png" title="Published Dec 3 '24">
+            <span class="series-switcher__num">25</span>
+            <span class="series-switcher__title">Adding multi-language support to NestJS and Angular applications</span>
+          </a>
+
+          <a href="/endykaufman/timezone-support-in-a-full-stack-application-based-on-nestjs-and-angular-working-with-rest-and-2pd6" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="https://media2.dev.to/dynamic/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.amazonaws.com%2Fuploads%2Farticles%2Foxqifry2bux2j601wno1.png" title="Published Dec 12 '24">
+            <span class="series-switcher__num">26</span>
+            <span class="series-switcher__title">Timezone support in a full-stack application based on NestJS and Angular: working with REST and WebSockets</span>
+          </a>
+
+          <a href="/endykaufman/integrating-and-storing-the-selected-user-language-into-the-database-in-a-full-stack-application-on-4l2i" class="crayons-link crayons-link--contentful series-switcher__link  series-switcher__link--hidden" data-preload-image="https://media2.dev.to/dynamic/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.amazonaws.com%2Fuploads%2Farticles%2F09huc9rb6hhnjlgun3j4.png" title="Published Dec 16 '24">
+            <span class="series-switcher__num">27</span>
+            <span class="series-switcher__title">Integrating and storing the selected user language into the database in a full-stack application on "Angular" and "NestJS"</span>
+          </a>
+
+          <a href="/endykaufman/converting-date-by-user-time-zone-in-nestjs-and-entering-and-displaying-date-in-angular-2195" class="crayons-link crayons-link--contentful series-switcher__link  " data-preload-image="https://media2.dev.to/dynamic/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.amazonaws.com%2Fuploads%2Farticles%2Fhpagkuvys7cs08vhj5n2.png" title="Published Dec 29 '24">
+            <span class="series-switcher__num">28</span>
+            <span class="series-switcher__title">Converting date by user time zone in "NestJS", and entering and displaying date in "Angular"</span>
+          </a>
+
+          <a href="/endykaufman/how-i-deployed-a-full-stack-application-with-nestjs-with-angular-on-supabase-and-vercel-6nk" class="crayons-link crayons-link--contentful series-switcher__link series-switcher__link--active " data-preload-image="" title="Published Feb 14">
+            <span class="series-switcher__num">29</span>
+            <span class="series-switcher__title">How I Deployed a Full-Stack Application with "NestJS" with "Angular" on "Supabase" and "Vercel"</span>
+          </a>
+    </div>
+  </nav>
+
+              <div class="js-billboard-container body-billboard-container" data-async-url="/endykaufman/how-i-deployed-a-full-stack-application-with-nestjs-with-angular-on-supabase-and-vercel-6nk/bmar11/post_body_bottom"></div>
+          </div>
+          <section id="comments" data-follow-button-container="true" data-updated-at="2025-12-25 17:49:40 UTC" class="text-padding mb-4 border-t-1 border-0 border-solid border-base-10">
+    <header class="relative flex justify-between items-center mb-6">
+      <div class="flex items-center">
+        <h2 class="crayons-subtitle-1">
+          Top comments <span class="js-comments-count" data-comments-count="0">(0)</span>
+        </h2>
+      </div>
+
+
+      <div id="comment-subscription" class="print-hidden">
+        <div class="crayons-btn-group">
+          <span class="crayons-btn crayons-btn--outlined">Subscribe</span>
+        </div>
+      </div>
+    </header>
+    <div id="billboard_delay_trigger"></div>
+    <div id="comments-container" data-testid="comments-container" data-commentable-id="2278295" data-commentable-type="Article" data-has-recent-comment-activity="false">
+
+        <div id="response-templates-data" class="hidden"></div>
+
+
+<form class="comment-form print-hidden" id="new_comment" action="/comments" accept-charset="UTF-8" method="post"><input name="utf8" type="hidden" value="✓" autocomplete="off">
+
+  <input type="hidden" name="authenticity_token" value="NOTHING" id="new_comment_authenticity_token">
+
+    <input value="2278295" autocomplete="off" type="hidden" name="comment[commentable_id]" id="comment_commentable_id">
+    <input value="Article" autocomplete="off" type="hidden" name="comment[commentable_type]" id="comment_commentable_type">
+    
+
+  <span class="crayons-avatar m:crayons-avatar--l mr-2 shrink-0">
+    <img src="https://media2.dev.to/dynamic/image/width=256,height=,fit=scale-down,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.amazonaws.com%2Fuploads%2Farticles%2F8j7kvp660rqzt99zui8e.png" width="32" height="32" alt="pic" class="crayons-avatar__image overflow-hidden" id="comment-primary-user-profile--avatar" loading="lazy">
+  </span>
+  <div class="comment-form__inner">
+    <div class="comment-form__field" data-tracking-name="comment_form_textfield">
+      <textarea placeholder="Add to the discussion" onfocus="handleFocus(event)" onkeyup="handleKeyUp(event)" onkeydown="handleKeyDown(event)" oninput="handleChange(event)" id="text-area" required="required" class="crayons-textfield comment-textarea crayons-textfield--ghost" aria-label="Add a comment to the discussion" name="comment[body_markdown]"></textarea>
+
+    </div>
+
+    <div class="response-templates-container crayons-card crayons-card--secondary p-4 mb-4 comment-form__templates fs-base hidden">
+      <header class="mb-3">
+        <button type="button" class="crayons-btn personal-template-button active" data-target-type="personal" data-form-id="new_comment">Personal</button>
+        <button type="button" class="crayons-btn moderator-template-button hidden" data-target-type="moderator" data-form-id="new_comment">Trusted User</button>
+      </header>
+
+      <div class="personal-responses-container">
+      </div>
+      <div class="moderator-responses-container hidden">
+      </div>
+
+      <a target="_blank" rel="noopener nofollow" href="/settings/response-templates">
+        Create template
+      </a>
+      <p>Templates let you quickly answer FAQs or store snippets for re-use.</p>
+    </div>
+
+    <div class="comment-form__preview text-styles text-styles--secondary" id="preview-div"></div>
+
+    <div class="comment-form__buttons mb-4">
+      <button type="submit" class="crayons-btn mr-2 js-btn-enable" onclick="validateField(event)" data-tracking-name="comment_submit_button" disabled="">Submit</button>
+      <button type="button" class="preview-toggle crayons-btn crayons-btn--secondary comment-action-preview js-btn-enable mr-2" data-tracking-name="comment_preview_button" disabled="">Preview</button>
+      <a href="/404.html" class="dismiss-edit-comment crayons-btn crayons-btn--ghost js-btn-dismiss hidden">Dismiss</a>
+    </div>
+  </div>
+
+  <div class="code-of-conduct" id="toggle-code-of-conduct-checkbox"></div>
+</form>
+
+
+      <div class="comments" id="comment-trees-container">
+      </div>
+    </div>
+
+    <div class="align-center">
+
+
+  <nav class="fs-s align-center block" aria-label="Conduct controls">
+  <a href="/code-of-conduct" class="crayons-link crayons-link--secondary">Code of Conduct</a>
+  <span class="opacity-25 px-2" role="presentation">•</span>
+  <a href="/report-abuse" class="crayons-link crayons-link--secondary">Report abuse</a>
+</nav>
+
+</div>
+
+</section>
+<div id="hide-comments-modal" class="hidden">
+  <form id="hide-comments-modal__form" class="hide-comments-modal__form" data-type="json" action="/comments/hide" accept-charset="UTF-8" data-remote="true" method="post"><input name="utf8" type="hidden" value="✓" autocomplete="off"><input type="hidden" name="_method" value="patch" autocomplete="off"><input type="hidden" name="authenticity_token" value="w1ZStEVj3udqGlBrt2fV6F_2TMJG8clmm4kiRv3FGjOFHpNb0-LUtS1XMLOLUYBZxFV0cHLkC418j_Moaii2Ug" autocomplete="off">
+    <div class="hide-comments-modal__content">
+      <p class="pb-2">
+        Are you sure you want to hide this comment? It will become hidden in your post, but will still be visible via the comment's <a id="hide-comments-modal__comment-permalink" href="#">permalink</a>.
+      </p>
+      <label class="crayons-field crayons-field--checkbox my-2">
+        <input name="hide_children" type="hidden" value="0" autocomplete="off"><input class="hide_children crayons-checkbox" type="checkbox" value="1" name="hide_children" id="hide_children">
+        <p class="crayons-field__label">Hide child comments as well</p>
+      </label>
+      <p class="pb-4 pt-2">
+        <button type="submit" class="crayons-btn">
+          Confirm
+        </button>
+      </p>
+    </div>
+</form>  <p class="fs-s color-base-60">For further actions, you may consider blocking this person and/or <a id="hide-comments-modal__report-link" href="/report-abuse">reporting abuse</a></p>
+</div>
+
+
+
+        
+  </div>
+</body>
+</html>
+        

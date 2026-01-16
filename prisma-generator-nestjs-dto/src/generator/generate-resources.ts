@@ -88,14 +88,13 @@ export const generateResourcesIndex = ({
 
   return `/* eslint-disable @typescript-eslint/no-explicit-any */
 import { DataProvider } from "react-admin";
-import { Prisma } from "../prisma/browser";
 ${dataProviderImports}
 ${formImports}
 ${listImports}
 
 export const resources: Partial<
   Record<
-    Prisma.ModelName,
+    string,
     {
       dataProvider: DataProvider<any>;
       label: string;

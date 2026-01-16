@@ -1,6 +1,7 @@
-// defaultProvidersInitializer.ts - Service to initialize default providers in model_execution_tracking table
+// defaultProvidersInitializer.ts - Service to initialize default providers in "ChatLlmModel" table
+import { PrismaService } from '../../services/prisma.service';
 import { ConfigManager } from '../config';
-import { Database } from '../database';
+import { PROVIDER_NAMES } from '../constants';
 import { Logger } from '../logger';
 
 export interface ProviderConfig {
@@ -12,58 +13,46 @@ export interface ProviderConfig {
 
 export class DefaultProvidersInitializer {
   /**
-   * Initialize default providers in model_execution_tracking table
+   * Initialize default providers in "ChatLlmModel" table
    * This should be called at system startup to populate the table with
    * default configurations for all supported providers
    */
   static async initializeDefaultProviders(): Promise<void> {
     try {
-      Logger.logInfo(
-        'Initializing default providers in model_execution_tracking table',
-      );
+      Logger.logInfo('Initializing default providers in "ChatLlmModel" table');
 
       // Get all supported providers from ConfigManager
-      const supportedProviders = [
-        'groq',
-        'openai',
-        'a4f',
-        'z_ai',
-        'ollama',
-        'anthropic',
-        'gemini',
-        'huggingface',
-        'deepseek',
-      ];
+      const supportedProviders = Object.values(PROVIDER_NAMES);
 
       for (const provider of supportedProviders) {
         try {
           // Get configuration for this provider
           const config = ConfigManager.getChatConfig(provider);
 
-          Logger.logInfo(`Processing provider ${provider}`, config);
+          // Logger.logInfo(`Processing provider ${provider}`, config);
 
           // Skip if essential config is missing
-          if (!config.model) {
-            Logger.logInfo(
-              `Skipping provider ${provider} - no model configured`,
-            );
-            continue;
-          }
+          // if (!config.model) {
+          //   Logger.logInfo(
+          //     `Skipping provider ${provider} - no model configured`,
+          //   );
+          //   continue;
+          // }
 
           // Check if provider requires API key and if it's present
           const requiresApiKey = this.requiresApiKey(provider);
           const hasApiKey = !!config.apiKey && config.apiKey.trim().length > 0;
 
           if (requiresApiKey) {
-            if (hasApiKey) {
-              Logger.logInfo(
-                `Activating provider ${provider} - missing API key`,
-              );
-            } else {
-              Logger.logInfo(
-                `Deactivating provider ${provider} - missing API key`,
-              );
-            }
+            //  if (hasApiKey) {
+            //    Logger.logInfo(
+            //      `Activating provider ${provider} - missing API key`,
+            //    );
+            //  } else {
+            //    Logger.logInfo(
+            //      `Deactivating provider ${provider} - missing API key`,
+            //    );
+            //  }
             await this.activateOrDeactivateProvider(
               provider,
               config.model,
@@ -111,25 +100,13 @@ export class DefaultProvidersInitializer {
    */
   private static requiresApiKey(provider: string): boolean {
     // These providers require API keys
-    const apiKeyRequiredProviders = [
-      'groq',
-      'openai',
-      'a4f',
-      'z_ai',
-      'anthropic',
-      'gemini',
-      'huggingface',
-      'deepseek',
-    ];
-
-    // These providers don't require API keys (typically local/self-hosted)
-    const noApiKeyProviders = ['ollama'];
+    const apiKeyRequiredProviders = Object.values(PROVIDER_NAMES) as string[];
 
     return apiKeyRequiredProviders.includes(provider.toLowerCase());
   }
 
   /**
-   * Activate or deactivate a provider in the model_execution_tracking table
+   * Activate or deactivate a provider in the "ChatLlmModel" table
    * First checks if record exists, then inserts or updates accordingly
    * @param provider - Provider name
    * @param model - Model name
@@ -146,43 +123,39 @@ export class DefaultProvidersInitializer {
   ): Promise<void> {
     try {
       // First, try to find existing record with same configuration
-      const findQuery = `
-        SELECT id, active FROM model_execution_tracking 
-        WHERE provider = $1 AND model = $2
-        LIMIT 1
-      `;
-
-      const findResult = await Database.getInstance().query(findQuery, [
-        provider,
-        model,
-      ]);
+      const existingRecord =
+        await PrismaService.instance.chatLlmModel.findFirst({
+          where: {
+            provider: provider,
+            model: model,
+          },
+          select: {
+            id: true,
+            isActive: true,
+          },
+        });
 
       const isActive =
         activate === undefined ? null : activate === true ? true : false;
       const status = 'deactivated'; // Always set to deactivated when calling this method
 
-      if (findResult.rows.length > 0) {
+      if (existingRecord) {
         // Record exists, update it
-        const recordId = findResult.rows[0].id;
+        const recordId = existingRecord.id;
 
         if (
-          findResult.rows[0].active !== true &&
-          findResult.rows[0].active !== false
+          existingRecord.isActive !== true &&
+          existingRecord.isActive !== false
         ) {
-          const updateQuery = `
-          UPDATE model_execution_tracking 
-          SET 
-            updated_at = NOW(),
-            active = $2,
-            status = $3
-          WHERE id = $1
-        `;
-
-          await Database.getInstance().query(updateQuery, [
-            recordId,
-            isActive,
-            status,
-          ]);
+          await PrismaService.instance.chatLlmModel.update({
+            where: {
+              id: recordId,
+            },
+            data: {
+              isActive: isActive,
+              status: status,
+            },
+          });
 
           Logger.logInfo('Provider entry updated for activation/deactivation', {
             provider,
@@ -195,20 +168,16 @@ export class DefaultProvidersInitializer {
         }
       } else {
         // Record doesn't exist, insert new one
-        const insertQuery = `
-          INSERT INTO model_execution_tracking 
-          (provider, model, temperature, chunk_size, start_time, status, active)
-          VALUES ($1, $2, $3, $4, NOW(), $5, $6)
-        `;
-
-        await Database.getInstance().query(insertQuery, [
-          provider,
-          model,
-          temperature ? +temperature : 1,
-          chunkSize || null,
-          status,
-          isActive,
-        ]);
+        await PrismaService.instance.chatLlmModel.create({
+          data: {
+            provider: provider,
+            model: model,
+            temperature: temperature,
+            chunkSize: chunkSize || null,
+            status: status,
+            isActive: isActive,
+          },
+        });
 
         Logger.logInfo('Provider entry created for activation/deactivation', {
           provider,
@@ -234,7 +203,7 @@ export class DefaultProvidersInitializer {
   }
 
   /**
-   * Create or update a provider entry in the model_execution_tracking table
+   * Create or update a provider entry in the "ChatLlmModel" table
    * First checks if record exists, then inserts or updates accordingly
    */
   private static async createOrUpdateProviderEntry(
@@ -242,41 +211,29 @@ export class DefaultProvidersInitializer {
   ): Promise<void> {
     try {
       // First, try to find existing record with same provider and model
-      const findQuery = `
-        SELECT id FROM model_execution_tracking 
-        WHERE provider = $1 AND model = $2
-        LIMIT 1
-      `;
+      const existingRecord =
+        await PrismaService.instance.chatLlmModel.findFirst({
+          where: {
+            provider: config.provider,
+            model: config.model,
+          },
+          select: {
+            id: true,
+          },
+        });
 
-      const findResult = await Database.getInstance().query(findQuery, [
-        config.provider,
-        config.model,
-      ]);
-
-      if (findResult.rows.length > 0) {
+      if (existingRecord) {
         // Record exists, update it
-        const updateQuery = `
-          UPDATE model_execution_tracking 
-          SET 
-            temperature = $2,
-            chunk_size = $3,
-            updated_at = NOW(),
-            status = CASE 
-              WHEN status = 'initialized' THEN 'initialized'
-              ELSE status
-            END,
-            active = CASE
-              WHEN active IS NULL THEN TRUE
-              ELSE active
-            END
-          WHERE id = $1
-        `;
-
-        await Database.getInstance().query(updateQuery, [
-          findResult.rows[0].id,
-          config.temperature ? +config.temperature : 1,
-          config.chunkSize || 2000,
-        ]);
+        await PrismaService.instance.chatLlmModel.update({
+          where: {
+            id: existingRecord.id,
+          },
+          data: {
+            temperature: config.temperature,
+            chunkSize: config.chunkSize || 2000,
+            isActive: true, // Default to active if not set
+          },
+        });
 
         Logger.logInfo('Provider entry updated', {
           provider: config.provider,
@@ -286,18 +243,16 @@ export class DefaultProvidersInitializer {
         });
       } else {
         // Record doesn't exist, insert new one
-        const insertQuery = `
-          INSERT INTO model_execution_tracking 
-          (provider, model, temperature, chunk_size, start_time, status, active)
-          VALUES ($1, $2, $3, $4, NOW(), 'initialized', TRUE)
-        `;
-
-        await Database.getInstance().query(insertQuery, [
-          config.provider,
-          config.model,
-          config.temperature ? +config.temperature : 1,
-          config.chunkSize || 2000,
-        ]);
+        await PrismaService.instance.chatLlmModel.create({
+          data: {
+            provider: config.provider,
+            model: config.model,
+            temperature: config.temperature,
+            chunkSize: config.chunkSize || 2000,
+            status: 'initialized',
+            isActive: true,
+          },
+        });
 
         Logger.logInfo('Provider entry created', {
           provider: config.provider,
@@ -334,32 +289,45 @@ export class DefaultProvidersInitializer {
     }>
   > {
     try {
-      const query = `
-SELECT provider,
-       model,
-       temperature,
-       chunk_size    as "chunkSize",
-       MAX(end_time) as "lastSuccess"
-FROM model_execution_tracking
-WHERE active = TRUE
-  AND (status != 'failure' OR
-       (status = 'failure' AND end_time IS NOT NULL AND end_time < NOW() - INTERVAL '2 minutes') OR
-       (status = 'failure' AND start_time IS NOT NULL AND start_time < NOW() - INTERVAL '4 minutes')
-    )
-GROUP BY provider, model, temperature, chunk_size
-ORDER BY MAX(end_time) DESC NULLS LAST,
-         provider,
-         model
-      `;
+      // Note: Complex time-based filtering and aggregations require raw SQL
+      // For now, using simplified Prisma query with basic filtering
+      const activeProviders =
+        await PrismaService.instance.chatLlmModel.findMany({
+          where: {
+            isActive: true,
+            // Simplified status filtering - would need raw SQL for complex time conditions
+            status: {
+              not: 'failure',
+            },
+          },
+          select: {
+            provider: true,
+            model: true,
+            temperature: true,
+            chunkSize: true,
+            endTime: true,
+          },
+          orderBy: [
+            {
+              endTime: 'desc',
+            },
+            {
+              provider: 'asc',
+            },
+            {
+              model: 'asc',
+            },
+          ],
+        });
 
-      const result = await Database.getInstance().query(query);
-
-      return result.rows.map((row) => ({
+      return activeProviders.map((row) => ({
         provider: row.provider,
         model: row.model,
-        temperature: row.temperature ? +row.temperature : 1,
+        temperature: row.temperature
+          ? parseFloat(row.temperature.toString())
+          : 1,
         chunkSize: row.chunkSize,
-        lastSuccess: row.lastSuccess,
+        lastSuccess: row.endTime,
       }));
     } catch (error) {
       Logger.logError('Failed to get sorted active providers', {
@@ -438,17 +406,15 @@ ORDER BY MAX(end_time) DESC NULLS LAST,
     chunkSize?: number,
   ): Promise<boolean> {
     try {
-      const query = `
-        SELECT 1 FROM model_execution_tracking 
-        WHERE provider = $1 AND model = $2
-      `;
+      const existingProvider =
+        await PrismaService.instance.chatLlmModel.findFirst({
+          where: {
+            provider: provider,
+            model: model,
+          },
+        });
 
-      const result = await Database.getInstance().query(query, [
-        provider,
-        model,
-      ]);
-
-      return result.rows.length > 0;
+      return existingProvider !== null;
     } catch (error) {
       Logger.logError('Failed to check provider existence', {
         error: error instanceof Error ? error.message : String(error),

@@ -55,6 +55,7 @@ import {
 import { isUUID } from 'class-validator';
 import {
   FindManyArgs,
+  FindManyResponseMeta,
   getFirstSkipFromCurPerPage,
   PrismaSdk,
   PrismaService,
@@ -72,16 +73,7 @@ import { ${updateDtoClassName} } from './${templateHelpers.updateDtoFilename(mod
 
 export class ${findManyArgsName} extends FindManyArgs {}
 
-export class ${findManyResponseMetaName} {
-  @ApiPropertyOptional({ type: Number })
-  curPage?: number;
-
-  @ApiPropertyOptional({ type: Number })
-  perPage?: number;
-
-  @ApiProperty({ type: Number })
-  totalResults!: number;
-}
+export class ${findManyResponseMetaName} extends FindManyResponseMeta {}
 
 export class ${findManyResponseName} {
   @ApiProperty({ type: () => [${entityClassName}] })

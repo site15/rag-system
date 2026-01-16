@@ -24,7 +24,6 @@
       "dom"
     ],
     "skipDefaultLibCheck": true,
-    "baseUrl": ".",
     "noImplicitOverride": true,
     "strictPropertyInitialization": true,
     "noImplicitReturns": true,

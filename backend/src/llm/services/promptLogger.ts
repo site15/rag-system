@@ -5,7 +5,7 @@ import { DocWithMetadataAndId } from '../types';
 import { Category } from './questionTransformer';
 
 export interface PromptLogData {
-  dialogId: number;
+  dialogId: string;
   question: string;
   transformedQuestion: string;
   sourceFilter?: string | null;
@@ -27,7 +27,7 @@ export class PromptLogger {
    * @param logData - Complete information about the prompt and context
    */
   static async logPrompt(logData: {
-    dialogId: number;
+    dialogId: string;
     mode: string;
     prompt: string;
   }): Promise<void> {

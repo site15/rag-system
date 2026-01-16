@@ -90,7 +90,7 @@ export class Logger {
 
     // Log to file only if file logging is enabled
     const appConfig = ConfigManager.getAppConfig();
-    if (appConfig.enableFileLogging) {
+    if (process.env.ENABLE_FILE_LOGGING === 'true') {
       // Log to file asynchronously (non-blocking) with different format
       let fileLogEntry = `[${time}] [${level}] ${message.trim()}`;
       if (meta) {

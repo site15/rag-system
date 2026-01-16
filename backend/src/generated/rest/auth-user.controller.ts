@@ -19,6 +19,7 @@ import {
 import { isUUID } from 'class-validator';
 import {
   FindManyArgs,
+  FindManyResponseMeta,
   getFirstSkipFromCurPerPage,
   PrismaSdk,
   PrismaService,
@@ -32,16 +33,7 @@ import { UpdateAuthUserDto } from './update-auth-user.dto';
 
 export class FindManyAuthUserArgs extends FindManyArgs {}
 
-export class FindManyAuthUserResponseMeta {
-  @ApiPropertyOptional({ type: Number })
-  curPage?: number;
-
-  @ApiPropertyOptional({ type: Number })
-  perPage?: number;
-
-  @ApiProperty({ type: Number })
-  totalResults!: number;
-}
+export class FindManyAuthUserResponseMeta extends FindManyResponseMeta {}
 
 export class FindManyAuthUserResponse {
   @ApiProperty({ type: () => [AuthUser] })

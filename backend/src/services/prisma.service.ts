@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../generated/prisma/client';
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsOptional } from 'class-validator';
 
@@ -27,6 +27,17 @@ export class FindManyArgs {
   sort?: string;
 }
 
+export class FindManyResponseMeta {
+  @ApiPropertyOptional({ type: Number })
+  curPage?: number;
+
+  @ApiPropertyOptional({ type: Number })
+  perPage?: number;
+
+  @ApiProperty({ type: Number })
+  totalResults!: number;
+}
+
 export function getFirstSkipFromCurPerPage(args: FindManyArgs): {
   take: number;
   skip: number;
@@ -42,11 +53,13 @@ export function getFirstSkipFromCurPerPage(args: FindManyArgs): {
 
 @Injectable()
 export class PrismaService extends PrismaClient {
+  static instance: PrismaService;
   constructor() {
     super({
       adapter: new PrismaPg({
         connectionString: process.env.DATABASE_URL,
       }),
     });
+    PrismaService.instance = this;
   }
 }

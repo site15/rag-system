@@ -31,6 +31,7 @@ export class LLMFactory {
       model,
       temperature,
       baseUrl,
+      hasApiKey: !!apiKey,
     });
 
     if (

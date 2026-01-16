@@ -3,40 +3,12 @@
  * Contains all hardcoded values, string literals, and numeric constants
  */
 
-import { ConfigManager } from './config';
-
-// Security and Authentication Constants
-export const SECURITY_CONSTANTS = {
-  /** Default hardcoded token when HARD_CODED_TOKEN env var is not set */
-  DEFAULT_AUTH_TOKEN: 'Z8vTBDrNaFZnU9eXSM8h9cSoIPpQ5wU3tnzT',
-
-  /** Default allowed IP addresses when ALLOWED_IPS env var is not set */
-  DEFAULT_ALLOWED_IPS: [
-    '127.0.0.1',
-    '192.168.168.1',
-    '94.41.68.16',
-    '::1',
-  ] as const,
-
-  /** Authorization header prefix */
-  AUTH_HEADER_PREFIX: 'Bearer ',
-
-  /** HTTP status codes for authentication responses */
-  HTTP_STATUS: {
-    UNAUTHORIZED: 401,
-    FORBIDDEN: 403,
-  } as const,
-} as const;
-
-// HTTP Status Codes
-export const HTTP_STATUS_CODES = {
-  OK: 200,
-  BAD_REQUEST: 400,
-  UNAUTHORIZED: 401,
-  FORBIDDEN: 403,
-  TOO_MANY_REQUESTS: 429,
-  INTERNAL_SERVER_ERROR: 500,
-} as const;
+export const DEFAULT_ALLOWED_IPS = [
+  '127.0.0.1',
+  '192.168.168.1',
+  '94.41.68.16',
+  '::1',
+];
 
 // Error Messages
 export const ERROR_MESSAGES = {
@@ -88,27 +60,6 @@ export const ERROR_MESSAGES = {
   } as const,
 } as const;
 
-// Database Configuration Constants
-export const DATABASE_CONFIG = {
-  /** Default database host */
-  DEFAULT_HOST: 'localhost',
-
-  /** Default database port */
-  DEFAULT_PORT: '15432',
-
-  /** Default database user */
-  DEFAULT_USER: 'rag_user',
-
-  /** Default database password */
-  DEFAULT_PASSWORD: 'YCtPYrdmjaLWMObZZIP4mdnP0llD8HSd',
-
-  /** Default database name */
-  DEFAULT_NAME: 'rag_db',
-
-  /** Exit code for database errors */
-  ERROR_EXIT_CODE: -1,
-} as const;
-
 // Provider Names and Identifiers
 export const PROVIDER_NAMES = {
   A4F: 'a4f',
@@ -125,21 +76,10 @@ export const PROVIDER_NAMES = {
 // Provider URLs and Domains
 export const PROVIDER_DOMAINS = {
   A4F: 'a4f.co',
-  Z_AI: 'z_ai',
+  Z_AI: 'z.ai',
   DEEPSEEK: 'deepseek.com',
   ANTHROPIC: 'anthropic.com',
   HUGGINGFACE: 'huggingface.co',
-} as const;
-
-// Proxy Configuration
-export const PROXY_CONFIG = {
-  /** Environment variables for HTTPS proxy */
-  HTTPS_PROXY_VARS: [
-    'HTTPS_PROXY',
-    'HTTP_PROXY',
-    'GLOBAL_HTTPS_PROXY',
-    'GLOBAL_HTTP_PROXY',
-  ] as const,
 } as const;
 
 // RAG Search Configuration
@@ -161,16 +101,6 @@ export const RAG_SEARCH_CONFIG = {
 
   /** Filter rule for including telegram documents */
   TELEGRAM_INCLUDE_RULE: 'ilike' as const,
-} as const;
-
-// Dialog Management Constants
-export const DIALOG_CONSTANTS = {
-  /** Default failure threshold before creating new dialog */
-  DEFAULT_MAX_CONSECUTIVE_FAILURES: 5,
-
-  /** Warning message when dialog reaches max failures */
-  MAX_FAILURES_WARNING:
-    'Извините, но по текущему диалогу невозможно получить ответ. Пришлось создать новый диалог, так как старый диалог больше не может быть продолжен из-за неудачных попыток.',
 } as const;
 
 // LLM Response Processing
@@ -269,7 +199,7 @@ export function createSourceReference({
   index,
   type,
 }: {
-  doc: { id: number; source: string; fromLine?: number; toLine?: number };
+  doc: { id: string; source: string; fromLine?: number; toLine?: number };
   index: number;
   type?: string;
 }) {

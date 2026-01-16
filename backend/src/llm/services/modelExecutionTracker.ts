@@ -1,5 +1,6 @@
 // modelExecutionTracker.ts - Service for tracking model execution timing and status
-import { Database } from '../database';
+import { PrismaService } from '../../services/prisma.service';
+import { Prisma } from '../../generated/prisma/client';
 import { Logger } from '../logger';
 
 export interface ModelExecutionOptions {
@@ -7,16 +8,16 @@ export interface ModelExecutionOptions {
   model: string;
   temperature?: number;
   chunkSize?: number;
-  llmQueryLogId?: number | null;
+  llmQueryLogId?: string | null;
 }
 
 export interface ModelExecutionRecord {
-  id: number;
+  id: string;
   provider: string;
   model: string;
   temperature?: number;
   chunkSize?: number;
-  llmQueryLogId?: number | null;
+  llmQueryLogId?: string | null;
   startTime: Date;
   endTime?: Date;
   status: 'running' | 'success' | 'failure' | 'timeout';
@@ -29,39 +30,37 @@ export class ModelExecutionTracker {
    * Start tracking a model execution
    * First checks if record exists, then inserts or updates accordingly
    */
-  static async startExecution(options: ModelExecutionOptions): Promise<number> {
+  static async startExecution(options: ModelExecutionOptions): Promise<string> {
     try {
       // First, try to find existing record with same configuration
-      const findQuery = `
-        SELECT id FROM model_execution_tracking 
-        WHERE provider = $1 AND model = $2
-        LIMIT 1
-      `;
+      const existingRecord =
+        await PrismaService.instance.chatLlmModel.findFirst({
+          where: {
+            provider: options.provider,
+            model: options.model,
+          },
+          select: {
+            id: true,
+          },
+        });
 
-      const findValues = [options.provider, options.model];
-
-      const findResult = await Database.getInstance().query(
-        findQuery,
-        findValues,
-      );
-
-      if (findResult.rows.length > 0) {
+      if (existingRecord) {
         // Record exists, update it
-        const recordId = findResult.rows[0].id;
-        const updateQuery = `
-          UPDATE model_execution_tracking 
-          SET start_time = NOW(),
-              status = 'running',
-              llm_query_log_id = $2,
-              updated_at = NOW()
-          WHERE id = $1
-          RETURNING id
-        `;
+        const updatedRecord = await PrismaService.instance.chatLlmModel.update({
+          where: {
+            id: existingRecord.id,
+          },
+          data: {
+            startTime: new Date(),
+            status: 'running',
+            lastRequestId: options.llmQueryLogId?.toString(),
+          },
+          select: {
+            id: true,
+          },
+        });
 
-        const updateResult = await Database.getInstance().query(updateQuery, [
-          recordId,
-          options.llmQueryLogId || null,
-        ]);
+        const recordId = updatedRecord.id;
 
         Logger.logInfo('Updated existing model execution tracking', {
           recordId,
@@ -71,29 +70,25 @@ export class ModelExecutionTracker {
           chunkSize: options.chunkSize || 2000,
         });
 
-        return updateResult.rows[0]?.id || recordId;
+        return recordId;
       } else {
         // Record doesn't exist, insert new one
-        const insertQuery = `
-          INSERT INTO model_execution_tracking 
-          (provider, model, temperature, chunk_size, llm_query_log_id, start_time, status)
-          VALUES ($1, $2, $3, $4, $5, NOW(), 'running')
-          RETURNING id
-        `;
+        const newRecord = await PrismaService.instance.chatLlmModel.create({
+          data: {
+            provider: options.provider,
+            model: options.model,
+            temperature: options.temperature,
+            chunkSize: options.chunkSize || 2000,
+            lastRequestId: options.llmQueryLogId?.toString(),
+            startTime: new Date(),
+            status: 'running',
+          },
+          select: {
+            id: true,
+          },
+        });
 
-        const insertValues = [
-          options.provider,
-          options.model,
-          options.temperature ? +options.temperature : 1,
-          options.chunkSize || 2000,
-          options.llmQueryLogId || null,
-        ];
-
-        const insertResult = await Database.getInstance().query(
-          insertQuery,
-          insertValues,
-        );
-        const recordId = insertResult.rows[0]?.id;
+        const recordId = newRecord.id;
 
         Logger.logInfo('Inserted new model execution tracking', {
           recordId,
@@ -119,27 +114,27 @@ export class ModelExecutionTracker {
    * Complete a model execution with success status
    */
   static async completeExecution(
-    recordId: number,
-    llmQueryLogId?: number,
+    recordId: string,
+    llmQueryLogId?: string,
   ): Promise<boolean> {
     try {
-      const query = `
-        UPDATE model_execution_tracking 
-        SET end_time = NOW(), status = 'success', updated_at = NOW(), llm_query_log_id = $2
-        WHERE id = $1
-      `;
-
-      const result = await Database.getInstance().query(query, [
-        recordId,
-        llmQueryLogId,
-      ]);
+      const result = await PrismaService.instance.chatLlmModel.update({
+        where: {
+          id: recordId,
+        },
+        data: {
+          endTime: new Date(),
+          status: 'success',
+          lastRequestId: llmQueryLogId?.toString(),
+        },
+      });
 
       Logger.logInfo('Completed model execution tracking', {
         recordId,
         status: 'success',
       });
 
-      return (result.rowCount || 0) > 0;
+      return result !== null;
     } catch (error) {
       Logger.logError('Failed to complete model execution tracking', {
         error: error instanceof Error ? error.message : String(error),
@@ -153,17 +148,19 @@ export class ModelExecutionTracker {
    * Fail a model execution with failure status
    */
   static async failExecution(
-    recordId: number,
+    recordId: string,
     errorMessage?: string,
   ): Promise<boolean> {
     try {
-      const query = `
-        UPDATE model_execution_tracking 
-        SET end_time = NOW(), status = 'failure', updated_at = NOW()
-        WHERE id = $1
-      `;
-
-      const result = await Database.getInstance().query(query, [recordId]);
+      const result = await PrismaService.instance.chatLlmModel.update({
+        where: {
+          id: recordId,
+        },
+        data: {
+          endTime: new Date(),
+          status: 'failure',
+        },
+      });
 
       Logger.logInfo('Failed model execution tracking', {
         recordId,
@@ -171,7 +168,7 @@ export class ModelExecutionTracker {
         errorMessage,
       });
 
-      return (result.rowCount || 0) > 0;
+      return result !== null;
     } catch (error) {
       Logger.logError('Failed to mark model execution as failed', {
         error: error instanceof Error ? error.message : String(error),
@@ -184,22 +181,24 @@ export class ModelExecutionTracker {
   /**
    * Timeout a model execution
    */
-  static async timeoutExecution(recordId: number): Promise<boolean> {
+  static async timeoutExecution(recordId: string): Promise<boolean> {
     try {
-      const query = `
-        UPDATE model_execution_tracking 
-        SET end_time = NOW(), status = 'timeout', updated_at = NOW()
-        WHERE id = $1
-      `;
-
-      const result = await Database.getInstance().query(query, [recordId]);
+      const result = await PrismaService.instance.chatLlmModel.update({
+        where: {
+          id: recordId,
+        },
+        data: {
+          endTime: new Date(),
+          status: 'timeout',
+        },
+      });
 
       Logger.logInfo('Timed out model execution tracking', {
         recordId,
         status: 'timeout',
       });
 
-      return (result.rowCount || 0) > 0;
+      return result !== null;
     } catch (error) {
       Logger.logError('Failed to mark model execution as timeout', {
         error: error instanceof Error ? error.message : String(error),
@@ -213,20 +212,38 @@ export class ModelExecutionTracker {
    * Get execution record by ID
    */
   static async getExecution(
-    recordId: number,
+    recordId: string,
   ): Promise<ModelExecutionRecord | null> {
     try {
-      const query = `
-        SELECT id, provider, model, temperature, chunk_size as "chunkSize", 
-               llm_query_log_id as "llmQueryLogId",
-               start_time as "startTime", end_time as "endTime", status,
-               created_at as "createdAt", updated_at as "updatedAt"
-        FROM model_execution_tracking 
-        WHERE id = $1
-      `;
+      const execution = await PrismaService.instance.chatLlmModel.findUnique({
+        where: {
+          id: recordId,
+        },
+      });
 
-      const result = await Database.getInstance().query(query, [recordId]);
-      return result.rows[0] || null;
+      if (!execution) return null;
+
+      return {
+        id: execution.id,
+        provider: execution.provider,
+        model: execution.model,
+        temperature: execution.temperature
+          ? parseFloat(execution.temperature.toString())
+          : undefined,
+        chunkSize: execution.chunkSize || undefined,
+        llmQueryLogId: execution.lastRequestId
+          ? execution.lastRequestId
+          : undefined,
+        startTime: execution.startTime || new Date(),
+        endTime: execution.endTime || undefined,
+        status: execution.status as
+          | 'running'
+          | 'success'
+          | 'failure'
+          | 'timeout',
+        createdAt: execution.createdAt,
+        updatedAt: execution.updatedAt,
+      };
     } catch (error) {
       Logger.logError('Failed to get model execution record', {
         error: error instanceof Error ? error.message : String(error),
@@ -244,26 +261,41 @@ export class ModelExecutionTracker {
     status?: string,
   ): Promise<ModelExecutionRecord[]> {
     try {
-      let query = `
-        SELECT id, provider, model, temperature, chunk_size as "chunkSize", 
-               llm_query_log_id as "llmQueryLogId",
-               start_time as "startTime", end_time as "endTime", status,
-               created_at as "createdAt", updated_at as "updatedAt"
-        FROM model_execution_tracking 
-      `;
-
-      const params: any[] = [];
+      const whereConditions: any = {};
 
       if (status) {
-        query += `WHERE status = $1 `;
-        params.push(status);
+        whereConditions.status = status;
       }
 
-      query += `ORDER BY start_time DESC LIMIT $${params.length + 1}`;
-      params.push(limit);
+      const executions = await PrismaService.instance.chatLlmModel.findMany({
+        where: whereConditions,
+        orderBy: {
+          startTime: 'desc',
+        },
+        take: limit,
+      });
 
-      const result = await Database.getInstance().query(query, params);
-      return result.rows;
+      return executions.map((execution) => ({
+        id: execution.id,
+        provider: execution.provider,
+        model: execution.model,
+        temperature: execution.temperature
+          ? parseFloat(execution.temperature.toString())
+          : undefined,
+        chunkSize: execution.chunkSize || undefined,
+        llmQueryLogId: execution.lastRequestId
+          ? execution.lastRequestId
+          : undefined,
+        startTime: execution.startTime || new Date(),
+        endTime: execution.endTime || undefined,
+        status: execution.status as
+          | 'running'
+          | 'success'
+          | 'failure'
+          | 'timeout',
+        createdAt: execution.createdAt,
+        updatedAt: execution.updatedAt,
+      }));
     } catch (error) {
       Logger.logError('Failed to get recent model executions', {
         error: error instanceof Error ? error.message : String(error),

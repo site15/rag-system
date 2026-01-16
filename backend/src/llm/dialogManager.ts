@@ -1,22 +1,25 @@
 // dialogManager.ts
-import { Database } from './database';
+import { PrismaService } from '../services/prisma.service';
 import { Logger } from './logger';
 import { FailureTracker } from './services/failureTracker';
 import { Category } from './services/questionTransformer';
 
 export class DialogManager {
-  public static async createDialog(userId: string): Promise<number> {
+  public static async createDialog(userId: string): Promise<string> {
     Logger.logInfo('Создание нового диалога', { userId });
-    const r = await Database.getInstance().query(
-      `
-      INSERT INTO new_chat_dialogs (user_id, title)
-      VALUES ($1, 'Новый диалог')
-      RETURNING id
-      `,
-      [userId],
-    );
-    Logger.logInfo('Диалог создан', { dialogId: r.rows[0].id });
-    return +r.rows[0].id;
+
+    const dialog = await PrismaService.instance.chatDialog.create({
+      data: {
+        userId: userId,
+        title: 'Новый диалог',
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    Logger.logInfo('Диалог создан', { dialogId: dialog.id });
+    return dialog.id;
   }
 
   public static async saveMessage({
@@ -24,7 +27,6 @@ export class DialogManager {
     userId,
     question,
     answer,
-    ignored = false,
     selectedDocumentIds = [],
     answerDocumentId,
     isSuccess = true,
@@ -37,13 +39,12 @@ export class DialogManager {
     goodResponse,
     badResponse,
   }: {
-    dialogId: number;
+    dialogId: string;
     userId: string;
     question: string;
     answer: string;
-    ignored?: boolean;
-    selectedDocumentIds?: number[];
-    answerDocumentId?: number;
+    selectedDocumentIds?: string[];
+    answerDocumentId?: string;
     isSuccess?: boolean;
     detectedCategory?: string;
     transformedQuestion?: string;
@@ -54,13 +55,18 @@ export class DialogManager {
     goodResponse?: boolean;
     badResponse?: boolean;
   }) {
-    const dialog = await Database.getInstance().query(
-      'SELECT id FROM new_chat_dialogs WHERE id = $1',
-      [dialogId],
-    );
-    Logger.logInfo('Диалог найден', { dialogId: dialog.rows?.[0]?.id });
+    const dialog = await PrismaService.instance.chatDialog.findUnique({
+      where: {
+        id: dialogId,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    Logger.logInfo('Диалог найден', { dialogId: dialog?.id });
     // проверяем существование диалога по ид в базе и если нет то создаем
-    if (!dialog.rows?.[0]?.id) {
+    if (!dialog?.id) {
       dialogId = await DialogManager.createDialog(userId);
     } else {
       // Check if dialog is marked as failed
@@ -76,35 +82,30 @@ export class DialogManager {
     Logger.logInfo('Сохранение сообщения в историю', {
       dialogId,
       userId,
-      ignored,
     });
 
     // Insert the chat history record and get the ID
-    const insertResult = await Database.getInstance().query(
-      `
-      INSERT INTO new_chat_history
-        (dialog_id, user_id, question, answer, ignored, detected_category, transformed_question, transformed_embedding_query, llm_provider, llm_model, llm_temperature, good_response, bad_response)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-      RETURNING id
-      `,
-      [
-        dialogId,
-        userId,
-        question,
-        answer,
-        ignored,
-        detectedCategory,
-        transformedQuestion,
-        transformedEmbeddingQuery,
-        llmProvider,
-        llmModel,
-        llmTemperature,
-        goodResponse,
-        badResponse,
-      ],
-    );
+    const chatMessage = await PrismaService.instance.chatMessage.create({
+      data: {
+        dialogId: dialogId,
+        userId: userId,
+        question: question,
+        answer: answer,
+        category: detectedCategory,
+        transformedQuestion: transformedQuestion,
+        transformedEmbeddingQuery: transformedEmbeddingQuery,
+        provider: llmProvider,
+        model: llmModel,
+        temperature: llmTemperature,
+        isGoodResponse: goodResponse,
+        isBadResponse: badResponse,
+      },
+      select: {
+        id: true,
+      },
+    });
 
-    const chatHistoryId = insertResult.rows[0].id;
+    const chatHistoryId = chatMessage.id;
     Logger.logInfo('Сообщение сохранено', { chatHistoryId });
 
     // Track success/failure
@@ -119,14 +120,13 @@ export class DialogManager {
       const documentAssociations = [];
       for (const docId of selectedDocumentIds) {
         documentAssociations.push(
-          Database.getInstance().query(
-            `
-            INSERT INTO new_chat_history_documents
-              (chat_history_id, embedding_document_id, is_answer_document)
-            VALUES ($1, $2, $3)
-            `,
-            [chatHistoryId, docId, answerDocumentId === docId], // Mark as answer document if it matches answerDocumentId
-          ),
+          PrismaService.instance.chatMessageDocumentEmbedding.create({
+            data: {
+              chatHistoryId: chatHistoryId,
+              embeddingDocumentId: docId,
+              isFound: answerDocumentId === docId, // Mark as found if it matches answerDocumentId
+            },
+          }),
         );
       }
 
@@ -143,51 +143,66 @@ export class DialogManager {
   }
 
   public static async getDialogRawHistory(
-    dialogId: number,
+    dialogId: string,
     limit = 20,
   ): Promise<
     {
-      id: number;
+      id: string;
       question: string;
       answer: string;
       detected_category: Category;
     }[]
   > {
     Logger.logInfo('Получение истории диалога', { dialogId, limit });
-    const r = await Database.getInstance().query(
-      `
-      SELECT id, question, answer, detected_category
-      FROM new_chat_history
-      WHERE dialog_id = $1
-        AND ignored = false
-      ORDER BY created_at DESC
-      LIMIT $2
-      `,
-      [dialogId, limit],
-    );
 
-    Logger.logInfo('История диалога получена', { count: r.rows.length });
-    return r.rows;
+    const messages = await PrismaService.instance.chatMessage.findMany({
+      where: {
+        dialogId: dialogId,
+      },
+      select: {
+        id: true,
+        question: true,
+        answer: true,
+        category: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: limit,
+    });
+
+    const result = messages.map((msg) => ({
+      id: msg.id,
+      question: msg.question,
+      answer: msg.answer,
+      detected_category: msg.category as Category,
+    }));
+
+    Logger.logInfo('История диалога получена', { count: result.length });
+    return result;
   }
 
   public static async getDialogHistory(
-    dialogId: number,
+    dialogId: string,
     limit = 20,
   ): Promise<string[]> {
     Logger.logInfo('Получение истории диалога', { dialogId, limit });
-    const r = await Database.getInstance().query(
-      `
-      SELECT question, answer
-      FROM new_chat_history
-      WHERE dialog_id = $1
-        AND ignored = false
-      ORDER BY created_at DESC
-      LIMIT $2
-      `,
-      [dialogId, limit],
-    );
 
-    const history = r.rows
+    const messages = await PrismaService.instance.chatMessage.findMany({
+      where: {
+        dialogId: dialogId,
+      },
+      select: {
+        question: true,
+        answer: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: limit,
+    });
+
+    const history = messages
       .reverse()
       .map((x) => `Пользователь: ${x.question}\nАссистент: ${x.answer}`);
 
@@ -196,19 +211,20 @@ export class DialogManager {
   }
 
   public static async getDialogSummary(
-    dialogId: number,
+    dialogId: string,
   ): Promise<string | null> {
     Logger.logInfo('Получение суммаризации диалога', { dialogId });
-    const r = await Database.getInstance().query(
-      `
-      SELECT summary
-      FROM new_chat_dialogs
-      WHERE id = $1
-      `,
-      [dialogId],
-    );
 
-    const summary = r.rows?.[0]?.summary || null;
+    const dialog = await PrismaService.instance.chatDialog.findUnique({
+      where: {
+        id: dialogId,
+      },
+      select: {
+        summary: true,
+      },
+    });
+
+    const summary = dialog?.summary || null;
     Logger.logInfo('Суммаризация диалога получена', {
       dialogId,
       hasSummary: !!summary,

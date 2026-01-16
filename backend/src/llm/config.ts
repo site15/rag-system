@@ -2,17 +2,10 @@
 
 import { PROVIDER_NAMES } from './constants';
 
-import dotenv from 'dotenv';
-
 /**
  * Configuration manager for provider-specific environment variables
  */
 export class ConfigManager {
-  /**
-   * Get provider-specific configuration for chat services
-   * @param provider - Provider name (e.g., 'groq', 'openai', 'ollama')
-   * @returns Object with provider-specific configuration
-   */
   public static getChatConfig(provider: string) {
     const providerUpper = provider.toUpperCase();
 
@@ -35,11 +28,6 @@ export class ConfigManager {
     };
   }
 
-  /**
-   * Get provider-specific configuration for embeddings services
-   * @param provider - Provider name (e.g., 'groq', 'openai', 'ollama')
-   * @returns Object with provider-specific configuration
-   */
   public static getEmbeddingsConfig(provider: string) {
     const providerUpper = provider.toUpperCase();
 
@@ -121,7 +109,7 @@ export class ConfigManager {
         return 'https://api.z.ai/api/paas/v4';
       case PROVIDER_NAMES.OLLAMA:
       default:
-        return 'http://localhost:11434';
+        return 'http://localhost:21434';
     }
   }
 
@@ -156,7 +144,7 @@ export class ConfigManager {
         return 'https://api.deepseek.com';
       case PROVIDER_NAMES.OLLAMA:
       default:
-        return 'http://localhost:11434';
+        return 'http://localhost:21434';
     }
   }
 
@@ -164,7 +152,6 @@ export class ConfigManager {
    * Get general application configuration
    */
   public static getAppConfig() {
-    dotenv.config();
     if (!process.env.CHAT_PROVIDER) {
       throw new Error('CHAT_PROVIDER environment variable is missing');
     }
@@ -172,30 +159,11 @@ export class ConfigManager {
       throw new Error('EMBEDDINGS_PROVIDER environment variable is missing');
     }
     const config = {
-      port: parseInt(process.env.PORT || '23005', 10),
-      host: process.env.HOST || '0.0.0.0',
       chatProvider: process.env.CHAT_PROVIDER,
       embeddingsProvider: process.env.EMBEDDINGS_PROVIDER,
-      parallelThreads: parseInt(process.env.PARALLEL_THREADS || '1', 10),
-      maxConsecutiveFailures: parseInt(
-        process.env.MAX_CONSECUTIVE_FAILURES || '5',
-        10,
-      ),
-      enableFileLogging: process.env.ENABLE_FILE_LOGGING === 'true',
     };
     return config;
   }
-
-  /**
-   * Get security configuration
-   */
-  public static getSecurityConfig() {
-    return {
-      hardCodedToken: process.env.HARD_CODED_TOKEN,
-      allowedIps: process.env.ALLOWED_IPS?.split(',') || [],
-    };
-  }
-
   /**
    * Get proxy configuration
    */
@@ -203,15 +171,6 @@ export class ConfigManager {
     return {
       httpsProxy: process.env.GLOBAL_HTTPS_PROXY,
       httpProxy: process.env.GLOBAL_HTTP_PROXY,
-    };
-  }
-
-  /**
-   * Get LLM configuration
-   */
-  public static getLLMConfig() {
-    return {
-      timeoutMs: parseInt(process.env.LLM_TIMEOUT_MS || '180000', 10), // 3 minutes default
     };
   }
 

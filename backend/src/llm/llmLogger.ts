@@ -4,8 +4,7 @@ import { HuggingFaceInference } from '@langchain/community/llms/hf';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { ChatGroq } from '@langchain/groq';
 import { ChatOpenAI } from '@langchain/openai';
-import { ConfigManager } from './config';
-import { Database } from './database';
+import { PrismaService } from '../services/prisma.service';
 import { Logger } from './logger';
 import { LLMQueryLogger } from './services/llmQueryLogger';
 import {
@@ -124,13 +123,13 @@ export class LLMLogger {
     prompt: string;
     metadata?: Record<string, any>;
     provider: string;
-    dialogId: number | undefined;
-    historyId: number | undefined;
+    dialogId: string | undefined;
+    historyId: string | undefined;
     abortController?: AbortController;
-  }): Promise<{ logId: number | undefined; content: string }> {
+  }): Promise<{ logId: string | undefined; content: string }> {
     const startTime = Date.now();
     let timeoutId: NodeJS.Timeout | null = null;
-    let executionTrackingId: number | null = null;
+    let executionTrackingId: string | null = null;
 
     try {
       Logger.logInfo('LLM Request Initiated', {
@@ -141,14 +140,14 @@ export class LLMLogger {
       });
 
       // Set up timeout handling
-      const TIMEOUT_MS = ConfigManager.getLLMConfig().timeoutMs; // 3 minutes default
+      const TIMEOUT_MS = parseInt(process.env.LLM_TIMEOUT_MS || '0', 10);
 
       // Start model execution tracking with the logId
       try {
         const modelOptions: ModelExecutionOptions = {
           provider,
           model: (llm as any).modelName || (llm as any).model,
-          temperature: (llm as any).temperature,
+          temperature: +(llm as any).temperature,
           chunkSize: metadata?.chunkSize,
         };
 
@@ -388,35 +387,31 @@ export class LLMLogger {
     chunkSize?: number,
   ): Promise<boolean> {
     try {
-      const query = `
-        SELECT active 
-        FROM model_execution_tracking 
-        WHERE provider = $1 
-          AND model = $2 
-        LIMIT 1
-      `;
-
-      const result = await Database.getInstance().query(query, [
-        provider,
-        model,
-      ]);
+      const llmModel = await PrismaService.instance.chatLlmModel.findFirst({
+        where: {
+          provider: provider,
+          model: model,
+        },
+        select: {
+          isActive: true,
+        },
+      });
 
       Logger.logInfo('LLM Blocked Check', {
         provider,
         model,
         temperature,
         chunkSize,
-        result,
+        result: llmModel,
       });
 
       // If no record found, assume it's not blocked (default behavior)
-      if (result.rows.length === 0) {
+      if (!llmModel) {
         return false;
       }
 
-      // Return true if active is false or null (blocked), false if active is true
-      const active = result.rows[0].active;
-      return active !== true;
+      // Return true if isActive is false or null (blocked), false if isActive is true
+      return !llmModel.isActive;
     } catch (error) {
       Logger.logError('Failed to check LLM blocked status', {
         error: error instanceof Error ? error.message : String(error),
@@ -459,13 +454,13 @@ export class LLMLogger {
     success?: boolean;
     errorMessage?: string;
     provider: string;
-    dialogId: number | undefined;
-    historyId: number | undefined;
-  }): Promise<number | null> {
+    dialogId: string | undefined;
+    historyId: string | undefined;
+  }): Promise<string | null> {
     try {
       // Extract provider and model information
       const modelName = (llm as any).modelName || (llm as any).model;
-      const temperature = (llm as any).temperature;
+      const temperature = +(llm as any).temperature;
 
       // Calculate execution time
       const executionTimeMs = Date.now() - startTime;

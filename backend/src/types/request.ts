@@ -88,12 +88,14 @@ export function getRequestFromExecutionContext(ctx: ExecutionContext) {
 export type AppRequest = {
   user: AuthUser;
   userId: string;
+  userIp: string;
   headers: Record<string, string>;
 };
 
 export const CurrentAppRequest = createParamDecorator(
   (_data: unknown, ctx: ExecutionContext) => {
     const req = getRequestFromExecutionContext(ctx) as AppRequest;
+
     return req;
   },
 );

@@ -2,7 +2,7 @@
 import { Logger } from '../logger';
 
 interface ActiveRequest {
-  dialogId: number;
+  dialogId: string;
   requestId: string;
   startTime: Date;
   abortController: AbortController;
@@ -10,14 +10,14 @@ interface ActiveRequest {
 
 export class RequestManager {
   // Track active requests by dialog ID
-  private static activeRequests = new Map<number, ActiveRequest>();
+  private static activeRequests = new Map<string, ActiveRequest>();
 
   /**
    * Registers a new request for a dialog and cancels any existing request for the same dialog
    * @param dialogId - The dialog ID to register the request for
    * @returns AbortController for the new request
    */
-  public static registerRequest(dialogId: number): AbortController {
+  public static registerRequest(dialogId: string): AbortController {
     // Cancel existing request for this dialog if one exists
     const existingRequest = this.activeRequests.get(dialogId);
     if (existingRequest) {
@@ -57,7 +57,7 @@ export class RequestManager {
    * Unregisters a completed request
    * @param dialogId - The dialog ID of the completed request
    */
-  public static unregisterRequest(dialogId: number): void {
+  public static unregisterRequest(dialogId: string): void {
     const request = this.activeRequests.get(dialogId);
     if (request) {
       Logger.logInfo('Unregistered completed request for dialog', {
@@ -74,7 +74,7 @@ export class RequestManager {
    * @param dialogId - The dialog ID to check
    * @returns boolean indicating if there's an active request
    */
-  public static hasActiveRequest(dialogId: number): boolean {
+  public static hasActiveRequest(dialogId: string): boolean {
     return this.activeRequests.has(dialogId);
   }
 
@@ -83,7 +83,7 @@ export class RequestManager {
    * @param dialogId - The dialog ID to get the request for
    * @returns ActiveRequest or undefined
    */
-  public static getActiveRequest(dialogId: number): ActiveRequest | undefined {
+  public static getActiveRequest(dialogId: string): ActiveRequest | undefined {
     return this.activeRequests.get(dialogId);
   }
 
@@ -125,7 +125,7 @@ export class RequestManager {
   } {
     const stats = {
       totalActive: this.activeRequests.size,
-      requestsByDialog: {} as Record<number, number>,
+      requestsByDialog: {} as Record<string, number>,
     };
 
     for (const [dialogId] of this.activeRequests.entries()) {

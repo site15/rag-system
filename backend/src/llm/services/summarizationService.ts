@@ -9,7 +9,7 @@ import { DialogSummary } from '../dialogSummary';
 import { Logger } from '../logger';
 
 interface SummarizationTask {
-  dialogId: number;
+  dialogId: string;
   llmConfig: {
     provider: string;
     model: string;
@@ -20,10 +20,10 @@ interface SummarizationTask {
 }
 
 export class SummarizationService {
-  private static activeWorkers = new Map<number, Worker>();
+  private static activeWorkers = new Map<string, Worker>();
   // Queue for pending summarization tasks
   private static pendingTasks: Array<{
-    dialogId: number;
+    dialogId: string;
     llm:
       | ChatOllama
       | ChatOpenAI
@@ -34,7 +34,7 @@ export class SummarizationService {
   }> = [];
 
   // Track active summarizations to prevent duplicates
-  private static activeSummarizations = new Set<number>();
+  private static activeSummarizations = new Set<string>();
 
   public static async queueSummarization({
     dialogId,
@@ -42,7 +42,7 @@ export class SummarizationService {
     provider,
     historyId,
   }: {
-    dialogId: number;
+    dialogId: string;
     llm:
       | ChatOllama
       | ChatOpenAI
@@ -51,7 +51,7 @@ export class SummarizationService {
       | HuggingFaceInference
       | ChatGroq;
     provider: string;
-    historyId: number;
+    historyId: string;
   }) {
     // Don't queue if already active
     if (this.activeSummarizations.has(dialogId)) {
@@ -68,7 +68,7 @@ export class SummarizationService {
     this.processQueue(provider, historyId);
   }
 
-  private static processQueue(provider: string, historyId: number) {
+  private static processQueue(provider: string, historyId: string) {
     // Process one task at a time from the queue
     if (this.pendingTasks.length > 0 && this.activeSummarizations.size < 5) {
       // Limit concurrent summarizations
@@ -108,7 +108,7 @@ export class SummarizationService {
     provider,
     historyId,
   }: {
-    dialogId: number;
+    dialogId: string;
     llm:
       | ChatOllama
       | ChatOpenAI
@@ -117,7 +117,7 @@ export class SummarizationService {
       | HuggingFaceInference
       | ChatGroq;
     provider: string;
-    historyId: number;
+    historyId: string;
   }) {
     try {
       Logger.logInfo('Начало суммаризации в фоновом режиме', {
@@ -152,8 +152,8 @@ export class SummarizationService {
     llm,
     provider,
   }: {
-    historyId: number;
-    dialogId: number;
+    historyId: string;
+    dialogId: string;
     llm:
       | ChatOllama
       | ChatOpenAI

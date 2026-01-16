@@ -5,19 +5,22 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 datasource db {
-  provider = "postgresql"
+  provider   = "postgresql"
+  extensions = [vector]
 }
 
 generator backendClient {
-  provider     = "prisma-client"
-  output       = "../src/generated/prisma"
-  moduleFormat = "cjs"
+  provider        = "prisma-client"
+  output          = "../src/generated/prisma"
+  moduleFormat    = "cjs"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 generator frontendClient {
-  provider     = "prisma-client"
-  output       = "../../frontend/src/generated/prisma"
-  moduleFormat = "cjs"
+  provider        = "prisma-client"
+  output          = "../../frontend/src/generated/prisma"
+  moduleFormat    = "cjs"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 generator prismaClassGenerator {
@@ -48,7 +51,7 @@ generator prismaClassGenerator {
 }
 
 model AuthUser {
-  id               String   @id(map: "PK_AUTH_USER") @default(uuid()) @db.Uuid
+  id               String   @id(map: "PK_AUTH_USER") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   anonymousId      String?
   supabaseUserId   String?
   supabaseUserData Json?
@@ -65,7 +68,7 @@ model AuthUser {
 }
 
 model AuthSession {
-  id       String   @id(map: "PK_AUTH_SESSION") @default(uuid()) @db.Uuid
+  id       String   @id(map: "PK_AUTH_SESSION") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   userId   String   @db.Uuid
   isActive Boolean?
 
@@ -78,7 +81,7 @@ model AuthSession {
 }
 
 model ChatDocumentEmbedding {
-  id               String                       @id(map: "PK_CHAT_DOCUMENT_EMBEDDINGS") @default(uuid()) @db.Uuid
+  id               String                       @id(map: "PK_CHAT_DOCUMENT_EMBEDDINGS") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   content          String                       @db.Text
   embedding384     Unsupported("vector(384)")?
   embedding768     Unsupported("vector(768)")?
@@ -100,7 +103,7 @@ model ChatDocumentEmbedding {
 }
 
 model ChatDialog {
-  id                  String  @id(map: "PK_CHAT_DIALOGS") @default(uuid()) @db.Uuid
+  id                  String  @id(map: "PK_CHAT_DIALOGS") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   userId              String  @db.Uuid
   title               String? @db.VarChar(255)
   summary             String? @db.Text
@@ -120,7 +123,7 @@ model ChatDialog {
 }
 
 model ChatMessage {
-  id                        String   @id(map: "PK_CHAT_MESSAGES") @default(uuid()) @db.Uuid
+  id                        String   @id(map: "PK_CHAT_MESSAGES") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   userId                    String   @db.Uuid
   question                  String   @db.Text
   answer                    String   @db.Text
@@ -155,7 +158,7 @@ model ChatMessage {
 }
 
 model ChatMessageDocumentEmbedding {
-  id                  String   @id(map: "PK_CHAT_MESSAGE_DOCUMENT_EMBEDDINGS") @default(uuid()) @db.Uuid
+  id                  String   @id(map: "PK_CHAT_MESSAGE_DOCUMENT_EMBEDDINGS") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   chatHistoryId       String?  @db.Uuid
   embeddingDocumentId String?  @db.Uuid
   isFound             Boolean  @default(false)
@@ -173,7 +176,7 @@ model ChatMessageDocumentEmbedding {
 }
 
 model ChatLlmRequest {
-  id              String   @id(map: "PK_CHAT_LLM_REQUESTS") @default(uuid()) @db.Uuid
+  id              String   @id(map: "PK_CHAT_LLM_REQUESTS") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   request         String   @db.Text
   response        String   @db.Text
   requestLength   Int
@@ -206,7 +209,7 @@ model ChatLlmRequest {
 }
 
 model ChatLlmModel {
-  id            String    @id(map: "PK_CHAT_LLM_MODELS") @default(uuid()) @db.Uuid
+  id            String    @id(map: "PK_CHAT_LLM_MODELS") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   provider      String    @db.VarChar(50)
   model         String    @db.VarChar(100)
   temperature   Decimal?  @db.Decimal(3, 2)
@@ -235,7 +238,7 @@ model ChatLlmModel {
 }
 
 model ChatEmbeddingModel {
-  id        String  @id(map: "PK_CHAT_EMBEDDING_MODELS") @default(uuid()) @db.Uuid
+  id        String  @id(map: "PK_CHAT_EMBEDDING_MODELS") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   name      String  @db.VarChar(100)
   provider  String  @db.VarChar(50)
   model     String  @db.VarChar(100)

@@ -1,5 +1,5 @@
 // embeddingsDB.ts
-import { Database } from './database';
+import { PrismaService } from '../services/prisma.service';
 import { Logger } from './logger';
 
 export class EmbeddingsDB {
@@ -7,24 +7,21 @@ export class EmbeddingsDB {
     hash: string,
     source: string,
   ): Promise<boolean> {
-    const r = await Database.getInstance().query(
-      `SELECT EXISTS (
-       SELECT 1 
-       FROM new_document_embeddings 
-       WHERE "contentHash" = $1 
-         AND metadata ->> 'source' ilike '%${source.split('/').at(-1)}'
-    ) AS "exists"`,
-      [hash],
+    const fileName = source.split('/').at(-1);
+    const exists = await PrismaService.instance.chatDocumentEmbedding.findFirst(
+      {
+        where: {
+          contentHash: hash,
+          metadata: { path: ['source'], string_contains: fileName },
+        },
+      },
     );
 
-    // r.rows[0].exists будет true или false
-    return r?.rows?.[0]?.exists ?? false;
+    return exists !== null;
   }
 
   public static async clearEmbeddings() {
     Logger.logWarn('Очистка таблицы эмбеддингов (reindex)');
-    await Database.getInstance().query(
-      `TRUNCATE TABLE new_document_embeddings`,
-    );
+    await PrismaService.instance.chatDocumentEmbedding.deleteMany();
   }
 }

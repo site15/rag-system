@@ -19,6 +19,7 @@ import {
 import { isUUID } from 'class-validator';
 import {
   FindManyArgs,
+  FindManyResponseMeta,
   getFirstSkipFromCurPerPage,
   PrismaSdk,
   PrismaService,
@@ -33,16 +34,7 @@ import { UpdateAuthSessionDto } from './update-auth-session.dto';
 
 export class FindManyAuthSessionArgs extends FindManyArgs {}
 
-export class FindManyAuthSessionResponseMeta {
-  @ApiPropertyOptional({ type: Number })
-  curPage?: number;
-
-  @ApiPropertyOptional({ type: Number })
-  perPage?: number;
-
-  @ApiProperty({ type: Number })
-  totalResults!: number;
-}
+export class FindManyAuthSessionResponseMeta extends FindManyResponseMeta {}
 
 export class FindManyAuthSessionResponse {
   @ApiProperty({ type: () => [AuthSession] })
