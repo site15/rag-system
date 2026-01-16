@@ -10,15 +10,15 @@ import {
   GetOneResult,
   UpdateManyResult,
   UpdateResult,
-} from "react-admin";
-import { CreateChatDocumentEmbeddingDto } from "../client";
+} from 'react-admin';
+import { CreateChatDocumentEmbeddingDto } from '../client';
 import {
   chatDocumentEmbeddingControllerCreateOne,
   chatDocumentEmbeddingControllerDeleteOne,
   chatDocumentEmbeddingControllerFindMany,
   chatDocumentEmbeddingControllerFindOne,
   chatDocumentEmbeddingControllerUpdateOne,
-} from "../client/sdk.gen";
+} from '../client/sdk.gen';
 
 export const ChatDocumentEmbeddingDataProvider: DataProvider<any> = {
   getList: async (_, params) => {

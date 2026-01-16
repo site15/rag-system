@@ -6,26 +6,13 @@ import {
   NumberInput,
   SimpleForm,
   TextInput,
-} from "react-admin";
+} from 'react-admin';
 
-import { Prisma } from "../prisma/browser";
+import { Prisma } from '../prisma/browser';
 
 export const AuthSessionEditForm = () => (
   <Edit>
     <SimpleForm>
-      <TextInput
-        source={Prisma.AuthSessionScalarFieldEnum.id}
-        readOnly={true}
-      />
-      <DateTimeInput
-        source={Prisma.AuthSessionScalarFieldEnum.createdAt}
-        readOnly={true}
-      />
-      <DateTimeInput
-        source={Prisma.AuthSessionScalarFieldEnum.updatedAt}
-        readOnly={true}
-      />
-      <TextInput source={Prisma.AuthSessionScalarFieldEnum.userId} />
       <BooleanInput source={Prisma.AuthSessionScalarFieldEnum.isActive} />
     </SimpleForm>
   </Edit>
@@ -38,6 +25,14 @@ export const AuthSessionShowForm = () => (
         source={Prisma.AuthSessionScalarFieldEnum.id}
         readOnly={true}
       />
+      <TextInput
+        source={Prisma.AuthSessionScalarFieldEnum.userId}
+        readOnly={true}
+      />
+      <BooleanInput
+        source={Prisma.AuthSessionScalarFieldEnum.isActive}
+        readOnly={true}
+      />
       <DateTimeInput
         source={Prisma.AuthSessionScalarFieldEnum.createdAt}
         readOnly={true}
@@ -46,8 +41,6 @@ export const AuthSessionShowForm = () => (
         source={Prisma.AuthSessionScalarFieldEnum.updatedAt}
         readOnly={true}
       />
-      <TextInput source={Prisma.AuthSessionScalarFieldEnum.userId} />
-      <BooleanInput source={Prisma.AuthSessionScalarFieldEnum.isActive} />
     </SimpleForm>
   </Edit>
 );
@@ -55,7 +48,6 @@ export const AuthSessionShowForm = () => (
 export const AuthSessionCreateForm = () => (
   <Create>
     <SimpleForm>
-      <TextInput source={Prisma.AuthSessionScalarFieldEnum.userId} />
       <BooleanInput source={Prisma.AuthSessionScalarFieldEnum.isActive} />
     </SimpleForm>
   </Create>

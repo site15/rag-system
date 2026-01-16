@@ -6,34 +6,19 @@ import {
   NumberInput,
   SimpleForm,
   TextInput,
-} from "react-admin";
+} from 'react-admin';
 
-import { Prisma } from "../prisma/browser";
+import { Prisma } from '../prisma/browser';
 
 export const ChatDocumentEmbeddingEditForm = () => (
   <Edit>
     <SimpleForm>
-      <TextInput
-        source={Prisma.ChatDocumentEmbeddingScalarFieldEnum.id}
-        readOnly={true}
-      />
-      <DateTimeInput
-        source={Prisma.ChatDocumentEmbeddingScalarFieldEnum.createdAt}
-        readOnly={true}
-      />
-      <DateTimeInput
-        source={Prisma.ChatDocumentEmbeddingScalarFieldEnum.updatedAt}
-        readOnly={true}
-      />
       <TextInput source={Prisma.ChatDocumentEmbeddingScalarFieldEnum.content} />
       <TextInput
         source={Prisma.ChatDocumentEmbeddingScalarFieldEnum.metadata}
       />
       <TextInput
         source={Prisma.ChatDocumentEmbeddingScalarFieldEnum.contentHash}
-      />
-      <TextInput
-        source={Prisma.ChatDocumentEmbeddingScalarFieldEnum.embeddingModelId}
       />
     </SimpleForm>
   </Edit>
@@ -46,6 +31,22 @@ export const ChatDocumentEmbeddingShowForm = () => (
         source={Prisma.ChatDocumentEmbeddingScalarFieldEnum.id}
         readOnly={true}
       />
+      <TextInput
+        source={Prisma.ChatDocumentEmbeddingScalarFieldEnum.content}
+        readOnly={true}
+      />
+      <TextInput
+        source={Prisma.ChatDocumentEmbeddingScalarFieldEnum.metadata}
+        readOnly={true}
+      />
+      <TextInput
+        source={Prisma.ChatDocumentEmbeddingScalarFieldEnum.contentHash}
+        readOnly={true}
+      />
+      <TextInput
+        source={Prisma.ChatDocumentEmbeddingScalarFieldEnum.embeddingModelId}
+        readOnly={true}
+      />
       <DateTimeInput
         source={Prisma.ChatDocumentEmbeddingScalarFieldEnum.createdAt}
         readOnly={true}
@@ -53,16 +54,6 @@ export const ChatDocumentEmbeddingShowForm = () => (
       <DateTimeInput
         source={Prisma.ChatDocumentEmbeddingScalarFieldEnum.updatedAt}
         readOnly={true}
-      />
-      <TextInput source={Prisma.ChatDocumentEmbeddingScalarFieldEnum.content} />
-      <TextInput
-        source={Prisma.ChatDocumentEmbeddingScalarFieldEnum.metadata}
-      />
-      <TextInput
-        source={Prisma.ChatDocumentEmbeddingScalarFieldEnum.contentHash}
-      />
-      <TextInput
-        source={Prisma.ChatDocumentEmbeddingScalarFieldEnum.embeddingModelId}
       />
     </SimpleForm>
   </Edit>
@@ -77,9 +68,6 @@ export const ChatDocumentEmbeddingCreateForm = () => (
       />
       <TextInput
         source={Prisma.ChatDocumentEmbeddingScalarFieldEnum.contentHash}
-      />
-      <TextInput
-        source={Prisma.ChatDocumentEmbeddingScalarFieldEnum.embeddingModelId}
       />
     </SimpleForm>
   </Create>

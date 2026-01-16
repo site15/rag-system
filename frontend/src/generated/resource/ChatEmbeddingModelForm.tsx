@@ -6,33 +6,18 @@ import {
   NumberInput,
   SimpleForm,
   TextInput,
-} from "react-admin";
+} from 'react-admin';
 
-import { Prisma } from "../prisma/browser";
+import { Prisma } from '../prisma/browser';
 
 export const ChatEmbeddingModelEditForm = () => (
   <Edit>
     <SimpleForm>
-      <TextInput
-        source={Prisma.ChatEmbeddingModelScalarFieldEnum.id}
-        readOnly={true}
-      />
-      <DateTimeInput
-        source={Prisma.ChatEmbeddingModelScalarFieldEnum.createdAt}
-        readOnly={true}
-      />
-      <DateTimeInput
-        source={Prisma.ChatEmbeddingModelScalarFieldEnum.updatedAt}
-        readOnly={true}
-      />
       <TextInput source={Prisma.ChatEmbeddingModelScalarFieldEnum.name} />
       <TextInput source={Prisma.ChatEmbeddingModelScalarFieldEnum.provider} />
       <TextInput source={Prisma.ChatEmbeddingModelScalarFieldEnum.model} />
       <NumberInput
         source={Prisma.ChatEmbeddingModelScalarFieldEnum.dimension}
-      />
-      <BooleanInput
-        source={Prisma.ChatEmbeddingModelScalarFieldEnum.isActive}
       />
     </SimpleForm>
   </Edit>
@@ -45,6 +30,26 @@ export const ChatEmbeddingModelShowForm = () => (
         source={Prisma.ChatEmbeddingModelScalarFieldEnum.id}
         readOnly={true}
       />
+      <TextInput
+        source={Prisma.ChatEmbeddingModelScalarFieldEnum.name}
+        readOnly={true}
+      />
+      <TextInput
+        source={Prisma.ChatEmbeddingModelScalarFieldEnum.provider}
+        readOnly={true}
+      />
+      <TextInput
+        source={Prisma.ChatEmbeddingModelScalarFieldEnum.model}
+        readOnly={true}
+      />
+      <NumberInput
+        source={Prisma.ChatEmbeddingModelScalarFieldEnum.dimension}
+        readOnly={true}
+      />
+      <BooleanInput
+        source={Prisma.ChatEmbeddingModelScalarFieldEnum.isActive}
+        readOnly={true}
+      />
       <DateTimeInput
         source={Prisma.ChatEmbeddingModelScalarFieldEnum.createdAt}
         readOnly={true}
@@ -52,15 +57,6 @@ export const ChatEmbeddingModelShowForm = () => (
       <DateTimeInput
         source={Prisma.ChatEmbeddingModelScalarFieldEnum.updatedAt}
         readOnly={true}
-      />
-      <TextInput source={Prisma.ChatEmbeddingModelScalarFieldEnum.name} />
-      <TextInput source={Prisma.ChatEmbeddingModelScalarFieldEnum.provider} />
-      <TextInput source={Prisma.ChatEmbeddingModelScalarFieldEnum.model} />
-      <NumberInput
-        source={Prisma.ChatEmbeddingModelScalarFieldEnum.dimension}
-      />
-      <BooleanInput
-        source={Prisma.ChatEmbeddingModelScalarFieldEnum.isActive}
       />
     </SimpleForm>
   </Edit>
@@ -74,9 +70,6 @@ export const ChatEmbeddingModelCreateForm = () => (
       <TextInput source={Prisma.ChatEmbeddingModelScalarFieldEnum.model} />
       <NumberInput
         source={Prisma.ChatEmbeddingModelScalarFieldEnum.dimension}
-      />
-      <BooleanInput
-        source={Prisma.ChatEmbeddingModelScalarFieldEnum.isActive}
       />
     </SimpleForm>
   </Create>

@@ -1,10 +1,11 @@
-import { kebab, pascal } from 'case';
 import { TemplateHelpers } from './template-helpers';
 import { ModelParams } from './types';
 
 export const generateForm = ({
   controller,
   templateHelpers,
+  create,
+  update,
 }: ModelParams & { templateHelpers: TemplateHelpers }): string => {
   const { model } = controller;
   const { entityName } = templateHelpers;
@@ -46,6 +47,7 @@ export const generateForm = ({
 
   // Generate input fields for create form (only editable fields)
   const createFormFields = editableFields
+    .filter((field) => create.fields.find((f) => f.name === field.name))
     .map((field) => {
       const component = getInputComponent(field);
       return `      <${component} source={Prisma.${entityClassName}ScalarFieldEnum.${field.name}} />`;
@@ -54,16 +56,30 @@ export const generateForm = ({
 
   // Generate input fields for edit form (editable + read-only)
   const editFormFields = [
-    ...readOnlyFields.map((field) => {
+    ...readOnlyFields
+      .filter((field) => update.fields.find((f) => f.name === field.name))
+      .map((field) => {
+        const component = getInputComponent(field);
+        return `      <${component}
+        source={Prisma.${entityClassName}ScalarFieldEnum.${field.name}}
+        readOnly={true}
+      />`;
+      }),
+    ...editableFields
+      .filter((field) => update.fields.find((f) => f.name === field.name))
+      .map((field) => {
+        const component = getInputComponent(field);
+        return `      <${component} source={Prisma.${entityClassName}ScalarFieldEnum.${field.name}} />`;
+      }),
+  ].join('\n');
+
+  const showFormFields = [
+    ...allFields.map((field) => {
       const component = getInputComponent(field);
       return `      <${component}
         source={Prisma.${entityClassName}ScalarFieldEnum.${field.name}}
         readOnly={true}
       />`;
-    }),
-    ...editableFields.map((field) => {
-      const component = getInputComponent(field);
-      return `      <${component} source={Prisma.${entityClassName}ScalarFieldEnum.${field.name}} />`;
     }),
   ].join('\n');
 
@@ -90,7 +106,7 @@ ${editFormFields}
 export const ${showFormName} = () => (
   <Edit>
     <SimpleForm>
-${editFormFields}
+${showFormFields}
     </SimpleForm>
   </Edit>
 );

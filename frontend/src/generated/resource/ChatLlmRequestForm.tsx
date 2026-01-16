@@ -6,25 +6,13 @@ import {
   NumberInput,
   SimpleForm,
   TextInput,
-} from "react-admin";
+} from 'react-admin';
 
-import { Prisma } from "../prisma/browser";
+import { Prisma } from '../prisma/browser';
 
 export const ChatLlmRequestEditForm = () => (
   <Edit>
     <SimpleForm>
-      <TextInput
-        source={Prisma.ChatLlmRequestScalarFieldEnum.id}
-        readOnly={true}
-      />
-      <DateTimeInput
-        source={Prisma.ChatLlmRequestScalarFieldEnum.createdAt}
-        readOnly={true}
-      />
-      <DateTimeInput
-        source={Prisma.ChatLlmRequestScalarFieldEnum.updatedAt}
-        readOnly={true}
-      />
       <TextInput source={Prisma.ChatLlmRequestScalarFieldEnum.request} />
       <TextInput source={Prisma.ChatLlmRequestScalarFieldEnum.response} />
       <NumberInput
@@ -39,10 +27,7 @@ export const ChatLlmRequestEditForm = () => (
       <TextInput source={Prisma.ChatLlmRequestScalarFieldEnum.provider} />
       <TextInput source={Prisma.ChatLlmRequestScalarFieldEnum.model} />
       <NumberInput source={Prisma.ChatLlmRequestScalarFieldEnum.temperature} />
-      <BooleanInput source={Prisma.ChatLlmRequestScalarFieldEnum.isSuccess} />
       <TextInput source={Prisma.ChatLlmRequestScalarFieldEnum.errorMessage} />
-      <TextInput source={Prisma.ChatLlmRequestScalarFieldEnum.dialogId} />
-      <TextInput source={Prisma.ChatLlmRequestScalarFieldEnum.historyId} />
     </SimpleForm>
   </Edit>
 );
@@ -54,6 +39,54 @@ export const ChatLlmRequestShowForm = () => (
         source={Prisma.ChatLlmRequestScalarFieldEnum.id}
         readOnly={true}
       />
+      <TextInput
+        source={Prisma.ChatLlmRequestScalarFieldEnum.request}
+        readOnly={true}
+      />
+      <TextInput
+        source={Prisma.ChatLlmRequestScalarFieldEnum.response}
+        readOnly={true}
+      />
+      <NumberInput
+        source={Prisma.ChatLlmRequestScalarFieldEnum.requestLength}
+        readOnly={true}
+      />
+      <NumberInput
+        source={Prisma.ChatLlmRequestScalarFieldEnum.responseLength}
+        readOnly={true}
+      />
+      <NumberInput
+        source={Prisma.ChatLlmRequestScalarFieldEnum.executionTimeMs}
+        readOnly={true}
+      />
+      <TextInput
+        source={Prisma.ChatLlmRequestScalarFieldEnum.provider}
+        readOnly={true}
+      />
+      <TextInput
+        source={Prisma.ChatLlmRequestScalarFieldEnum.model}
+        readOnly={true}
+      />
+      <NumberInput
+        source={Prisma.ChatLlmRequestScalarFieldEnum.temperature}
+        readOnly={true}
+      />
+      <BooleanInput
+        source={Prisma.ChatLlmRequestScalarFieldEnum.isSuccess}
+        readOnly={true}
+      />
+      <TextInput
+        source={Prisma.ChatLlmRequestScalarFieldEnum.errorMessage}
+        readOnly={true}
+      />
+      <TextInput
+        source={Prisma.ChatLlmRequestScalarFieldEnum.dialogId}
+        readOnly={true}
+      />
+      <TextInput
+        source={Prisma.ChatLlmRequestScalarFieldEnum.historyId}
+        readOnly={true}
+      />
       <DateTimeInput
         source={Prisma.ChatLlmRequestScalarFieldEnum.createdAt}
         readOnly={true}
@@ -62,24 +95,6 @@ export const ChatLlmRequestShowForm = () => (
         source={Prisma.ChatLlmRequestScalarFieldEnum.updatedAt}
         readOnly={true}
       />
-      <TextInput source={Prisma.ChatLlmRequestScalarFieldEnum.request} />
-      <TextInput source={Prisma.ChatLlmRequestScalarFieldEnum.response} />
-      <NumberInput
-        source={Prisma.ChatLlmRequestScalarFieldEnum.requestLength}
-      />
-      <NumberInput
-        source={Prisma.ChatLlmRequestScalarFieldEnum.responseLength}
-      />
-      <NumberInput
-        source={Prisma.ChatLlmRequestScalarFieldEnum.executionTimeMs}
-      />
-      <TextInput source={Prisma.ChatLlmRequestScalarFieldEnum.provider} />
-      <TextInput source={Prisma.ChatLlmRequestScalarFieldEnum.model} />
-      <NumberInput source={Prisma.ChatLlmRequestScalarFieldEnum.temperature} />
-      <BooleanInput source={Prisma.ChatLlmRequestScalarFieldEnum.isSuccess} />
-      <TextInput source={Prisma.ChatLlmRequestScalarFieldEnum.errorMessage} />
-      <TextInput source={Prisma.ChatLlmRequestScalarFieldEnum.dialogId} />
-      <TextInput source={Prisma.ChatLlmRequestScalarFieldEnum.historyId} />
     </SimpleForm>
   </Edit>
 );
@@ -101,10 +116,7 @@ export const ChatLlmRequestCreateForm = () => (
       <TextInput source={Prisma.ChatLlmRequestScalarFieldEnum.provider} />
       <TextInput source={Prisma.ChatLlmRequestScalarFieldEnum.model} />
       <NumberInput source={Prisma.ChatLlmRequestScalarFieldEnum.temperature} />
-      <BooleanInput source={Prisma.ChatLlmRequestScalarFieldEnum.isSuccess} />
       <TextInput source={Prisma.ChatLlmRequestScalarFieldEnum.errorMessage} />
-      <TextInput source={Prisma.ChatLlmRequestScalarFieldEnum.dialogId} />
-      <TextInput source={Prisma.ChatLlmRequestScalarFieldEnum.historyId} />
     </SimpleForm>
   </Create>
 );

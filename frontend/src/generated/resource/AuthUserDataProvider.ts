@@ -10,15 +10,15 @@ import {
   GetOneResult,
   UpdateManyResult,
   UpdateResult,
-} from "react-admin";
-import { CreateAuthUserDto } from "../client";
+} from 'react-admin';
+import { CreateAuthUserDto } from '../client';
 import {
   authUserControllerCreateOne,
   authUserControllerDeleteOne,
   authUserControllerFindMany,
   authUserControllerFindOne,
   authUserControllerUpdateOne,
-} from "../client/sdk.gen";
+} from '../client/sdk.gen';
 
 export const AuthUserDataProvider: DataProvider<any> = {
   getList: async (_, params) => {

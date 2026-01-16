@@ -1,5 +1,5 @@
-import { DataTable, List } from "react-admin";
-import { Prisma } from "../prisma/browser";
+import { DataTable, List } from 'react-admin';
+import { Prisma } from '../prisma/browser';
 
 export const ChatMessageList = () => (
   <List>

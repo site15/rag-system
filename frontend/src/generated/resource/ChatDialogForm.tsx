@@ -6,29 +6,15 @@ import {
   NumberInput,
   SimpleForm,
   TextInput,
-} from "react-admin";
+} from 'react-admin';
 
-import { Prisma } from "../prisma/browser";
+import { Prisma } from '../prisma/browser';
 
 export const ChatDialogEditForm = () => (
   <Edit>
     <SimpleForm>
-      <TextInput source={Prisma.ChatDialogScalarFieldEnum.id} readOnly={true} />
-      <DateTimeInput
-        source={Prisma.ChatDialogScalarFieldEnum.createdAt}
-        readOnly={true}
-      />
-      <DateTimeInput
-        source={Prisma.ChatDialogScalarFieldEnum.updatedAt}
-        readOnly={true}
-      />
-      <TextInput source={Prisma.ChatDialogScalarFieldEnum.userId} />
       <TextInput source={Prisma.ChatDialogScalarFieldEnum.title} />
       <TextInput source={Prisma.ChatDialogScalarFieldEnum.summary} />
-      <NumberInput
-        source={Prisma.ChatDialogScalarFieldEnum.consecutiveFailures}
-      />
-      <BooleanInput source={Prisma.ChatDialogScalarFieldEnum.isFailed} />
     </SimpleForm>
   </Edit>
 );
@@ -37,6 +23,26 @@ export const ChatDialogShowForm = () => (
   <Edit>
     <SimpleForm>
       <TextInput source={Prisma.ChatDialogScalarFieldEnum.id} readOnly={true} />
+      <TextInput
+        source={Prisma.ChatDialogScalarFieldEnum.userId}
+        readOnly={true}
+      />
+      <TextInput
+        source={Prisma.ChatDialogScalarFieldEnum.title}
+        readOnly={true}
+      />
+      <TextInput
+        source={Prisma.ChatDialogScalarFieldEnum.summary}
+        readOnly={true}
+      />
+      <NumberInput
+        source={Prisma.ChatDialogScalarFieldEnum.consecutiveFailures}
+        readOnly={true}
+      />
+      <BooleanInput
+        source={Prisma.ChatDialogScalarFieldEnum.isFailed}
+        readOnly={true}
+      />
       <DateTimeInput
         source={Prisma.ChatDialogScalarFieldEnum.createdAt}
         readOnly={true}
@@ -45,13 +51,6 @@ export const ChatDialogShowForm = () => (
         source={Prisma.ChatDialogScalarFieldEnum.updatedAt}
         readOnly={true}
       />
-      <TextInput source={Prisma.ChatDialogScalarFieldEnum.userId} />
-      <TextInput source={Prisma.ChatDialogScalarFieldEnum.title} />
-      <TextInput source={Prisma.ChatDialogScalarFieldEnum.summary} />
-      <NumberInput
-        source={Prisma.ChatDialogScalarFieldEnum.consecutiveFailures}
-      />
-      <BooleanInput source={Prisma.ChatDialogScalarFieldEnum.isFailed} />
     </SimpleForm>
   </Edit>
 );
@@ -59,13 +58,8 @@ export const ChatDialogShowForm = () => (
 export const ChatDialogCreateForm = () => (
   <Create>
     <SimpleForm>
-      <TextInput source={Prisma.ChatDialogScalarFieldEnum.userId} />
       <TextInput source={Prisma.ChatDialogScalarFieldEnum.title} />
       <TextInput source={Prisma.ChatDialogScalarFieldEnum.summary} />
-      <NumberInput
-        source={Prisma.ChatDialogScalarFieldEnum.consecutiveFailures}
-      />
-      <BooleanInput source={Prisma.ChatDialogScalarFieldEnum.isFailed} />
     </SimpleForm>
   </Create>
 );
