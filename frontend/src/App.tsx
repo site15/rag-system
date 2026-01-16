@@ -4,7 +4,7 @@ import { client } from "./generated/client/client.gen";
 import { resources } from "./generated/resource/resources";
 
 client.setConfig({
-  baseUrl: "http://localhost:23000",
+  baseUrl: import.meta.env.VITE_API_URL,
 });
 
 export const App = () => {
