@@ -10,6 +10,14 @@ export class CreateChatDocumentEmbeddingDto {
   @IsString()
   content!: string;
   @ApiProperty({
+    type: 'string',
+    required: false,
+    nullable: true,
+  })
+  @IsOptional()
+  @IsString()
+  graphContent?: string | null;
+  @ApiProperty({
     type: () => Object,
     required: false,
     nullable: true,

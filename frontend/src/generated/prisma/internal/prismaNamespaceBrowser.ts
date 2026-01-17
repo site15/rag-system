@@ -108,6 +108,7 @@ export type AuthSessionScalarFieldEnum =
 export const ChatDocumentEmbeddingScalarFieldEnum = {
   id: "id",
   content: "content",
+  graphContent: "graphContent",
   metadata: "metadata",
   contentHash: "contentHash",
   embeddingModelId: "embeddingModelId",

@@ -41,6 +41,10 @@ export const ChatDocumentEmbeddingEditForm = () => (
         source={Prisma.ChatDocumentEmbeddingScalarFieldEnum.content}
         multiline
       />
+      <TextInput
+        source={Prisma.ChatDocumentEmbeddingScalarFieldEnum.graphContent}
+        multiline
+      />
       <JsonViewerField
         source={Prisma.ChatDocumentEmbeddingScalarFieldEnum.metadata}
       />
@@ -60,6 +64,11 @@ export const ChatDocumentEmbeddingShowForm = () => (
       />
       <TextInput
         source={Prisma.ChatDocumentEmbeddingScalarFieldEnum.content}
+        readOnly={true}
+        multiline
+      />
+      <TextInput
+        source={Prisma.ChatDocumentEmbeddingScalarFieldEnum.graphContent}
         readOnly={true}
         multiline
       />
@@ -92,6 +101,10 @@ export const ChatDocumentEmbeddingCreateForm = () => (
     <SimpleForm>
       <TextInput
         source={Prisma.ChatDocumentEmbeddingScalarFieldEnum.content}
+        multiline
+      />
+      <TextInput
+        source={Prisma.ChatDocumentEmbeddingScalarFieldEnum.graphContent}
         multiline
       />
       <JsonViewerField

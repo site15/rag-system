@@ -27,6 +27,7 @@ export type AggregateChatDocumentEmbedding = {
 export type ChatDocumentEmbeddingMinAggregateOutputType = {
   id: string | null;
   content: string | null;
+  graphContent: string | null;
   contentHash: string | null;
   embeddingModelId: string | null;
   createdAt: Date | null;
@@ -36,6 +37,7 @@ export type ChatDocumentEmbeddingMinAggregateOutputType = {
 export type ChatDocumentEmbeddingMaxAggregateOutputType = {
   id: string | null;
   content: string | null;
+  graphContent: string | null;
   contentHash: string | null;
   embeddingModelId: string | null;
   createdAt: Date | null;
@@ -45,6 +47,7 @@ export type ChatDocumentEmbeddingMaxAggregateOutputType = {
 export type ChatDocumentEmbeddingCountAggregateOutputType = {
   id: number;
   content: number;
+  graphContent: number;
   metadata: number;
   contentHash: number;
   embeddingModelId: number;
@@ -56,6 +59,7 @@ export type ChatDocumentEmbeddingCountAggregateOutputType = {
 export type ChatDocumentEmbeddingMinAggregateInputType = {
   id?: true;
   content?: true;
+  graphContent?: true;
   contentHash?: true;
   embeddingModelId?: true;
   createdAt?: true;
@@ -65,6 +69,7 @@ export type ChatDocumentEmbeddingMinAggregateInputType = {
 export type ChatDocumentEmbeddingMaxAggregateInputType = {
   id?: true;
   content?: true;
+  graphContent?: true;
   contentHash?: true;
   embeddingModelId?: true;
   createdAt?: true;
@@ -74,6 +79,7 @@ export type ChatDocumentEmbeddingMaxAggregateInputType = {
 export type ChatDocumentEmbeddingCountAggregateInputType = {
   id?: true;
   content?: true;
+  graphContent?: true;
   metadata?: true;
   contentHash?: true;
   embeddingModelId?: true;
@@ -170,6 +176,7 @@ export type ChatDocumentEmbeddingGroupByArgs<
 export type ChatDocumentEmbeddingGroupByOutputType = {
   id: string;
   content: string;
+  graphContent: string | null;
   metadata: runtime.JsonValue | null;
   contentHash: string;
   embeddingModelId: string | null;
@@ -208,6 +215,10 @@ export type ChatDocumentEmbeddingWhereInput = {
     | Prisma.ChatDocumentEmbeddingWhereInput[];
   id?: Prisma.UuidFilter<'ChatDocumentEmbedding'> | string;
   content?: Prisma.StringFilter<'ChatDocumentEmbedding'> | string;
+  graphContent?:
+    | Prisma.StringNullableFilter<'ChatDocumentEmbedding'>
+    | string
+    | null;
   metadata?: Prisma.JsonNullableFilter<'ChatDocumentEmbedding'>;
   contentHash?: Prisma.StringFilter<'ChatDocumentEmbedding'> | string;
   embeddingModelId?:
@@ -226,6 +237,7 @@ export type ChatDocumentEmbeddingWhereInput = {
 export type ChatDocumentEmbeddingOrderByWithRelationInput = {
   id?: Prisma.SortOrder;
   content?: Prisma.SortOrder;
+  graphContent?: Prisma.SortOrderInput | Prisma.SortOrder;
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder;
   contentHash?: Prisma.SortOrder;
   embeddingModelId?: Prisma.SortOrderInput | Prisma.SortOrder;
@@ -246,6 +258,10 @@ export type ChatDocumentEmbeddingWhereUniqueInput = Prisma.AtLeast<
       | Prisma.ChatDocumentEmbeddingWhereInput
       | Prisma.ChatDocumentEmbeddingWhereInput[];
     content?: Prisma.StringFilter<'ChatDocumentEmbedding'> | string;
+    graphContent?:
+      | Prisma.StringNullableFilter<'ChatDocumentEmbedding'>
+      | string
+      | null;
     metadata?: Prisma.JsonNullableFilter<'ChatDocumentEmbedding'>;
     contentHash?: Prisma.StringFilter<'ChatDocumentEmbedding'> | string;
     embeddingModelId?:
@@ -266,6 +282,7 @@ export type ChatDocumentEmbeddingWhereUniqueInput = Prisma.AtLeast<
 export type ChatDocumentEmbeddingOrderByWithAggregationInput = {
   id?: Prisma.SortOrder;
   content?: Prisma.SortOrder;
+  graphContent?: Prisma.SortOrderInput | Prisma.SortOrder;
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder;
   contentHash?: Prisma.SortOrder;
   embeddingModelId?: Prisma.SortOrderInput | Prisma.SortOrder;
@@ -286,6 +303,10 @@ export type ChatDocumentEmbeddingScalarWhereWithAggregatesInput = {
     | Prisma.ChatDocumentEmbeddingScalarWhereWithAggregatesInput[];
   id?: Prisma.UuidWithAggregatesFilter<'ChatDocumentEmbedding'> | string;
   content?: Prisma.StringWithAggregatesFilter<'ChatDocumentEmbedding'> | string;
+  graphContent?:
+    | Prisma.StringNullableWithAggregatesFilter<'ChatDocumentEmbedding'>
+    | string
+    | null;
   metadata?: Prisma.JsonNullableWithAggregatesFilter<'ChatDocumentEmbedding'>;
   contentHash?:
     | Prisma.StringWithAggregatesFilter<'ChatDocumentEmbedding'>
@@ -307,6 +328,7 @@ export type ChatDocumentEmbeddingScalarWhereWithAggregatesInput = {
 export type ChatDocumentEmbeddingCreateInput = {
   id?: string;
   content: string;
+  graphContent?: string | null;
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   contentHash: string;
   createdAt?: Date | string;
@@ -318,6 +340,7 @@ export type ChatDocumentEmbeddingCreateInput = {
 export type ChatDocumentEmbeddingUncheckedCreateInput = {
   id?: string;
   content: string;
+  graphContent?: string | null;
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   contentHash: string;
   embeddingModelId?: string | null;
@@ -329,6 +352,10 @@ export type ChatDocumentEmbeddingUncheckedCreateInput = {
 export type ChatDocumentEmbeddingUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string;
   content?: Prisma.StringFieldUpdateOperationsInput | string;
+  graphContent?:
+    | Prisma.NullableStringFieldUpdateOperationsInput
+    | string
+    | null;
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   contentHash?: Prisma.StringFieldUpdateOperationsInput | string;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -340,6 +367,10 @@ export type ChatDocumentEmbeddingUpdateInput = {
 export type ChatDocumentEmbeddingUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string;
   content?: Prisma.StringFieldUpdateOperationsInput | string;
+  graphContent?:
+    | Prisma.NullableStringFieldUpdateOperationsInput
+    | string
+    | null;
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   contentHash?: Prisma.StringFieldUpdateOperationsInput | string;
   embeddingModelId?:
@@ -354,6 +385,7 @@ export type ChatDocumentEmbeddingUncheckedUpdateInput = {
 export type ChatDocumentEmbeddingCreateManyInput = {
   id?: string;
   content: string;
+  graphContent?: string | null;
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   contentHash: string;
   embeddingModelId?: string | null;
@@ -364,6 +396,10 @@ export type ChatDocumentEmbeddingCreateManyInput = {
 export type ChatDocumentEmbeddingUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string;
   content?: Prisma.StringFieldUpdateOperationsInput | string;
+  graphContent?:
+    | Prisma.NullableStringFieldUpdateOperationsInput
+    | string
+    | null;
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   contentHash?: Prisma.StringFieldUpdateOperationsInput | string;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -373,6 +409,10 @@ export type ChatDocumentEmbeddingUpdateManyMutationInput = {
 export type ChatDocumentEmbeddingUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string;
   content?: Prisma.StringFieldUpdateOperationsInput | string;
+  graphContent?:
+    | Prisma.NullableStringFieldUpdateOperationsInput
+    | string
+    | null;
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   contentHash?: Prisma.StringFieldUpdateOperationsInput | string;
   embeddingModelId?:
@@ -386,6 +426,7 @@ export type ChatDocumentEmbeddingUncheckedUpdateManyInput = {
 export type ChatDocumentEmbeddingCountOrderByAggregateInput = {
   id?: Prisma.SortOrder;
   content?: Prisma.SortOrder;
+  graphContent?: Prisma.SortOrder;
   metadata?: Prisma.SortOrder;
   contentHash?: Prisma.SortOrder;
   embeddingModelId?: Prisma.SortOrder;
@@ -396,6 +437,7 @@ export type ChatDocumentEmbeddingCountOrderByAggregateInput = {
 export type ChatDocumentEmbeddingMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder;
   content?: Prisma.SortOrder;
+  graphContent?: Prisma.SortOrder;
   contentHash?: Prisma.SortOrder;
   embeddingModelId?: Prisma.SortOrder;
   createdAt?: Prisma.SortOrder;
@@ -405,6 +447,7 @@ export type ChatDocumentEmbeddingMaxOrderByAggregateInput = {
 export type ChatDocumentEmbeddingMinOrderByAggregateInput = {
   id?: Prisma.SortOrder;
   content?: Prisma.SortOrder;
+  graphContent?: Prisma.SortOrder;
   contentHash?: Prisma.SortOrder;
   embeddingModelId?: Prisma.SortOrder;
   createdAt?: Prisma.SortOrder;
@@ -572,6 +615,7 @@ export type ChatDocumentEmbeddingCreateWithoutChatMessageDocumentEmbeddingInput 
   {
     id?: string;
     content: string;
+    graphContent?: string | null;
     metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     contentHash: string;
     createdAt?: Date | string;
@@ -583,6 +627,7 @@ export type ChatDocumentEmbeddingUncheckedCreateWithoutChatMessageDocumentEmbedd
   {
     id?: string;
     content: string;
+    graphContent?: string | null;
     metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     contentHash: string;
     embeddingModelId?: string | null;
@@ -625,6 +670,10 @@ export type ChatDocumentEmbeddingUpdateWithoutChatMessageDocumentEmbeddingInput 
   {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     content?: Prisma.StringFieldUpdateOperationsInput | string;
+    graphContent?:
+      | Prisma.NullableStringFieldUpdateOperationsInput
+      | string
+      | null;
     metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     contentHash?: Prisma.StringFieldUpdateOperationsInput | string;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -636,6 +685,10 @@ export type ChatDocumentEmbeddingUncheckedUpdateWithoutChatMessageDocumentEmbedd
   {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     content?: Prisma.StringFieldUpdateOperationsInput | string;
+    graphContent?:
+      | Prisma.NullableStringFieldUpdateOperationsInput
+      | string
+      | null;
     metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     contentHash?: Prisma.StringFieldUpdateOperationsInput | string;
     embeddingModelId?:
@@ -649,6 +702,7 @@ export type ChatDocumentEmbeddingUncheckedUpdateWithoutChatMessageDocumentEmbedd
 export type ChatDocumentEmbeddingCreateWithoutEmbeddingModelInput = {
   id?: string;
   content: string;
+  graphContent?: string | null;
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   contentHash: string;
   createdAt?: Date | string;
@@ -659,6 +713,7 @@ export type ChatDocumentEmbeddingCreateWithoutEmbeddingModelInput = {
 export type ChatDocumentEmbeddingUncheckedCreateWithoutEmbeddingModelInput = {
   id?: string;
   content: string;
+  graphContent?: string | null;
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   contentHash: string;
   createdAt?: Date | string;
@@ -722,6 +777,10 @@ export type ChatDocumentEmbeddingScalarWhereInput = {
     | Prisma.ChatDocumentEmbeddingScalarWhereInput[];
   id?: Prisma.UuidFilter<'ChatDocumentEmbedding'> | string;
   content?: Prisma.StringFilter<'ChatDocumentEmbedding'> | string;
+  graphContent?:
+    | Prisma.StringNullableFilter<'ChatDocumentEmbedding'>
+    | string
+    | null;
   metadata?: Prisma.JsonNullableFilter<'ChatDocumentEmbedding'>;
   contentHash?: Prisma.StringFilter<'ChatDocumentEmbedding'> | string;
   embeddingModelId?:
@@ -735,6 +794,7 @@ export type ChatDocumentEmbeddingScalarWhereInput = {
 export type ChatDocumentEmbeddingCreateManyEmbeddingModelInput = {
   id?: string;
   content: string;
+  graphContent?: string | null;
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   contentHash: string;
   createdAt?: Date | string;
@@ -744,6 +804,10 @@ export type ChatDocumentEmbeddingCreateManyEmbeddingModelInput = {
 export type ChatDocumentEmbeddingUpdateWithoutEmbeddingModelInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string;
   content?: Prisma.StringFieldUpdateOperationsInput | string;
+  graphContent?:
+    | Prisma.NullableStringFieldUpdateOperationsInput
+    | string
+    | null;
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   contentHash?: Prisma.StringFieldUpdateOperationsInput | string;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -754,6 +818,10 @@ export type ChatDocumentEmbeddingUpdateWithoutEmbeddingModelInput = {
 export type ChatDocumentEmbeddingUncheckedUpdateWithoutEmbeddingModelInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string;
   content?: Prisma.StringFieldUpdateOperationsInput | string;
+  graphContent?:
+    | Prisma.NullableStringFieldUpdateOperationsInput
+    | string
+    | null;
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   contentHash?: Prisma.StringFieldUpdateOperationsInput | string;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -765,6 +833,10 @@ export type ChatDocumentEmbeddingUncheckedUpdateManyWithoutEmbeddingModelInput =
   {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     content?: Prisma.StringFieldUpdateOperationsInput | string;
+    graphContent?:
+      | Prisma.NullableStringFieldUpdateOperationsInput
+      | string
+      | null;
     metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     contentHash?: Prisma.StringFieldUpdateOperationsInput | string;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -818,6 +890,7 @@ export type ChatDocumentEmbeddingSelect<
   {
     id?: boolean;
     content?: boolean;
+    graphContent?: boolean;
     metadata?: boolean;
     contentHash?: boolean;
     embeddingModelId?: boolean;
@@ -843,6 +916,7 @@ export type ChatDocumentEmbeddingSelectCreateManyAndReturn<
   {
     id?: boolean;
     content?: boolean;
+    graphContent?: boolean;
     metadata?: boolean;
     contentHash?: boolean;
     embeddingModelId?: boolean;
@@ -862,6 +936,7 @@ export type ChatDocumentEmbeddingSelectUpdateManyAndReturn<
   {
     id?: boolean;
     content?: boolean;
+    graphContent?: boolean;
     metadata?: boolean;
     contentHash?: boolean;
     embeddingModelId?: boolean;
@@ -877,6 +952,7 @@ export type ChatDocumentEmbeddingSelectUpdateManyAndReturn<
 export type ChatDocumentEmbeddingSelectScalar = {
   id?: boolean;
   content?: boolean;
+  graphContent?: boolean;
   metadata?: boolean;
   contentHash?: boolean;
   embeddingModelId?: boolean;
@@ -890,6 +966,7 @@ export type ChatDocumentEmbeddingOmit<
 > = runtime.Types.Extensions.GetOmit<
   | 'id'
   | 'content'
+  | 'graphContent'
   | 'metadata'
   | 'contentHash'
   | 'embeddingModelId'
@@ -941,6 +1018,7 @@ export type $ChatDocumentEmbeddingPayload<
     {
       id: string;
       content: string;
+      graphContent: string | null;
       metadata: runtime.JsonValue | null;
       contentHash: string;
       embeddingModelId: string | null;
@@ -1598,6 +1676,7 @@ export interface Prisma__ChatDocumentEmbeddingClient<
 export interface ChatDocumentEmbeddingFieldRefs {
   readonly id: Prisma.FieldRef<'ChatDocumentEmbedding', 'String'>;
   readonly content: Prisma.FieldRef<'ChatDocumentEmbedding', 'String'>;
+  readonly graphContent: Prisma.FieldRef<'ChatDocumentEmbedding', 'String'>;
   readonly metadata: Prisma.FieldRef<'ChatDocumentEmbedding', 'Json'>;
   readonly contentHash: Prisma.FieldRef<'ChatDocumentEmbedding', 'String'>;
   readonly embeddingModelId: Prisma.FieldRef<'ChatDocumentEmbedding', 'String'>;

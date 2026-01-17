@@ -13,6 +13,11 @@ export class ChatDocumentEmbedding {
   })
   content!: string;
   @ApiProperty({
+    type: 'string',
+    nullable: true,
+  })
+  graphContent!: string | null;
+  @ApiProperty({
     type: () => Object,
     nullable: true,
   })

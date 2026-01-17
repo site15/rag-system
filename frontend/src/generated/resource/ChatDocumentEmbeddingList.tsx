@@ -39,6 +39,16 @@ export const ChatDocumentEmbeddingList = () => (
         }}
       />
       <DataTable.Col
+        source={Prisma.ChatDocumentEmbeddingScalarFieldEnum.graphContent}
+        sx={{
+          display: "inline-block",
+          maxWidth: "200px",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        }}
+      />
+      <DataTable.Col
         source={Prisma.ChatDocumentEmbeddingScalarFieldEnum.metadata}
       >
         <JsonViewerField

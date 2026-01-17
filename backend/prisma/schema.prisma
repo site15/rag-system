@@ -81,16 +81,22 @@ model AuthSession {
 }
 
 model ChatDocumentEmbedding {
-  id               String                       @id(map: "PK_CHAT_DOCUMENT_EMBEDDINGS") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  content          String                       @db.Text
-  embedding384     Unsupported("vector(384)")?
-  embedding768     Unsupported("vector(768)")?
-  embedding1024    Unsupported("vector(1024)")?
-  embedding1536    Unsupported("vector(1536)")?
-  embedding3072    Unsupported("vector(3072)")?
-  metadata         Json?
-  contentHash      String                       @db.VarChar(64)
-  embeddingModelId String?                      @db.Uuid
+  id                 String                       @id(map: "PK_CHAT_DOCUMENT_EMBEDDINGS") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  content            String                       @db.Text
+  embedding384       Unsupported("vector(384)")?
+  embedding768       Unsupported("vector(768)")?
+  embedding1024      Unsupported("vector(1024)")?
+  embedding1536      Unsupported("vector(1536)")?
+  embedding3072      Unsupported("vector(3072)")?
+  graphContent       String?                      @db.Text
+  graphEmbedding384  Unsupported("vector(384)")?
+  graphEmbedding768  Unsupported("vector(768)")?
+  graphEmbedding1024 Unsupported("vector(1024)")?
+  graphEmbedding1536 Unsupported("vector(1536)")?
+  graphEmbedding3072 Unsupported("vector(3072)")?
+  metadata           Json?
+  contentHash        String                       @db.VarChar(64)
+  embeddingModelId   String?                      @db.Uuid
 
   createdAt DateTime @default(now()) @db.Timestamp(6)
   updatedAt DateTime @default(now()) @db.Timestamp(6)
@@ -159,7 +165,7 @@ model ChatMessage {
 
 model ChatMessageDocumentEmbedding {
   id                  String   @id(map: "PK_CHAT_MESSAGE_DOCUMENT_EMBEDDINGS") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  messageId       String?  @db.Uuid
+  messageId           String?  @db.Uuid
   embeddingDocumentId String?  @db.Uuid
   isFound             Boolean  @default(false)
   relevanceScore      Decimal? @db.Decimal(3, 2)
