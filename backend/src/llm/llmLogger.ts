@@ -314,7 +314,7 @@ export class LLMLogger {
     }
   }
 
-  private static getResponseString(result: any) {
+  static getResponseString(result: any) {
     let response: string;
     if (typeof result === 'string') {
       response = result;
