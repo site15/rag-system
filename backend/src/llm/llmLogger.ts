@@ -5,6 +5,7 @@ import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { ChatGroq } from '@langchain/groq';
 import { ChatOpenAI } from '@langchain/openai';
 import { PrismaService } from '../services/prisma.service';
+import { Trace } from '../trace/trace.module';
 import { Logger } from './logger';
 import { LLMQueryLogger } from './services/llmQueryLogger';
 import {
@@ -101,6 +102,7 @@ export class LLMLogger {
   /**
    * Calls the LLM and logs the full request/response
    */
+  @Trace()
   static async callWithLogging({
     llm,
     prompt,

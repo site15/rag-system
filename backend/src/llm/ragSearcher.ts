@@ -123,7 +123,11 @@ LIMIT ${limit};
     chunkSize: number = 1000,
     delimiter = `\n--\n`,
     showLog = true,
+    depth = 5,
   ): string[] {
+    if (depth <= 0) {
+      return [text];
+    }
     if (showLog) {
       Logger.logInfo('Разделение текста на чанки', {
         textLength: text.length,
@@ -166,6 +170,8 @@ LIMIT ${limit};
               chunk,
               chunkSize,
               (delimiter = `\n\n`),
+              false,
+              depth - 1,
             )
               .map((chunk) =>
                 chunk.length > chunkSize

@@ -8,9 +8,15 @@ import { LlmBootstrapService } from './services/llm-bootstrap.service';
 import { LlmDialogService } from './services/llm-dialog.service';
 import { LlmSendMessageService } from './services/llm-send-message.service';
 import { PrismaService } from './services/prisma.service';
+import { TraceModule } from './trace/trace.module';
 
 @Module({
-  imports: [JwtModule],
+  imports: [
+    JwtModule,
+    TraceModule.forRoot({
+      saveTracesAsMermaid: true,
+    }),
+  ],
   controllers: [...CONTROLLERS, FlowController],
   providers: [
     PrismaService,

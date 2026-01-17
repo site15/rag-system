@@ -15,6 +15,7 @@ import {
   FindManyResponseMeta,
   getFirstSkipFromCurPerPage,
 } from '../services/prisma.service';
+import { Trace } from '../trace/trace.module';
 import { AppRequest, CurrentAppRequest } from '../types/request';
 
 ///////////
@@ -156,6 +157,7 @@ export class FlowController {
 
   @Post('send-message')
   @ApiCreatedResponse({ type: SendMessageFlowResponse })
+  @Trace()
   async sendMessage(
     @CurrentAppRequest() req: AppRequest,
     @Body() args: SendMessageFlowArgs,

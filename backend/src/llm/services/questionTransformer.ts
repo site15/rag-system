@@ -5,6 +5,7 @@ import { HuggingFaceInference } from '@langchain/community/llms/hf';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { ChatGroq } from '@langchain/groq';
 import { ChatOpenAI } from '@langchain/openai';
+import { addPayloadToTrace, Trace } from '../../trace/trace.module';
 import { CATEGORY, RAG_SEARCH_CONFIG } from '../constants';
 import { DialogManager } from '../dialogManager';
 import { getCategoryByDetectedCategory } from '../getCategoryByDetectedCategory';
@@ -257,128 +258,149 @@ export class QuestionTransformer {
       messageId,
     });
 
-    const transformedEmbedded1 = await this.transformToEmbeddedWithLLM({
-      question,
-      llm,
-      category,
-      provider,
-      dialogId,
-      messageId,
-      prompt: `Ты — переписчик пользовательских запросов для entity-based semantic search.
+    const transformedEmbeddedActionBased =
+      await this.transformToEmbeddedWithLLM({
+        type: 'action-based',
+        question,
+        llm,
+        category,
+        provider,
+        dialogId,
+        messageId,
+        prompt: `Ты — переписчик пользовательских запросов для action-based semantic search.
 
-Документы — это короткие сообщения, реплики или утверждения автора.
-Поиск осуществляется по факту упоминания или позиции, а не по объяснениям.
+Твоя задача — преобразовать ВОПРОС в ПОИСКОВЫЙ ЗАПРОС об ОПЫТЕ ИСПОЛЬЗОВАНИЯ.
 
-Твоя задача — привести вопрос к КОРОТКОМУ поисковому якорю, чтобы:
-- смысл и цель НЕ изменялись;
-- результат был одной строкой;
-- остались только ключевые сущности и термины;
-- были удалены вопросы, уточнения, вводные слова и эмоции.
-
-КРИТИЧЕСКОЕ ПРАВИЛО:
-- Ты НИКОГДА не отвечаешь на вопрос и НИКОГДА не добавляешь факты
-  (даты, годы, числа, значения, оценки).
-- Ты ТОЛЬКО переформулируешь запрос в поисковый якорь.
-- Никогда не добавляй слова, уточнения, модификаторы или любые временные наречия к глаголу из истории переписки; используй глагол **строго в той форме**, в которой ассистент его уже использовал, без изменений и добавлений.
-
-СТРОГО ЗАПРЕЩЕНО:
-- отвечать на вопрос пользователя;
-- подставлять конкретные данные (годы, цифры, факты);
-- добавлять слова "пример", "как", "почему", "стоит ли", "использовать";
-- добавлять глаголы действий;
-- формировать исследовательские или обучающие формулировки.
-- добавлять к сущности любые уточнения, годы, версии, свойства или пояснения.
+ЖЁСТКИЕ ПРАВИЛА:
+1. НИКОГДА не отвечай на вопрос пользователя
+2. НИКОГДА не добавляй годы, даты, числа, места, временные периоды
+3. Используй ТОЛЬКО разрешённые слова-действия: "использование", "применение", "опыт", "пример", "реализация"
+4. Результат — "Действие + Сущность"
 
 КРИТИЧЕСКИ ВАЖНО:
-- основной термин БЕРИ из истории переписки;
-- если вопрос является уточнением, используй основной термин
-  из предыдущего контекста;
-- если есть альтернативное написание (eng/ru),
-  добавь его В КОНЕЦ строки через запятую;
-- НЕ заменяй основной термин альтернативным.
-- ЕСЛИ входной вопрос является уточнением (когда?, где?, какой?, в каком году?), то результатом ВСЕГДА является ТОЛЬКО исходная сущность из контекста
-- БЕЗ добавления атрибутов, характеристик или значений.
+- Ты не отвечаешь на вопрос "в каком году?", а ищешь документы про ОПЫТ ИСПОЛЬЗОВАНИЯ
+- Вопрос "когда?" → ищем документы про "использование [технология]"
+- Вопрос "где?" → ищем документы про "применение [технология]"
+- Вопрос "какой?" → ищем документы про "опыт [технология]"
+
+СТРОГИЕ ПРИМЕРЫ ДЛЯ ВОПРОСА "В КАКОМ ГОДУ?":
+Контекст: "Использовал флюрби"
+Вопрос: "в каком году?"
+Результат: "использование флюрби" ✅
+
+Контекст: "Работал с зорбиком"
+Вопрос: "когда?"
+Результат: "опыт зорбика" ✅
+
+Контекст: "Применял кваксу"
+Вопрос: "где применял?"
+Результат: "применение кваксы" ✅
+
+ЗАПРЕЩЕНО ДЛЯ ВОПРОСА "В КАКОМ ГОДУ?":
+- "использование флюрби в 2005" ❌ (добавлен год)
+- "опыт зорбика в 2018" ❌ (добавлен год)
+- "применение кваксы в продакшене" ❌ (добавлено место)
+- "флюрби использовал в 2005" ❌ (это утверждение, не поисковый запрос)
+
+КРИТИЧЕСКОЕ ПРАВИЛО ПОВТОРЕНИЕ:
+- Ты не ищешь ОТВЕТ на вопрос
+- Ты ищешь документы, где описывается ОПЫТ ИСПОЛЬЗОВАНИЯ технологии
+- "2005" — это ОТВЕТ, а не поисковый запрос
+- "использование флюрби" — это поисковый запрос для нахождения документов об опыте
+
+Формат результата:
+- одна строка
+- только одно действие + одна сущность
+- строчными буквами
+- без точек, запятых, пояснений
+
+Контекст диалога:
+${(history || []).join('\n')}
+
+Вопрос:
+${question}
+
+Результат:`,
+      });
+
+    const transformedEmbeddedEntityBased =
+      await this.transformToEmbeddedWithLLM({
+        type: 'entity-based',
+        question,
+        llm,
+        category,
+        provider,
+        dialogId,
+        messageId,
+        prompt: `Ты — переписчик пользовательских запросов для entity-based semantic search.
+
+Твоя ЕДИНСТВЕННАЯ задача — извлечь ИМЕНА СУЩНОСТЕЙ из контекста диалога для поиска.
+
+ЖЁСТКИЕ ПРАВИЛА:
+1. НИКОГДА не отвечай на вопрос пользователя
+2. НИКОГДА не добавляй годы, даты, числа, версии, места, время
+3. Для вопросов "когда?", "в каком году?", "где?", "какой?" результат ДОЛЖЕН быть ТОЛЬКО имя сущности
+4. Результат — только существительные/имена
+
+КРИТИЧЕСКИ ВАЖНО:
+- Ты не ищешь ответ, ты ищешь ПО ЧЕМУ ИСКАТЬ
+- "2005" — это НЕ поисковый якорь, это попытка ответить
+- "флюрби" — это поисковый якорь, по которому можно искать
+
+СТРОГИЕ ПРИМЕРЫ ДЛЯ ВОПРОСА "В КАКОМ ГОДУ?":
+Контекст: "Использовал флюрби"
+Вопрос: "в каком году?"
+Результат: "флюрби" ✅
+
+Контекст: "Работал с зорбиком"
+Вопрос: "где?"
+Результат: "зорбик" ✅
+
+Контекст: "Знаю кваксу"
+Вопрос: "какую версию?"
+Результат: "квакса" ✅
+
+Контекст: "Разрабатывал на мурзике"
+Вопрос: "когда?"
+Результат: "мурзик" ✅
+
+ЗАПРЕЩЕНО ДЛЯ ВОПРОСА "В КАКОМ ГОДУ?":
+- "2005" ❌ (это не сущность)
+- "флюрби 2005" ❌ (добавлен год)
+- "2005 года" ❌ (это не сущность)
+- "Использовал в 2005" ❌ (это не сущность)
+
+ДОПОЛНИТЕЛЬНЫЕ ПРАВИЛА:
+1. Не используй глаголы
+2. Не используй предлоги
+3. Не используй местоимения
+4. Только имена, термины, технологии
+
+КРАТКОЕ НАПОМИНАНИЕ:
+- Вопрос: "в каком году?" → ответ: "ИмяСущности"
+- Вопрос: "когда?" → ответ: "ИмяСущности"
+- Вопрос: "где?" → ответ: "ИмяСущности"
+- Вопрос: "какой?" → ответ: "ИмяСущности"
 
 Формат:
-- одна строка;
-- существительные или устойчивые термины;
-- допускается перечисление через запятую;
-- без пояснений.
+- одна строка
+- только имена/термины
+- можно перечисление через запятую
+- без точек, без пояснений
 
-Conversation history (use strictly for personal experience context):
+Контекст диалога:
 ${(history || []).join('\n')}
 
 Входной вопрос:
 ${question}
 
 Результат:`,
-    });
-
-    const transformedEmbedded2 = await this.transformToEmbeddedWithLLM({
-      question,
-      llm,
-      category,
-      provider,
-      dialogId,
-      messageId,
-      prompt: `Ты — переписчик пользовательских запросов для action-based semantic search.
-
-Документы — это статьи или развёрнутые сообщения,
-где автор описывает применение, опыт или реализацию.
-
-Твоя задача — минимально восстановить поисковый запрос так, чтобы:
-- смысл вопроса НЕ изменился;
-- результат был одной строкой;
-- в формулировке ПРИСУТСТВОВАЛО действие или аспект использования;
-- формулировка оставалась нейтральной и краткой.
-
-КРИТИЧЕСКОЕ ПРАВИЛО:
-- Ты НИКОГДА не отвечаешь на вопрос пользователя.
-- Ты НЕ объясняешь и НЕ описываешь решение.
-- Ты ТОЛЬКО восстанавливаешь поисковый запрос.
-- Никогда не добавляй слова, уточнения, модификаторы или любые временные наречия к глаголу из истории переписки; используй глагол **строго в той форме**, в которой ассистент его уже использовал, без изменений и добавлений.
-
-РАЗРЕШЕНО:
-- использовать ТОЛЬКО следующие action-слова:
-  "пример", "использование", "применение", "реализация", "опыт";
-- восстанавливать action-based уточнения
-  ("например?", "а как?", "а где используется?"),
-  но БЕЗ добавления новых фактов.
-
-СТРОГО ЗАПРЕЩЕНО:
-- добавлять конкретные факты, шаги, технологии или оценки;
-- добавлять глаголы действий вне разрешённого списка;
-- формировать обучающие, исследовательские или объяснительные формулировки;
-- расширять запрос больше чем необходимо.
-
-КРИТИЧЕСКИ ВАЖНО:
-- основной термин БЕРИ из истории переписки;
-- если входной вопрос является уточнением,
-  восстанови полный action-based запрос,
-  используя термин из контекста;
-- если есть альтернативное написание (eng/ru),
-  добавь его В КОНЕЦ строки через запятую;
-- НЕ заменяй основной термин альтернативным.
-
-Формат:
-- одна строка;
-- действие + объект;
-- существительные или устойчивые словосочетания;
-- без пояснений, кавычек и пунктуации в конце.
-
-Conversation history (use strictly for personal experience context):
-${(history || []).join('\n')}
-
-Входной вопрос:
-${question}
-
-Результат:`,
-    });
+      });
 
     Logger.logInfo('Question transformation completed', {
       original: question,
       transformedQuestion,
-      transformedEmbedded: transformedEmbedded1.question,
+      transformedEmbedded: transformedEmbeddedActionBased.question,
       category,
       detectedCategory,
       sourceFilter,
@@ -390,11 +412,11 @@ ${question}
       transformedQuestion: transformedQuestion.question,
       logIds: [
         transformedQuestion.logId,
-        transformedEmbedded1.logId,
-        transformedEmbedded2.logId,
+        transformedEmbeddedActionBased.logId,
+        transformedEmbeddedEntityBased.logId,
         detectCategoryResult.logId,
       ],
-      transformedEmbedded: `${transformedEmbedded1.question}, ${transformedEmbedded2.question}`,
+      transformedEmbedded: `${transformedEmbeddedActionBased.question}, ${transformedEmbeddedEntityBased.question}`,
       category,
       sourceFilter,
       searchLimit:
@@ -440,6 +462,7 @@ ${question}
   /**
    * Transform the question using LLM to make it more specific and better understood
    */
+  @Trace()
   private static async transformWithLLM({
     question,
     llm,
@@ -470,6 +493,11 @@ ${question}
       ? createMinimalTransformationPrompt({ question, category, history })
       : createContextualRewritePrompt({ question, category, history });
 
+    addPayloadToTrace({
+      prompt,
+      isSelfContained,
+    });
+
     try {
       const { content: transformed, logId } = await LLMLogger.callWithLogging({
         provider,
@@ -487,6 +515,10 @@ ${question}
             .then(async (result) =>
               typeof result === 'string' ? result.trim() : result,
             ),
+      });
+
+      addPayloadToTrace({
+        transformed,
       });
 
       // If the transformation result seems invalid (empty, same as original, or an error), return the original
@@ -526,7 +558,9 @@ ${question}
   /**
    * Transform the question using LLM to make it more specific and better understood
    */
+  @Trace()
   private static async transformToEmbeddedWithLLM({
+    type,
     question,
     llm,
     category,
@@ -535,6 +569,7 @@ ${question}
     messageId,
     prompt,
   }: {
+    type: string;
     dialogId: string | undefined;
     messageId: string | undefined;
     question: string;
@@ -550,6 +585,11 @@ ${question}
     prompt: string;
   }) {
     try {
+      addPayloadToTrace({
+        prompt,
+        type,
+      });
+
       const { content: transformed, logId } = await LLMLogger.callWithLogging({
         provider,
         llm,
@@ -566,6 +606,10 @@ ${question}
             .then(async (result) =>
               typeof result === 'string' ? result.trim() : result,
             ),
+      });
+
+      addPayloadToTrace({
+        transformed,
       });
 
       // Возвращаем оригинальный вопрос, если результат пустой или некорректный
@@ -598,6 +642,7 @@ ${question}
     }
   }
 
+  @Trace()
   private static async detectCategory({
     llm,
     text,
@@ -676,6 +721,10 @@ ${text}
 Вывод:`;
 
     try {
+      addPayloadToTrace({
+        prompt,
+      });
+
       const { content: reconstructed, logId } = await LLMLogger.callWithLogging(
         {
           provider,
@@ -694,6 +743,10 @@ ${text}
               ),
         },
       );
+
+      addPayloadToTrace({
+        reconstructed,
+      });
 
       // If reconstruction fails, return a simple fallback
       if (!reconstructed || reconstructed.includes('[ERROR]')) {

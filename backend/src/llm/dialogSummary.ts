@@ -10,6 +10,7 @@ import { ChatGroq } from '@langchain/groq';
 import { DialogManager } from './dialogManager';
 import { LLMLogger } from './llmLogger';
 import { createDialogSummaryPrompt } from './prompt';
+import { addPayloadToTrace, Trace } from '../trace/trace.module';
 
 export class DialogSummary {
   public static async shouldSummarize(dialogId: string): Promise<boolean> {
@@ -30,6 +31,7 @@ export class DialogSummary {
     return should;
   }
 
+  @Trace()
   public static async summarizeDialog({
     dialogId,
     llm,
@@ -54,6 +56,11 @@ export class DialogSummary {
       dialogId,
       promptLength: prompt.length,
     });
+
+    addPayloadToTrace({
+      prompt,
+    });
+
     const { content, logId } = await LLMLogger.callWithLogging({
       provider,
       llm,
@@ -68,6 +75,11 @@ export class DialogSummary {
             typeof result === 'string' ? result.trim() : result,
           ),
     });
+
+    addPayloadToTrace({
+      content,
+    });
+
     Logger.logInfo('Получен ответ от LLM для суммаризации', {
       dialogId,
       // responseLength: typeof r.content === "string" ? r.content.length : JSON.stringify(r.content).length,

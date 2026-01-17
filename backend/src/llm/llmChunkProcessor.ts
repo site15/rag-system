@@ -5,6 +5,7 @@ import { HuggingFaceInference } from '@langchain/community/llms/hf';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { ChatGroq } from '@langchain/groq';
 import { ChatOpenAI } from '@langchain/openai';
+import { addPayloadToTrace, Trace } from '../trace/trace.module';
 import { CATEGORY_PROMPTS } from './category-prompts';
 import { DialogManager } from './dialogManager';
 import { LLMLogger } from './llmLogger';
@@ -430,6 +431,7 @@ export class LLMChunkProcessor {
     return chunk.trim();
   }
 
+  @Trace()
   public static async askLLMChunked({
     llm,
     dialogId,
@@ -477,6 +479,8 @@ export class LLMChunkProcessor {
     );
 
     if (successfulResult?.foundText) {
+      addPayloadToTrace({ foundText: successfulResult.foundText });
+
       Logger.logInfo('Найден успешный результат', {
         contextIndex: successfulResult.contextIndex,
         foundText: successfulResult.foundText,
@@ -492,6 +496,8 @@ export class LLMChunkProcessor {
       };
     }
 
+    addPayloadToTrace({ foundText: null });
+
     Logger.logInfo('Информация по вопросу не найдена в контексте');
     return {
       response: null,
@@ -503,6 +509,7 @@ export class LLMChunkProcessor {
     };
   }
 
+  @Trace()
   private static async processContextDocsInParallel({
     llm,
     contextDocs,
@@ -554,6 +561,7 @@ export class LLMChunkProcessor {
     }> = [];
 
     // Process in batches using a proper worker pool
+    // todo: maxParallelThreads not work correct
     for (let i = 0; i < contextDocs.length; i += maxParallelThreads) {
       const batch = contextDocs.slice(i, i + maxParallelThreads);
 
@@ -582,6 +590,10 @@ export class LLMChunkProcessor {
             p.then((result) => ({ result, batchIndex: idx, completed: true })),
           ),
         );
+
+        addPayloadToTrace({
+          firstSuccess,
+        });
 
         if (
           firstSuccess &&
@@ -661,6 +673,7 @@ export class LLMChunkProcessor {
     return { maxParallelThreads, questionType };
   }
 
+  @Trace()
   private static async processSingleContextDoc({
     llm,
     contextDoc,
@@ -732,15 +745,21 @@ export class LLMChunkProcessor {
       }
 
       // --- Разбиваем на чанки ---
-      const basePromptLength = (
-        await LLMChunkProcessor.generatePrompt({
-          history,
-          question,
-          source: contextDoc.source,
-          detectedCategory,
-          dialogId,
-        })
-      ).length;
+      const basePrompt = await LLMChunkProcessor.generatePrompt({
+        history,
+        question,
+        source: contextDoc.source,
+        detectedCategory,
+        dialogId,
+      });
+
+      const basePromptLength = basePrompt.length;
+
+      addPayloadToTrace({
+        contextDocsCount: contextDocs.length,
+        basePromptLength,
+        basePrompt,
+      });
 
       if (index === 0) {
         const combinedContent = contextDocs
@@ -788,6 +807,8 @@ export class LLMChunkProcessor {
         totalChunks: totalChunks,
         processedContentLength: processedContent.length,
       });
+
+      addPayloadToTrace({ totalChunks });
 
       let foundChunkIndex = -1;
       let foundText = '';
@@ -843,7 +864,7 @@ export class LLMChunkProcessor {
             },
           );
 
-          const mainPrompt = await LLMChunkProcessor.generatePrompt({
+          const chunkPrompt = await LLMChunkProcessor.generatePrompt({
             chunk,
             history,
             question,
@@ -852,10 +873,15 @@ export class LLMChunkProcessor {
             dialogId,
           });
 
+          addPayloadToTrace({
+            [`chunk${i}Prompt`]: chunkPrompt,
+            [`chunk${i}PromptLength`]: chunkPrompt.length,
+          });
+
           const { content: text, logId } = await LLMLogger.callWithLogging({
             provider,
             llm,
-            prompt: mainPrompt,
+            prompt: chunkPrompt,
             metadata: {
               contextIndex,
               chunkIndex: i,
@@ -870,6 +896,14 @@ export class LLMChunkProcessor {
                 .then(async (result) =>
                   typeof result === 'string' ? result.trim() : result,
                 ),
+          });
+
+          addPayloadToTrace({
+            text,
+          });
+
+          addPayloadToTrace({
+            [`chunk${i}PromptResult`]: text,
           });
 
           foundLogIds.push(logId);
@@ -907,14 +941,21 @@ export class LLMChunkProcessor {
               foundText = text.replace(/^\[FOUND]\s*/, '');
               foundChunkIndex = i;
 
+              const finalAnswerPrompt = createFinalAnswerPrompt({
+                question,
+                fact: foundText,
+                category,
+                history: history.join('\n'),
+              });
+
+              addPayloadToTrace({
+                [`chunk${i}FinalAnswerPrompt`]: finalAnswerPrompt,
+              });
+
               const { content, logId } = await LLMLogger.callWithLogging({
                 provider,
                 llm,
-                prompt: createFinalAnswerPrompt({
-                  question,
-                  fact: foundText,
-                  category,
-                }),
+                prompt: finalAnswerPrompt,
                 messageId: undefined,
                 dialogId,
                 callback: (prompt) =>
@@ -924,7 +965,13 @@ export class LLMChunkProcessor {
                       typeof result === 'string' ? result.trim() : result,
                     ),
               });
+
               foundText = content;
+
+              addPayloadToTrace({
+                foundText,
+              });
+
               foundLogIds.push(logId);
               break;
             } else {
@@ -942,6 +989,9 @@ export class LLMChunkProcessor {
       Logger.logInfo('foundLogIds', foundLogIds);
 
       if (foundText) {
+        addPayloadToTrace({
+          foundText,
+        });
         return {
           foundLogIds,
           success: true,
@@ -982,6 +1032,7 @@ export class LLMChunkProcessor {
     }
   }
 
+  @Trace()
   static async frendlyFound({
     category,
     surroundingChunks,
@@ -1009,6 +1060,10 @@ export class LLMChunkProcessor {
       question,
     });
 
+    addPayloadToTrace({
+      prompt,
+    });
+
     const { content: foundText, logId } = await LLMLogger.callWithLogging({
       provider,
       llm,
@@ -1026,9 +1081,15 @@ export class LLMChunkProcessor {
             typeof result === 'string' ? result.trim() : result,
           ),
     });
+
+    addPayloadToTrace({
+      foundText,
+    });
+
     return { foundText, logId };
   }
 
+  @Trace()
   static async frendlyNotFound({
     category,
     chunk,
@@ -1054,6 +1115,10 @@ export class LLMChunkProcessor {
   }) {
     const prompt = createFriendlyNotFoundPrompt({ category, chunk, question });
 
+    addPayloadToTrace({
+      prompt,
+    });
+
     const { content: foundText, logId } = await LLMLogger.callWithLogging({
       provider,
       llm,
@@ -1070,6 +1135,10 @@ export class LLMChunkProcessor {
           .then(async (result) =>
             typeof result === 'string' ? result.trim() : result,
           ),
+    });
+
+    addPayloadToTrace({
+      foundText,
     });
 
     return { foundText, logId };

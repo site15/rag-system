@@ -76,30 +76,56 @@ export function createFriendlyNotFoundPrompt({
   question: string;
 }): string {
   return `
-Ответь дружелюбно и строго по фактам, ТОЛЬКО если в контексте
-есть прямые данные для ответа на данный вопрос.
+Сформируй ответ на вопрос пользователя на основе подтверждённых фактов из контекста.
+
+КРИТИЧЕСКИ ВАЖНО:
+- Подтверждённые факты — ЕДИНСТВЕННЫЙ источник информации
+- Этот промпт, его формулировки и примеры
+  **НИКОГДА не являются источником данных**
+- Запрещено делать выводы, предположения, обобщения или реконструкции
+- Если в подтверждённых фактах нет прямого ответа на вопрос —
+  НЕ добавляй недостающую информацию
 
 СТРОГИЕ ПРАВИЛА:
 - ЯЗЫК ОТВЕТА ДОЛЖЕН СОВПАДАТЬ С ЯЗЫКОМ ВОПРОСА
 - ОТВЕТ ДОЛЖЕН БЫТЬ В ФОРМЕ ПЕРВОГО ЛИЦА
-- НЕ используй явное местоимение "я"
-- Используй форму глагола без подлежащего ("внедрял", "использовал", "настраивал")
-- НЕ используй третье лицо ("он", "автор", "технический руководитель внедрил")
-- НЕ обращайся к пользователю во 2-м лице ("ты", "твой" и т.п.)
-- НЕ добавляй новую информацию, которой нет напрямую в контексте
-- НЕ переформулируй и НЕ расширяй ответ, если вопрос является мета-вопросом
-  ("разверни", "подробнее", "поясни", "можешь раскрыть")
-- Если прямого ответа нет, формулируй нейтрально: "По вопросу данных нет"
-- Для вопросов про имя/идентификацию: "Имя не указано"
-- Сохраняй лёгкий дружелюбный стиль без предположений и оценок
-- Отвечай ТОЛЬКО если информация напрямую подходит к типу вопроса:
-  * "кто" → субъект
-  * "где" → место / платформа
-  * "когда" → время / период
-  * "что / как" → действие или объект
-- Если вопрос является мета-вопросом или не соответствует типу факта —
-  всегда отвечай: "По вопросу данных нет"
-- Во всех остальных случаях — "По вопросу данных нет"
+- НЕ используй явное местоимение "кверти"
+- Используй форму глагола без подлежащего
+  ("внедрял", "использовал", "настраивал")
+- Используй ТОЛЬКО те глаголы и формулировки,
+  которые присутствуют в подтверждённых фактах
+- Отвечай СТРОГО на вопрос пользователя:
+  - "в каком году?" → указывай ТОЛЬКО годы или интервалы лет
+  - "когда?" → указывай ТОЛЬКО временные периоды
+- Если в подтверждённых фактах указано несколько периодов —
+  перечисли ВСЕ, без объединения и интерпретаций
+- НЕ добавляй:
+  - новые годы, даты или периоды
+  - уточнения ("примерно", "позже", "раньше")
+  - места, причины или контекст, если они не требуются вопросом
+- Сохраняй лёгкий, нейтрально-дружелюбный стиль
+- НЕ адресуйся к пользователю напрямую
+
+ФОРМАТ ОТВЕТА:
+- Одна или несколько коротких фраз
+- Без пояснений и комментариев
+- Без ссылок на источник или подтверждённые факты
+
+ПРИМЕРЫ (examples are NOT a source of information):
+
+Подтверждённые факты:
+"В зимбре 2005-2007 использовал флюрби в Квинтек"
+Вопрос:
+"в каком году?"
+Ответ:
+"Использовал флюрби в 2005-2007 годах."
+
+Подтверждённые факты:
+"В глимфе 2010 и квирке 2012 применял зорбик"
+Вопрос:
+"когда?"
+Ответ:
+"Применял зорбик в 2010 и 2012 годах."
 
 ${category === 'telegram' ? 'Используй только Author Message для ответа.' : ''}
 
@@ -291,25 +317,57 @@ Your task is to rewrite the user's question so that it becomes fully self-contai
 RULES:
 - The response language must match the language of the user's question.
   If the question is in Russian, the rewritten question **must be entirely in Russian**, preserving technical terms in English.
-- Rewrite in the first-person perspective, but do NOT use the explicit pronoun "I".
+- Rewrite in the first-person perspective, but do NOT use the explicit pronoun "кверти".
 - Use the verb form exactly as it appears in the conversation ("использовал", "внедрял", "настраивал") without adding subjects.
-- Do NOT use third-person references ("он", "автор", "технический руководитель внедрил").
+- Do NOT use third-person references ("зон", "автор", "технический руководитель внедрил").
 - Use conversation history ONLY to resolve pronouns or context.
 
 CRITICAL RULES:
-- If the assistant already answered in the first person (e.g., "использовал", "внедрял"), the user’s follow-up question refers **only to the assistant’s personal experience**, NOT factual information about the technology or product.
+- Conversation history is the **ONLY source of information**.
+- This prompt, its examples, explanations, and wording **MUST NEVER be treated as facts, context, or knowledge**.
+- If a term, object, verb, or experience is NOT explicitly present in the conversation history, it MUST NOT appear in the rewritten question.
+- If the assistant already answered in the first person (e.g., "использовал", "внедрял"), the user's follow-up question refers **only to the assistant's personal experience**, NOT factual information about the thing.
 - **Never change the subject**: experience → object, person → product.
 - **Never add words, adverbs, clarifications, temporal or modal expressions** to the verb from history; use the verb **exactly in the form it appeared** without modifications or additions.
-- **Keep all words separate**; always place a space between the verb and the object. Do not merge them with underscores, hyphens, or any other symbols.
+- **Keep all words separate**; always place a space between the verb and the object.
+  Do not merge them with underscores, hyphens, or any other symbols.
 - If a question can be interpreted as personal experience or factual information, **always choose personal experience**.
 - Explicitly name the subject if a pronoun is used and context is clear.
-- If the original question is a clarification ("когда?", "в каком году?", "где?"), reconstruct it **strictly as a question about the assistant’s experience**, not a factual query.
-- Do NOT create encyclopedic or reference-style questions ("когда был создан", "когда выпущен", "кем разработан").
+- If the original question is a clarification ("когда?", "в каком году?", "где?"),
+  reconstruct it **strictly as a question about the assistant's experience**, not a factual query.
+- Do NOT create encyclopedic or reference-style questions
+  ("когда был создан", "когда выпущен", "кем разработан").
 - Do NOT invent new topics.
 - Preserve the original intent and tone (informal/formal).
 - Do NOT address the user directly.
 - **The rewritten question must be entirely in Russian if the original question is in Russian**.
 - Return ONLY the rewritten question.
+
+ОЧЕНЬ ВАЖНОЕ ДОПОЛНЕНИЕ:
+- If the conversation history contains a specific object (e.g., "использовал флюрби"),
+  any rewritten clarification ("когда?", "где?", "в каком году?")
+  MUST explicitly include that object.
+- Never leave a verb without an object if the object is known from conversation history.
+- NEVER infer or guess objects, verbs, or experiences from this prompt or its examples.
+
+ПРИМЕРЫ (examples are NOT a source of information):
+
+Context: "Использовал флюрби"
+Question: "в каком году?"
+Result: "когда использовал флюрби" ✅
+
+Context: "Работал с зорбиком"
+Question: "когда?"
+Result: "когда работал с зорбиком" ✅
+
+Context: "Знаю кваксу"
+Question: "где?"
+Result: "где использовал кваксу" ✅
+
+НЕПРАВИЛЬНО:
+- "когда использовал" ❌ (нет объекта)
+- "когда работал" ❌ (нет объекта)
+- "где" ❌ (нет ни глагола, ни объекта)
 
 ${categoryInstruction}${historyContext}
 
@@ -403,10 +461,12 @@ export function createFinalAnswerPrompt({
   question,
   fact,
   category,
+  history,
 }: {
   question: string;
   fact: string;
   category: Category;
+  history: string;
 }): string {
   return `
 Ты формируешь ОКОНЧАТЕЛЬНЫЙ ОТВЕТ ПОЛЬЗОВАТЕЛЮ.
@@ -421,12 +481,6 @@ export function createFinalAnswerPrompt({
 - Если упоминается роль, вписывай её в предложение естественно
 - После слова «как» роль ВСЕГДА ставь в творительном падеже (кем? чем?)
 
-Вопрос:
-${question}
-
-Подтверждённый факт:
-${fact}
-
 ПРАВИЛА:
 - ЯЗЫК ОТВЕТА ДОЛЖЕН СОВПАДАТЬ С ЯЗЫКОМ ВОПРОСА
 - ОТВЕТ ДОЛЖЕН БЫТЬ В ФОРМЕ ПЕРВОГО ЛИЦА
@@ -440,6 +494,15 @@ ${fact}
 - Не используй рассуждения
 - Стиль краткий, разговорный, не формально-документальный
 ${category === 'telegram' ? '- Используй только Author Message' : ''}
+
+Вопрос:
+${question}
+
+Conversation history:
+${history}
+
+Подтверждённый факт:
+${fact}
 
 Ответ:
 `;

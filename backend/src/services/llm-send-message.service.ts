@@ -31,6 +31,7 @@ import { SummarizationService } from '../llm/services/summarizationService';
 import { TextHelpers } from '../llm/textHelpers';
 import { DocWithMetadataAndId } from '../llm/types';
 import { isUUID } from 'class-validator';
+import { addPayloadToTrace, Trace } from '../trace/trace.module';
 
 // Request interface definition
 export interface MessageRequest {
@@ -58,6 +59,7 @@ type ProcessMessageResponse = {
 
 @Injectable()
 export class LlmSendMessageService {
+  @Trace()
   async processMessageWithRetry({
     messageRequest,
     userId,
@@ -81,6 +83,12 @@ export class LlmSendMessageService {
           currentModel,
         );
 
+        addPayloadToTrace({
+          currentAttempt,
+          maxRetries,
+          currentProvider,
+          currentModel,
+        });
         return await this.processMessage({
           messageRequest,
           userId,
@@ -299,6 +307,7 @@ export class LlmSendMessageService {
     };
   }
 
+  @Trace()
   async processMessage({
     messageRequest,
     userId,
@@ -329,6 +338,8 @@ export class LlmSendMessageService {
         userId,
       });
 
+      addPayloadToTrace({ dialogId, userId });
+
       // Get LLM configuration - use request parameters if provided, otherwise use defaults
       const { appConfig, fullConfig } = this.prepareConfigs({
         messageRequest,
@@ -348,6 +359,8 @@ export class LlmSendMessageService {
 
       const history = await DialogManager.getDialogHistory(dialogId);
 
+      addPayloadToTrace({ history });
+
       this.logBeforeTransformQuestion(message);
 
       // Transform the question using the QuestionTransformer to categorize and optimize it
@@ -361,6 +374,12 @@ export class LlmSendMessageService {
       });
       const processedQuestion = categorizedQuestion.transformedQuestion;
 
+      addPayloadToTrace({
+        userMessage: message,
+        transformedUserMessage: processedQuestion,
+        detectedUserMessageCategory: categorizedQuestion.detectedCategory,
+        commonUserMessageCategory: categorizedQuestion.category,
+      });
       this.logAfterTransformQuestion(
         dialogId,
         message,
@@ -374,6 +393,10 @@ export class LlmSendMessageService {
       const normalizedQuestionArray = TextHelpers.normalizeTextMy(
         categorizedQuestion.transformedEmbedded,
       ).split(', ');
+
+      addPayloadToTrace({
+        normalizedUserMessageArray: normalizedQuestionArray,
+      });
 
       let contextDocs: DocWithMetadataAndId[] = [];
 
@@ -414,6 +437,11 @@ export class LlmSendMessageService {
       let answer = llmResult.response;
       let isSuccess =
         answer !== null && answer !== undefined && answer.trim() !== '';
+
+      addPayloadToTrace({
+        answer,
+        isSuccess,
+      });
 
       // Prepare document info for logging
       const documentInfo = docsWithMeta
@@ -675,6 +703,7 @@ export class LlmSendMessageService {
     });
   }
 
+  @Trace()
   private async searchContextDocs({
     embeddings,
     normalizedQuestion,
