@@ -11,7 +11,7 @@ export class ChatMessageDocumentEmbedding {
     type: 'string',
     nullable: true,
   })
-  chatHistoryId!: string | null;
+  messageId!: string | null;
   @ApiProperty({
     type: 'string',
     nullable: true,

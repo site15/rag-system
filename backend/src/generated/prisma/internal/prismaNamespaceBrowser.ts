@@ -156,7 +156,7 @@ export type ChatMessageScalarFieldEnum =
 
 export const ChatMessageDocumentEmbeddingScalarFieldEnum = {
   id: 'id',
-  chatHistoryId: 'chatHistoryId',
+  messageId: 'messageId',
   embeddingDocumentId: 'embeddingDocumentId',
   isFound: 'isFound',
   relevanceScore: 'relevanceScore',
@@ -180,7 +180,7 @@ export const ChatLlmRequestScalarFieldEnum = {
   isSuccess: 'isSuccess',
   errorMessage: 'errorMessage',
   dialogId: 'dialogId',
-  historyId: 'historyId',
+  messageId: 'messageId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
 } as const;

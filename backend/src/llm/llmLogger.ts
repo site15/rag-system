@@ -132,7 +132,6 @@ export class LLMLogger {
       Logger.logInfo('LLM Request Initiated', {
         model: (llm as any).modelName || (llm as any).model,
         promptLength: prompt.length,
-        prompt,
         metadata,
       });
 

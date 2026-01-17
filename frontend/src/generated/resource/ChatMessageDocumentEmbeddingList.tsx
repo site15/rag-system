@@ -31,9 +31,7 @@ export const ChatMessageDocumentEmbeddingList = () => (
         source={Prisma.ChatMessageDocumentEmbeddingScalarFieldEnum.id}
       />
       <DataTable.Col
-        source={
-          Prisma.ChatMessageDocumentEmbeddingScalarFieldEnum.chatHistoryId
-        }
+        source={Prisma.ChatMessageDocumentEmbeddingScalarFieldEnum.messageId}
       />
       <DataTable.Col
         source={

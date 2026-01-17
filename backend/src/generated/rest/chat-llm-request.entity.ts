@@ -63,7 +63,7 @@ export class ChatLlmRequest {
     type: 'string',
     nullable: true,
   })
-  historyId!: string | null;
+  messageId!: string | null;
   @ApiProperty({
     type: 'string',
     format: 'date-time',

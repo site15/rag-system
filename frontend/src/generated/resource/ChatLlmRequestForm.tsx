@@ -120,7 +120,7 @@ export const ChatLlmRequestShowForm = () => (
         readOnly={true}
       />
       <TextInput
-        source={Prisma.ChatLlmRequestScalarFieldEnum.historyId}
+        source={Prisma.ChatLlmRequestScalarFieldEnum.messageId}
         readOnly={true}
       />
       <DateTimeInput

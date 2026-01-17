@@ -53,7 +53,7 @@ export type ChatLlmRequestMinAggregateOutputType = {
   isSuccess: boolean | null;
   errorMessage: string | null;
   dialogId: string | null;
-  historyId: string | null;
+  messageId: string | null;
   createdAt: Date | null;
   updatedAt: Date | null;
 };
@@ -71,7 +71,7 @@ export type ChatLlmRequestMaxAggregateOutputType = {
   isSuccess: boolean | null;
   errorMessage: string | null;
   dialogId: string | null;
-  historyId: string | null;
+  messageId: string | null;
   createdAt: Date | null;
   updatedAt: Date | null;
 };
@@ -89,7 +89,7 @@ export type ChatLlmRequestCountAggregateOutputType = {
   isSuccess: number;
   errorMessage: number;
   dialogId: number;
-  historyId: number;
+  messageId: number;
   createdAt: number;
   updatedAt: number;
   _all: number;
@@ -122,7 +122,7 @@ export type ChatLlmRequestMinAggregateInputType = {
   isSuccess?: true;
   errorMessage?: true;
   dialogId?: true;
-  historyId?: true;
+  messageId?: true;
   createdAt?: true;
   updatedAt?: true;
 };
@@ -140,7 +140,7 @@ export type ChatLlmRequestMaxAggregateInputType = {
   isSuccess?: true;
   errorMessage?: true;
   dialogId?: true;
-  historyId?: true;
+  messageId?: true;
   createdAt?: true;
   updatedAt?: true;
 };
@@ -158,7 +158,7 @@ export type ChatLlmRequestCountAggregateInputType = {
   isSuccess?: true;
   errorMessage?: true;
   dialogId?: true;
-  historyId?: true;
+  messageId?: true;
   createdAt?: true;
   updatedAt?: true;
   _all?: true;
@@ -274,7 +274,7 @@ export type ChatLlmRequestGroupByOutputType = {
   isSuccess: boolean;
   errorMessage: string | null;
   dialogId: string | null;
-  historyId: string | null;
+  messageId: string | null;
   createdAt: Date;
   updatedAt: Date;
   _count: ChatLlmRequestCountAggregateOutputType | null;
@@ -320,7 +320,7 @@ export type ChatLlmRequestWhereInput = {
   isSuccess?: Prisma.BoolFilter<"ChatLlmRequest"> | boolean;
   errorMessage?: Prisma.StringNullableFilter<"ChatLlmRequest"> | string | null;
   dialogId?: Prisma.UuidNullableFilter<"ChatLlmRequest"> | string | null;
-  historyId?: Prisma.UuidNullableFilter<"ChatLlmRequest"> | string | null;
+  messageId?: Prisma.UuidNullableFilter<"ChatLlmRequest"> | string | null;
   createdAt?: Prisma.DateTimeFilter<"ChatLlmRequest"> | Date | string;
   updatedAt?: Prisma.DateTimeFilter<"ChatLlmRequest"> | Date | string;
   dialog?: Prisma.XOR<
@@ -347,7 +347,7 @@ export type ChatLlmRequestOrderByWithRelationInput = {
   isSuccess?: Prisma.SortOrder;
   errorMessage?: Prisma.SortOrderInput | Prisma.SortOrder;
   dialogId?: Prisma.SortOrderInput | Prisma.SortOrder;
-  historyId?: Prisma.SortOrderInput | Prisma.SortOrder;
+  messageId?: Prisma.SortOrderInput | Prisma.SortOrder;
   createdAt?: Prisma.SortOrder;
   updatedAt?: Prisma.SortOrder;
   dialog?: Prisma.ChatDialogOrderByWithRelationInput;
@@ -381,7 +381,7 @@ export type ChatLlmRequestWhereUniqueInput = Prisma.AtLeast<
       | string
       | null;
     dialogId?: Prisma.UuidNullableFilter<"ChatLlmRequest"> | string | null;
-    historyId?: Prisma.UuidNullableFilter<"ChatLlmRequest"> | string | null;
+    messageId?: Prisma.UuidNullableFilter<"ChatLlmRequest"> | string | null;
     createdAt?: Prisma.DateTimeFilter<"ChatLlmRequest"> | Date | string;
     updatedAt?: Prisma.DateTimeFilter<"ChatLlmRequest"> | Date | string;
     dialog?: Prisma.XOR<
@@ -410,7 +410,7 @@ export type ChatLlmRequestOrderByWithAggregationInput = {
   isSuccess?: Prisma.SortOrder;
   errorMessage?: Prisma.SortOrderInput | Prisma.SortOrder;
   dialogId?: Prisma.SortOrderInput | Prisma.SortOrder;
-  historyId?: Prisma.SortOrderInput | Prisma.SortOrder;
+  messageId?: Prisma.SortOrderInput | Prisma.SortOrder;
   createdAt?: Prisma.SortOrder;
   updatedAt?: Prisma.SortOrder;
   _count?: Prisma.ChatLlmRequestCountOrderByAggregateInput;
@@ -452,7 +452,7 @@ export type ChatLlmRequestScalarWhereWithAggregatesInput = {
     | Prisma.UuidNullableWithAggregatesFilter<"ChatLlmRequest">
     | string
     | null;
-  historyId?:
+  messageId?:
     | Prisma.UuidNullableWithAggregatesFilter<"ChatLlmRequest">
     | string
     | null;
@@ -508,7 +508,7 @@ export type ChatLlmRequestUncheckedCreateInput = {
   isSuccess?: boolean;
   errorMessage?: string | null;
   dialogId?: string | null;
-  historyId?: string | null;
+  messageId?: string | null;
   createdAt?: Date | string;
   updatedAt?: Date | string;
   ChatLlmModel?: Prisma.ChatLlmModelUncheckedCreateNestedManyWithoutChatLlmRequestInput;
@@ -564,7 +564,7 @@ export type ChatLlmRequestUncheckedUpdateInput = {
     | string
     | null;
   dialogId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
-  historyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  messageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   ChatLlmModel?: Prisma.ChatLlmModelUncheckedUpdateManyWithoutChatLlmRequestNestedInput;
@@ -588,7 +588,7 @@ export type ChatLlmRequestCreateManyInput = {
   isSuccess?: boolean;
   errorMessage?: string | null;
   dialogId?: string | null;
-  historyId?: string | null;
+  messageId?: string | null;
   createdAt?: Date | string;
   updatedAt?: Date | string;
 };
@@ -640,7 +640,7 @@ export type ChatLlmRequestUncheckedUpdateManyInput = {
     | string
     | null;
   dialogId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
-  historyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  messageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
@@ -668,7 +668,7 @@ export type ChatLlmRequestCountOrderByAggregateInput = {
   isSuccess?: Prisma.SortOrder;
   errorMessage?: Prisma.SortOrder;
   dialogId?: Prisma.SortOrder;
-  historyId?: Prisma.SortOrder;
+  messageId?: Prisma.SortOrder;
   createdAt?: Prisma.SortOrder;
   updatedAt?: Prisma.SortOrder;
 };
@@ -693,7 +693,7 @@ export type ChatLlmRequestMaxOrderByAggregateInput = {
   isSuccess?: Prisma.SortOrder;
   errorMessage?: Prisma.SortOrder;
   dialogId?: Prisma.SortOrder;
-  historyId?: Prisma.SortOrder;
+  messageId?: Prisma.SortOrder;
   createdAt?: Prisma.SortOrder;
   updatedAt?: Prisma.SortOrder;
 };
@@ -711,7 +711,7 @@ export type ChatLlmRequestMinOrderByAggregateInput = {
   isSuccess?: Prisma.SortOrder;
   errorMessage?: Prisma.SortOrder;
   dialogId?: Prisma.SortOrder;
-  historyId?: Prisma.SortOrder;
+  messageId?: Prisma.SortOrder;
   createdAt?: Prisma.SortOrder;
   updatedAt?: Prisma.SortOrder;
 };
@@ -1016,7 +1016,7 @@ export type ChatLlmRequestUncheckedCreateWithoutDialogInput = {
     | null;
   isSuccess?: boolean;
   errorMessage?: string | null;
-  historyId?: string | null;
+  messageId?: string | null;
   createdAt?: Date | string;
   updatedAt?: Date | string;
   ChatLlmModel?: Prisma.ChatLlmModelUncheckedCreateNestedManyWithoutChatLlmRequestInput;
@@ -1091,7 +1091,7 @@ export type ChatLlmRequestScalarWhereInput = {
   isSuccess?: Prisma.BoolFilter<"ChatLlmRequest"> | boolean;
   errorMessage?: Prisma.StringNullableFilter<"ChatLlmRequest"> | string | null;
   dialogId?: Prisma.UuidNullableFilter<"ChatLlmRequest"> | string | null;
-  historyId?: Prisma.UuidNullableFilter<"ChatLlmRequest"> | string | null;
+  messageId?: Prisma.UuidNullableFilter<"ChatLlmRequest"> | string | null;
   createdAt?: Prisma.DateTimeFilter<"ChatLlmRequest"> | Date | string;
   updatedAt?: Prisma.DateTimeFilter<"ChatLlmRequest"> | Date | string;
 };
@@ -1226,7 +1226,7 @@ export type ChatLlmRequestUncheckedCreateWithoutChatLlmModelInput = {
   isSuccess?: boolean;
   errorMessage?: string | null;
   dialogId?: string | null;
-  historyId?: string | null;
+  messageId?: string | null;
   createdAt?: Date | string;
   updatedAt?: Date | string;
 };
@@ -1308,7 +1308,7 @@ export type ChatLlmRequestUncheckedUpdateWithoutChatLlmModelInput = {
     | string
     | null;
   dialogId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
-  historyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  messageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
@@ -1330,7 +1330,7 @@ export type ChatLlmRequestCreateManyDialogInput = {
     | null;
   isSuccess?: boolean;
   errorMessage?: string | null;
-  historyId?: string | null;
+  messageId?: string | null;
   createdAt?: Date | string;
   updatedAt?: Date | string;
 };
@@ -1383,7 +1383,7 @@ export type ChatLlmRequestUncheckedUpdateWithoutDialogInput = {
     | Prisma.NullableStringFieldUpdateOperationsInput
     | string
     | null;
-  historyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  messageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   ChatLlmModel?: Prisma.ChatLlmModelUncheckedUpdateManyWithoutChatLlmRequestNestedInput;
@@ -1410,7 +1410,7 @@ export type ChatLlmRequestUncheckedUpdateManyWithoutDialogInput = {
     | Prisma.NullableStringFieldUpdateOperationsInput
     | string
     | null;
-  historyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  messageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
@@ -1572,7 +1572,7 @@ export type ChatLlmRequestSelect<
     isSuccess?: boolean;
     errorMessage?: boolean;
     dialogId?: boolean;
-    historyId?: boolean;
+    messageId?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
     dialog?: boolean | Prisma.ChatLlmRequest$dialogArgs<ExtArgs>;
@@ -1600,7 +1600,7 @@ export type ChatLlmRequestSelectCreateManyAndReturn<
     isSuccess?: boolean;
     errorMessage?: boolean;
     dialogId?: boolean;
-    historyId?: boolean;
+    messageId?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
     dialog?: boolean | Prisma.ChatLlmRequest$dialogArgs<ExtArgs>;
@@ -1626,7 +1626,7 @@ export type ChatLlmRequestSelectUpdateManyAndReturn<
     isSuccess?: boolean;
     errorMessage?: boolean;
     dialogId?: boolean;
-    historyId?: boolean;
+    messageId?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
     dialog?: boolean | Prisma.ChatLlmRequest$dialogArgs<ExtArgs>;
@@ -1648,7 +1648,7 @@ export type ChatLlmRequestSelectScalar = {
   isSuccess?: boolean;
   errorMessage?: boolean;
   dialogId?: boolean;
-  historyId?: boolean;
+  messageId?: boolean;
   createdAt?: boolean;
   updatedAt?: boolean;
 };
@@ -1669,7 +1669,7 @@ export type ChatLlmRequestOmit<
   | "isSuccess"
   | "errorMessage"
   | "dialogId"
-  | "historyId"
+  | "messageId"
   | "createdAt"
   | "updatedAt",
   ExtArgs["result"]["chatLlmRequest"]
@@ -1722,7 +1722,7 @@ export type $ChatLlmRequestPayload<
       isSuccess: boolean;
       errorMessage: string | null;
       dialogId: string | null;
-      historyId: string | null;
+      messageId: string | null;
       createdAt: Date;
       updatedAt: Date;
     },
@@ -2378,7 +2378,7 @@ export interface ChatLlmRequestFieldRefs {
   readonly isSuccess: Prisma.FieldRef<"ChatLlmRequest", "Boolean">;
   readonly errorMessage: Prisma.FieldRef<"ChatLlmRequest", "String">;
   readonly dialogId: Prisma.FieldRef<"ChatLlmRequest", "String">;
-  readonly historyId: Prisma.FieldRef<"ChatLlmRequest", "String">;
+  readonly messageId: Prisma.FieldRef<"ChatLlmRequest", "String">;
   readonly createdAt: Prisma.FieldRef<"ChatLlmRequest", "DateTime">;
   readonly updatedAt: Prisma.FieldRef<"ChatLlmRequest", "DateTime">;
 }

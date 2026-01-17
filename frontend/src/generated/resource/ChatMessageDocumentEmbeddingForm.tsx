@@ -54,9 +54,7 @@ export const ChatMessageDocumentEmbeddingShowForm = () => (
         readOnly={true}
       />
       <TextInput
-        source={
-          Prisma.ChatMessageDocumentEmbeddingScalarFieldEnum.chatHistoryId
-        }
+        source={Prisma.ChatMessageDocumentEmbeddingScalarFieldEnum.messageId}
         readOnly={true}
       />
       <TextInput

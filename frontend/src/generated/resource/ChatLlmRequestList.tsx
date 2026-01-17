@@ -76,7 +76,7 @@ export const ChatLlmRequestList = () => (
         }}
       />
       <DataTable.Col source={Prisma.ChatLlmRequestScalarFieldEnum.dialogId} />
-      <DataTable.Col source={Prisma.ChatLlmRequestScalarFieldEnum.historyId} />
+      <DataTable.Col source={Prisma.ChatLlmRequestScalarFieldEnum.messageId} />
       <EditButton />
       <DeleteButton />
     </DataTable>

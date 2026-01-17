@@ -18,7 +18,8 @@ export function getCategoryByDetectedCategory(detectedCategory: Category) {
     detectedCategory === Category.partnership ||
     detectedCategory === Category.investment ||
     detectedCategory === Category.intro ||
-    detectedCategory === Category.life
+    detectedCategory === Category.life ||
+    detectedCategory === Category.technology
   ) {
     category = Category.resume;
   }
@@ -38,8 +39,7 @@ export function getCategoryByDetectedCategory(detectedCategory: Category) {
 
   if (
     detectedCategory === Category.review ||
-    detectedCategory === Category.access ||
-    detectedCategory === Category.technology
+    detectedCategory === Category.access
   ) {
     category = Category.telegram;
   }

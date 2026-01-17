@@ -41,7 +41,7 @@ export type ChatDocumentEmbedding = {
 
 export type ChatMessageDocumentEmbedding = {
   id: string;
-  chatHistoryId: string | null;
+  messageId: string | null;
   embeddingDocumentId: string | null;
   isFound: boolean;
   relevanceScore: string | null;
@@ -80,7 +80,7 @@ export type ChatLlmRequest = {
   isSuccess: boolean;
   errorMessage: string | null;
   dialogId: string | null;
-  historyId: string | null;
+  messageId: string | null;
   createdAt: string;
   updatedAt: string;
   dialog?: ChatDialog | null;

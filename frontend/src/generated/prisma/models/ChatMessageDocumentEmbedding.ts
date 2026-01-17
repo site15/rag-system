@@ -36,7 +36,7 @@ export type ChatMessageDocumentEmbeddingSumAggregateOutputType = {
 
 export type ChatMessageDocumentEmbeddingMinAggregateOutputType = {
   id: string | null;
-  chatHistoryId: string | null;
+  messageId: string | null;
   embeddingDocumentId: string | null;
   isFound: boolean | null;
   relevanceScore: runtime.Decimal | null;
@@ -46,7 +46,7 @@ export type ChatMessageDocumentEmbeddingMinAggregateOutputType = {
 
 export type ChatMessageDocumentEmbeddingMaxAggregateOutputType = {
   id: string | null;
-  chatHistoryId: string | null;
+  messageId: string | null;
   embeddingDocumentId: string | null;
   isFound: boolean | null;
   relevanceScore: runtime.Decimal | null;
@@ -56,7 +56,7 @@ export type ChatMessageDocumentEmbeddingMaxAggregateOutputType = {
 
 export type ChatMessageDocumentEmbeddingCountAggregateOutputType = {
   id: number;
-  chatHistoryId: number;
+  messageId: number;
   embeddingDocumentId: number;
   isFound: number;
   relevanceScore: number;
@@ -75,7 +75,7 @@ export type ChatMessageDocumentEmbeddingSumAggregateInputType = {
 
 export type ChatMessageDocumentEmbeddingMinAggregateInputType = {
   id?: true;
-  chatHistoryId?: true;
+  messageId?: true;
   embeddingDocumentId?: true;
   isFound?: true;
   relevanceScore?: true;
@@ -85,7 +85,7 @@ export type ChatMessageDocumentEmbeddingMinAggregateInputType = {
 
 export type ChatMessageDocumentEmbeddingMaxAggregateInputType = {
   id?: true;
-  chatHistoryId?: true;
+  messageId?: true;
   embeddingDocumentId?: true;
   isFound?: true;
   relevanceScore?: true;
@@ -95,7 +95,7 @@ export type ChatMessageDocumentEmbeddingMaxAggregateInputType = {
 
 export type ChatMessageDocumentEmbeddingCountAggregateInputType = {
   id?: true;
-  chatHistoryId?: true;
+  messageId?: true;
   embeddingDocumentId?: true;
   isFound?: true;
   relevanceScore?: true;
@@ -205,7 +205,7 @@ export type ChatMessageDocumentEmbeddingGroupByArgs<
 
 export type ChatMessageDocumentEmbeddingGroupByOutputType = {
   id: string;
-  chatHistoryId: string | null;
+  messageId: string | null;
   embeddingDocumentId: string | null;
   isFound: boolean;
   relevanceScore: runtime.Decimal | null;
@@ -251,7 +251,7 @@ export type ChatMessageDocumentEmbeddingWhereInput = {
     | Prisma.ChatMessageDocumentEmbeddingWhereInput
     | Prisma.ChatMessageDocumentEmbeddingWhereInput[];
   id?: Prisma.UuidFilter<"ChatMessageDocumentEmbedding"> | string;
-  chatHistoryId?:
+  messageId?:
     | Prisma.UuidNullableFilter<"ChatMessageDocumentEmbedding">
     | string
     | null;
@@ -287,7 +287,7 @@ export type ChatMessageDocumentEmbeddingWhereInput = {
 
 export type ChatMessageDocumentEmbeddingOrderByWithRelationInput = {
   id?: Prisma.SortOrder;
-  chatHistoryId?: Prisma.SortOrderInput | Prisma.SortOrder;
+  messageId?: Prisma.SortOrderInput | Prisma.SortOrder;
   embeddingDocumentId?: Prisma.SortOrderInput | Prisma.SortOrder;
   isFound?: Prisma.SortOrder;
   relevanceScore?: Prisma.SortOrderInput | Prisma.SortOrder;
@@ -307,7 +307,7 @@ export type ChatMessageDocumentEmbeddingWhereUniqueInput = Prisma.AtLeast<
     NOT?:
       | Prisma.ChatMessageDocumentEmbeddingWhereInput
       | Prisma.ChatMessageDocumentEmbeddingWhereInput[];
-    chatHistoryId?:
+    messageId?:
       | Prisma.UuidNullableFilter<"ChatMessageDocumentEmbedding">
       | string
       | null;
@@ -345,7 +345,7 @@ export type ChatMessageDocumentEmbeddingWhereUniqueInput = Prisma.AtLeast<
 
 export type ChatMessageDocumentEmbeddingOrderByWithAggregationInput = {
   id?: Prisma.SortOrder;
-  chatHistoryId?: Prisma.SortOrderInput | Prisma.SortOrder;
+  messageId?: Prisma.SortOrderInput | Prisma.SortOrder;
   embeddingDocumentId?: Prisma.SortOrderInput | Prisma.SortOrder;
   isFound?: Prisma.SortOrder;
   relevanceScore?: Prisma.SortOrderInput | Prisma.SortOrder;
@@ -367,7 +367,7 @@ export type ChatMessageDocumentEmbeddingScalarWhereWithAggregatesInput = {
     | Prisma.ChatMessageDocumentEmbeddingScalarWhereWithAggregatesInput
     | Prisma.ChatMessageDocumentEmbeddingScalarWhereWithAggregatesInput[];
   id?: Prisma.UuidWithAggregatesFilter<"ChatMessageDocumentEmbedding"> | string;
-  chatHistoryId?:
+  messageId?:
     | Prisma.UuidNullableWithAggregatesFilter<"ChatMessageDocumentEmbedding">
     | string
     | null;
@@ -412,7 +412,7 @@ export type ChatMessageDocumentEmbeddingCreateInput = {
 
 export type ChatMessageDocumentEmbeddingUncheckedCreateInput = {
   id?: string;
-  chatHistoryId?: string | null;
+  messageId?: string | null;
   embeddingDocumentId?: string | null;
   isFound?: boolean;
   relevanceScore?:
@@ -443,10 +443,7 @@ export type ChatMessageDocumentEmbeddingUpdateInput = {
 
 export type ChatMessageDocumentEmbeddingUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string;
-  chatHistoryId?:
-    | Prisma.NullableStringFieldUpdateOperationsInput
-    | string
-    | null;
+  messageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   embeddingDocumentId?:
     | Prisma.NullableStringFieldUpdateOperationsInput
     | string
@@ -465,7 +462,7 @@ export type ChatMessageDocumentEmbeddingUncheckedUpdateInput = {
 
 export type ChatMessageDocumentEmbeddingCreateManyInput = {
   id?: string;
-  chatHistoryId?: string | null;
+  messageId?: string | null;
   embeddingDocumentId?: string | null;
   isFound?: boolean;
   relevanceScore?:
@@ -494,10 +491,7 @@ export type ChatMessageDocumentEmbeddingUpdateManyMutationInput = {
 
 export type ChatMessageDocumentEmbeddingUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string;
-  chatHistoryId?:
-    | Prisma.NullableStringFieldUpdateOperationsInput
-    | string
-    | null;
+  messageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   embeddingDocumentId?:
     | Prisma.NullableStringFieldUpdateOperationsInput
     | string
@@ -526,7 +520,7 @@ export type ChatMessageDocumentEmbeddingOrderByRelationAggregateInput = {
 
 export type ChatMessageDocumentEmbeddingCountOrderByAggregateInput = {
   id?: Prisma.SortOrder;
-  chatHistoryId?: Prisma.SortOrder;
+  messageId?: Prisma.SortOrder;
   embeddingDocumentId?: Prisma.SortOrder;
   isFound?: Prisma.SortOrder;
   relevanceScore?: Prisma.SortOrder;
@@ -540,7 +534,7 @@ export type ChatMessageDocumentEmbeddingAvgOrderByAggregateInput = {
 
 export type ChatMessageDocumentEmbeddingMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder;
-  chatHistoryId?: Prisma.SortOrder;
+  messageId?: Prisma.SortOrder;
   embeddingDocumentId?: Prisma.SortOrder;
   isFound?: Prisma.SortOrder;
   relevanceScore?: Prisma.SortOrder;
@@ -550,7 +544,7 @@ export type ChatMessageDocumentEmbeddingMaxOrderByAggregateInput = {
 
 export type ChatMessageDocumentEmbeddingMinOrderByAggregateInput = {
   id?: Prisma.SortOrder;
-  chatHistoryId?: Prisma.SortOrder;
+  messageId?: Prisma.SortOrder;
   embeddingDocumentId?: Prisma.SortOrder;
   isFound?: Prisma.SortOrder;
   relevanceScore?: Prisma.SortOrder;
@@ -807,7 +801,7 @@ export type ChatMessageDocumentEmbeddingCreateWithoutEmbeddingDocumentInput = {
 export type ChatMessageDocumentEmbeddingUncheckedCreateWithoutEmbeddingDocumentInput =
   {
     id?: string;
-    chatHistoryId?: string | null;
+    messageId?: string | null;
     isFound?: boolean;
     relevanceScore?:
       | runtime.Decimal
@@ -876,7 +870,7 @@ export type ChatMessageDocumentEmbeddingScalarWhereInput = {
     | Prisma.ChatMessageDocumentEmbeddingScalarWhereInput
     | Prisma.ChatMessageDocumentEmbeddingScalarWhereInput[];
   id?: Prisma.UuidFilter<"ChatMessageDocumentEmbedding"> | string;
-  chatHistoryId?:
+  messageId?:
     | Prisma.UuidNullableFilter<"ChatMessageDocumentEmbedding">
     | string
     | null;
@@ -980,7 +974,7 @@ export type ChatMessageDocumentEmbeddingUpdateManyWithWhereWithoutChatHistoryInp
 
 export type ChatMessageDocumentEmbeddingCreateManyEmbeddingDocumentInput = {
   id?: string;
-  chatHistoryId?: string | null;
+  messageId?: string | null;
   isFound?: boolean;
   relevanceScore?:
     | runtime.Decimal
@@ -1010,10 +1004,7 @@ export type ChatMessageDocumentEmbeddingUpdateWithoutEmbeddingDocumentInput = {
 export type ChatMessageDocumentEmbeddingUncheckedUpdateWithoutEmbeddingDocumentInput =
   {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
-    chatHistoryId?:
-      | Prisma.NullableStringFieldUpdateOperationsInput
-      | string
-      | null;
+    messageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     isFound?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     relevanceScore?:
       | Prisma.NullableDecimalFieldUpdateOperationsInput
@@ -1029,10 +1020,7 @@ export type ChatMessageDocumentEmbeddingUncheckedUpdateWithoutEmbeddingDocumentI
 export type ChatMessageDocumentEmbeddingUncheckedUpdateManyWithoutEmbeddingDocumentInput =
   {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
-    chatHistoryId?:
-      | Prisma.NullableStringFieldUpdateOperationsInput
-      | string
-      | null;
+    messageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     isFound?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     relevanceScore?:
       | Prisma.NullableDecimalFieldUpdateOperationsInput
@@ -1118,7 +1106,7 @@ export type ChatMessageDocumentEmbeddingSelect<
 > = runtime.Types.Extensions.GetSelect<
   {
     id?: boolean;
-    chatHistoryId?: boolean;
+    messageId?: boolean;
     embeddingDocumentId?: boolean;
     isFound?: boolean;
     relevanceScore?: boolean;
@@ -1140,7 +1128,7 @@ export type ChatMessageDocumentEmbeddingSelectCreateManyAndReturn<
 > = runtime.Types.Extensions.GetSelect<
   {
     id?: boolean;
-    chatHistoryId?: boolean;
+    messageId?: boolean;
     embeddingDocumentId?: boolean;
     isFound?: boolean;
     relevanceScore?: boolean;
@@ -1162,7 +1150,7 @@ export type ChatMessageDocumentEmbeddingSelectUpdateManyAndReturn<
 > = runtime.Types.Extensions.GetSelect<
   {
     id?: boolean;
-    chatHistoryId?: boolean;
+    messageId?: boolean;
     embeddingDocumentId?: boolean;
     isFound?: boolean;
     relevanceScore?: boolean;
@@ -1180,7 +1168,7 @@ export type ChatMessageDocumentEmbeddingSelectUpdateManyAndReturn<
 
 export type ChatMessageDocumentEmbeddingSelectScalar = {
   id?: boolean;
-  chatHistoryId?: boolean;
+  messageId?: boolean;
   embeddingDocumentId?: boolean;
   isFound?: boolean;
   relevanceScore?: boolean;
@@ -1193,7 +1181,7 @@ export type ChatMessageDocumentEmbeddingOmit<
     runtime.Types.Extensions.DefaultArgs,
 > = runtime.Types.Extensions.GetOmit<
   | "id"
-  | "chatHistoryId"
+  | "messageId"
   | "embeddingDocumentId"
   | "isFound"
   | "relevanceScore"
@@ -1247,7 +1235,7 @@ export type $ChatMessageDocumentEmbeddingPayload<
   scalars: runtime.Types.Extensions.GetPayloadResult<
     {
       id: string;
-      chatHistoryId: string | null;
+      messageId: string | null;
       embeddingDocumentId: string | null;
       isFound: boolean;
       relevanceScore: runtime.Decimal | null;
@@ -1948,10 +1936,7 @@ export interface Prisma__ChatMessageDocumentEmbeddingClient<
  */
 export interface ChatMessageDocumentEmbeddingFieldRefs {
   readonly id: Prisma.FieldRef<"ChatMessageDocumentEmbedding", "String">;
-  readonly chatHistoryId: Prisma.FieldRef<
-    "ChatMessageDocumentEmbedding",
-    "String"
-  >;
+  readonly messageId: Prisma.FieldRef<"ChatMessageDocumentEmbedding", "String">;
   readonly embeddingDocumentId: Prisma.FieldRef<
     "ChatMessageDocumentEmbedding",
     "String"
