@@ -779,7 +779,7 @@ export class LLMChunkProcessor {
       Logger.logInfo(
         `chatChunkSize: "${chatChunkSize}", basePromptLength: "${basePromptLength}"`,
       );
-      const max = +(chatChunkSize || 2000) - basePromptLength - 100;
+      const max = +chatChunkSize - basePromptLength - 100;
       const chunks =
         max > 0 ? RAGSearcher.splitTextIntoChunks(processedContent, max) : [];
       const totalChunks = chunks.length;
@@ -1109,13 +1109,25 @@ export class LLMChunkProcessor {
       return CATEGORY_PROMPTS[detectedCategory]
         .replace('{{history}}', history.length ? history.join('\n') : 'нет')
         .replace('{{context}}', chunk || '')
-        .replace('{{question}}', question);
+        .replace('{{question}}', question)
+        .replace(
+          '{{questionWithTitle}}',
+          history.length
+            ? `Original question (follow-up): ${question}`
+            : question,
+        );
     }
 
     return CATEGORY_PROMPTS.telegram
       .replace('{{history}}', history.length ? history.join('\n') : 'нет')
       .replace('{{context}}', chunk || '')
-      .replace('{{question}}', question);
+      .replace('{{question}}', question)
+      .replace(
+        '{{questionWithTitle}}',
+        history.length
+          ? `Original question (follow-up): ${question}`
+          : question,
+      );
   }
 
   static getDocTypeBySource(source: string) {

@@ -138,7 +138,11 @@ export function createTelegramAnalysisPrompt({
   return CATEGORY_PROMPTS.telegram
     .replace('{{history}}', history.length ? history.join('\n') : 'нет')
     .replace('{{context}}', chunk || '')
-    .replace('{{question}}', question);
+    .replace('{{question}}', question)
+    .replace(
+      '{{questionWithTitle}}',
+      history.length ? `Original question (follow-up): ${question}` : question,
+    );
 }
 
 /**
@@ -161,7 +165,11 @@ export function createArticleAnalysisPrompt({
   return CATEGORY_PROMPTS.articles
     .replace('{{history}}', history.length ? history.join('\n') : 'нет')
     .replace('{{context}}', chunk || '')
-    .replace('{{question}}', question);
+    .replace('{{question}}', question)
+    .replace(
+      '{{questionWithTitle}}',
+      history.length ? `Original question (follow-up): ${question}` : question,
+    );
 }
 
 /**
@@ -184,7 +192,11 @@ export function createPortfolioAnalysisPrompt({
   return CATEGORY_PROMPTS.portfolio
     .replace('{{history}}', history.length ? history.join('\n') : 'нет')
     .replace('{{context}}', chunk || '')
-    .replace('{{question}}', question);
+    .replace('{{question}}', question)
+    .replace(
+      '{{questionWithTitle}}',
+      history.length ? `Original question (follow-up): ${question}` : question,
+    );
 }
 
 /**
@@ -207,7 +219,11 @@ export function createResumeAnalysisPrompt({
   return CATEGORY_PROMPTS.resume
     .replace('{{history}}', history.length ? history.join('\n') : 'нет')
     .replace('{{context}}', chunk || '')
-    .replace('{{question}}', question);
+    .replace('{{question}}', question)
+    .replace(
+      '{{questionWithTitle}}',
+      history.length ? `Original question (follow-up): ${question}` : question,
+    );
 }
 
 /**
@@ -229,7 +245,11 @@ export function createGenericAnalysisPrompt({
   return CATEGORY_PROMPTS.none
     .replace('{{history}}', history.length ? history.join('\n') : 'нет')
     .replace('{{context}}', chunk || '')
-    .replace('{{question}}', question);
+    .replace('{{question}}', question)
+    .replace(
+      '{{questionWithTitle}}',
+      history.length ? `Original question (follow-up): ${question}` : question,
+    );
 }
 
 /**
@@ -259,7 +279,7 @@ export function createContextualRewritePrompt({
     const historyText = history.join('\n');
     historyContext = `
 
-Conversation history:
+Conversation history (use only for context of prior assistant experience):
 ${historyText}`;
   }
 
@@ -269,24 +289,31 @@ You are a question rewriter.
 Your task is to rewrite the user's question so that it becomes fully self-contained and understandable WITHOUT conversation history.
 
 RULES:
-- ЯЗЫК ОТВЕТА ДОЛЖЕН СОВПАДАТЬ С ЯЗЫКОМ ВОПРОСА
-- ОТВЕТ ДОЛЖЕН БЫТЬ В ФОРМЕ ПЕРВОГО ЛИЦА
-- НЕ используй явное местоимение "я"
-- Используй форму глагола без подлежащего ("внедрял", "использовал", "настраивал")
-- НЕ используй третье лицо ("он", "автор", "технический руководитель внедрил")
-- Use conversation history ONLY to resolve references (e.g., "он", "нём")
-- Explicitly name the subject when a pronoun is used and the context is known (e.g., "Ильшат")
-- Consider the general topic of the conversation to correctly interpret technical terms (e.g., Python is a programming language)
-- If the original question contains pronouns or context that cannot be resolved from the available information, rewrite it to indicate that the subject or context is unclear
-- Do NOT invent new topics
-- Preserve the original intent and tone (informal/formal)
-- Do NOT address the user directly (no "ты", "вы")
-- Respond in the same language as the original question
-- Return ONLY the rewritten question
+- The response language must match the language of the user's question.
+  If the question is in Russian, the rewritten question **must be entirely in Russian**, preserving technical terms in English.
+- Rewrite in the first-person perspective, but do NOT use the explicit pronoun "I".
+- Use the verb form exactly as it appears in the conversation ("использовал", "внедрял", "настраивал") without adding subjects.
+- Do NOT use third-person references ("он", "автор", "технический руководитель внедрил").
+- Use conversation history ONLY to resolve pronouns or context.
+
+CRITICAL RULES:
+- If the assistant already answered in the first person (e.g., "использовал", "внедрял"), the user’s follow-up question refers **only to the assistant’s personal experience**, NOT factual information about the technology or product.
+- **Never change the subject**: experience → object, person → product.
+- **Never add words, adverbs, clarifications, temporal or modal expressions** to the verb from history; use the verb **exactly in the form it appeared** without modifications or additions.
+- **Keep all words separate**; always place a space between the verb and the object. Do not merge them with underscores, hyphens, or any other symbols.
+- If a question can be interpreted as personal experience or factual information, **always choose personal experience**.
+- Explicitly name the subject if a pronoun is used and context is clear.
+- If the original question is a clarification ("когда?", "в каком году?", "где?"), reconstruct it **strictly as a question about the assistant’s experience**, not a factual query.
+- Do NOT create encyclopedic or reference-style questions ("когда был создан", "когда выпущен", "кем разработан").
+- Do NOT invent new topics.
+- Preserve the original intent and tone (informal/formal).
+- Do NOT address the user directly.
+- **The rewritten question must be entirely in Russian if the original question is in Russian**.
+- Return ONLY the rewritten question.
 
 ${categoryInstruction}${historyContext}
 
-Original question: ${question}
+${historyContext ? `Original question (follow-up): ${question}` : `Original question: ${question}`}
 
 Rewritten self-contained question:
 `;

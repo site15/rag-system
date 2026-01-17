@@ -8,7 +8,7 @@ export interface ProviderConfig {
   provider: string;
   model: string;
   temperature: number;
-  chunkSize?: number;
+  chunkSize: number;
 }
 
 export class DefaultProvidersInitializer {
@@ -118,7 +118,7 @@ export class DefaultProvidersInitializer {
     provider: string,
     model: string,
     temperature: number,
-    chunkSize?: number,
+    chunkSize: number,
     activate?: boolean,
   ): Promise<void> {
     try {
@@ -230,7 +230,7 @@ export class DefaultProvidersInitializer {
           },
           data: {
             temperature: config.temperature,
-            chunkSize: config.chunkSize || 2000,
+            chunkSize: config.chunkSize,
             isActive: true, // Default to active if not set
           },
         });
@@ -248,7 +248,7 @@ export class DefaultProvidersInitializer {
             provider: config.provider,
             model: config.model,
             temperature: config.temperature,
-            chunkSize: config.chunkSize || 2000,
+            chunkSize: config.chunkSize,
             status: 'initialized',
             isActive: true,
           },
@@ -403,7 +403,7 @@ export class DefaultProvidersInitializer {
     provider: string,
     model: string,
     temperature: number,
-    chunkSize?: number,
+    chunkSize: number,
   ): Promise<boolean> {
     try {
       const existingProvider =

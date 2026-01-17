@@ -6,15 +6,16 @@ import { TextLoader } from 'langchain/document_loaders/fs/text';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { resolve } from 'path';
 import { PrismaService } from '../services/prisma.service';
+import { ConfigManager } from './config';
 import { EmbeddingsDB } from './embeddingsDB';
 import { EmbeddingsFactory } from './embeddingsFactory';
 import { LLMFactory } from './llmFactory';
+import { LLMLogger } from './llmLogger';
 import { Logger } from './logger';
 import { DefaultProvidersInitializer } from './services/defaultProvidersInitializer';
 import { TextHelpers } from './textHelpers';
 import { AppConfig, ChatConfig, EmbeddingsConfig } from './types';
-import { ConfigManager } from './config';
-import { LLMLogger } from './llmLogger';
+import { RAGSearcher } from './ragSearcher';
 
 export class RAGApplication {
   public static async start(fullConfig: {
@@ -110,38 +111,37 @@ export class RAGApplication {
   ) {
     // === Вставка эмбеддингов ===
     Logger.logInfo('Начало процесса вставки эмбеддингов');
-    const splitterTelegram = new RecursiveCharacterTextSplitter({
-      chunkSize: 2000,
-      chunkOverlap: 0,
-      separators: ['\n--\n'],
-    });
-
-    const splitterGlobal = new RecursiveCharacterTextSplitter({
-      chunkSize: 1500,
-      chunkOverlap: 250,
-      separators: ['\n--\n', '\n\n', '\n', ' ', ''],
-    });
+    // const splitterTelegram = new RecursiveCharacterTextSplitter({
+    //   chunkSize: 2000,
+    //   chunkOverlap: 0,
+    //   separators: ['\n--\n'],
+    // });
+    //
+    // const splitterGlobal = new RecursiveCharacterTextSplitter({
+    //   chunkSize: 1500,
+    //   chunkOverlap: 250,
+    //   separators: ['\n--\n', '\n\n', '\n', ' ', ''],
+    // });
 
     let totalChunks = 0;
     for (const doc of docs) {
       const isTelegramDoc = doc.metadata.source?.includes('/telegram/');
-      const splitter = isTelegramDoc ? splitterTelegram : splitterGlobal;
+      // const splitter = isTelegramDoc ? splitterTelegram : splitterGlobal;
 
       if (!doc.metadata) doc.metadata = {};
       doc.metadata.source = doc.metadata.source;
       Logger.logInfo('Разделение документа', { source: doc.metadata.source });
-      const chunks = await splitter.splitDocuments([doc]);
+      const chunks = RAGSearcher.splitTextIntoChunks(doc.pageContent, 1700); // await splitter.splitDocuments([doc]);
 
       for (const chunk of chunks) {
-        if (!chunk.metadata) chunk.metadata = {};
-        chunk.metadata.source = doc.metadata.source;
-        const normalized = TextHelpers.normalizeTextMy(chunk.pageContent);
+        const source = doc.metadata.source;
+        const normalized = TextHelpers.normalizeTextMy(chunk);
         if (
           !normalized ||
-          (isTelegramDoc && !chunk.pageContent.includes('My telegram message'))
+          (isTelegramDoc && !chunk.includes('My telegram message'))
         ) {
           Logger.logInfo('Пропуск пустого чанка', {
-            source: chunk.metadata.source,
+            source,
           });
           continue;
         }
@@ -153,7 +153,7 @@ export class RAGApplication {
           continue;
         }
         Logger.logInfo('Создание эмбеддинга для чанка', {
-          source: chunk.metadata.source,
+          source: source,
           hash: hash.substring(0, 8),
           normalizedLength: normalized.length,
         });
@@ -164,31 +164,31 @@ export class RAGApplication {
           await PrismaService.instance.$executeRaw`
 INSERT INTO "ChatDocumentEmbedding"
 (content, embedding384, metadata, "contentHash")
-VALUES (${chunk.pageContent}, ${vectorValue}::vector, ${chunk.metadata || '{}'}, ${hash})
+VALUES (${chunk}, ${vectorValue}::vector, ${doc.metadata || '{}'}, ${hash})
 `;
         } else if (vector.length === 768) {
           await PrismaService.instance.$executeRaw`
 INSERT INTO "ChatDocumentEmbedding"
 (content, embedding768, metadata, "contentHash")
-VALUES (${chunk.pageContent}, ${vectorValue}::vector, ${chunk.metadata || '{}'}, ${hash})
+VALUES (${chunk}, ${vectorValue}::vector, ${doc.metadata || '{}'}, ${hash})
 `;
         } else if (vector.length === 1024) {
           await PrismaService.instance.$executeRaw`
 INSERT INTO "ChatDocumentEmbedding"
 (content, embedding1024, metadata, "contentHash")
-VALUES (${chunk.pageContent}, ${vectorValue}::vector, ${chunk.metadata || '{}'}, ${hash})
+VALUES (${chunk}, ${vectorValue}::vector, ${doc.metadata || '{}'}, ${hash})
 `;
         } else if (vector.length === 1536) {
           await PrismaService.instance.$executeRaw`
 INSERT INTO "ChatDocumentEmbedding"
 (content, embedding1536, metadata, "contentHash")
-VALUES (${chunk.pageContent}, ${vectorValue}::vector, ${chunk.metadata || '{}'}, ${hash})
+VALUES (${chunk}, ${vectorValue}::vector, ${doc.metadata || '{}'}, ${hash})
 `;
         } else if (vector.length === 3072) {
           await PrismaService.instance.$executeRaw`
 INSERT INTO "ChatDocumentEmbedding"
 (content, embedding3072, metadata, "contentHash")
-VALUES (${chunk.pageContent}, ${vectorValue}::vector, ${chunk.metadata || '{}'}, ${hash})
+VALUES (${chunk}, ${vectorValue}::vector, ${doc.metadata || '{}'}, ${hash})
 `;
         }
 
@@ -202,14 +202,32 @@ VALUES (${chunk.pageContent}, ${vectorValue}::vector, ${chunk.metadata || '{}'},
     Logger.logInfo('Процесс вставки эмбеддингов завершен', { totalChunks });
   }
 
-  public static async fillGraphEmbedDocuments() {
-    Logger.logInfo('Начало заполнения graphContent для документов');
+  public static async fillGraphEmbedDocuments(
+    embeddings?: OpenAIEmbeddings | OllamaEmbeddings,
+  ) {
+    Logger.logInfo(
+      'Начало заполнения graphContent и graphEmbeddings для документов',
+    );
 
     try {
       // Get chat configuration for LLM
       const appConfig = ConfigManager.getAppConfig();
       const chatConfig = ConfigManager.getChatConfig(appConfig.chatProvider);
       const llm = LLMFactory.createLLM(chatConfig.provider, chatConfig);
+
+      // If embeddings not provided, initialize them
+      let embeddingModel: OpenAIEmbeddings | OllamaEmbeddings;
+      if (embeddings) {
+        embeddingModel = embeddings;
+      } else {
+        const embeddingsConfig = ConfigManager.getEmbeddingsConfig(
+          appConfig.embeddingsProvider,
+        );
+        embeddingModel = EmbeddingsFactory.createEmbeddings(
+          appConfig.embeddingsProvider,
+          embeddingsConfig,
+        );
+      }
 
       // Find all documents without graphContent
       const documents =
@@ -253,138 +271,87 @@ VALUES (${chunk.pageContent}, ${vectorValue}::vector, ${chunk.metadata || '{}'},
           }
 
           // Create the prompt with the document content
-          const prompt = `You are an expert in semantic metadata extraction and document classification.
+          const prompt = `You are an expert system for semantic metadata extraction and document classification.
 
-Your task is to analyze the provided text and produce a structured JSON object
-containing metadata that best represents the content, as well as a classification
-of the type of response this content would require.
+Your task is to analyze the provided text and return a SINGLE valid JSON object
+that represents the document metadata and the required response classification.
 
-Rules:
-- Return ONLY valid JSON
-- Do NOT use markdown, explanations, or comments
+STRICT OUTPUT RULES:
+- Output ONLY valid JSON
+- Do NOT include markdown, explanations, comments, or extra text
+- If the output is not valid JSON, the response is invalid
 - Field names must be in lowerCamelCase
-- Include only fields that are relevant to this specific document
-- Always include the mandatory base fields (see below)
-- Include optional fields only if relevant
-- Determine the classification label according to the user request classification rules
-  (see classification rules below)
-- If multiple classification types apply, choose the one with the HIGHEST priority
-- If the message is not a direct user request (e.g. article, documentation, log, metadata),
-  set classification to "none"
+- Do NOT include fields that are not relevant
+- Always include all mandatory base fields
+- Optional fields must be included ONLY if clearly applicable
+- If the input text is NOT a direct user request, set classification to "none"
 
-Mandatory base fields (always include):
+LANGUAGE RULE:
+- All textual values in the JSON MUST be in RUSSIAN
+- EXCEPTIONS (do NOT translate):
+  - proper names
+  - company names
+  - technologies, tools, frameworks, programming languages
+  - widely accepted technical terms
+
+MANDATORY BASE FIELDS (always include):
 - title: short descriptive title (2–7 words)
-- summary: concise summary of the document (1–3 sentences)
-- documentType: one of "note", "instruction", "article", "code", "log", "resume", "cv", "spec", "unknown"
+- summary: concise summary (1–3 sentences)
+- documentType: one of ["note","instruction","article","code","log","resume","cv","spec","unknown"]
 - language: "ru", "en", or "other"
+- classification: string (see rules below)
 
-Optional fields (include only if relevant):
-- topics: array of high-level themes or domains
-- entities: array of important named entities, technologies, tools, companies, people
-- technologies: array of technical tools, frameworks, languages, platforms
-- infrastructure: object describing local/cloud infrastructure components
-- problems: array of problems or pain points described
-- solutions: array of solutions or approaches described
-- limitations: array of constraints or drawbacks
-- steps: ordered array of implementation or procedural steps
-- tags: short categorical labels
-- publishedAt: ISO 8601 date string if present
-- source: object with origin information (e.g. url, platform)
-- importance: number from 0.0 to 1.0 indicating overall relevance and completeness
+OPTIONAL FIELDS (include only if relevant):
+- topics
+- entities
+- technologies
+- infrastructure
+- problems
+- solutions
+- limitations
+- steps
+- tags
+- publishedAt
+- source
+- importance
 
-Classification rules:
+CLASSIFICATION RULES:
+- Classification refers to the type of a CORRECT RESPONSE to this message,
+  NOT the type of the document itself.
+- Return ONE classification label.
+- If multiple labels apply, choose the HIGHEST priority.
 
-- Determine the type of data that a correct response to this message would belong to, NOT the type of the text itself.
-- Return a single classification label as a string.
-- Priorities (high → low):
+PRIORITY ORDER (high → low):
+spam, job, freelance, consulting, pricing, partnership, investment, hiring,
+interview, speaking, media, support, review, decision, technology, product,
+access, resume, portfolio, articles, life, intro, followup, gratitude,
+clarification, none
 
-spam, job, freelance, consulting, pricing, partnership, investment, hiring, interview, speaking, media, support, review, decision, technology, product, access, resume, portfolio, articles, life, intro, followup, gratitude, clarification, none
+CLASSIFICATION DEFINITIONS (key ones):
+- technology: mentions of technical concepts WITHOUT asking for help or decisions
+- articles: requests for explanations, guides, tutorials, or how-to content
+- support: requests for help with a specific technical problem
+- review: requests to review code, architecture, or documents
+- decision: requests to choose between options
+- none: not a user request (articles, docs, logs, metadata, etc.)
 
-- Definitions:
-
-technology — mentions of technologies, tools, frameworks, programming languages, architecture patterns, or technical concepts WITHOUT an explicit request for help, decision, review, or instruction.
-
-articles — requests for explanations, guides, tutorials, walkthroughs, educational content, or how-to materials.
-
-support — requests for help with a specific technical problem, bug, error, or failure.
-
-review — requests to review code, architecture, ideas, technical documents, or designs.
-
-decision — requests for help choosing between technologies, tools, approaches, or solutions.
-
-job — full-time employment offers or discussions.
-
-freelance — project-based, part-time, or contract work offers.
-
-consulting — paid expert help, audits, mentoring, or advisory requests.
-
-pricing — questions about rates, costs, budgets, or payment terms.
-
-partnership — proposals for collaboration, joint ventures, or startups.
-
-investment — investment offers or requests for funding.
-
-hiring — questions about recruiting, building, or strengthening a team.
-
-interview — interview-related questions or preparation.
-
-speaking — invitations to speak at events, podcasts, streams, or conferences.
-
-media — requests for interviews, articles, or comments for media.
-
-product — questions about products or services I created.
-
-access — requests for access to demos, betas, repositories, or courses.
-
-resume — questions about my professional experience, skills, or background.
-
-portfolio — questions about my projects, achievements, or case studies.
-
-intro — requests for introductions or networking.
-
-followup — continuation of previous conversation without a new intent.
-
-gratitude — expressions of thanks without a request.
-
-clarification — questions asking to clarify or explain a previous response.
-
-life — questions about personal life, hobbies, or preferences.
-
-spam — promotional, bulk, or irrelevant messages.
-
-none — anything that does not fit the above or is not a user request.
-
-Additional guidelines:
-- Do NOT invent information that is not explicitly or implicitly present
+ADDITIONAL RULES:
+- Do NOT invent information
 - Prefer semantic meaning over exact wording
-- Group related information into structured objects when appropriate
-- Avoid overly generic fields if more specific structure is possible
-- If information is partial or unclear, omit the field entirely
-- If no optional fields are clearly applicable, return only the mandatory base fields
+- Omit fields if information is missing or unclear
+- If no optional fields apply, return ONLY mandatory base fields
 
-Output format:
-
+OUTPUT FORMAT:
 {
   "title": "...",
   "summary": "...",
   "documentType": "...",
   "language": "...",
-  "topics": [...],
-  "entities": [...],
-  "technologies": [...],
-  "infrastructure": {...},
-  "problems": [...],
-  "solutions": [...],
-  "limitations": [...],
-  "steps": [...],
-  "tags": [...],
-  "publishedAt": "...",
-  "source": {...},
-  "importance": 0.0-1.0,
-  "classification": "..." 
+  "classification": "...",
+  "...": "other relevant fields"
 }
 
-Text to analyze: ${doc.content}`;
+TEXT TO ANALYZE: ${doc.content}`;
 
           // Call LLM
           const result = await llm.invoke(prompt);
@@ -394,16 +361,51 @@ Text to analyze: ${doc.content}`;
           try {
             JSON.parse(response);
           } catch (jsonError) {
+            Logger.logError('Invalid JSON in response', {
+              response,
+              error: jsonError,
+            });
             throw new Error(
               `Invalid JSON in response: ${(jsonError as Error).message}`,
             );
           }
 
-          // Update the document with graphContent
-          await PrismaService.instance.chatDocumentEmbedding.update({
-            where: { id: doc.id },
-            data: { graphContent: response },
-          });
+          // Generate embedding for the graph content (JSON string)
+          const graphVector = await embeddingModel.embedQuery(response);
+          const graphVectorValue = `[${graphVector.join(',')}]`;
+
+          // Use raw SQL for vector operations since Prisma doesn't support vectors natively
+          if (graphVector.length === 384) {
+            await PrismaService.instance.$executeRaw`
+              UPDATE "ChatDocumentEmbedding" 
+              SET "graphContent" = ${response}, "graphEmbedding384" = ${graphVectorValue}::vector 
+              WHERE id = ${doc.id}
+            `;
+          } else if (graphVector.length === 768) {
+            await PrismaService.instance.$executeRaw`
+              UPDATE "ChatDocumentEmbedding" 
+              SET "graphContent" = ${response}, "graphEmbedding768" = ${graphVectorValue}::vector 
+              WHERE id = ${doc.id}
+            `;
+          } else if (graphVector.length === 1024) {
+            await PrismaService.instance.$executeRaw`
+              UPDATE "ChatDocumentEmbedding" 
+              SET "graphContent" = ${response}, "graphEmbedding1024" = ${graphVectorValue}::vector 
+              WHERE id = ${doc.id}
+            `;
+          } else if (graphVector.length === 1536) {
+            await PrismaService.instance.$executeRaw`
+              UPDATE "ChatDocumentEmbedding" 
+              SET "graphContent" = ${response}, "graphEmbedding1536" = ${graphVectorValue}::vector 
+              WHERE id = ${doc.id}
+            `;
+          } else if (graphVector.length === 3072) {
+            await PrismaService.instance.$executeRaw`
+              UPDATE "ChatDocumentEmbedding" 
+              SET "graphContent" = ${response}, "graphEmbedding3072" = ${graphVectorValue}::vector 
+              WHERE id = ${doc.id}
+            `;
+          }
 
           processedCount++;
           Logger.logInfo('Документ успешно обработан', {

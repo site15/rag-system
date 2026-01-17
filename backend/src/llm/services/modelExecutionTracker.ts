@@ -67,7 +67,7 @@ export class ModelExecutionTracker {
           provider: options.provider,
           model: options.model,
           temperature: options.temperature,
-          chunkSize: options.chunkSize || 2000,
+          chunkSize: options.chunkSize,
         });
 
         return recordId;
@@ -78,7 +78,7 @@ export class ModelExecutionTracker {
             provider: options.provider,
             model: options.model,
             temperature: options.temperature,
-            chunkSize: options.chunkSize || 2000,
+            chunkSize: options.chunkSize,
             lastRequestId: options.llmQueryLogId?.toString(),
             startTime: new Date(),
             status: 'running',
@@ -95,7 +95,7 @@ export class ModelExecutionTracker {
           provider: options.provider,
           model: options.model,
           temperature: options.temperature,
-          chunkSize: options.chunkSize || 2000,
+          chunkSize: options.chunkSize,
         });
 
         return recordId;

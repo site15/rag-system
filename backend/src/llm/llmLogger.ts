@@ -354,7 +354,7 @@ export class LLMLogger {
     provider: string,
     model: string,
     temperature: number,
-    chunkSize?: number,
+    chunkSize: number,
   ): Promise<boolean> {
     try {
       const llmModel = await PrismaService.instance.chatLlmModel.findFirst({

@@ -80,14 +80,14 @@ Author Message: "ENTITY_X HAS_IMPL(IMPL_CUSTOM)"
 Author Message: "ENTITY_X HAS_IMPL(IMPL_CUSTOM)"
 → [NOT_FOUND]
 
-ИСТОРИЯ ПЕРЕПИСКИ: 
+Conversation history (use strictly for personal experience context): 
 {{history}}
 
 Контекст:
 {{context}}
 
 Вопрос:
-{{question}}
+{{questionWithTitle}}
 
 Ответ:
 `,
@@ -110,14 +110,14 @@ Author Message: "ENTITY_X HAS_IMPL(IMPL_CUSTOM)"
 [FOUND]
 [NOT_FOUND]
 
-ИСТОРИЯ ПЕРЕПИСКИ: 
+Conversation history (use strictly for personal experience context): 
 {{history}}
 
 Контекст:
 {{context}}
 
 Вопрос:
-{{question}}
+{{questionWithTitle}}
 
 Ответ:
 `,
@@ -140,14 +140,14 @@ Author Message: "ENTITY_X HAS_IMPL(IMPL_CUSTOM)"
 [FOUND]
 [NOT_FOUND]
 
-ИСТОРИЯ ПЕРЕПИСКИ: 
+Conversation history (use strictly for personal experience context): 
 {{history}}
 
 Контекст:
 {{context}}
 
 Вопрос:
-{{question}}
+{{questionWithTitle}}
 
 Ответ:
 `,
@@ -172,14 +172,14 @@ Author Message: "ENTITY_X HAS_IMPL(IMPL_CUSTOM)"
 [FOUND]
 [NOT_FOUND]
 
-ИСТОРИЯ ПЕРЕПИСКИ: 
+Conversation history (use strictly for personal experience context): 
 {{history}}
 
 Контекст:
 {{context}}
 
 Вопрос:
-{{question}}
+{{questionWithTitle}}
 
 Ответ:
 `,
@@ -205,14 +205,14 @@ Author Message: "ENTITY_X HAS_IMPL(IMPL_CUSTOM)"
 [FOUND]
 [NOT_FOUND]
 
-ИСТОРИЯ ПЕРЕПИСКИ: 
+Conversation history (use strictly for personal experience context): 
 {{history}}
 
 Контекст:
 {{context}}
 
 Вопрос:
-{{question}}
+{{questionWithTitle}}
 
 Ответ:
 `,
@@ -238,14 +238,14 @@ Author Message: "ENTITY_X HAS_IMPL(IMPL_CUSTOM)"
 [FOUND]
 [NOT_FOUND]
 
-ИСТОРИЯ ПЕРЕПИСКИ: 
+Conversation history (use strictly for personal experience context): 
 {{history}}
 
 Контекст:
 {{context}}
 
 Вопрос:
-{{question}}
+{{questionWithTitle}}
 
 Ответ:
 `,
@@ -270,14 +270,14 @@ Author Message: "ENTITY_X HAS_IMPL(IMPL_CUSTOM)"
 [FOUND]
 [NOT_FOUND]
 
-ИСТОРИЯ ПЕРЕПИСКИ: 
+Conversation history (use strictly for personal experience context): 
 {{history}}
 
 Контекст:
 {{context}}
 
 Вопрос:
-{{question}}
+{{questionWithTitle}}
 
 Ответ:
 `,
@@ -301,14 +301,14 @@ Author Message: "ENTITY_X HAS_IMPL(IMPL_CUSTOM)"
 [FOUND]
 [NOT_FOUND]
 
-ИСТОРИЯ ПЕРЕПИСКИ: 
+Conversation history (use strictly for personal experience context): 
 {{history}}
 
 Контекст:
 {{context}}
 
 Вопрос:
-{{question}}
+{{questionWithTitle}}
 
 Ответ:
 `,
@@ -332,14 +332,14 @@ Author Message: "ENTITY_X HAS_IMPL(IMPL_CUSTOM)"
 [FOUND]
 [NOT_FOUND]
 
-ИСТОРИЯ ПЕРЕПИСКИ: 
+Conversation history (use strictly for personal experience context): 
 {{history}}
 
 Контекст:
 {{context}}
 
 Вопрос:
-{{question}}
+{{questionWithTitle}}
 
 Ответ:
 `,
@@ -363,14 +363,14 @@ Author Message: "ENTITY_X HAS_IMPL(IMPL_CUSTOM)"
 [FOUND]
 [NOT_FOUND]
 
-ИСТОРИЯ ПЕРЕПИСКИ: 
+Conversation history (use strictly for personal experience context): 
 {{history}}
 
 Контекст:
 {{context}}
 
 Вопрос:
-{{question}}
+{{questionWithTitle}}
 
 Ответ:
 `,
@@ -396,14 +396,14 @@ Author Message: "ENTITY_X HAS_IMPL(IMPL_CUSTOM)"
 [FOUND]
 [NOT_FOUND]
 
-ИСТОРИЯ ПЕРЕПИСКИ: 
+Conversation history (use strictly for personal experience context): 
 {{history}}
 
 Контекст:
 {{context}}
 
 Вопрос:
-{{question}}
+{{questionWithTitle}}
 
 Ответ:
 `,
@@ -428,14 +428,14 @@ Author Message: "ENTITY_X HAS_IMPL(IMPL_CUSTOM)"
 [FOUND]
 [NOT_FOUND]
 
-ИСТОРИЯ ПЕРЕПИСКИ: 
+Conversation history (use strictly for personal experience context): 
 {{history}}
 
 Контекст:
 {{context}}
 
 Вопрос:
-{{question}}
+{{questionWithTitle}}
 
 Ответ:
 `,
@@ -464,14 +464,14 @@ Author Message: "ENTITY_X HAS_IMPL(IMPL_CUSTOM)"
 [FOUND] <короткое описание решённой проблемы>
 [NOT_FOUND]
 
-ИСТОРИЯ ПЕРЕПИСКИ: 
+Conversation history (use strictly for personal experience context): 
 {{history}}
 
 Контекст:
 {{context}}
 
 Вопрос:
-{{question}}
+{{questionWithTitle}}
 
 Ответ:
 `,
@@ -499,14 +499,14 @@ Author Message: "ENTITY_X HAS_IMPL(IMPL_CUSTOM)"
 [FOUND] <краткий вывод или оценка автора>
 [NOT_FOUND]
 
-ИСТОРИЯ ПЕРЕПИСКИ: 
+Conversation history (use strictly for personal experience context): 
 {{history}}
 
 Контекст:
 {{context}}
 
 Вопрос:
-{{question}}
+{{questionWithTitle}}
 
 Ответ:
 `,
@@ -536,14 +536,14 @@ Author Message: "ENTITY_X HAS_IMPL(IMPL_CUSTOM)"
 [FOUND] <явно выбранный вариант и причина (если указана)>
 [NOT_FOUND]
 
-ИСТОРИЯ ПЕРЕПИСКИ: 
+Conversation history (use strictly for personal experience context): 
 {{history}}
 
 Контекст:
 {{context}}
 
 Вопрос:
-{{question}}
+{{questionWithTitle}}
 
 Ответ:
 `,
@@ -565,14 +565,14 @@ Author Message: "ENTITY_X HAS_IMPL(IMPL_CUSTOM)"
 [FOUND]
 [NOT_FOUND]
 
-ИСТОРИЯ ПЕРЕПИСКИ: 
+Conversation history (use strictly for personal experience context): 
 {{history}}
 
 Контекст:
 {{context}}
 
 Вопрос:
-{{question}}
+{{questionWithTitle}}
 
 Ответ:
 `,
@@ -598,14 +598,14 @@ Author Message: "ENTITY_X HAS_IMPL(IMPL_CUSTOM)"
 [FOUND]
 [NOT_FOUND]
 
-ИСТОРИЯ ПЕРЕПИСКИ: 
+Conversation history (use strictly for personal experience context): 
 {{history}}
 
 Контекст:
 {{context}}
 
 Вопрос:
-{{question}}
+{{questionWithTitle}}
 
 Ответ:
 `,
@@ -656,14 +656,14 @@ Q: "HAS_SKILL(PERSON_A, TECH_X)?"
 RESUME_TEXT: "PERSON_A применял TECH_X на проекте Z в production."
 → [FOUND] PERSON_A использовал TECH_X на проекте Z в production
 
-ИСТОРИЯ ПЕРЕПИСКИ: 
+Conversation history (use strictly for personal experience context): 
 {{history}}
 
 Контекст:
 {{context}}
 
 Вопрос:
-{{question}}
+{{questionWithTitle}}
 
 Ответ:
 `,
@@ -712,14 +712,14 @@ Q: "USES(OBJ_A, TECH_X)?"
 TEXT: "Project Z was implemented using TECH_X in production."
 → [FOUND] Project Z uses TECH_X in production
 
-ИСТОРИЯ ПЕРЕПИСКИ: 
+Conversation history (use strictly for personal experience context): 
 {{history}}
 
 Контекст:
 {{context}}
 
 Вопрос:
-{{question}}
+{{questionWithTitle}}
 
 Ответ:
 `,
@@ -765,14 +765,14 @@ Q: "USE(OBJ_A, FEATURE_X)?"
 TEXT: "OBJ_A explicitly uses FEATURE_X in production."
 → [FOUND] OBJ_A uses FEATURE_X in production
 
-ИСТОРИЯ ПЕРЕПИСКИ: 
+Conversation history (use strictly for personal experience context): 
 {{history}}
 
 Контекст:
 {{context}}
 
 Вопрос:
-{{question}}
+{{questionWithTitle}}
 
 Ответ:
 `,
@@ -797,14 +797,14 @@ TEXT: "OBJ_A explicitly uses FEATURE_X in production."
 [FOUND] <короткий личный факт>
 [NOT_FOUND]
 
-ИСТОРИЯ ПЕРЕПИСКИ: 
+Conversation history (use strictly for personal experience context): 
 {{history}}
 
 Контекст:
 {{context}}
 
 Вопрос:
-{{question}}
+{{questionWithTitle}}
 
 Ответ:
 `,
@@ -847,7 +847,7 @@ TEXT: "OBJ_A explicitly uses FEATURE_X in production."
 {{history}}
 
 Сообщение:
-{{question}}
+{{questionWithTitle}}
 
 Ответ:
 `,
@@ -882,7 +882,7 @@ TEXT: "OBJ_A explicitly uses FEATURE_X in production."
 {{history}}
 
 Вопрос:
-{{question}}
+{{questionWithTitle}}
 
 Ответ:
 `,
@@ -924,7 +924,7 @@ TEXT: "OBJ_A explicitly uses FEATURE_X in production."
 {{history}}
 
 Сообщение:
-{{question}}
+{{questionWithTitle}}
 
 Ответ:
 `,
@@ -958,7 +958,7 @@ TEXT: "OBJ_A explicitly uses FEATURE_X in production."
 {{history}}
 
 Вопрос:
-{{question}}
+{{questionWithTitle}}
 
 Ответ:
 `,
@@ -987,14 +987,14 @@ TEXT: "OBJ_A explicitly uses FEATURE_X in production."
 [FOUND] <короткий факт> - если есть прямой ответ
 [NOT_FOUND] - если прямого ответа нет
 
-ИСТОРИЯ ПЕРЕПИСКИ: 
+Conversation history (use strictly for personal experience context): 
 {{history}}
 
 Контекст:
 {{context}}
 
 Вопрос:
-{{question}}
+{{questionWithTitle}}
 
 Ответ:
 `,
@@ -1026,19 +1026,20 @@ TEXT: "OBJ_A explicitly uses FEATURE_X in production."
 - Примеры, аналогии, рассуждения — [NOT_FOUND]
 - Если технология только описывается — [NOT_FOUND]
 - Если нет явного утверждения автора — [NOT_FOUND]
+- Никогда не добавляй слова, наречия, уточнения или модификаторы к глаголу из истории; используй глагол ровно в той форме, в которой ассистент его уже использовал.
 
 ФОРМАТ ОТВЕТА:
 [FOUND] <короткий факт или утверждение автора>
 [NOT_FOUND]
 
-ИСТОРИЯ ПЕРЕПИСКИ: 
+Conversation history (use strictly for personal experience context): 
 {{history}}
 
 Контекст:
 {{context}}
 
 Вопрос:
-{{question}}
+{{questionWithTitle}}
 
 Ответ:
 `,

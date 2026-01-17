@@ -447,6 +447,7 @@ export class LLMFactory {
         openaiOptions.configuration.httpsAgent = proxyAgent;
       }
 
+      Logger.logInfo('Creating ChatOpenAI instance', openaiOptions);
       return new ChatOpenAI(openaiOptions);
     }
   }

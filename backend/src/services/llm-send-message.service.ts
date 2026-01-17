@@ -30,6 +30,7 @@ import {
 import { SummarizationService } from '../llm/services/summarizationService';
 import { TextHelpers } from '../llm/textHelpers';
 import { DocWithMetadataAndId } from '../llm/types';
+import { isUUID } from 'class-validator';
 
 // Request interface definition
 export interface MessageRequest {
@@ -822,7 +823,7 @@ export class LlmSendMessageService {
     dialogId: string | undefined;
     userId: string;
   }) {
-    if (!dialogId || typeof dialogId !== 'number') {
+    if (!dialogId || !isUUID(dialogId)) {
       dialogId = await DialogManager.createDialog(userId);
       Logger.logInfo('New dialog created', { dialogId });
     } else {
