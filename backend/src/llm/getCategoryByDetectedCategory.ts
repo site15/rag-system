@@ -8,6 +8,7 @@ export function getCategoryByDetectedCategory(detectedCategory: Category) {
   }
 
   if (
+    detectedCategory === Category.pricing ||
     detectedCategory === Category.resume ||
     detectedCategory === Category.interview ||
     detectedCategory === Category.hiring ||
@@ -36,7 +37,6 @@ export function getCategoryByDetectedCategory(detectedCategory: Category) {
   }
 
   if (
-    detectedCategory === Category.pricing ||
     detectedCategory === Category.review ||
     detectedCategory === Category.access ||
     detectedCategory === Category.technology

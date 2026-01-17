@@ -9,6 +9,7 @@ import {
   ERROR_MESSAGES,
   RAG_SEARCH_CONFIG,
   createDocumentInfo,
+  createSourceReference,
 } from '../llm/constants';
 import { DialogManager } from '../llm/dialogManager';
 import { DialogSummary } from '../llm/dialogSummary';
@@ -302,7 +303,18 @@ export class LlmSendMessageService {
     userId,
     overrideProvider,
     overrideModel,
-  }: ProcessMessageArgs): Promise<{ dialogId: string; response: string }> {
+  }: ProcessMessageArgs): Promise<{
+    dialogId: string;
+    response: string;
+    sources: {
+      id: string;
+      source: string;
+      fromLine: number | undefined;
+      toLine: number | undefined;
+      position: number;
+      type: string | undefined;
+    }[];
+  }> {
     const foundLogIds: (string | undefined)[] = [];
 
     let docsWithMeta: DocWithMetadataAndId[] = [];
@@ -340,7 +352,7 @@ export class LlmSendMessageService {
       // Transform the question using the QuestionTransformer to categorize and optimize it
       const categorizedQuestion = await QuestionTransformer.transformQuestion({
         dialogId,
-        historyId: undefined,
+        messageId: undefined,
         question: message,
         llm,
         history,
@@ -386,7 +398,7 @@ export class LlmSendMessageService {
 
       this.logBeforeAskLLMChunked(docsWithMeta, history);
 
-      const globalResult = await LLMChunkProcessor.askLLMChunked({
+      const llmResult = await LLMChunkProcessor.askLLMChunked({
         llm,
         dialogId,
         history,
@@ -398,11 +410,8 @@ export class LlmSendMessageService {
         detectedCategory: categorizedQuestion.detectedCategory,
       });
 
-      let answer = globalResult.response;
-      let telegramResult:
-        | { response: string | null; answerDocumentId?: string }
-        | undefined;
-      let isGlobalSuccess =
+      let answer = llmResult.response;
+      let isSuccess =
         answer !== null && answer !== undefined && answer.trim() !== '';
 
       // Prepare document info for logging
@@ -410,7 +419,7 @@ export class LlmSendMessageService {
         .map((doc, index) => createDocumentInfo({ doc, index }))
         .reduce((acc, curr) => ({ ...acc, ...curr }), {});
 
-      this.logAfterAskLLMChunked(globalResult, docsWithMeta, documentInfo);
+      this.logAfterAskLLMChunked(llmResult, docsWithMeta, documentInfo);
 
       /**
        * NOT FOUND
@@ -435,14 +444,13 @@ export class LlmSendMessageService {
 
       ///
 
-      const { historyId, ...saveDialogMessageResult } =
+      const { messageId, ...saveDialogMessageResult } =
         await this.saveDialogMessage(
           dialogId,
           userId,
-          isGlobalSuccess,
-          telegramResult,
+          isSuccess,
           docsWithMeta,
-          globalResult,
+          llmResult.answerDocumentId,
           message,
           answer,
           categorizedQuestion,
@@ -455,34 +463,32 @@ export class LlmSendMessageService {
 
       LLMQueryLogger.updateQueryReferences(
         [
-          ...(globalResult.logIds || []),
+          ...(llmResult.logIds || []),
           ...categorizedQuestion.logIds,
           ...foundLogIds,
         ],
         dialogId,
-        historyId,
+        messageId,
       ).catch((err) => Logger.logError(err));
 
-      await this.summarizeIfNeeded(dialogId, historyId, llm, appConfig);
+      await this.summarizeIfNeeded(dialogId, messageId, llm, appConfig);
 
       this.logSuccessResult(answer, docsWithMeta);
 
       // Prepare source references for the response
-      // const sourceReferences = docsWithMeta.map((doc, index) =>
-      //   createSourceReference({
-      //     doc,
-      //     index,
-      //     type: LLMChunkProcessor.getDocTypeBySource(doc.source),
-      //   }),
-      // );
+      const sourceReferences = docsWithMeta.map((doc, index) =>
+        createSourceReference({
+          doc,
+          index,
+          type: LLMChunkProcessor.getDocTypeBySource(doc.source),
+        }),
+      );
 
       return {
         //  success: true,
         dialogId,
         response: answer || 'No response generated',
-        //  consecutiveFailures: finalConsecutiveFailures,
-        //  maxFailures: finalMaxFailures,
-        //  sources: sourceReferences,
+        sources: sourceReferences,
       };
     } catch (error: any) {
       // Check if it's a rate limit error
@@ -549,7 +555,7 @@ export class LlmSendMessageService {
 
   private async summarizeIfNeeded(
     dialogId: string,
-    historyId: string,
+    messageId: string,
     llm: any,
     appConfig: { chatProvider: string; embeddingsProvider: string },
   ) {
@@ -557,7 +563,7 @@ export class LlmSendMessageService {
       Logger.logInfo('Диалог требует суммаризации', { dialogId });
       // Run summarization in background to avoid blocking user request
       SummarizationService.queueSummarizationWithoutBlocking({
-        historyId,
+        messageId,
         dialogId,
         llm,
         provider: appConfig.chatProvider,
@@ -570,22 +576,9 @@ export class LlmSendMessageService {
   private async saveDialogMessage(
     dialogId: string,
     userId: string,
-    isGlobalSuccess: boolean,
-    telegramResult:
-      | { response: string | null; answerDocumentId?: string }
-      | undefined,
+    isSuccess: boolean,
     docsWithMeta: DocWithMetadataAndId[],
-    globalResult:
-      | {
-          response: string;
-          answerDocumentId: string | undefined;
-          logIds: (string | undefined)[];
-        }
-      | {
-          response: null;
-          answerDocumentId: undefined;
-          logIds: (string | undefined)[];
-        },
+    answerDocumentId: string | undefined,
     message: string,
     answer: string,
     categorizedQuestion: CategorizedQuestion,
@@ -616,33 +609,8 @@ export class LlmSendMessageService {
       userId: userId,
     });
 
-    // Determine if the response was successful
-    let isSuccess = false;
-    if (
-      isGlobalSuccess ||
-      (telegramResult &&
-        telegramResult.response !== null &&
-        telegramResult.response !== undefined &&
-        telegramResult.response.trim() !== '')
-    ) {
-      isSuccess = true;
-    } else {
-      // If no answer was found in both modes, check if it's a "not found" response vs no response
-      // A "not found" response from frendlyNotFound is considered a response, but not a successful one
-      // since no actual information was found in the documents
-      isSuccess = false;
-    }
-
     // Extract document IDs from the docsWithMeta array
     const selectedDocumentIds = docsWithMeta.map((doc) => doc.id);
-
-    // Determine the answer document ID based on which mode provided the answer
-    let answerDocumentId: string | undefined;
-    if (globalResult.answerDocumentId) {
-      answerDocumentId = globalResult.answerDocumentId;
-    } else if (telegramResult && telegramResult.answerDocumentId) {
-      answerDocumentId = telegramResult.answerDocumentId;
-    }
 
     const saveResult = await DialogManager.saveMessage({
       dialogId,
@@ -663,14 +631,14 @@ export class LlmSendMessageService {
     });
 
     dialogId = saveResult.dialogId;
-    const historyId = saveResult.historyId;
+    const messageId = saveResult.messageId;
 
     Logger.logInfo('Сохранение сообщения завершено', {
       dialogId,
-      historyId,
+      messageId,
     });
 
-    return { historyId, dialogId };
+    return { messageId, dialogId };
   }
 
   private logAfterAskLLMChunked(

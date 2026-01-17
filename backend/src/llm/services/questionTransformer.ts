@@ -5,7 +5,7 @@ import { HuggingFaceInference } from '@langchain/community/llms/hf';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { ChatGroq } from '@langchain/groq';
 import { ChatOpenAI } from '@langchain/openai';
-import { RAG_SEARCH_CONFIG } from '../constants';
+import { CATEGORY, RAG_SEARCH_CONFIG } from '../constants';
 import { DialogManager } from '../dialogManager';
 import { getCategoryByDetectedCategory } from '../getCategoryByDetectedCategory';
 import { LLMLogger } from '../llmLogger';
@@ -189,10 +189,10 @@ export class QuestionTransformer {
     history,
     provider,
     dialogId,
-    historyId,
+    messageId,
   }: {
     dialogId: string | undefined;
-    historyId: string | undefined;
+    messageId: string | undefined;
     question: string;
     llm:
       | ChatOllama
@@ -215,7 +215,7 @@ export class QuestionTransformer {
       history,
       provider,
       dialogId,
-      historyId,
+      messageId,
     });
 
     let detectedCategory = detectCategoryResult.category;
@@ -254,7 +254,7 @@ export class QuestionTransformer {
       isSelfContained,
       provider,
       dialogId,
-      historyId,
+      messageId,
     });
 
     const transformedEmbedded1 = await this.transformToEmbeddedWithLLM({
@@ -263,7 +263,7 @@ export class QuestionTransformer {
       category,
       provider,
       dialogId,
-      historyId,
+      messageId,
       prompt: `Ты — переписчик пользовательских запросов для entity-based semantic search.
 
 Документы — это короткие сообщения, реплики или утверждения автора.
@@ -307,7 +307,7 @@ ${question}
       category,
       provider,
       dialogId,
-      historyId,
+      messageId,
       prompt: `Ты — переписчик пользовательских запросов для action-based semantic search.
 
 Документы — это статьи или развёрнутые сообщения,
@@ -416,10 +416,10 @@ ${question}
     isSelfContained = true,
     provider,
     dialogId,
-    historyId,
+    messageId,
   }: {
     dialogId: string | undefined;
-    historyId: string | undefined;
+    messageId: string | undefined;
     question: string;
     llm:
       | ChatOllama
@@ -448,7 +448,13 @@ ${question}
           category,
         },
         dialogId,
-        historyId,
+        messageId,
+        callback: (prompt) =>
+          llm
+            .invoke(prompt)
+            .then(async (result) =>
+              typeof result === 'string' ? result.trim() : result,
+            ),
       });
 
       // If the transformation result seems invalid (empty, same as original, or an error), return the original
@@ -494,11 +500,11 @@ ${question}
     category,
     provider,
     dialogId,
-    historyId,
+    messageId,
     prompt,
   }: {
     dialogId: string | undefined;
-    historyId: string | undefined;
+    messageId: string | undefined;
     question: string;
     llm:
       | ChatOllama
@@ -521,7 +527,13 @@ ${question}
           category,
         },
         dialogId,
-        historyId,
+        messageId,
+        callback: (prompt) =>
+          llm
+            .invoke(prompt)
+            .then(async (result) =>
+              typeof result === 'string' ? result.trim() : result,
+            ),
       });
 
       // Возвращаем оригинальный вопрос, если результат пустой или некорректный
@@ -560,10 +572,10 @@ ${question}
     history,
     provider,
     dialogId,
-    historyId,
+    messageId,
   }: {
     dialogId: string | undefined;
-    historyId: string | undefined;
+    messageId: string | undefined;
     llm:
       | ChatOllama
       | ChatOpenAI
@@ -580,6 +592,8 @@ ${question}
 Определи, **к какому типу данных относится корректный ответ на этот текст**, а не тип самого текста.
 
 Если запрос подходит под несколько типов, **выбирай тип с более высоким приоритетом**.
+Правило: если текст является **вопросом**, он **не может** быть job, freelance, partnership или investment без явного предложения или оффера.
+Правило: вопросы про деньги, зарплату, компенсацию или рейты → pricing, если нет оффера или описания вакансии.
 
 Приоритеты (от высокого к низкому):
 1. spam
@@ -610,41 +624,9 @@ ${question}
 26. none
 
 Типы:
-- technology — вопросы или упоминания технологий, инструментов, фреймворков, языков программирования, архитектурных паттернов и технических терминов без явного запроса на инструкцию, помощь, выбор или решение проблемы, примеры: event sourcing, cqrs, kubernetes, nestjs, grpc
-- resume — вопросы о моём профессиональном опыте, навыках, местах работы, технологиях, профессиональных умениях;
-- portfolio — вопросы о моих проектах, результатах, метриках, реализованных решениях, в том числе ИИ-решениях;
-- articles — запросы на объяснения, руководства, разборы, инструкции, обучающие материалы;
-
-- job — предложения о работе на полный рабочий день (штат, фултайм, постоянная занятость);
-- freelance — предложения о частичной, проектной или почасовой работе, фриланс-контракты;
-- consulting — запросы на консультации, менторство, разовые созвоны, аудит, экспертную помощь за деньги;
-- pricing — вопросы о стоимости услуг, рейтах, бюджете, условиях оплаты;
-- partnership — предложения о партнёрстве, совместных проектах, стартапах;
-- investment — инвестиционные предложения, поиск инвестора или предложение инвестиций;
-
-- support — просьбы помочь с конкретной технической проблемой, багом, ошибкой;
-- review — запросы на ревью кода, архитектуры, ТЗ, идей;
-- decision — помощь с выбором технологии, инструмента, подхода или решения;
-
-- interview — вопросы о собеседованиях, подготовке к ним, оценке кандидатов;
-- hiring — вопросы о найме, формировании или усилении команды;
-
-- speaking — приглашения на выступления, подкасты, стримы, митапы, конференции;
-- media — запросы на интервью, статьи, комментарии для СМИ;
-
-- product — вопросы о продукте, сервисе или платформе, которые я создал;
-- access — просьбы о доступе: демо, бета, репозиторий, курс;
-
-- intro — запросы на знакомство, рекомендацию или интро;
-- followup — продолжение предыдущего диалога без нового запроса;
-
-- life — вопросы о личной жизни, хобби, личных интересах и предпочтениях, в том числе в искусстве;
-
-- spam — рекламные, массовые или нерелевантные сообщения;
-- gratitude — благодарности без запроса;
-- clarification — уточняющие вопросы к предыдущему ответу;
-
-- none — всё остальное.
+${Object.entries(CATEGORY)
+  .map(([key, value]) => `- ${key} — ${value}`)
+  .join('\n')}
 
 Очень важно:
 - выводи строго одно слово из списка типов;
@@ -671,7 +653,13 @@ ${text}
             operation: 'question_type_detection',
           },
           dialogId,
-          historyId,
+          messageId,
+          callback: (prompt) =>
+            llm
+              .invoke(prompt)
+              .then(async (result) =>
+                typeof result === 'string' ? result.trim() : result,
+              ),
         },
       );
 

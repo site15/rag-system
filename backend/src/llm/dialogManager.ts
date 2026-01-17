@@ -105,14 +105,14 @@ export class DialogManager {
       },
     });
 
-    const chatHistoryId = chatMessage.id;
-    Logger.logInfo('Сообщение сохранено', { chatHistoryId });
+    const messageId = chatMessage.id;
+    Logger.logInfo('Сообщение сохранено', { messageId });
 
     // Track success/failure
     if (isSuccess) {
-      await FailureTracker.recordSuccess(dialogId, chatHistoryId);
+      await FailureTracker.recordSuccess(dialogId, messageId);
     } else {
-      await FailureTracker.recordFailure(dialogId, chatHistoryId);
+      await FailureTracker.recordFailure(dialogId, messageId);
     }
 
     // Save associations between chat history and embedding documents
@@ -122,7 +122,7 @@ export class DialogManager {
         documentAssociations.push(
           PrismaService.instance.chatMessageDocumentEmbedding.create({
             data: {
-              chatHistoryId: chatHistoryId,
+              messageId: messageId,
               embeddingDocumentId: docId,
               isFound: answerDocumentId === docId, // Mark as found if it matches answerDocumentId
             },
@@ -133,13 +133,13 @@ export class DialogManager {
       // Wait for all document associations to be saved
       await Promise.all(documentAssociations);
       Logger.logInfo('Связи с документами сохранены', {
-        chatHistoryId,
+        messageId,
         documentCount: selectedDocumentIds.length,
         answerDocumentId,
       });
     }
 
-    return { dialogId, historyId: chatHistoryId };
+    return { dialogId, messageId: messageId };
   }
 
   public static async getDialogRawHistory(

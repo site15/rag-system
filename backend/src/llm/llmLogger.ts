@@ -29,8 +29,6 @@ export interface LLMLogEntry {
 }
 
 export class LLMLogger {
-  private static logEntries: LLMLogEntry[] = [];
-
   /**
    * Logs an LLM request and response
    */
@@ -74,9 +72,6 @@ export class LLMLogger {
     };
 
     try {
-      // Add to log entries
-      this.logEntries.push(logEntry);
-
       // Log to console/file/database as needed
       Logger.logInfo('LLM Request Completed', {
         id: logEntry.id,
@@ -86,6 +81,8 @@ export class LLMLogger {
         responseLength: logEntry.response.length,
         executionTime: logEntry.executionTime,
         metadata: logEntry.metadata,
+        prompt,
+        response,
       });
 
       // All logging is now handled by the main logger, which writes to both console and file
@@ -110,7 +107,8 @@ export class LLMLogger {
     metadata,
     provider,
     dialogId,
-    historyId,
+    messageId,
+    callback,
   }: {
     llm:
       | ChatOllama
@@ -123,7 +121,8 @@ export class LLMLogger {
     metadata?: Record<string, any>;
     provider: string;
     dialogId: string | undefined;
-    historyId: string | undefined;
+    messageId: string | undefined;
+    callback: (prompt: string) => Promise<any>;
   }): Promise<{ logId: string | undefined; content: string }> {
     const startTime = Date.now();
     let timeoutId: NodeJS.Timeout | null = null;
@@ -203,38 +202,11 @@ export class LLMLogger {
       }
 
       // Call the LLM with abort signal if provided
-      const llmCallPromise = llm
-        .invoke(prompt)
-        .then(async (result) =>
-          typeof result === 'string' ? result.trim() : result,
-        );
+      const llmCallPromise = await callback(prompt);
 
       // Race between LLM call and timeout
       const result = await Promise.race([llmCallPromise, timeoutPromise]);
-      let response: string;
-      if (typeof result === 'string') {
-        response = result;
-      } else if (typeof result === 'object' && result.content) {
-        // Handle different content types
-        if (typeof result.content === 'string') {
-          response = result.content;
-        } else if (Array.isArray(result.content)) {
-          // For complex content arrays, convert to string
-          response = result.content
-            .map((item: any) => {
-              if (typeof item === 'string') return item;
-              if (item.type === 'text' && item.text) return item.text;
-              return JSON.stringify(item);
-            })
-            .join(' ');
-        } else {
-          response = JSON.stringify(result.content);
-        }
-      } else {
-        response = JSON.stringify(result);
-      }
-
-      response = response.trim();
+      const response = LLMLogger.getResponseString(result);
 
       // Log the successful call
       await this.logLLMCall({
@@ -257,7 +229,7 @@ export class LLMLogger {
           metadata,
           success: true,
           dialogId,
-          historyId,
+          messageId,
         })) || undefined;
 
       // Mark execution as successful
@@ -331,7 +303,7 @@ export class LLMLogger {
         success: false,
         errorMessage: (error as Error).message,
         dialogId,
-        historyId,
+        messageId,
       });
 
       throw error;
@@ -343,25 +315,32 @@ export class LLMLogger {
     }
   }
 
-  /**
-   * Gets all logged LLM calls
-   */
-  static getLogEntries(): LLMLogEntry[] {
-    return [...this.logEntries];
-  }
+  private static getResponseString(result: any) {
+    let response: string;
+    if (typeof result === 'string') {
+      response = result;
+    } else if (typeof result === 'object' && result.content) {
+      // Handle different content types
+      if (typeof result.content === 'string') {
+        response = result.content;
+      } else if (Array.isArray(result.content)) {
+        // For complex content arrays, convert to string
+        response = result.content
+          .map((item: any) => {
+            if (typeof item === 'string') return item;
+            if (item.type === 'text' && item.text) return item.text;
+            return JSON.stringify(item);
+          })
+          .join(' ');
+      } else {
+        response = JSON.stringify(result.content);
+      }
+    } else {
+      response = JSON.stringify(result);
+    }
 
-  /**
-   * Clears all log entries
-   */
-  static clearLogEntries(): void {
-    this.logEntries = [];
-  }
-
-  /**
-   * Gets recent log entries (last N entries)
-   */
-  static getRecentLogEntries(count: number = 10): LLMLogEntry[] {
-    return this.logEntries.slice(-count);
+    response = response.trim();
+    return response;
   }
 
   /**
@@ -430,7 +409,7 @@ export class LLMLogger {
     errorMessage,
     provider,
     dialogId,
-    historyId,
+    messageId,
   }: {
     llm:
       | ChatOllama
@@ -447,7 +426,7 @@ export class LLMLogger {
     errorMessage?: string;
     provider: string;
     dialogId: string | undefined;
-    historyId: string | undefined;
+    messageId: string | undefined;
   }): Promise<string | null> {
     try {
       // Extract provider and model information
@@ -470,7 +449,7 @@ export class LLMLogger {
         success: success,
         errorMessage: errorMessage,
         dialogId,
-        historyId,
+        messageId,
       });
 
       return logId;

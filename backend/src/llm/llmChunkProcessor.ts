@@ -414,14 +414,20 @@ export class LLMChunkProcessor {
 
   private static extractAuthorMessageContent(chunk: string): string {
     if (chunk.includes('### Author Message')) {
-      const authorMatch = chunk.match(
-        /### Author Message \(Answer Source\)([\s\S]*)$/,
-      );
-      if (authorMatch && authorMatch[1]) {
-        return authorMatch[1].trim();
+      try {
+        const authorMatch = chunk
+          .replace(
+            'This section MUST be used to generate the final answer.',
+            '',
+          )
+          .split('### Author Message (Answer Source)')[1]
+          .split('\n--\n')[0];
+        return authorMatch.trim();
+      } catch (error) {
+        return chunk.trim();
       }
     }
-    return chunk; // Return original chunk if no Author Message section
+    return chunk.trim();
   }
 
   public static async askLLMChunked({
@@ -524,7 +530,6 @@ export class LLMChunkProcessor {
     chatChunkSize: number;
     detectedCategory: Category;
   }) {
-    let frendlyFound = false;
     Logger.logInfo('Начало обработки запроса с чанками', {
       dialogId,
       contextDocsCount: contextDocs.length,
@@ -587,56 +592,33 @@ export class LLMChunkProcessor {
             contextIndex: firstSuccess.result.contextIndex,
           });
 
-          // Generate friendly response immediately using the question and found answer
-          let friendlyText = firstSuccess.result.foundText;
-          if (frendlyFound) {
-            if (
-              firstSuccess.result.chunks &&
-              firstSuccess.result.foundChunkIndex !== undefined
-            ) {
-              const currentChunk =
-                firstSuccess.result.chunks[firstSuccess.result.foundChunkIndex];
+          let surroundingChunks = firstSuccess.result.foundText;
 
-              // Extract only Author Message content for friendly response
-              const authorContent =
-                LLMChunkProcessor.extractAuthorMessageContent(currentChunk);
-
-              // Limit context to Author Message only
-              const surroundingChunks = authorContent;
-
-              const ret = await LLMChunkProcessor.frendlyFound({
-                category,
-                surroundingChunks,
-                question,
-                llm,
-                provider,
-                dialogId,
-              });
-              friendlyText = ret.foundText;
-              foundLogIds.push(ret.logId);
-
-              Logger.logInfo('Дружеский ответ LLM', {
-                foundText: friendlyText,
-                chunk: currentChunk,
-              });
-            } else {
-              // Fallback if chunks or foundChunkIndex are not available
-              const ret = await LLMChunkProcessor.frendlyFound({
-                category,
-                surroundingChunks: firstSuccess.result.foundText,
-                question,
-                llm,
-                provider,
-                dialogId,
-              });
-              friendlyText = ret.foundText;
-              foundLogIds.push(ret.logId);
-
-              Logger.logInfo('Дружеский ответ LLM', {
-                foundText: friendlyText,
-              });
-            }
+          if (
+            firstSuccess.result.chunks &&
+            firstSuccess.result.foundChunkIndex !== undefined
+          ) {
+            const currentChunk =
+              firstSuccess.result.chunks[firstSuccess.result.foundChunkIndex];
+            surroundingChunks =
+              LLMChunkProcessor.extractAuthorMessageContent(currentChunk);
           }
+
+          const ret = await LLMChunkProcessor.frendlyFound({
+            category,
+            surroundingChunks,
+            question,
+            llm,
+            provider,
+            dialogId,
+          });
+          const friendlyText = ret.foundText;
+          foundLogIds.push(ret.logId);
+
+          Logger.logInfo('Дружеский ответ LLM', {
+            foundText: friendlyText,
+            chunk: surroundingChunks,
+          });
 
           // Return a special result indicating that friendly response was already generated
           return [
@@ -662,44 +644,6 @@ export class LLMChunkProcessor {
           throw error;
         }
         // If race fails, continue with normal processing
-      }
-
-      // Wait for all promises in the batch to settle
-      const batchResults = await Promise.allSettled(batchPromises);
-
-      // Process the settled results
-      const settledResults = batchResults.map((result) =>
-        result.status === 'fulfilled'
-          ? {
-              ...result.value,
-              foundLogIds: [
-                ...(result.value.foundLogIds || []),
-                ...foundLogIds,
-              ],
-            }
-          : {
-              success: false,
-              foundText: undefined,
-              foundLogIds,
-              foundChunkIndex: undefined,
-              chunks: undefined,
-              contextIndex: -1,
-              documentId: undefined,
-            },
-      );
-
-      // Add batch results to overall results
-      results.push(...settledResults);
-
-      // Check if any result in this batch was successful
-      const successfulResult = settledResults.find(
-        (result) => result.success && result.foundText,
-      );
-      if (successfulResult) {
-        Logger.logInfo('Найден успешный результат, отмена остальных', {
-          contextIndex: successfulResult.contextIndex,
-        });
-        break; // Stop processing further batches
       }
     }
 
@@ -919,7 +863,13 @@ export class LLMChunkProcessor {
               dialogId,
             },
             dialogId,
-            historyId: undefined,
+            messageId: undefined,
+            callback: (prompt) =>
+              llm
+                .invoke(prompt)
+                .then(async (result) =>
+                  typeof result === 'string' ? result.trim() : result,
+                ),
           });
 
           foundLogIds.push(logId);
@@ -965,8 +915,14 @@ export class LLMChunkProcessor {
                   fact: foundText,
                   category,
                 }),
-                historyId: undefined,
+                messageId: undefined,
                 dialogId,
+                callback: (prompt) =>
+                  llm
+                    .invoke(prompt)
+                    .then(async (result) =>
+                      typeof result === 'string' ? result.trim() : result,
+                    ),
               });
               foundText = content;
               foundLogIds.push(logId);
@@ -1062,7 +1018,13 @@ export class LLMChunkProcessor {
         dialogId,
       },
       dialogId,
-      historyId: undefined,
+      messageId: undefined,
+      callback: (prompt) =>
+        llm
+          .invoke(prompt)
+          .then(async (result) =>
+            typeof result === 'string' ? result.trim() : result,
+          ),
     });
     return { foundText, logId };
   }
@@ -1101,7 +1063,13 @@ export class LLMChunkProcessor {
         dialogId,
       },
       dialogId,
-      historyId: undefined,
+      messageId: undefined,
+      callback: (prompt) =>
+        llm
+          .invoke(prompt)
+          .then(async (result) =>
+            typeof result === 'string' ? result.trim() : result,
+          ),
     });
 
     return { foundText, logId };

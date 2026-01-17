@@ -4,6 +4,7 @@
  */
 
 import { CATEGORY_PROMPTS } from './category-prompts';
+import { CATEGORY } from './constants';
 import { Category } from './services/questionTransformer';
 
 /**
@@ -250,7 +251,7 @@ export function createContextualRewritePrompt({
 }): string {
   let categoryInstruction = '';
   if (category) {
-    categoryInstruction = `The question seems to be related to '${category}'. Keep the focus on this category.`;
+    categoryInstruction = `The question seems to be related to '${CATEGORY[category] || category}'. Keep the focus on this category.`;
   }
 
   let historyContext = '';
@@ -310,7 +311,7 @@ export function createMinimalTransformationPrompt({
 }): string {
   let categoryInstruction = '';
   if (category) {
-    categoryInstruction = `The question seems to be related to '${category}'. Keep the focus on this category.`;
+    categoryInstruction = `The question seems to be related to '${CATEGORY[category] || category}'. Keep the focus on this category.`;
   }
 
   let historyContext = '';

@@ -34,7 +34,7 @@ export class DialogSummary {
     dialogId,
     llm,
     provider,
-    historyId,
+    messageId,
   }: {
     dialogId: string;
     llm:
@@ -45,9 +45,9 @@ export class DialogSummary {
       | HuggingFaceInference
       | ChatGroq;
     provider: string;
-    historyId: string;
+    messageId: string;
   }) {
-    Logger.logInfo('Начало суммаризации диалога', { dialogId, historyId });
+    Logger.logInfo('Начало суммаризации диалога', { dialogId, messageId });
     const history = await DialogManager.getDialogHistory(dialogId);
     const prompt = createDialogSummaryPrompt(history);
     Logger.logInfo('Отправка запроса на суммаризацию', {
@@ -60,7 +60,13 @@ export class DialogSummary {
       prompt,
       metadata: { dialogId, operation: 'summarization' },
       dialogId,
-      historyId,
+      messageId,
+      callback: (prompt) =>
+        llm
+          .invoke(prompt)
+          .then(async (result) =>
+            typeof result === 'string' ? result.trim() : result,
+          ),
     });
     Logger.logInfo('Получен ответ от LLM для суммаризации', {
       dialogId,

@@ -13,7 +13,7 @@ export interface LLMQueryLogEntry {
   success?: boolean;
   errorMessage?: string;
   dialogId: string | undefined;
-  historyId: string | undefined;
+  messageId: string | undefined;
 }
 
 export class LLMQueryLogger {
@@ -37,7 +37,7 @@ export class LLMQueryLogger {
             isSuccess: entry.success !== undefined ? entry.success : true,
             errorMessage: entry.errorMessage || null,
             dialogId: entry.dialogId?.toString(),
-            historyId: entry.historyId?.toString(),
+            messageId: entry.messageId?.toString(),
           },
           select: {
             id: true,
@@ -137,7 +137,7 @@ export class LLMQueryLogger {
   static async updateQueryReferences(
     recordIds: (string | undefined)[],
     dialogId: string | undefined,
-    historyId: string | undefined,
+    messageId: string | undefined,
   ): Promise<boolean> {
     try {
       if (recordIds.length === 0) {
@@ -156,14 +156,14 @@ export class LLMQueryLogger {
         },
         data: {
           dialogId: dialogId || null,
-          historyId: historyId || null,
+          messageId: messageId || null,
         },
       });
 
       Logger.logInfo('LLM query references updated successfully', {
         recordIds,
         dialogId,
-        historyId,
+        messageId,
         updatedRecords: result.count,
       });
 
@@ -173,7 +173,7 @@ export class LLMQueryLogger {
         error: error instanceof Error ? error.message : String(error),
         recordIds,
         dialogId,
-        historyId,
+        messageId,
       });
       return false;
     }

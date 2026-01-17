@@ -7,11 +7,11 @@ export class FailureTracker {
    */
   public static async recordSuccess(
     dialogId: string,
-    chatHistoryId: string,
+    messageId: string,
   ): Promise<void> {
     Logger.logInfo('Recording successful response', {
       dialogId,
-      chatHistoryId,
+      messageId,
     });
 
     // Reset consecutive failures counter for the dialog
@@ -27,14 +27,14 @@ export class FailureTracker {
     // Mark the chat history entry as successful
     await PrismaService.instance.chatMessage.update({
       where: {
-        id: chatHistoryId,
+        id: messageId,
       },
       data: {
         isGoodResponse: true,
       },
     });
 
-    Logger.logInfo('Success recorded', { dialogId, chatHistoryId });
+    Logger.logInfo('Success recorded', { dialogId, messageId });
   }
 
   /**
@@ -42,9 +42,9 @@ export class FailureTracker {
    */
   public static async recordFailure(
     dialogId: string,
-    chatHistoryId: string,
+    messageId: string,
   ): Promise<void> {
-    Logger.logInfo('Recording failed response', { dialogId, chatHistoryId });
+    Logger.logInfo('Recording failed response', { dialogId, messageId });
 
     // Increment consecutive failures counter for the dialog
     const updatedDialog = await PrismaService.instance.chatDialog.update({
@@ -71,7 +71,7 @@ export class FailureTracker {
     // Mark the chat history entry as failed
     await PrismaService.instance.chatMessage.update({
       where: {
-        id: chatHistoryId,
+        id: messageId,
       },
       data: {
         isBadResponse: true,

@@ -40,7 +40,7 @@ export class SummarizationService {
     dialogId,
     llm,
     provider,
-    historyId,
+    messageId,
   }: {
     dialogId: string;
     llm:
@@ -51,7 +51,7 @@ export class SummarizationService {
       | HuggingFaceInference
       | ChatGroq;
     provider: string;
-    historyId: string;
+    messageId: string;
   }) {
     // Don't queue if already active
     if (this.activeSummarizations.has(dialogId)) {
@@ -65,10 +65,10 @@ export class SummarizationService {
     Logger.logInfo('Добавление задачи суммаризации в очередь', { dialogId });
 
     // Process the queue asynchronously without blocking
-    this.processQueue(provider, historyId);
+    this.processQueue(provider, messageId);
   }
 
-  private static processQueue(provider: string, historyId: string) {
+  private static processQueue(provider: string, messageId: string) {
     // Process one task at a time from the queue
     if (this.pendingTasks.length > 0 && this.activeSummarizations.size < 5) {
       // Limit concurrent summarizations
@@ -81,7 +81,7 @@ export class SummarizationService {
         this.activeSummarizations.add(dialogId);
 
         // Run summarization in the background without blocking
-        this.performSummarization({ provider, dialogId, historyId, llm })
+        this.performSummarization({ provider, dialogId, messageId, llm })
           .catch((error) => {
             Logger.logError(
               'Ошибка при суммаризации',
@@ -96,7 +96,7 @@ export class SummarizationService {
             // Remove from active set when done
             this.activeSummarizations.delete(dialogId);
             // Process next task if available
-            setImmediate(() => this.processQueue(provider, historyId));
+            setImmediate(() => this.processQueue(provider, messageId));
           });
       }
     }
@@ -106,7 +106,7 @@ export class SummarizationService {
     dialogId,
     llm,
     provider,
-    historyId,
+    messageId,
   }: {
     dialogId: string;
     llm:
@@ -117,27 +117,27 @@ export class SummarizationService {
       | HuggingFaceInference
       | ChatGroq;
     provider: string;
-    historyId: string;
+    messageId: string;
   }) {
     try {
       Logger.logInfo('Начало суммаризации в фоновом режиме', {
         dialogId,
-        historyId,
+        messageId,
       });
       const result = await DialogSummary.summarizeDialog({
         provider,
         dialogId,
         llm,
-        historyId,
+        messageId,
       });
-      Logger.logInfo('Суммаризация завершена успешно', { dialogId, historyId });
+      Logger.logInfo('Суммаризация завершена успешно', { dialogId, messageId });
       return result;
     } catch (error) {
       Logger.logError(
         'Ошибка при выполнении суммаризации',
         {
           dialogId,
-          historyId,
+          messageId,
           error: (error as Error).message,
         },
         (error as Error).stack,
@@ -147,12 +147,12 @@ export class SummarizationService {
   }
 
   public static queueSummarizationWithoutBlocking({
-    historyId,
+    messageId,
     dialogId,
     llm,
     provider,
   }: {
-    historyId: string;
+    messageId: string;
     dialogId: string;
     llm:
       | ChatOllama
@@ -181,7 +181,7 @@ export class SummarizationService {
       );
 
       // Process the queue asynchronously without blocking
-      this.processQueue(provider, historyId);
+      this.processQueue(provider, messageId);
     } catch (error) {
       Logger.logError(
         'Ошибка при постановке задачи суммаризации в очередь',
