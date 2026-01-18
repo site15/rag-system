@@ -612,8 +612,9 @@ export class LLMChunkProcessor {
           ) {
             const currentChunk =
               firstSuccess.result.chunks[firstSuccess.result.foundChunkIndex];
-            surroundingChunks =
-              LLMChunkProcessor.extractAuthorMessageContent(currentChunk);
+            surroundingChunks = LLMChunkProcessor.extractAuthorMessageContent(
+              currentChunk.content,
+            );
           }
 
           const ret = await LLMChunkProcessor.frendlyFound({
@@ -713,7 +714,17 @@ export class LLMChunkProcessor {
     foundText?: string;
     foundLogIds?: (string | undefined)[];
     foundChunkIndex?: number;
-    chunks?: string[];
+    chunks?: {
+      content: string;
+      meta: {
+        loc: {
+          lines: {
+            from: number;
+            to: number;
+          };
+        };
+      };
+    }[];
     contextIndex: number;
     documentId: string;
   }> {
@@ -800,7 +811,9 @@ export class LLMChunkProcessor {
       );
       const max = +chatChunkSize - basePromptLength - 100;
       const chunks =
-        max > 0 ? RAGSearcher.splitTextIntoChunks(processedContent, max) : [];
+        max > 0
+          ? RAGSearcher.splitTextIntoChunksWithMeta(processedContent, max)
+          : [];
       const totalChunks = chunks.length;
 
       Logger.logInfo(`Обработка чанков для контекста ${contextIndex}`, {
@@ -865,7 +878,7 @@ export class LLMChunkProcessor {
           );
 
           const chunkPrompt = await LLMChunkProcessor.generatePrompt({
-            chunk,
+            chunk: chunk.content,
             history,
             question,
             source: contextDoc.source,
@@ -918,7 +931,7 @@ export class LLMChunkProcessor {
             if (
               LLMChunkProcessor.validateFoundResult(
                 text,
-                chunk,
+                chunk.content,
                 question,
                 questionType,
               )
@@ -926,7 +939,7 @@ export class LLMChunkProcessor {
               // For telegram mode, ensure the result comes from Author Message
               if (
                 category === 'telegram' &&
-                !LLMChunkProcessor.isAuthorMessageContent(chunk)
+                !LLMChunkProcessor.isAuthorMessageContent(chunk.content)
               ) {
                 Logger.logInfo(
                   'Отброшен [FOUND] из Semantic Search Content, разрешены только Author Message',

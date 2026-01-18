@@ -14,7 +14,12 @@ import { LLMLogger } from './llmLogger';
 import { Logger } from './logger';
 import { DefaultProvidersInitializer } from './services/defaultProvidersInitializer';
 import { TextHelpers } from './textHelpers';
-import { AppConfig, ChatConfig, EmbeddingsConfig } from './types';
+import {
+  AppConfig,
+  ChatConfig,
+  EmbeddingsConfig,
+  EmbedingMetadata,
+} from './types';
 import { RAGSearcher } from './ragSearcher';
 
 export class RAGApplication {
@@ -83,7 +88,7 @@ export class RAGApplication {
     const docs = await RAGApplication.loadDocuments();
 
     // Process and embed documents
-    await RAGApplication.embedDocuments(docs, embeddings);
+    await RAGApplication.embedDocuments({ docs, embeddings });
 
     Logger.logInfo('Запуск заполнения graphContent для документов');
 
@@ -105,10 +110,13 @@ export class RAGApplication {
     return docs;
   }
 
-  private static async embedDocuments(
-    docs: any[],
-    embeddings: OpenAIEmbeddings | OllamaEmbeddings,
-  ) {
+  private static async embedDocuments({
+    docs,
+    embeddings,
+  }: {
+    docs: any[];
+    embeddings: OpenAIEmbeddings | OllamaEmbeddings;
+  }) {
     // === Вставка эмбеддингов ===
     Logger.logInfo('Начало процесса вставки эмбеддингов');
     // const splitterTelegram = new RecursiveCharacterTextSplitter({
@@ -125,78 +133,102 @@ export class RAGApplication {
 
     let totalChunks = 0;
     for (const doc of docs) {
-      const isTelegramDoc = doc.metadata.source?.includes('/telegram/');
-      // const splitter = isTelegramDoc ? splitterTelegram : splitterGlobal;
+      try {
+        const isTelegramDoc = doc.metadata.source?.includes('/telegram/');
+        // const splitter = isTelegramDoc ? splitterTelegram : splitterGlobal;
 
-      if (!doc.metadata) doc.metadata = {};
-      doc.metadata.source = doc.metadata.source;
-      Logger.logInfo('Разделение документа', { source: doc.metadata.source });
-      const chunks = RAGSearcher.splitTextIntoChunks(doc.pageContent, 1700); // await splitter.splitDocuments([doc]);
+        Logger.logInfo('Разделение документа', { source: doc.metadata.source });
+        const chunks = RAGSearcher.splitTextIntoChunksWithMeta(
+          doc.pageContent,
+          1700,
+        ); // await splitter.splitDocuments([doc]);
 
-      for (const chunk of chunks) {
-        const source = doc.metadata.source;
-        const normalized = TextHelpers.normalizeTextMy(chunk);
-        if (
-          !normalized ||
-          (isTelegramDoc && !chunk.includes('My telegram message'))
-        ) {
-          Logger.logInfo('Пропуск пустого чанка', {
-            source,
-          });
-          continue;
-        }
-        const hash = TextHelpers.hashContent(normalized);
-        if (await EmbeddingsDB.chunkExists(hash, doc.metadata.source)) {
-          Logger.logInfo('Чанк уже существует, пропуск', {
+        for (let chunkIndex = 0; chunkIndex < chunks.length; chunkIndex++) {
+          const chunk = chunks[chunkIndex];
+
+          const trimmedContent = chunk.content
+            .split(`\n--\n`)
+            .join('')
+            .split(`\n\n\n`)
+            .join('')
+            .trim();
+          const metadata: EmbedingMetadata = {
+            ...(doc.metadata || {}),
+            meta: { ...chunk.meta, chunkIndex },
+          };
+          const normalized = TextHelpers.normalizeTextMy(chunk.content);
+          if (
+            !normalized ||
+            (isTelegramDoc && !chunk.content.includes('My telegram message'))
+          ) {
+            Logger.logInfo('Пропуск пустого чанка', {
+              metadata,
+            });
+            continue;
+          }
+          const hash = TextHelpers.hashContent(normalized);
+          if (await EmbeddingsDB.chunkExists(hash, doc.metadata.source)) {
+            Logger.logInfo('Чанк уже существует, пропуск', {
+              hash: hash.substring(0, 8),
+            });
+            continue;
+          }
+          Logger.logInfo('Создание эмбеддинга для чанка', {
+            source: metadata.source,
             hash: hash.substring(0, 8),
+            normalizedLength: normalized.length,
           });
-          continue;
-        }
-        Logger.logInfo('Создание эмбеддинга для чанка', {
-          source: source,
-          hash: hash.substring(0, 8),
-          normalizedLength: normalized.length,
-        });
-        const vector = await embeddings.embedQuery(normalized);
-        const vectorValue = `[${vector.join(',')}]`;
 
-        if (vector.length === 384) {
-          await PrismaService.instance.$executeRaw`
+          const vector = await embeddings.embedQuery(normalized);
+          const vectorValue = `[${vector.join(',')}]`;
+
+          if (vector.length === 384) {
+            await PrismaService.instance.$executeRaw`
 INSERT INTO "ChatDocumentEmbedding"
 (content, embedding384, metadata, "contentHash")
-VALUES (${chunk}, ${vectorValue}::vector, ${doc.metadata || '{}'}, ${hash})
+VALUES (${trimmedContent}, ${vectorValue}::vector, ${metadata || '{}'}, ${hash})
 `;
-        } else if (vector.length === 768) {
-          await PrismaService.instance.$executeRaw`
+          } else if (vector.length === 768) {
+            await PrismaService.instance.$executeRaw`
 INSERT INTO "ChatDocumentEmbedding"
 (content, embedding768, metadata, "contentHash")
-VALUES (${chunk}, ${vectorValue}::vector, ${doc.metadata || '{}'}, ${hash})
+VALUES (${trimmedContent}, ${vectorValue}::vector, ${metadata || '{}'}, ${hash})
 `;
-        } else if (vector.length === 1024) {
-          await PrismaService.instance.$executeRaw`
+          } else if (vector.length === 1024) {
+            await PrismaService.instance.$executeRaw`
 INSERT INTO "ChatDocumentEmbedding"
 (content, embedding1024, metadata, "contentHash")
-VALUES (${chunk}, ${vectorValue}::vector, ${doc.metadata || '{}'}, ${hash})
+VALUES (${trimmedContent}, ${vectorValue}::vector, ${metadata || '{}'}, ${hash})
 `;
-        } else if (vector.length === 1536) {
-          await PrismaService.instance.$executeRaw`
+          } else if (vector.length === 1536) {
+            await PrismaService.instance.$executeRaw`
 INSERT INTO "ChatDocumentEmbedding"
 (content, embedding1536, metadata, "contentHash")
-VALUES (${chunk}, ${vectorValue}::vector, ${doc.metadata || '{}'}, ${hash})
+VALUES (${trimmedContent}, ${vectorValue}::vector, ${metadata || '{}'}, ${hash})
 `;
-        } else if (vector.length === 3072) {
-          await PrismaService.instance.$executeRaw`
+          } else if (vector.length === 3072) {
+            await PrismaService.instance.$executeRaw`
 INSERT INTO "ChatDocumentEmbedding"
 (content, embedding3072, metadata, "contentHash")
-VALUES (${chunk}, ${vectorValue}::vector, ${doc.metadata || '{}'}, ${hash})
+VALUES (${trimmedContent}, ${vectorValue}::vector, ${metadata || '{}'}, ${hash})
 `;
-        }
+          }
 
-        totalChunks++;
-        Logger.logInfo('Эмбеддинг сохранен', {
-          chunkNumber: totalChunks,
-          hash: hash.substring(0, 8),
-        });
+          totalChunks++;
+          Logger.logInfo('Эмбеддинг сохранен', {
+            chunkNumber: totalChunks,
+            hash: hash.substring(0, 8),
+          });
+        }
+      } catch (error) {
+        Logger.logError(
+          'Ошибка при создании эмбеддинга для чанка',
+          {
+            chunkNumber: totalChunks,
+            error: error.message,
+          },
+          error.stack,
+        );
       }
     }
     Logger.logInfo('Процесс вставки эмбеддингов завершен', { totalChunks });

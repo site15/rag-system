@@ -46,3 +46,16 @@ export type EmbeddingsConfig = {
   baseUrl: string;
   apiKey: string | undefined;
 };
+
+export type EmbedingMetadata = {
+  source?: string;
+  meta?: {
+    chunkIndex: number;
+    loc: {
+      lines: {
+        from: number;
+        to: number;
+      };
+    };
+  };
+};

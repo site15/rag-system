@@ -107,12 +107,31 @@ LIMIT ${limit};
   public static splitTextIntoChunksBasic(
     text: string,
     maxLength: number = 1000,
-  ) {
-    const chunks: string[] = [];
+    offset: number = 0, // Track position relative to original text
+  ): Array<{
+    content: string;
+    meta: { loc: { lines: { from: number; to: number } } };
+  }> {
+    const chunks: Array<{
+      content: string;
+      meta: { loc: { lines: { from: number; to: number } } };
+    }> = [];
     let start = 0;
+    let currentOffset = offset;
     while (start < text.length) {
       const end = Math.min(start + maxLength, text.length);
-      chunks.push(text.slice(start, end));
+      const chunkContent = text.slice(start, end);
+      chunks.push({
+        content: chunkContent,
+        meta: {
+          loc: {
+            lines: {
+              from: currentOffset + start,
+              to: currentOffset + end,
+            },
+          },
+        },
+      });
       start = end;
     }
     return chunks;
@@ -125,8 +144,43 @@ LIMIT ${limit};
     showLog = true,
     depth = 5,
   ): string[] {
+    // Call the new method and extract just the content
+    const chunkObjects = this.splitTextIntoChunksWithMeta(
+      text,
+      chunkSize,
+      delimiter,
+      showLog,
+      depth,
+    );
+    return chunkObjects.map((obj) => obj.content);
+  }
+
+  public static splitTextIntoChunksWithMeta(
+    text: string,
+    chunkSize: number = 1000,
+    delimiter = `\n--\n`,
+    showLog = true,
+    depth = 5,
+    offset: number = 0, // Track position relative to original text
+  ): Array<{
+    content: string;
+    meta: { loc: { lines: { from: number; to: number } } };
+  }> {
     if (depth <= 0) {
-      return [text];
+      // Return object with position tracking
+      return [
+        {
+          content: text,
+          meta: {
+            loc: {
+              lines: {
+                from: offset,
+                to: offset + text.length,
+              },
+            },
+          },
+        },
+      ];
     }
     if (showLog) {
       Logger.logInfo('Разделение текста на чанки', {
@@ -135,51 +189,88 @@ LIMIT ${limit};
       });
     }
     const parts = text.split(delimiter);
-    const chunks: string[] = [];
+    const chunks: Array<{
+      content: string;
+      meta: { loc: { lines: { from: number; to: number } } };
+    }> = [];
 
     let current = '';
+    let currentStartOffset = offset; // Track start position of current chunk
+
+    let currentPosition = offset; // Track current position in original text
 
     for (let i = 0; i < parts.length; i++) {
       const token = (i === 0 ? '' : delimiter) + parts[i];
+      const tokenLength = token.length;
 
       // если текущий пуст — просто кладём
       if (current.length === 0) {
         current = token;
+        currentStartOffset = currentPosition;
+        currentPosition += tokenLength;
         continue;
       }
 
       // если добавление превышает лимит — закрываем текущий
       if (current.length + token.length > chunkSize) {
-        chunks.push(current);
+        chunks.push({
+          content: current,
+          meta: {
+            loc: {
+              lines: {
+                from: currentStartOffset,
+                to: currentPosition,
+              },
+            },
+          },
+        });
         current = token;
+        currentStartOffset = currentPosition;
+        currentPosition += tokenLength;
         continue;
       }
 
       // иначе спокойно добавляем
       current += token;
+      currentPosition += tokenLength;
     }
 
     if (current.length > 0) {
-      chunks.push(current);
+      chunks.push({
+        content: current,
+        meta: {
+          loc: {
+            lines: {
+              from: currentStartOffset,
+              to: currentPosition,
+            },
+          },
+        },
+      });
     }
 
     const fixChunks = chunks
-      .map((chunk) =>
-        chunk.length > chunkSize
-          ? RAGSearcher.splitTextIntoChunks(
-              chunk,
+      .map((chunkObj) =>
+        chunkObj.content.length > chunkSize
+          ? RAGSearcher.splitTextIntoChunksWithMeta(
+              chunkObj.content,
               chunkSize,
-              (delimiter = `\n\n`),
+              `\n\n`, // Fixed assignment
               false,
               depth - 1,
+              chunkObj.meta.loc.lines.from, // Pass the original offset
             )
-              .map((chunk) =>
-                chunk.length > chunkSize
-                  ? RAGSearcher.splitTextIntoChunksBasic(chunk, chunkSize)
-                  : [chunk],
+              .map((subChunkObj) =>
+                subChunkObj.content.length > chunkSize
+                  ? RAGSearcher.splitTextIntoChunksBasic(
+                      subChunkObj.content,
+                      chunkSize,
+                      subChunkObj.meta.loc.lines.from,
+                    )
+                  : [subChunkObj],
               )
               .flat()
-          : [chunk],
+          : [chunkObj],
       )
       .flat();
 
