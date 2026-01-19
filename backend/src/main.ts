@@ -9,6 +9,8 @@ import { writeFileSync } from 'fs';
 import Mustache from 'mustache';
 import { AppModule } from './app.module';
 
+import 'dotenv/config';
+
 Mustache.escape = function (text) {
   return text;
 };

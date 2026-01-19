@@ -1,0 +1,8 @@
+{
+  "apps": [
+    {
+      "name": "backend",
+      "script": "cd backend && npm run build && npm run start:prod"
+    }
+  ]
+}

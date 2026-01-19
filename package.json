@@ -12,6 +12,8 @@
     "generate:backend": "npm run generate --prefix backend",
     "generate:frontend": "npm run generate --prefix frontend",
     "start:dev": "./start-dev.sh",
-    "stop:dev": "./stop-dev.sh"
+    "stop:dev": "./stop-dev.sh",
+    "start:prod": "./start-prod.sh",
+    "stop:prod": "./stop-prod.sh"
   }
 }
