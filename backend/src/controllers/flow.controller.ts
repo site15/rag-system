@@ -43,6 +43,13 @@ export class SendMessageFlowResponse {
   })
   @IsDefined()
   answer!: string;
+
+  @ApiProperty({
+    type: 'string',
+    nullable: true,
+  })
+  @IsDefined()
+  messageId!: string | null;
 }
 
 export class SendMessageFlowArgs {
@@ -186,6 +193,7 @@ export class FlowController {
     });
 
     return {
+      messageId: result.messageId,
       dialogId: result.dialogId,
       question: args.message,
       answer: result.response,

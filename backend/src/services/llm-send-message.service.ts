@@ -55,6 +55,7 @@ type ProcessMessageArgs = {
 type ProcessMessageResponse = {
   dialogId: string;
   response: string;
+  messageId: string;
 };
 
 @Injectable()
@@ -314,6 +315,7 @@ export class LlmSendMessageService {
     overrideProvider,
     overrideModel,
   }: ProcessMessageArgs): Promise<{
+    messageId: string;
     dialogId: string;
     response: string;
     sources: {
@@ -518,6 +520,7 @@ export class LlmSendMessageService {
         dialogId,
         response: answer || 'No response generated',
         sources: sourceReferences,
+        messageId,
       };
     } catch (error: any) {
       // Check if it's a rate limit error
