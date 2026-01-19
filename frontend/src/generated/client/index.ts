@@ -103,7 +103,6 @@ export type {
   AuthUserControllerUpdateOneResponses,
   AuthUserDto,
   CancelMessageArgs,
-  CancelMessageResponse,
   ChatDialog,
   ChatDialogControllerCreateOneData,
   ChatDialogControllerCreateOneErrors,

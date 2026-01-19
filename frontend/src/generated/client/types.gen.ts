@@ -595,12 +595,6 @@ export type CancelMessageArgs = {
   messageId: string;
 };
 
-export type CancelMessageResponse = {
-  success: boolean;
-  dialogId: string | null;
-  message: string;
-};
-
 export type AuthUserControllerFindManyData = {
   body?: never;
   path?: never;
@@ -1690,14 +1684,14 @@ export type FlowControllerCancelMessageData = {
 };
 
 export type FlowControllerCancelMessageErrors = {
-  default: CancelMessageResponse;
+  default: StatusResponse;
 };
 
 export type FlowControllerCancelMessageError =
   FlowControllerCancelMessageErrors[keyof FlowControllerCancelMessageErrors];
 
 export type FlowControllerCancelMessageResponses = {
-  201: CancelMessageResponse;
+  201: StatusResponse;
 };
 
 export type FlowControllerCancelMessageResponse =

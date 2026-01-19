@@ -24,6 +24,7 @@ import {
 } from '../services/prisma.service';
 import { getTraceStack } from '../trace/trace.module';
 import { AppRequest, CurrentAppRequest } from '../types/request';
+import { StatusResponse } from '../types/status-response';
 
 ///////////
 export class SendMessageFlowResponse {
@@ -176,26 +177,6 @@ export class CancelMessageArgs {
   messageId!: string;
 }
 
-export class CancelMessageResponse {
-  @ApiProperty({
-    type: 'boolean',
-  })
-  @IsDefined()
-  success!: boolean;
-
-  @ApiProperty({
-    type: 'string',
-    nullable: true,
-  })
-  dialogId!: string | null;
-
-  @ApiProperty({
-    type: 'string',
-  })
-  @IsDefined()
-  message!: string;
-}
-
 ///////////
 
 @ApiTags('flow')
@@ -279,28 +260,15 @@ export class FlowController {
   }
 
   @Post('message/cancel')
-  @ApiCreatedResponse({ type: CancelMessageResponse })
+  @ApiCreatedResponse({ type: StatusResponse })
   async cancelMessage(
     @CurrentAppRequest() req: AppRequest,
     @Body() args: CancelMessageArgs,
-  ): Promise<CancelMessageResponse> {
-    try {
-      const result = await DialogManager.deleteMessage(args.messageId);
+  ): Promise<StatusResponse> {
+    await DialogManager.deleteMessage(args.messageId);
 
-      return {
-        success: result.success,
-        dialogId: result.dialogId || null,
-        message: result.success
-          ? 'Message deleted successfully and dialog parameters reset'
-          : 'Failed to delete message',
-      };
-    } catch (error) {
-      this.logger.error('Error in deleteMessage endpoint', error);
-      return {
-        success: false,
-        dialogId: null,
-        message: 'Internal server error occurred while deleting message',
-      };
-    }
+    return {
+      message: 'ok',
+    };
   }
 }
