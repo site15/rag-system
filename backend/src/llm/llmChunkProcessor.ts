@@ -961,75 +961,58 @@ export class LLMChunkProcessor {
           );
 
           if (text.startsWith('[FOUND]')) {
-            // Validate the [FOUND] result to ensure it's not a false positive
+            // For telegram mode, ensure the result comes from Author Message
             if (
-              LLMChunkProcessor.validateFoundResult(
-                text,
-                chunk.content,
-                question,
-                questionType,
-              )
+              category === 'telegram' &&
+              !LLMChunkProcessor.isAuthorMessageContent(chunk.content)
             ) {
-              // For telegram mode, ensure the result comes from Author Message
-              if (
-                category === 'telegram' &&
-                !LLMChunkProcessor.isAuthorMessageContent(chunk.content)
-              ) {
-                Logger.logInfo(
-                  'Отброшен [FOUND] из Semantic Search Content, разрешены только Author Message',
-                  {
-                    contextIndex,
-                    chunkIndex: i,
-                  },
-                );
-                continue; // Skip this result, continue looking
-              }
-
-              foundText = text.replace(/^\[FOUND]\s*/, '');
-              foundChunkIndex = i;
-
-              const finalAnswerPrompt = createFinalAnswerPrompt({
-                question,
-                context: removeCodeWrappers(chunk.content),
-                fact: foundText,
-                category,
-                history: removeCodeWrappers(history.join('\n')),
-              });
-
-              addPayloadToTrace({
-                [`chunk${i}FinalAnswerPrompt`]: finalAnswerPrompt,
-              });
-
-              const { content, logId } = await LLMLogger.callWithLogging({
-                provider,
-                llm,
-                prompt: finalAnswerPrompt,
-                messageId: undefined,
-                dialogId,
-                callback: (prompt) =>
-                  llm
-                    .invoke(prompt)
-                    .then(async (result) =>
-                      typeof result === 'string' ? result.trim() : result,
-                    ),
-              });
-
-              foundText = content;
-
-              addPayloadToTrace({
-                foundText,
-              });
-
-              foundLogIds.push(logId);
-              break;
-            } else {
-              Logger.logInfo('Отброшен невалидный [FOUND] результат', {
-                contextIndex,
-                chunkIndex: i,
-                text,
-              });
-              continue; // Continue looking for valid results
+              Logger.logInfo(
+                'Отброшен [FOUND] из Semantic Search Content, разрешены только Author Message',
+                {
+                  contextIndex,
+                  chunkIndex: i,
+                },
+              );
+              continue; // Skip this result, continue looking
             }
+
+            foundText = text.replace(/^\[FOUND]\s*/, '');
+            foundChunkIndex = i;
+
+            const finalAnswerPrompt = createFinalAnswerPrompt({
+              question,
+              context: removeCodeWrappers(chunk.content),
+              fact: foundText,
+              category,
+              history: removeCodeWrappers(history.join('\n')),
+            });
+
+            addPayloadToTrace({
+              [`chunk${i}FinalAnswerPrompt`]: finalAnswerPrompt,
+            });
+
+            const { content, logId } = await LLMLogger.callWithLogging({
+              provider,
+              llm,
+              prompt: finalAnswerPrompt,
+              messageId: undefined,
+              dialogId,
+              callback: (prompt) =>
+                llm
+                  .invoke(prompt)
+                  .then(async (result) =>
+                    typeof result === 'string' ? result.trim() : result,
+                  ),
+            });
+
+            foundText = content;
+
+            addPayloadToTrace({
+              foundText,
+            });
+
+            foundLogIds.push(logId);
+            break;
           }
         }
       }
