@@ -4,7 +4,7 @@ import crypto from 'crypto';
 
 export class TextHelpers {
   public static normalizeTextMy(text: string): string {
-    return text
+    const str = text
       .split(`\n--\n`)
       .join('')
       .split(`\n\n\n`)
@@ -13,6 +13,8 @@ export class TextHelpers {
       .map((s) => s.replace(/\s+/g, ' ').trim())
       .join('\n')
       .trim();
+    // special case in my data
+    return str.replace(/—{3,}/g, '—');
   }
 
   public static prepareTextForEmbedding(text: string): string {

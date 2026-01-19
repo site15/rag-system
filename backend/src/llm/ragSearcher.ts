@@ -137,6 +137,113 @@ LIMIT ${limit};
     return chunks;
   }
 
+  private static splitTextWithHierarchicalDelimiters(
+    text: string,
+    maxLength: number = 1000,
+    offset: number = 0,
+  ): Array<{
+    content: string;
+    meta: { loc: { lines: { from: number; to: number } } };
+  }> {
+    // Try first delimiter: \n
+    const firstDelimiterChunks = this.trySplitByDelimiter(
+      text,
+      '\n',
+      maxLength,
+      offset,
+    );
+    if (firstDelimiterChunks.length > 1) {
+      return firstDelimiterChunks;
+    }
+
+    // Try second delimiter: space
+    const secondDelimiterChunks = this.trySplitByDelimiter(
+      text,
+      ' ',
+      maxLength,
+      offset,
+    );
+    if (secondDelimiterChunks.length > 1) {
+      return secondDelimiterChunks;
+    }
+
+    // Fall back to basic chunking
+    return this.splitTextIntoChunksBasic(text, maxLength, offset);
+  }
+
+  private static trySplitByDelimiter(
+    text: string,
+    delimiter: string,
+    maxLength: number,
+    offset: number,
+  ): Array<{
+    content: string;
+    meta: { loc: { lines: { from: number; to: number } } };
+  }> {
+    const parts = text.split(delimiter);
+    const chunks: Array<{
+      content: string;
+      meta: { loc: { lines: { from: number; to: number } } };
+    }> = [];
+
+    let current = '';
+    let currentStartOffset = offset;
+    let currentPosition = offset;
+
+    for (let i = 0; i < parts.length; i++) {
+      const token = (i === 0 ? '' : delimiter) + parts[i];
+      const tokenLength = token.length;
+
+      // If current is empty, just put the token
+      if (current.length === 0) {
+        current = token;
+        currentStartOffset = currentPosition;
+        currentPosition += tokenLength;
+        continue;
+      }
+
+      // If adding exceeds limit, close current chunk
+      if (current.length + token.length > maxLength) {
+        chunks.push({
+          content: current,
+          meta: {
+            loc: {
+              lines: {
+                from: currentStartOffset,
+                to: currentPosition,
+              },
+            },
+          },
+        });
+        current = token;
+        currentStartOffset = currentPosition;
+        currentPosition += tokenLength;
+        continue;
+      }
+
+      // Otherwise add normally
+      current += token;
+      currentPosition += tokenLength;
+    }
+
+    // Add remaining content
+    if (current.length > 0) {
+      chunks.push({
+        content: current,
+        meta: {
+          loc: {
+            lines: {
+              from: currentStartOffset,
+              to: currentPosition,
+            },
+          },
+        },
+      });
+    }
+
+    return chunks;
+  }
+
   public static splitTextIntoChunks(
     text: string,
     chunkSize: number = 1000,
@@ -262,7 +369,7 @@ LIMIT ${limit};
             )
               .map((subChunkObj) =>
                 subChunkObj.content.length > chunkSize
-                  ? RAGSearcher.splitTextIntoChunksBasic(
+                  ? RAGSearcher.splitTextWithHierarchicalDelimiters(
                       subChunkObj.content,
                       chunkSize,
                       subChunkObj.meta.loc.lines.from,

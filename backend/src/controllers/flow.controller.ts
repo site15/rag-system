@@ -7,7 +7,13 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsDefined, IsOptional } from 'class-validator';
+import {
+  IsBoolean,
+  IsDefined,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { LlmDialogService } from '../services/llm-dialog.service';
 import { LlmSendMessageService } from '../services/llm-send-message.service';
 import {
@@ -15,11 +21,9 @@ import {
   FindManyResponseMeta,
   getFirstSkipFromCurPerPage,
 } from '../services/prisma.service';
-import { Trace } from '../trace/trace.module';
 import { AppRequest, CurrentAppRequest } from '../types/request';
 
 ///////////
-
 export class SendMessageFlowResponse {
   @ApiProperty({
     type: 'string',
@@ -42,34 +46,40 @@ export class SendMessageFlowResponse {
 }
 
 export class SendMessageFlowArgs {
-  @ApiProperty({ type: String })
+  @ApiProperty({ type: 'string', required: true })
   @IsDefined()
+  @IsString()
   message!: string;
 
-  @ApiPropertyOptional({ type: String })
+  @ApiPropertyOptional({ type: 'string', required: false, nullable: true })
   @IsOptional()
+  @IsString()
   dialogId?: string;
 
-  @ApiPropertyOptional({ type: Boolean })
+  @ApiPropertyOptional({ type: 'boolean', required: false, nullable: true })
   @IsOptional()
+  @IsBoolean()
   @Type(() => Boolean)
   goodResponse?: boolean;
 
-  @ApiPropertyOptional({ type: Boolean })
+  @ApiPropertyOptional({ type: 'boolean', required: false, nullable: true })
   @IsOptional()
+  @IsBoolean()
   @Type(() => Boolean)
   badResponse?: boolean;
 
-  @ApiPropertyOptional({ type: String })
+  @ApiPropertyOptional({ type: 'string', required: false, nullable: true })
   @IsOptional()
   provider?: string;
 
-  @ApiPropertyOptional({ type: String })
+  @ApiPropertyOptional({ type: 'string', required: false, nullable: true })
   @IsOptional()
+  @IsString()
   model?: string;
 
-  @ApiPropertyOptional({ type: Number })
+  @ApiPropertyOptional({ type: 'number', required: false, nullable: true })
   @IsOptional()
+  @IsNumber()
   @Type(() => Number)
   temperature?: number;
 }
@@ -77,7 +87,7 @@ export class SendMessageFlowArgs {
 ///////////
 
 export class DialogFlowArgs extends FindManyArgs {
-  @ApiProperty({ type: String })
+  @ApiProperty({ type: 'string' })
   @IsDefined()
   dialogId!: string;
 }
@@ -157,7 +167,6 @@ export class FlowController {
 
   @Post('send-message')
   @ApiCreatedResponse({ type: SendMessageFlowResponse })
-  @Trace()
   async sendMessage(
     @CurrentAppRequest() req: AppRequest,
     @Body() args: SendMessageFlowArgs,

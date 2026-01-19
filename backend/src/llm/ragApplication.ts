@@ -133,102 +133,142 @@ export class RAGApplication {
 
     let totalChunks = 0;
     for (const doc of docs) {
-      try {
-        const isTelegramDoc = doc.metadata.source?.includes('/telegram/');
-        // const splitter = isTelegramDoc ? splitterTelegram : splitterGlobal;
+      const isTelegramDoc = doc.metadata.source?.includes('/telegram/');
+      // const splitter = isTelegramDoc ? splitterTelegram : splitterGlobal;
 
-        Logger.logInfo('Разделение документа', { source: doc.metadata.source });
-        const chunks = RAGSearcher.splitTextIntoChunksWithMeta(
-          doc.pageContent,
-          1700,
-        ); // await splitter.splitDocuments([doc]);
+      Logger.logInfo('Разделение документа', { source: doc.metadata.source });
+      const chunks = RAGSearcher.splitTextIntoChunksWithMeta(
+        doc.pageContent,
+        1600,
+      ); // await splitter.splitDocuments([doc]);
 
-        for (let chunkIndex = 0; chunkIndex < chunks.length; chunkIndex++) {
-          const chunk = chunks[chunkIndex];
+      for (let chunkIndex = 0; chunkIndex < chunks.length; chunkIndex++) {
+        let retryCount = 0;
+        const maxRetries = 1;
 
-          const trimmedContent = chunk.content
-            .split(`\n--\n`)
-            .join('')
-            .split(`\n\n\n`)
-            .join('')
-            .trim();
-          const metadata: EmbedingMetadata = {
-            ...(doc.metadata || {}),
-            meta: { ...chunk.meta, chunkIndex },
-          };
-          const normalized = TextHelpers.normalizeTextMy(chunk.content);
-          if (
-            !normalized ||
-            (isTelegramDoc && !chunk.content.includes('My telegram message'))
-          ) {
-            Logger.logInfo('Пропуск пустого чанка', {
-              metadata,
-            });
-            continue;
-          }
-          const hash = TextHelpers.hashContent(normalized);
-          if (await EmbeddingsDB.chunkExists(hash, doc.metadata.source)) {
-            Logger.logInfo('Чанк уже существует, пропуск', {
+        while (retryCount <= maxRetries) {
+          try {
+            const chunk = chunks[chunkIndex];
+
+            const trimmedContent = chunk.content
+              .split(`\n--\n`)
+              .join('')
+              .split(`\n\n\n`)
+              .join('')
+              .trim();
+            const metadata: EmbedingMetadata = {
+              ...(doc.metadata || {}),
+              meta: { ...chunk.meta, chunkIndex },
+            };
+            const normalized = TextHelpers.normalizeTextMy(chunk.content);
+            if (
+              !normalized ||
+              (isTelegramDoc && !chunk.content.includes('My telegram message'))
+            ) {
+              Logger.logInfo('Пропуск пустого чанка', {
+                metadata,
+              });
+              break; // Exit the retry loop for this chunk
+            }
+            const hash = TextHelpers.hashContent(normalized);
+            const skippedChunks = ['c2ac0e84'];
+            if (skippedChunks.includes(hash.substring(0, 8))) {
+              Logger.logInfo('Пропуск чанка по хешу', {
+                hash: hash.substring(0, 8),
+                skippedChunks,
+                normalizedLength: normalized.length,
+                normalized,
+              });
+              break; // Exit the retry loop for this chunk
+            }
+            if (await EmbeddingsDB.chunkExists(hash, doc.metadata.source)) {
+              Logger.logInfo('Чанк уже существует, пропуск', {
+                hash: hash.substring(0, 8),
+                normalizedLength: normalized.length,
+              });
+              break; // Exit the retry loop for this chunk
+            }
+            Logger.logInfo('Создание эмбеддинга для чанка', {
+              source: metadata.source,
               hash: hash.substring(0, 8),
+              normalizedLength: normalized.length,
             });
-            continue;
-          }
-          Logger.logInfo('Создание эмбеддинга для чанка', {
-            source: metadata.source,
-            hash: hash.substring(0, 8),
-            normalizedLength: normalized.length,
-          });
 
-          const vector = await embeddings.embedQuery(normalized);
-          const vectorValue = `[${vector.join(',')}]`;
+            const vector = await embeddings.embedQuery(normalized);
+            const vectorValue = `[${vector.join(',')}]`;
 
-          if (vector.length === 384) {
-            await PrismaService.instance.$executeRaw`
+            if (vector.length === 384) {
+              await PrismaService.instance.$executeRaw`
 INSERT INTO "ChatDocumentEmbedding"
 (content, embedding384, metadata, "contentHash")
 VALUES (${trimmedContent}, ${vectorValue}::vector, ${metadata || '{}'}, ${hash})
 `;
-          } else if (vector.length === 768) {
-            await PrismaService.instance.$executeRaw`
+            } else if (vector.length === 768) {
+              await PrismaService.instance.$executeRaw`
 INSERT INTO "ChatDocumentEmbedding"
 (content, embedding768, metadata, "contentHash")
 VALUES (${trimmedContent}, ${vectorValue}::vector, ${metadata || '{}'}, ${hash})
 `;
-          } else if (vector.length === 1024) {
-            await PrismaService.instance.$executeRaw`
+            } else if (vector.length === 1024) {
+              await PrismaService.instance.$executeRaw`
 INSERT INTO "ChatDocumentEmbedding"
 (content, embedding1024, metadata, "contentHash")
 VALUES (${trimmedContent}, ${vectorValue}::vector, ${metadata || '{}'}, ${hash})
 `;
-          } else if (vector.length === 1536) {
-            await PrismaService.instance.$executeRaw`
+            } else if (vector.length === 1536) {
+              await PrismaService.instance.$executeRaw`
 INSERT INTO "ChatDocumentEmbedding"
 (content, embedding1536, metadata, "contentHash")
 VALUES (${trimmedContent}, ${vectorValue}::vector, ${metadata || '{}'}, ${hash})
 `;
-          } else if (vector.length === 3072) {
-            await PrismaService.instance.$executeRaw`
+            } else if (vector.length === 3072) {
+              await PrismaService.instance.$executeRaw`
 INSERT INTO "ChatDocumentEmbedding"
 (content, embedding3072, metadata, "contentHash")
 VALUES (${trimmedContent}, ${vectorValue}::vector, ${metadata || '{}'}, ${hash})
 `;
-          }
+            }
 
-          totalChunks++;
-          Logger.logInfo('Эмбеддинг сохранен', {
-            chunkNumber: totalChunks,
-            hash: hash.substring(0, 8),
-          });
+            totalChunks++;
+            Logger.logInfo('Эмбеддинг сохранен', {
+              chunkNumber: totalChunks,
+              hash: hash.substring(0, 8),
+            });
+
+            // Success - exit the retry loop
+            break;
+          } catch (error) {
+            retryCount++;
+
+            if (retryCount <= maxRetries) {
+              // Log retry attempt
+              Logger.logWarn(
+                'Ошибка при создании эмбеддинга для чанка, повторная попытка через 2 секунды',
+                {
+                  chunkNumber: totalChunks,
+                  retryAttempt: retryCount,
+                  error: error.message,
+                },
+              );
+
+              // Wait 2 seconds before retry
+              await new Promise((resolve) => setTimeout(resolve, 2000));
+            } else {
+              // Max retries exceeded - log final error and move to next chunk
+              Logger.logError(
+                'Ошибка при создании эмбеддинга для чанка после всех попыток',
+                {
+                  chunkNumber: totalChunks,
+                  error: error.message,
+                  maxRetries: maxRetries,
+                },
+                error.stack,
+              );
+              // Don't throw - continue with next chunk
+              break;
+            }
+          }
         }
-      } catch (error) {
-        Logger.logError(
-          'Ошибка при создании эмбеддинга для чанка',
-          {
-            chunkNumber: totalChunks,
-            error: error.message,
-          },
-          error.stack,
-        );
       }
     }
     Logger.logInfo('Процесс вставки эмбеддингов завершен', { totalChunks });
@@ -387,7 +427,7 @@ TEXT TO ANALYZE: ${doc.content}`;
 
           // Call LLM
           const result = await llm.invoke(prompt);
-          const response = LLMLogger.getResponseString(result);
+          let response = LLMLogger.getResponseString(result);
 
           // Validate JSON structure
           try {
@@ -395,11 +435,8 @@ TEXT TO ANALYZE: ${doc.content}`;
           } catch (jsonError) {
             Logger.logError('Invalid JSON in response', {
               response,
-              error: jsonError,
             });
-            throw new Error(
-              `Invalid JSON in response: ${(jsonError as Error).message}`,
-            );
+            response = `ERROR: ${response}`;
           }
 
           // Generate embedding for the graph content (JSON string)
@@ -447,7 +484,7 @@ TEXT TO ANALYZE: ${doc.content}`;
           });
 
           // Add small delay to avoid rate limiting
-          await new Promise((resolve) => setTimeout(resolve, 1000));
+          // await new Promise((resolve) => setTimeout(resolve, 1000));
         } catch (error) {
           const errorMsg = `Ошибка обработки документа ${doc.id}: ${(error as Error).message}`;
           Logger.logError(errorMsg, { error: error });

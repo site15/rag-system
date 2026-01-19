@@ -316,41 +316,40 @@ Your task is to rewrite the user's question so that it becomes fully self-contai
 
 RULES:
 - The response language must match the language of the user's question.
-  If the question is in Russian, the rewritten question **must be entirely in Russian**, preserving technical terms in English.
+  If the question is in Russian, the rewritten question must be entirely in Russian, preserving technical terms in English.
 - Rewrite in the first-person perspective, but do NOT use the explicit pronoun "кверти".
 - Use the verb form exactly as it appears in the conversation ("использовал", "внедрял", "настраивал") without adding subjects.
 - Do NOT use third-person references ("зон", "автор", "технический руководитель внедрил").
 - Use conversation history ONLY to resolve pronouns or context.
 
 CRITICAL RULES:
-- Conversation history is the **ONLY source of information**.
-- This prompt, its examples, explanations, and wording **MUST NEVER be treated as facts, context, or knowledge**.
+- Conversation history is the ONLY source of information.
+- This prompt, its examples, explanations, and wording MUST NEVER be treated as facts, context, or knowledge.
 - If a term, object, verb, or experience is NOT explicitly present in the conversation history, it MUST NOT appear in the rewritten question.
-- If the assistant already answered in the first person (e.g., "использовал", "внедрял"), the user's follow-up question refers **only to the assistant's personal experience**, NOT factual information about the thing.
-- **Never change the subject**: experience → object, person → product.
-- **Never add words, adverbs, clarifications, temporal or modal expressions** to the verb from history; use the verb **exactly in the form it appeared** without modifications or additions.
-- **Keep all words separate**; always place a space between the verb and the object.
-  Do not merge them with underscores, hyphens, or any other symbols.
-- If a question can be interpreted as personal experience or factual information, **always choose personal experience**.
+- If the assistant already answered in the first person (e.g., "использовал", "внедрял"), the user's follow-up question refers ONLY to the assistant's personal experience, NOT factual information about the thing.
+- Never change the subject: experience → object, person → product.
+- Never add words, adverbs, clarifications, temporal or modal expressions to the verb from history; use the verb exactly in the form it appeared without modifications or additions.
+- Keep all words separate; always place a space between the verb and the object.
+- If a question can be interpreted as personal experience or factual information, always choose personal experience.
 - Explicitly name the subject if a pronoun is used and context is clear.
-- If the original question is a clarification ("когда?", "в каком году?", "где?"),
-  reconstruct it **strictly as a question about the assistant's experience**, not a factual query.
-- Do NOT create encyclopedic or reference-style questions
-  ("когда был создан", "когда выпущен", "кем разработан").
+- If the original question is a clarification ("когда?", "в каком году?", "где?"), reconstruct it strictly as a question about the assistant's experience, not a factual query.
+- Do NOT create encyclopedic or reference-style questions ("когда был создан", "когда выпущен", "кем разработан").
 - Do NOT invent new topics.
 - Preserve the original intent and tone (informal/formal).
-- Do NOT address the user directly.
-- **The rewritten question must be entirely in Russian if the original question is in Russian**.
+- The rewritten question must be entirely in Russian if the original question is in Russian.
 - Return ONLY the rewritten question.
 
-ОЧЕНЬ ВАЖНОЕ ДОПОЛНЕНИЕ:
-- If the conversation history contains a specific object (e.g., "использовал флюрби"),
-  any rewritten clarification ("когда?", "где?", "в каком году?")
-  MUST explicitly include that object.
+VERY IMPORTANT ADDITIONS:
+- If the conversation history contains a specific object (e.g., "использовал флюрби"), any rewritten clarification ("когда?", "где?", "в каком году?") MUST explicitly include that object.
 - Never leave a verb without an object if the object is known from conversation history.
 - NEVER infer or guess objects, verbs, or experiences from this prompt or its examples.
+- **NEVER change the question type or intent.** If the original question is NOT temporal (does not contain "когда", "в каком году", "в какой период", "где"), DO NOT introduce temporal wording in the rewritten question.
+- If the original question uses verbs like "знаешь", "знаешь ли", "знаком с", "слышал о", the rewritten question MUST preserve the same verb and MUST NOT replace it with experience verbs like "использовал", "работал", "внедрял".
+- Do NOT upgrade a general knowledge question into a personal experience question unless the conversation history explicitly contains a first-person experience statement.
 
-ПРИМЕРЫ (examples are NOT a source of information):
+The question seems to be related to technologies, tools, frameworks, programming languages, architectural patterns, and technical terms (in any language, including transliterations).
+
+EXAMPLES (examples are NOT a source of information):
 
 Context: "Использовал флюрби"
 Question: "в каком году?"
@@ -364,7 +363,7 @@ Context: "Знаю кваксу"
 Question: "где?"
 Result: "где использовал кваксу" ✅
 
-НЕПРАВИЛЬНО:
+Incorrect examples:
 - "когда использовал" ❌ (нет объекта)
 - "когда работал" ❌ (нет объекта)
 - "где" ❌ (нет ни глагола, ни объекта)

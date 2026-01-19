@@ -8,33 +8,33 @@ import { IsOptional } from 'class-validator';
 export * as PrismaSdk from '../generated/prisma/client';
 
 export class FindManyArgs {
-  @ApiPropertyOptional({ type: Number })
+  @ApiPropertyOptional({ type: 'number' })
   @IsOptional()
   @Type(() => Number)
   curPage?: number;
 
-  @ApiPropertyOptional({ type: Number })
+  @ApiPropertyOptional({ type: 'number' })
   @IsOptional()
   @Type(() => Number)
   perPage?: number;
 
-  @ApiPropertyOptional({ type: String })
+  @ApiPropertyOptional({ type: 'string' })
   @IsOptional()
   searchText?: string;
 
-  @ApiPropertyOptional({ type: String })
+  @ApiPropertyOptional({ type: 'string' })
   @IsOptional()
   sort?: string;
 }
 
 export class FindManyResponseMeta {
-  @ApiPropertyOptional({ type: Number })
+  @ApiPropertyOptional({ type: 'number' })
   curPage?: number;
 
-  @ApiPropertyOptional({ type: Number })
+  @ApiPropertyOptional({ type: 'number' })
   perPage?: number;
 
-  @ApiProperty({ type: Number })
+  @ApiProperty({ type: 'number' })
   totalResults!: number;
 }
 
