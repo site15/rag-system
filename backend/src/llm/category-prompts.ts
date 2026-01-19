@@ -82,13 +82,17 @@ Author Message: "ENTITY_X HAS_IMPL(IMPL_CUSTOM)"
 Author Message: "ENTITY_X HAS_IMPL(IMPL_CUSTOM)"
 → [NOT_FOUND]
 
-Conversation history (use strictly for personal experience context): 
+Conversation history (use strictly for personal experience context):
+\`\`\`
 {{history}}
+\`\`\` 
 
 Контекст:
+\`\`\`
 {{context}}
+\`\`\`
 
-{{questionWithTitle}}
+{{#isFollowUp}}Original question (follow-up): {{question}}{{/isFollowUp}}{{^isFollowUp}}Original question: {{question}}{{/isFollowUp}}
 
 Ответ:
 `,
@@ -114,12 +118,16 @@ Conversation history (use strictly for personal experience context):
 [NOT_FOUND]
 
 Conversation history (use strictly for personal experience context): 
+\`\`\`
 {{history}}
+\`\`\` 
 
 Контекст:
+\`\`\`
 {{context}}
+\`\`\`
 
-{{questionWithTitle}}
+{{#isFollowUp}}Original question (follow-up): {{question}}{{/isFollowUp}}{{^isFollowUp}}Original question: {{question}}{{/isFollowUp}}
 
 Ответ:
 `,
@@ -145,12 +153,16 @@ Conversation history (use strictly for personal experience context):
 [NOT_FOUND]
 
 Conversation history (use strictly for personal experience context): 
+\`\`\`
 {{history}}
+\`\`\` 
 
 Контекст:
+\`\`\`
 {{context}}
+\`\`\`
 
-{{questionWithTitle}}
+{{#isFollowUp}}Original question (follow-up): {{question}}{{/isFollowUp}}{{^isFollowUp}}Original question: {{question}}{{/isFollowUp}}
 
 Ответ:
 `,
@@ -179,12 +191,16 @@ Conversation history (use strictly for personal experience context):
 [NOT_FOUND]
 
 Conversation history (use strictly for personal experience context): 
+\`\`\`
 {{history}}
+\`\`\` 
 
 Контекст:
+\`\`\`
 {{context}}
+\`\`\`
 
-{{questionWithTitle}}
+{{#isFollowUp}}Original question (follow-up): {{question}}{{/isFollowUp}}{{^isFollowUp}}Original question: {{question}}{{/isFollowUp}}
 
 Ответ:
 `,
@@ -213,12 +229,16 @@ Conversation history (use strictly for personal experience context):
 [NOT_FOUND]
 
 Conversation history (use strictly for personal experience context): 
+\`\`\`
 {{history}}
+\`\`\` 
 
 Контекст:
+\`\`\`
 {{context}}
+\`\`\`
 
-{{questionWithTitle}}
+{{#isFollowUp}}Original question (follow-up): {{question}}{{/isFollowUp}}{{^isFollowUp}}Original question: {{question}}{{/isFollowUp}}
 
 Ответ:
 `,
@@ -247,12 +267,16 @@ Conversation history (use strictly for personal experience context):
 [NOT_FOUND]
 
 Conversation history (use strictly for personal experience context): 
+\`\`\`
 {{history}}
+\`\`\` 
 
 Контекст:
+\`\`\`
 {{context}}
+\`\`\`
 
-{{questionWithTitle}}
+{{#isFollowUp}}Original question (follow-up): {{question}}{{/isFollowUp}}{{^isFollowUp}}Original question: {{question}}{{/isFollowUp}}
 
 Ответ:
 `,
@@ -280,12 +304,16 @@ Conversation history (use strictly for personal experience context):
 [NOT_FOUND]
 
 Conversation history (use strictly for personal experience context): 
+\`\`\`
 {{history}}
+\`\`\` 
 
 Контекст:
+\`\`\`
 {{context}}
+\`\`\`
 
-{{questionWithTitle}}
+{{#isFollowUp}}Original question (follow-up): {{question}}{{/isFollowUp}}{{^isFollowUp}}Original question: {{question}}{{/isFollowUp}}
 
 Ответ:
 `,
@@ -312,12 +340,16 @@ Conversation history (use strictly for personal experience context):
 [NOT_FOUND]
 
 Conversation history (use strictly for personal experience context): 
+\`\`\`
 {{history}}
+\`\`\` 
 
 Контекст:
+\`\`\`
 {{context}}
+\`\`\`
 
-{{questionWithTitle}}
+{{#isFollowUp}}Original question (follow-up): {{question}}{{/isFollowUp}}{{^isFollowUp}}Original question: {{question}}{{/isFollowUp}}
 
 Ответ:
 `,
@@ -344,12 +376,16 @@ Conversation history (use strictly for personal experience context):
 [NOT_FOUND]
 
 Conversation history (use strictly for personal experience context): 
+\`\`\`
 {{history}}
+\`\`\` 
 
 Контекст:
+\`\`\`
 {{context}}
+\`\`\`
 
-{{questionWithTitle}}
+{{#isFollowUp}}Original question (follow-up): {{question}}{{/isFollowUp}}{{^isFollowUp}}Original question: {{question}}{{/isFollowUp}}
 
 Ответ:
 `,
@@ -376,12 +412,16 @@ Conversation history (use strictly for personal experience context):
 [NOT_FOUND]
 
 Conversation history (use strictly for personal experience context): 
+\`\`\`
 {{history}}
+\`\`\` 
 
 Контекст:
+\`\`\`
 {{context}}
+\`\`\`
 
-{{questionWithTitle}}
+{{#isFollowUp}}Original question (follow-up): {{question}}{{/isFollowUp}}{{^isFollowUp}}Original question: {{question}}{{/isFollowUp}}
 
 Ответ:
 `,
@@ -410,12 +450,16 @@ Conversation history (use strictly for personal experience context):
 [NOT_FOUND]
 
 Conversation history (use strictly for personal experience context): 
+\`\`\`
 {{history}}
+\`\`\` 
 
 Контекст:
+\`\`\`
 {{context}}
+\`\`\`
 
-{{questionWithTitle}}
+{{#isFollowUp}}Original question (follow-up): {{question}}{{/isFollowUp}}{{^isFollowUp}}Original question: {{question}}{{/isFollowUp}}
 
 Ответ:
 `,
@@ -443,12 +487,16 @@ Conversation history (use strictly for personal experience context):
 [NOT_FOUND]
 
 Conversation history (use strictly for personal experience context): 
+\`\`\`
 {{history}}
+\`\`\` 
 
 Контекст:
+\`\`\`
 {{context}}
+\`\`\`
 
-{{questionWithTitle}}
+{{#isFollowUp}}Original question (follow-up): {{question}}{{/isFollowUp}}{{^isFollowUp}}Original question: {{question}}{{/isFollowUp}}
 
 Ответ:
 `,
@@ -480,12 +528,16 @@ Conversation history (use strictly for personal experience context):
 [NOT_FOUND]
 
 Conversation history (use strictly for personal experience context): 
+\`\`\`
 {{history}}
+\`\`\` 
 
 Контекст:
+\`\`\`
 {{context}}
+\`\`\`
 
-{{questionWithTitle}}
+{{#isFollowUp}}Original question (follow-up): {{question}}{{/isFollowUp}}{{^isFollowUp}}Original question: {{question}}{{/isFollowUp}}
 
 Ответ:
 `,
@@ -516,12 +568,16 @@ Conversation history (use strictly for personal experience context):
 [NOT_FOUND]
 
 Conversation history (use strictly for personal experience context): 
+\`\`\`
 {{history}}
+\`\`\` 
 
 Контекст:
+\`\`\`
 {{context}}
+\`\`\`
 
-{{questionWithTitle}}
+{{#isFollowUp}}Original question (follow-up): {{question}}{{/isFollowUp}}{{^isFollowUp}}Original question: {{question}}{{/isFollowUp}}
 
 Ответ:
 `,
@@ -554,12 +610,16 @@ Conversation history (use strictly for personal experience context):
 [NOT_FOUND]
 
 Conversation history (use strictly for personal experience context): 
+\`\`\`
 {{history}}
+\`\`\` 
 
 Контекст:
+\`\`\`
 {{context}}
+\`\`\`
 
-{{questionWithTitle}}
+{{#isFollowUp}}Original question (follow-up): {{question}}{{/isFollowUp}}{{^isFollowUp}}Original question: {{question}}{{/isFollowUp}}
 
 Ответ:
 `,
@@ -584,12 +644,16 @@ Conversation history (use strictly for personal experience context):
 [NOT_FOUND]
 
 Conversation history (use strictly for personal experience context): 
+\`\`\`
 {{history}}
+\`\`\` 
 
 Контекст:
+\`\`\`
 {{context}}
+\`\`\`
 
-{{questionWithTitle}}
+{{#isFollowUp}}Original question (follow-up): {{question}}{{/isFollowUp}}{{^isFollowUp}}Original question: {{question}}{{/isFollowUp}}
 
 Ответ:
 `,
@@ -618,12 +682,16 @@ Conversation history (use strictly for personal experience context):
 [NOT_FOUND]
 
 Conversation history (use strictly for personal experience context): 
+\`\`\`
 {{history}}
+\`\`\` 
 
 Контекст:
+\`\`\`
 {{context}}
+\`\`\`
 
-{{questionWithTitle}}
+{{#isFollowUp}}Original question (follow-up): {{question}}{{/isFollowUp}}{{^isFollowUp}}Original question: {{question}}{{/isFollowUp}}
 
 Ответ:
 `,
@@ -677,12 +745,16 @@ RESUME_TEXT: "PERSON_A применял TECH_X на проекте Z в producti
 → [FOUND] PERSON_A использовал TECH_X на проекте Z в production
 
 Conversation history (use strictly for personal experience context): 
+\`\`\`
 {{history}}
+\`\`\` 
 
 Контекст:
+\`\`\`
 {{context}}
+\`\`\`
 
-{{questionWithTitle}}
+{{#isFollowUp}}Original question (follow-up): {{question}}{{/isFollowUp}}{{^isFollowUp}}Original question: {{question}}{{/isFollowUp}}
 
 Ответ:
 `,
@@ -734,12 +806,16 @@ TEXT: "Project Z was implemented using TECH_X in production."
 → [FOUND] Project Z uses TECH_X in production
 
 Conversation history (use strictly for personal experience context): 
+\`\`\`
 {{history}}
+\`\`\` 
 
 Контекст:
+\`\`\`
 {{context}}
+\`\`\`
 
-{{questionWithTitle}}
+{{#isFollowUp}}Original question (follow-up): {{question}}{{/isFollowUp}}{{^isFollowUp}}Original question: {{question}}{{/isFollowUp}}
 
 Ответ:
 `,
@@ -788,12 +864,16 @@ TEXT: "OBJ_A explicitly uses FEATURE_X in production."
 → [FOUND] OBJ_A uses FEATURE_X in production
 
 Conversation history (use strictly for personal experience context): 
+\`\`\`
 {{history}}
+\`\`\` 
 
 Контекст:
+\`\`\`
 {{context}}
+\`\`\`
 
-{{questionWithTitle}}
+{{#isFollowUp}}Original question (follow-up): {{question}}{{/isFollowUp}}{{^isFollowUp}}Original question: {{question}}{{/isFollowUp}}
 
 Ответ:
 `,
@@ -821,12 +901,16 @@ Conversation history (use strictly for personal experience context):
 [NOT_FOUND]
 
 Conversation history (use strictly for personal experience context): 
+\`\`\`
 {{history}}
+\`\`\` 
 
 Контекст:
+\`\`\`
 {{context}}
+\`\`\`
 
-{{questionWithTitle}}
+{{#isFollowUp}}Original question (follow-up): {{question}}{{/isFollowUp}}{{^isFollowUp}}Original question: {{question}}{{/isFollowUp}}
 
 Ответ:
 `,
@@ -868,10 +952,12 @@ Conversation history (use strictly for personal experience context):
 <одна короткая фраза>
 
 История:
+\`\`\`
 {{history}}
+\`\`\` 
 
 Сообщение:
-{{questionWithTitle}}
+{{#isFollowUp}}Original question (follow-up): {{question}}{{/isFollowUp}}{{^isFollowUp}}Original question: {{question}}{{/isFollowUp}}
 
 Ответ:
 `,
@@ -905,9 +991,11 @@ Conversation history (use strictly for personal experience context):
 [NOT_FOUND]
 
 История:
+\`\`\`
 {{history}}
+\`\`\` 
 
-{{questionWithTitle}}
+{{#isFollowUp}}Original question (follow-up): {{question}}{{/isFollowUp}}{{^isFollowUp}}Original question: {{question}}{{/isFollowUp}}
 
 Ответ:
 `,
@@ -948,10 +1036,12 @@ Conversation history (use strictly for personal experience context):
 <одна короткая фраза>
 
 История:
+\`\`\`
 {{history}}
+\`\`\` 
 
 Сообщение:
-{{questionWithTitle}}
+{{#isFollowUp}}Original question (follow-up): {{question}}{{/isFollowUp}}{{^isFollowUp}}Original question: {{question}}{{/isFollowUp}}
 
 Ответ:
 `,
@@ -984,9 +1074,11 @@ Conversation history (use strictly for personal experience context):
 [NOT_FOUND]
 
 История:
+\`\`\`
 {{history}}
+\`\`\` 
 
-{{questionWithTitle}}
+{{#isFollowUp}}Original question (follow-up): {{question}}{{/isFollowUp}}{{^isFollowUp}}Original question: {{question}}{{/isFollowUp}}
 
 Ответ:
 `,
@@ -1018,12 +1110,16 @@ Conversation history (use strictly for personal experience context):
 [NOT_FOUND] - если прямого ответа нет
 
 Conversation history (use strictly for personal experience context): 
+\`\`\`
 {{history}}
+\`\`\` 
 
 Контекст:
+\`\`\`
 {{context}}
+\`\`\`
 
-{{questionWithTitle}}
+{{#isFollowUp}}Original question (follow-up): {{question}}{{/isFollowUp}}{{^isFollowUp}}Original question: {{question}}{{/isFollowUp}}
 
 Ответ:
 `,
@@ -1054,9 +1150,7 @@ Conversation history (use strictly for personal experience context):
 {{customRules}}
 
 ВАЖНО:
-- Если вопрос является уточняющим или мета-вопросом
-  (например: "что именно?", "уточни", "подробности", "почему?") —
-  не ищи факт или период в контексте и сразу возвращай [NOT_FOUND]
+- Если вопрос является уточняющим или мета-вопросом (например: "что именно?", "что там?", "что там делал?", "уточни", "подробности", "почему?") — не ищи факт или период в контексте и сразу возвращай [NOT_FOUND]
 - Для вопросов с временным аспектом ищи ТОЛЬКО
   явно указанные временные метки
 
@@ -1116,12 +1210,16 @@ Conversation history (use strictly for personal experience context):
 Ответ: [NOT_FOUND]
 
 Conversation history (use strictly for personal experience context):
+\`\`\`
 {{history}}
+\`\`\` 
 
 Контекст:
+\`\`\`
 {{context}}
+\`\`\`
 
-{{questionWithTitle}}
+{{#isFollowUp}}Original question (follow-up): {{question}}{{/isFollowUp}}{{^isFollowUp}}Original question: {{question}}{{/isFollowUp}}
 
 Ответ:
 `,

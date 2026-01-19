@@ -3,7 +3,7 @@ import { OllamaEmbeddings } from '@langchain/community/embeddings/ollama';
 import { OpenAIEmbeddings } from '@langchain/openai';
 import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
 import { TextLoader } from 'langchain/document_loaders/fs/text';
-import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
+import Mustache from 'mustache';
 import { resolve } from 'path';
 import { PrismaService } from '../services/prisma.service';
 import { ConfigManager } from './config';
@@ -12,6 +12,7 @@ import { EmbeddingsFactory } from './embeddingsFactory';
 import { LLMFactory } from './llmFactory';
 import { LLMLogger } from './llmLogger';
 import { Logger } from './logger';
+import { RAGSearcher } from './ragSearcher';
 import { DefaultProvidersInitializer } from './services/defaultProvidersInitializer';
 import { TextHelpers } from './textHelpers';
 import {
@@ -20,7 +21,6 @@ import {
   EmbeddingsConfig,
   EmbedingMetadata,
 } from './types';
-import { RAGSearcher } from './ragSearcher';
 
 export class RAGApplication {
   public static async start(fullConfig: {
@@ -345,7 +345,8 @@ VALUES (${trimmedContent}, ${vectorValue}::vector, ${metadata || '{}'}, ${hash})
           }
 
           // Create the prompt with the document content
-          const prompt = `You are an expert system for semantic metadata extraction and document classification.
+          const prompt = Mustache.render(
+            `You are an expert system for semantic metadata extraction and document classification.
 
 Your task is to analyze the provided text and return a SINGLE valid JSON object
 that represents the document metadata and the required response classification.
@@ -425,7 +426,9 @@ OUTPUT FORMAT:
   "...": "other relevant fields"
 }
 
-TEXT TO ANALYZE: ${doc.content}`;
+TEXT TO ANALYZE: {{content}}`,
+            { content: doc.content },
+          );
 
           // Call LLM
           const result = await llm.invoke(prompt);
@@ -438,7 +441,7 @@ TEXT TO ANALYZE: ${doc.content}`;
             Logger.logError('Invalid JSON in response', {
               response,
             });
-            response = `ERROR: ${response}`;
+            response = Mustache.render(`ERROR: {{response}}`, { response });
           }
 
           // Generate embedding for the graph content (JSON string)

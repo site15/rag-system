@@ -4,6 +4,7 @@ import { HuggingFaceInference } from '@langchain/community/llms/hf';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { ChatGroq } from '@langchain/groq';
 import { ChatOpenAI } from '@langchain/openai';
+import Mustache from 'mustache';
 import { PrismaService } from '../services/prisma.service';
 import { Trace } from '../trace/trace.module';
 import { Logger } from './logger';
@@ -280,7 +281,9 @@ export class LLMLogger {
         provider,
         llm,
         prompt,
-        response: `ERROR: ${(error as Error).message}`,
+        response: Mustache.render(`ERROR: {{errorMessage}}`, {
+          errorMessage: (error as Error).message,
+        }),
         startTime,
         metadata: {
           ...metadata,
@@ -294,7 +297,9 @@ export class LLMLogger {
         provider,
         llm,
         prompt,
-        response: `ERROR: ${(error as Error).message}`,
+        response: Mustache.render(`ERROR: {{errorMessage}}`, {
+          errorMessage: (error as Error).message,
+        }),
         startTime,
         metadata: {
           ...metadata,

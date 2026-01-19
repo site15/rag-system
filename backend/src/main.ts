@@ -6,7 +6,12 @@ import {
 } from '@nestjs/platform-fastify';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { writeFileSync } from 'fs';
+import Mustache from 'mustache';
 import { AppModule } from './app.module';
+
+Mustache.escape = function (text) {
+  return text;
+};
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(

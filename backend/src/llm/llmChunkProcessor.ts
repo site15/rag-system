@@ -5,6 +5,7 @@ import { HuggingFaceInference } from '@langchain/community/llms/hf';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { ChatGroq } from '@langchain/groq';
 import { ChatOpenAI } from '@langchain/openai';
+import Mustache from 'mustache';
 import { addPayloadToTrace, Trace } from '../trace/trace.module';
 import { CATEGORY_PROMPTS } from './category-prompts';
 import { DialogManager } from './dialogManager';
@@ -19,6 +20,7 @@ import { RAGSearcher } from './ragSearcher';
 import { FailureTracker } from './services/failureTracker';
 import { Category } from './services/questionTransformer';
 import { DocWithMetadataAndId } from './types';
+import { removeCodeWrappers } from './utils';
 
 // Question types for classification
 enum QuestionType {
@@ -29,6 +31,9 @@ enum QuestionType {
   OTHER = 'OTHER',
 }
 
+const AUTHOR_MESSAGE_ANSWER_SOURCE = '### Author Message (Answer Source)';
+const THIS_SECTION_MUST_BE_USED_TO_GENERATE_THE_FINAL_ANSWER =
+  'This section MUST be used to generate the final answer.';
 export class LLMChunkProcessor {
   private static classifyQuestion(question: string): QuestionType {
     const lowerQuestion = question.toLowerCase().trim();
@@ -407,21 +412,15 @@ export class LLMChunkProcessor {
 
   private static isAuthorMessageContent(chunk: string): boolean {
     // Check if the chunk contains Author Message content
-    return (
-      chunk.includes('### Author Message') ||
-      chunk.includes('Author Message (Answer Source)')
-    );
+    return chunk.includes(AUTHOR_MESSAGE_ANSWER_SOURCE);
   }
 
   private static extractAuthorMessageContent(chunk: string): string {
-    if (chunk.includes('### Author Message')) {
+    if (chunk.includes(AUTHOR_MESSAGE_ANSWER_SOURCE)) {
       try {
         const authorMatch = chunk
-          .replace(
-            'This section MUST be used to generate the final answer.',
-            '',
-          )
-          .split('### Author Message (Answer Source)')[1]
+          .replace(THIS_SECTION_MUST_BE_USED_TO_GENERATE_THE_FINAL_ANSWER, '')
+          .split(AUTHOR_MESSAGE_ANSWER_SOURCE)[1]
           .split('\n--\n')[0];
         return authorMatch.trim();
       } catch (error) {
@@ -744,15 +743,41 @@ export class LLMChunkProcessor {
         const author = authorMatch ? authorMatch[1].trim() : '';
 
         if (semantic || author) {
-          processedContent =
-            `[${contextDoc.source}:${contextDoc.fromLine}-${contextDoc.toLine}]\n` +
-            `### Semantic Search Content\n${semantic}\n` +
-            `### Author Message (Answer Source)\n${author}`;
+          const template = `
+[{{source}}:{{fromLine}}-{{toLine}}]
+### Semantic Search Content
+{{semantic}}
+### Author Message (Answer Source)
+{{author}}`;
+
+          processedContent = Mustache.render(template, {
+            source: contextDoc.source,
+            fromLine: contextDoc.fromLine,
+            toLine: contextDoc.toLine,
+            semantic: semantic,
+            author: author,
+          });
         } else {
-          processedContent = `[${contextDoc.source}:${contextDoc.fromLine}-${contextDoc.toLine}]\n${contextDoc.content}`;
+          const template = `[{{source}}:{{fromLine}}-{{toLine}}]
+{{content}}`;
+
+          processedContent = Mustache.render(template, {
+            source: contextDoc.source,
+            fromLine: contextDoc.fromLine,
+            toLine: contextDoc.toLine,
+            content: contextDoc.content,
+          });
         }
       } else {
-        processedContent = `[${contextDoc.source}:${contextDoc.fromLine}-${contextDoc.toLine}]\n${contextDoc.content}`;
+        const template = `[{{source}}:{{fromLine}}-{{toLine}}]
+{{content}}`;
+
+        processedContent = Mustache.render(template, {
+          source: contextDoc.source,
+          fromLine: contextDoc.fromLine,
+          toLine: contextDoc.toLine,
+          content: contextDoc.content,
+        });
       }
 
       // --- Разбиваем на чанки ---
@@ -774,10 +799,18 @@ export class LLMChunkProcessor {
 
       if (index === 0) {
         const combinedContent = contextDocs
-          .map(
-            (doc) =>
-              `[id: ${doc.id}, source: ${doc.source}, fromLine: ${doc.fromLine}, toLine: ${doc.toLine}, distance: ${doc.distance}]\n${doc.content}`,
-          )
+          .map((doc) => {
+            const template = `[id: {{id}}, source: {{source}}, fromLine: {{fromLine}}, toLine: {{toLine}}, distance: {{distance}}]
+{{content}}`;
+            return Mustache.render(template, {
+              id: doc.id,
+              source: doc.source,
+              fromLine: doc.fromLine,
+              toLine: doc.toLine,
+              distance: doc.distance,
+              content: doc.content,
+            });
+          })
           .join('\n');
         contextDocs = [
           {
@@ -956,9 +989,10 @@ export class LLMChunkProcessor {
 
               const finalAnswerPrompt = createFinalAnswerPrompt({
                 question,
+                context: removeCodeWrappers(chunk.content),
                 fact: foundText,
                 category,
-                history: history.join('\n'),
+                history: removeCodeWrappers(history.join('\n')),
               });
 
               addPayloadToTrace({
@@ -1187,53 +1221,28 @@ export class LLMChunkProcessor {
       }
     }
 
-    if (CATEGORY_PROMPTS[detectedCategory]) {
-      return CATEGORY_PROMPTS[detectedCategory]
-        .replace('{{history}}', history.length ? history.join('\n') : 'нет')
-        .replace('{{context}}', chunk || '')
-        .replace('{{question}}', question)
-        .replace(
-          '{{customRules}}',
-          history.length
-            ? `Если вопрос является follow-up (уточнение, продолжение) и conversation history содержит опыт в первом лице, 
+    const customRules = history.length
+      ? `Если вопрос является follow-up (уточнение, продолжение) и conversation history содержит опыт в первом лице, 
 ориентируйся ТОЛЬКО на этот опыт, а контекст документа используй только для уточнения фактов, связанных с этим опытом. 
 Не берите информацию из контекста, если она относится к другому проекту, не упомянутому в истории.
 
 Если объект или технология упомянуты в истории, а контекст документа содержит другой объект/технологию, 
-игнорируй несвязанный контекст и отвечай только исходя из истории.
-`
-            : '',
-        )
-        .replace(
-          '{{questionWithTitle}}',
-          history.length
-            ? `Original question (follow-up): ${question}`
-            : question,
-        );
+игнорируй несвязанный контекст и отвечай только исходя из истории.`
+      : '';
+
+    const templateData = {
+      history: removeCodeWrappers(history.length ? history.join('\n') : 'нет'),
+      context: removeCodeWrappers(chunk || ''),
+      question: question,
+      customRules: customRules,
+      isFollowUp: history.length > 0,
+    };
+
+    if (CATEGORY_PROMPTS[detectedCategory]) {
+      return Mustache.render(CATEGORY_PROMPTS[detectedCategory], templateData);
     }
 
-    return CATEGORY_PROMPTS.telegram
-      .replace('{{history}}', history.length ? history.join('\n') : 'нет')
-      .replace('{{context}}', chunk || '')
-      .replace('{{question}}', question)
-      .replace(
-        '{{customRules}}',
-        history.length
-          ? `Если вопрос является follow-up (уточнение, продолжение) и conversation history содержит опыт в первом лице, 
-ориентируйся ТОЛЬКО на этот опыт, а контекст документа используй только для уточнения фактов, связанных с этим опытом. 
-Не берите информацию из контекста, если она относится к другому проекту, не упомянутому в истории.
-
-Если объект или технология упомянуты в истории, а контекст документа содержит другой объект/технологию, 
-игнорируй несвязанный контекст и отвечай только исходя из истории.
-`
-          : '',
-      )
-      .replace(
-        '{{questionWithTitle}}',
-        history.length
-          ? `Original question (follow-up): ${question}`
-          : question,
-      );
+    return Mustache.render(CATEGORY_PROMPTS.telegram, templateData);
   }
 
   static getDocTypeBySource(source: string) {

@@ -5,6 +5,7 @@ import { HuggingFaceInference } from '@langchain/community/llms/hf';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { ChatGroq } from '@langchain/groq';
 import { ChatOpenAI } from '@langchain/openai';
+import Mustache from 'mustache';
 import { addPayloadToTrace, Trace } from '../../trace/trace.module';
 import { CATEGORY, RAG_SEARCH_CONFIG } from '../constants';
 import { DialogManager } from '../dialogManager';
@@ -15,6 +16,7 @@ import {
   createContextualRewritePrompt,
   createMinimalTransformationPrompt,
 } from '../prompt';
+import { removeCodeWrappers } from '../utils';
 
 export enum Category {
   telegram = 'telegram',
@@ -267,7 +269,8 @@ export class QuestionTransformer {
         provider,
         dialogId,
         messageId,
-        prompt: `Ты — переписчик пользовательских запросов для action-based semantic search.
+        prompt: Mustache.render(
+          `Ты — переписчик пользовательских запросов для action-based semantic search.
 
 Твоя задача — преобразовать ВОПРОС в ПОИСКОВЫЙ ЗАПРОС об ОПЫТЕ ИСПОЛЬЗОВАНИЯ.
 
@@ -315,12 +318,19 @@ export class QuestionTransformer {
 - без точек, запятых, пояснений
 
 Контекст диалога:
-${(history || []).join('\n')}
+\`\`\`
+{{history}}
+\`\`\` 
 
 Вопрос:
-${question}
+{{question}}
 
 Результат:`,
+          {
+            history: removeCodeWrappers((history || []).join('\n')),
+            question: question,
+          },
+        ),
       });
 
     const transformedEmbeddedEntityBased =
@@ -332,7 +342,8 @@ ${question}
         provider,
         dialogId,
         messageId,
-        prompt: `Ты — переписчик пользовательских запросов для entity-based semantic search.
+        prompt: Mustache.render(
+          `Ты — переписчик пользовательских запросов для entity-based semantic search.
 
 Твоя ЕДИНСТВЕННАЯ задача — извлечь ИМЕНА СУЩНОСТЕЙ из контекста диалога для поиска.
 
@@ -389,12 +400,19 @@ ${question}
 - без точек, без пояснений
 
 Контекст диалога:
-${(history || []).join('\n')}
+\`\`\`
+{{history}}
+\`\`\` 
 
 Входной вопрос:
-${question}
+{{question}}
 
 Результат:`,
+          {
+            history: removeCodeWrappers((history || []).join('\n')),
+            question: question,
+          },
+        ),
       });
 
     Logger.logInfo('Question transformation completed', {
@@ -416,7 +434,10 @@ ${question}
         transformedEmbeddedEntityBased.logId,
         detectCategoryResult.logId,
       ],
-      transformedEmbedded: `${transformedEmbeddedActionBased.question}, ${transformedEmbeddedEntityBased.question}`,
+      transformedEmbedded: Mustache.render(`{{actionBased}}, {{entityBased}}`, {
+        actionBased: transformedEmbeddedActionBased.question,
+        entityBased: transformedEmbeddedEntityBased.question,
+      }),
       category,
       sourceFilter,
       searchLimit:
@@ -664,7 +685,8 @@ ${question}
     history: string[];
     provider: string;
   }) {
-    const prompt = `Ты — классификатор пользовательских запросов.
+    const prompt = Mustache.render(
+      `Ты — классификатор пользовательских запросов.
 
 Определи, **к какому типу данных относится корректный ответ на этот текст**, а не тип самого текста.
 
@@ -701,9 +723,7 @@ ${question}
 26. none
 
 Типы:
-${Object.entries(CATEGORY)
-  .map(([key, value]) => `- ${key} — ${value}`)
-  .join('\n')}
+{{categoryList}}
 
 Очень важно:
 - выводи строго одно слово из списка типов;
@@ -714,12 +734,22 @@ ${Object.entries(CATEGORY)
 
 Вход:
 ИСТОРИЯ ПЕРЕПИСКИ (для понимания намерения):
-${(history || []).join('\n')}
+\`\`\`
+{{history}}
+\`\`\` 
 
 Текст для классификации:
-${text}
+{{text}}
 
-Вывод:`;
+Вывод:`,
+      {
+        categoryList: Object.entries(CATEGORY)
+          .map(([key, value]) => `- ${key} — ${value}`)
+          .join('\n'),
+        history: removeCodeWrappers((history || []).join('\n')),
+        text: text,
+      },
+    );
 
     try {
       addPayloadToTrace({

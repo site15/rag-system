@@ -3,9 +3,11 @@
  * Contains all prompt strings used for LLM calls with descriptions
  */
 
+import Mustache from 'mustache';
 import { CATEGORY_PROMPTS } from './category-prompts';
 import { CATEGORY } from './constants';
 import { Category } from './services/questionTransformer';
+import { removeCodeWrappers } from './utils';
 
 /**
  * Creates a prompt for friendly found responses
@@ -23,7 +25,8 @@ export function createFriendlyFoundPrompt({
   chunk?: string;
   question: string;
 }): string {
-  return `
+  return Mustache.render(
+    `
 Отвечай дружески и по существу, используя только контекст.
 
 ВАЖНО:
@@ -42,21 +45,26 @@ export function createFriendlyFoundPrompt({
   * "когда" → время/период
   * "что/как" → действие или объект
 - Иначе — [NOT_FOUND]
-${category === 'telegram' ? 'Используй только Author Message для ответа.' : ''}
+{{#isTelegram}}Используй только Author Message для ответа.{{/isTelegram}}
 
-${
-  chunk
-    ? `
+{{#hasContext}}
 Контекст:
-${chunk}`
-    : ''
-}
+\`\`\`
+{{context}}
+\`\`\`{{/hasContext}}
 
 Вопрос:
-${question}
+{{question}}
 
 Ответ:
-`;
+`,
+    {
+      isTelegram: category === 'telegram',
+      hasContext: !!chunk,
+      context: removeCodeWrappers(chunk),
+      question: question,
+    },
+  );
 }
 
 /**
@@ -75,7 +83,8 @@ export function createFriendlyNotFoundPrompt({
   chunk?: string;
   question: string;
 }): string {
-  return `
+  return Mustache.render(
+    `
 Сформируй ответ на вопрос пользователя на основе подтверждённых фактов из контекста.
 
 КРИТИЧЕСКИ ВАЖНО:
@@ -127,21 +136,26 @@ export function createFriendlyNotFoundPrompt({
 Ответ:
 "Применял зорбик в 2010 и 2012 годах."
 
-${category === 'telegram' ? 'Используй только Author Message для ответа.' : ''}
+{{#isTelegram}}Используй только Author Message для ответа.{{/isTelegram}}
 
-${
-  chunk
-    ? `
+{{#hasContext}}
 Контекст:
-${chunk}`
-    : ''
-}
+\`\`\`
+{{context}}
+\`\`\`{{/hasContext}}
 
 Вопрос:
-${question}
+{{question}}
 
 Ответ:
-`;
+`,
+    {
+      isTelegram: category === 'telegram',
+      hasContext: !!chunk,
+      context: removeCodeWrappers(chunk),
+      question: question,
+    },
+  );
 }
 
 /**
@@ -161,26 +175,22 @@ export function createTelegramAnalysisPrompt({
   history: string[];
   question: string;
 }): string {
-  return CATEGORY_PROMPTS.telegram
-    .replace('{{history}}', history.length ? history.join('\n') : 'нет')
-    .replace('{{context}}', chunk || '')
-    .replace('{{question}}', question)
-    .replace(
-      '{{customRules}}',
-      history.length
-        ? `Если вопрос является follow-up (уточнение, продолжение) и conversation history содержит опыт в первом лице, 
+  const customRules = history.length
+    ? `Если вопрос является follow-up (уточнение, продолжение) и conversation history содержит опыт в первом лице, 
 ориентируйся ТОЛЬКО на этот опыт, а контекст документа используй только для уточнения фактов, связанных с этим опытом. 
 Не берите информацию из контекста, если она относится к другому проекту, не упомянутому в истории.
 
 Если объект или технология упомянуты в истории, а контекст документа содержит другой объект/технологию, 
-игнорируй несвязанный контекст и отвечай только исходя из истории.
-`
-        : '',
-    )
-    .replace(
-      '{{questionWithTitle}}',
-      history.length ? `Original question (follow-up): ${question}` : question,
-    );
+игнорируй несвязанный контекст и отвечай только исходя из истории.`
+    : '';
+
+  return Mustache.render(CATEGORY_PROMPTS.telegram, {
+    history: removeCodeWrappers(history.length ? history.join('\n') : 'нет'),
+    context: removeCodeWrappers(chunk || ''),
+    question: question,
+    customRules: customRules,
+    isFollowUp: history.length > 0,
+  });
 }
 
 /**
@@ -200,26 +210,22 @@ export function createArticleAnalysisPrompt({
   history: string[];
   question: string;
 }): string {
-  return CATEGORY_PROMPTS.articles
-    .replace('{{history}}', history.length ? history.join('\n') : 'нет')
-    .replace('{{context}}', chunk || '')
-    .replace('{{question}}', question)
-    .replace(
-      '{{customRules}}',
-      history.length
-        ? `Если вопрос является follow-up (уточнение, продолжение) и conversation history содержит опыт в первом лице, 
+  const customRules = history.length
+    ? `Если вопрос является follow-up (уточнение, продолжение) и conversation history содержит опыт в первом лице, 
 ориентируйся ТОЛЬКО на этот опыт, а контекст документа используй только для уточнения фактов, связанных с этим опытом. 
 Не берите информацию из контекста, если она относится к другому проекту, не упомянутому в истории.
 
 Если объект или технология упомянуты в истории, а контекст документа содержит другой объект/технологию, 
-игнорируй несвязанный контекст и отвечай только исходя из истории.
-`
-        : '',
-    )
-    .replace(
-      '{{questionWithTitle}}',
-      history.length ? `Original question (follow-up): ${question}` : question,
-    );
+игнорируй несвязанный контекст и отвечай только исходя из истории.`
+    : '';
+
+  return Mustache.render(CATEGORY_PROMPTS.articles, {
+    history: removeCodeWrappers(history.length ? history.join('\n') : 'нет'),
+    context: removeCodeWrappers(chunk || ''),
+    question: question,
+    customRules: customRules,
+    isFollowUp: history.length > 0,
+  });
 }
 
 /**
@@ -239,26 +245,22 @@ export function createPortfolioAnalysisPrompt({
   history: string[];
   question: string;
 }): string {
-  return CATEGORY_PROMPTS.portfolio
-    .replace('{{history}}', history.length ? history.join('\n') : 'нет')
-    .replace('{{context}}', chunk || '')
-    .replace('{{question}}', question)
-    .replace(
-      '{{customRules}}',
-      history.length
-        ? `Если вопрос является follow-up (уточнение, продолжение) и conversation history содержит опыт в первом лице, 
+  const customRules = history.length
+    ? `Если вопрос является follow-up (уточнение, продолжение) и conversation history содержит опыт в первом лице, 
 ориентируйся ТОЛЬКО на этот опыт, а контекст документа используй только для уточнения фактов, связанных с этим опытом. 
 Не берите информацию из контекста, если она относится к другому проекту, не упомянутому в истории.
 
 Если объект или технология упомянуты в истории, а контекст документа содержит другой объект/технологию, 
-игнорируй несвязанный контекст и отвечай только исходя из истории.
-`
-        : '',
-    )
-    .replace(
-      '{{questionWithTitle}}',
-      history.length ? `Original question (follow-up): ${question}` : question,
-    );
+игнорируй несвязанный контекст и отвечай только исходя из истории.`
+    : '';
+
+  return Mustache.render(CATEGORY_PROMPTS.portfolio, {
+    history: removeCodeWrappers(history.length ? history.join('\n') : 'нет'),
+    context: removeCodeWrappers(chunk || ''),
+    question: question,
+    customRules: customRules,
+    isFollowUp: history.length > 0,
+  });
 }
 
 /**
@@ -278,26 +280,22 @@ export function createResumeAnalysisPrompt({
   history: string[];
   question: string;
 }): string {
-  return CATEGORY_PROMPTS.resume
-    .replace('{{history}}', history.length ? history.join('\n') : 'нет')
-    .replace('{{context}}', chunk || '')
-    .replace('{{question}}', question)
-    .replace(
-      '{{customRules}}',
-      history.length
-        ? `Если вопрос является follow-up (уточнение, продолжение) и conversation history содержит опыт в первом лице, 
+  const customRules = history.length
+    ? `Если вопрос является follow-up (уточнение, продолжение) и conversation history содержит опыт в первом лице, 
 ориентируйся ТОЛЬКО на этот опыт, а контекст документа используй только для уточнения фактов, связанных с этим опытом. 
 Не берите информацию из контекста, если она относится к другому проекту, не упомянутому в истории.
 
 Если объект или технология упомянуты в истории, а контекст документа содержит другой объект/технологию, 
-игнорируй несвязанный контекст и отвечай только исходя из истории.
-`
-        : '',
-    )
-    .replace(
-      '{{questionWithTitle}}',
-      history.length ? `Original question (follow-up): ${question}` : question,
-    );
+игнорируй несвязанный контекст и отвечай только исходя из истории.`
+    : '';
+
+  return Mustache.render(CATEGORY_PROMPTS.resume, {
+    history: removeCodeWrappers(history.length ? history.join('\n') : 'нет'),
+    context: removeCodeWrappers(chunk || ''),
+    question: question,
+    customRules: customRules,
+    isFollowUp: history.length > 0,
+  });
 }
 
 /**
@@ -316,26 +314,22 @@ export function createGenericAnalysisPrompt({
   history: string[];
   question: string;
 }): string {
-  return CATEGORY_PROMPTS.none
-    .replace('{{history}}', history.length ? history.join('\n') : 'нет')
-    .replace('{{context}}', chunk || '')
-    .replace('{{question}}', question)
-    .replace(
-      '{{customRules}}',
-      history.length
-        ? `Если вопрос является follow-up (уточнение, продолжение) и conversation history содержит опыт в первом лице, 
+  const customRules = history.length
+    ? `Если вопрос является follow-up (уточнение, продолжение) и conversation history содержит опыт в первом лице, 
 ориентируйся ТОЛЬКО на этот опыт, а контекст документа используй только для уточнения фактов, связанных с этим опытом. 
 Не берите информацию из контекста, если она относится к другому проекту, не упомянутому в истории.
 
 Если объект или технология упомянуты в истории, а контекст документа содержит другой объект/технологию, 
-игнорируй несвязанный контекст и отвечай только исходя из истории.
-`
-        : '',
-    )
-    .replace(
-      '{{questionWithTitle}}',
-      history.length ? `Original question (follow-up): ${question}` : question,
-    );
+игнорируй несвязанный контекст и отвечай только исходя из истории.`
+    : '';
+
+  return Mustache.render(CATEGORY_PROMPTS.none, {
+    history: removeCodeWrappers(history.length ? history.join('\n') : 'нет'),
+    context: removeCodeWrappers(chunk || ''),
+    question: question,
+    customRules: customRules,
+    isFollowUp: history.length > 0,
+  });
 }
 
 /**
@@ -355,21 +349,26 @@ export function createContextualRewritePrompt({
   category: string | null;
   history?: string[];
 }): string {
-  let categoryInstruction = '';
-  if (category) {
-    categoryInstruction = `The question seems to be related to '${CATEGORY[category] || category}'. Keep the focus on this category.`;
-  }
+  const hasCategory = !!category;
+  const categoryName = category ? CATEGORY[category] || category : '';
 
-  let historyContext = '';
-  if (history && history.length > 0) {
-    const historyText = history.join('\n');
-    historyContext = `
+  const historyContext =
+    history && history.length > 0
+      ? Mustache.render(
+          `
 
 Conversation history (use only for context of prior assistant experience):
-${historyText}`;
-  }
+\`\`\`
+{{history}}
+\`\`\``,
+          { history: removeCodeWrappers(history.join('\n')) },
+        )
+      : '';
 
-  return `
+  const questionType = historyContext ? 'follow-up' : 'original';
+
+  // Template for the contextual rewrite prompt
+  const template = `
 You are a question rewriter.
 
 Your task is to rewrite the user's question so that it becomes fully self-contained and understandable WITHOUT conversation history.
@@ -428,12 +427,20 @@ Incorrect examples:
 - "когда работал" ❌ (нет объекта)
 - "где" ❌ (нет ни глагола, ни объекта)
 
-${categoryInstruction}${historyContext}
+{{categoryInstruction}}{{historyContext}}
 
-${historyContext ? `Original question (follow-up): ${question}` : `Original question: ${question}`}
+{{#isFollowUp}}Original question (follow-up): {{question}}{{/isFollowUp}}{{^isFollowUp}}Original question: {{question}}{{/isFollowUp}}
 
 Rewritten self-contained question:
 `;
+
+  return Mustache.render(template, {
+    hasCategory: hasCategory,
+    categoryName: categoryName,
+    historyContext: historyContext,
+    isFollowUp: !!historyContext,
+    question: question,
+  });
 }
 
 /**
@@ -453,21 +460,24 @@ export function createMinimalTransformationPrompt({
   category: Category;
   history: string[];
 }): string {
-  let categoryInstruction = '';
-  if (category) {
-    categoryInstruction = `The question seems to be related to '${CATEGORY[category] || category}'. Keep the focus on this category.`;
-  }
+  const hasCategory = !!category;
+  const categoryName = category ? CATEGORY[category] || category : '';
 
-  let historyContext = '';
-  if (history && history.length > 0) {
-    const historyText = history.join('\n');
-    historyContext = `
+  const historyContext =
+    history && history.length > 0
+      ? Mustache.render(
+          `
 
 Conversation history:
-${historyText}`;
-  }
+\`\`\`
+{{history}}
+\`\`\``,
+          { history: removeCodeWrappers(history.join('\n')) },
+        )
+      : '';
 
-  return `
+  // Template for the minimal transformation prompt
+  const template = `
 You are a question transformer. Your task is to slightly rephrase the question ONLY to improve grammatical clarity.
 
 STRICT RULES:
@@ -490,12 +500,19 @@ STRICT RULES:
 
 Conversation history is provided ONLY to understand references (e.g., "он", "нём"), NOT to change wording or roles.
 
-${categoryInstruction}${historyContext}
+{{categoryInstruction}}{{historyContext}}
 
-Original question: ${question}
+Original question: {{question}}
 
 Transformed question:
 `;
+
+  return Mustache.render(template, {
+    hasCategory: hasCategory,
+    categoryName: categoryName,
+    historyContext: historyContext,
+    question: question,
+  });
 }
 
 /**
@@ -505,29 +522,37 @@ Transformed question:
  * @returns Formatted prompt string for dialog summarization
  */
 export function createDialogSummaryPrompt(history: string[]): string {
-  return `
+  return Mustache.render(
+    `
 Суммируй диалог кратко (3–5 предложений).
 Только факты, без интерпретаций.
 
 Диалог:
-${history.join('\n\n')}
+\`\`\`
+{{history}}
+\`\`\` 
 
 Summary:
-`;
+`,
+    { history: removeCodeWrappers(history.join('\n\n')) },
+  );
 }
 
 export function createFinalAnswerPrompt({
   question,
+  context,
   fact,
   category,
   history,
 }: {
   question: string;
+  context: string;
   fact: string;
   category: Category;
   history: string;
 }): string {
-  return `
+  return Mustache.render(
+    `
 Ты формируешь ОКОНЧАТЕЛЬНЫЙ ОТВЕТ ПОЛЬЗОВАТЕЛЮ.
 
 ВАЖНО:
@@ -552,17 +577,34 @@ export function createFinalAnswerPrompt({
 - Не добавляй новой информации
 - Не используй рассуждения
 - Стиль краткий, разговорный, не формально-документальный
-${category === 'telegram' ? '- Используй только Author Message' : ''}
+{{#isTelegram}}- Используй только Author Message{{/isTelegram}}
 
 Вопрос:
-${question}
+{{question}}
 
 Conversation history:
-${history}
+\`\`\`
+{{history}}
+\`\`\` 
+
+Контекст:
+\`\`\`
+{{context}}
+\`\`\`
 
 Подтверждённый факт:
-${fact}
+\`\`\`
+{{fact}}
+\`\`\`
 
 Ответ:
-`;
+`,
+    {
+      isTelegram: category === 'telegram',
+      question: question,
+      context: removeCodeWrappers(context),
+      history: removeCodeWrappers(history),
+      fact: removeCodeWrappers(fact),
+    },
+  );
 }

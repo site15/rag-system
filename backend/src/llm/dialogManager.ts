@@ -1,4 +1,5 @@
 // dialogManager.ts
+import Mustache from 'mustache';
 import { PrismaService } from '../services/prisma.service';
 import { TraceNode } from '../trace/trace.module';
 import { Logger } from './logger';
@@ -227,9 +228,12 @@ export class DialogManager {
       take: limit,
     });
 
-    const history = messages
-      .reverse()
-      .map((x) => `Пользователь: ${x.question}\nАссистент: ${x.answer}`);
+    const history = messages.reverse().map((x) =>
+      Mustache.render(`Пользователь: {{question}}\nАссистент: {{answer}}`, {
+        question: x.question,
+        answer: x.answer,
+      }),
+    );
 
     Logger.logInfo('История диалога получена', { count: history.length });
     return history;
