@@ -235,7 +235,9 @@ export class QuestionTransformer {
       Logger.logInfo('Last history item', lastHistoryItem);
 
       if (lastHistoryItem.length) {
-        detectedCategory = lastHistoryItem[0].detected_category;
+        detectedCategory = getCategoryByDetectedCategory(
+          lastHistoryItem[0].detected_category,
+        );
       }
     }
 
@@ -730,7 +732,6 @@ export class QuestionTransformer {
 - не добавляй пояснений;
 - если текст является коротким уточнением (например: "почему?", "как?", "в смысле?", "что именно?")и не содержит названий технологий, продуктов или предметных сущностей, и имеет смысл ТОЛЬКО в контексте предыдущего ответа — выбирай clarification;
 - используй только нижний регистр;
-- если текст является вопросом и содержит название технологии, инструмента или языка программирования (в том числе на русском языке) — выбирай technology, даже если вопрос короткий (например: «ты знаешь шимелфи?», «работал с бутескопом?»).
 
 Вход:
 ИСТОРИЯ ПЕРЕПИСКИ (для понимания намерения):

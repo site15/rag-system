@@ -489,7 +489,7 @@ STRICT RULES:
 - Do NOT change the speaker or the addressee of the question
 - Do NOT change grammatical person (e.g., "ты", "вы", "я")
 - Do NOT change the communication style (informal/formal)
-- Do NOT replace words with synonyms
+- Do NOT replace words with synonyms or narrow general verbs into more specific ones
 - Do NOT normalize or reinterpret context
 - Do NOT add or remove meaning
 
@@ -497,6 +497,8 @@ STRICT RULES:
 - Respond in the same language as the original question
 - Preserve all original words whenever possible
 - Only return the transformed question, nothing else
+- If the original question is already grammatically correct, return it unchanged except for removing explicit subject pronouns
+
 
 Conversation history is provided ONLY to understand references (e.g., "он", "нём"), NOT to change wording or roles.
 

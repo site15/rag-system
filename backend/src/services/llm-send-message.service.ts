@@ -4,12 +4,13 @@
 import { OllamaEmbeddings } from '@langchain/community/embeddings/ollama';
 import { OpenAIEmbeddings } from '@langchain/openai';
 import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
+import { isUUID } from 'class-validator';
 import { ConfigManager } from '../llm/config';
 import {
-  ERROR_MESSAGES,
-  RAG_SEARCH_CONFIG,
   createDocumentInfo,
   createSourceReference,
+  ERROR_MESSAGES,
+  RAG_SEARCH_CONFIG,
 } from '../llm/constants';
 import { DialogManager } from '../llm/dialogManager';
 import { DialogSummary } from '../llm/dialogSummary';
@@ -30,7 +31,6 @@ import {
 import { SummarizationService } from '../llm/services/summarizationService';
 import { TextHelpers } from '../llm/textHelpers';
 import { DocWithMetadataAndId } from '../llm/types';
-import { isUUID } from 'class-validator';
 import { addPayloadToTrace, Trace } from '../trace/trace.module';
 
 // Request interface definition
@@ -400,7 +400,16 @@ export class LlmSendMessageService {
         normalizedUserMessageArray: normalizedQuestionArray,
       });
 
-      let contextDocs: DocWithMetadataAndId[] = [];
+      const getDialogFoundDocuments =
+        await DialogManager.getDialogFoundDocuments(dialogId);
+
+      let contextDocs: DocWithMetadataAndId[] =
+        (await RAGSearcher.getDocsByIds({
+          ids:
+            getDialogFoundDocuments
+              .map((doc) => doc?.id)
+              .filter((id) => id !== null && id !== undefined) || [],
+        })) || [];
 
       for (let index = 0; index < normalizedQuestionArray.length; index++) {
         docsWithMeta = await this.searchContextDocs({
@@ -422,13 +431,13 @@ export class LlmSendMessageService {
       //    });
       //  });
 
-      this.logBeforeAskLLMChunked(docsWithMeta, history);
+      this.logBeforeAskLLMChunked(contextDocs, history);
 
       const llmResult = await LLMChunkProcessor.askLLMChunked({
         llm,
         dialogId,
         history,
-        contextDocs: docsWithMeta,
+        contextDocs,
         question: processedQuestion,
         category: categorizedQuestion.category,
         provider: appConfig.chatProvider,
@@ -446,11 +455,11 @@ export class LlmSendMessageService {
       });
 
       // Prepare document info for logging
-      const documentInfo = docsWithMeta
+      const documentInfo = contextDocs
         .map((doc, index) => createDocumentInfo({ doc, index }))
         .reduce((acc, curr) => ({ ...acc, ...curr }), {});
 
-      this.logAfterAskLLMChunked(llmResult, docsWithMeta, documentInfo);
+      this.logAfterAskLLMChunked(llmResult, contextDocs, documentInfo);
 
       /**
        * NOT FOUND
@@ -469,8 +478,6 @@ export class LlmSendMessageService {
 
         answer = noAnswerResponse.foundText;
         foundLogIds.push(noAnswerResponse.logId);
-        // Clear sources for "not found" responses
-        // docsWithMeta = [];
       }
 
       ///

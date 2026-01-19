@@ -21,6 +21,7 @@ import { FailureTracker } from './services/failureTracker';
 import { Category } from './services/questionTransformer';
 import { DocWithMetadataAndId } from './types';
 import { removeCodeWrappers } from './utils';
+import { getCategoryByDetectedCategory } from './getCategoryByDetectedCategory';
 
 // Question types for classification
 enum QuestionType {
@@ -1217,7 +1218,9 @@ export class LLMChunkProcessor {
       Logger.logInfo('Last history item', lastHistoryItem);
 
       if (lastHistoryItem.length) {
-        detectedCategory = lastHistoryItem[0].detected_category;
+        detectedCategory = getCategoryByDetectedCategory(
+          lastHistoryItem[0].detected_category,
+        );
       }
     }
 

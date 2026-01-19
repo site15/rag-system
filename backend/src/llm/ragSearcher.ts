@@ -4,6 +4,41 @@ import { Logger } from './logger';
 import { DocWithMetadataAndId } from './types';
 
 export class RAGSearcher {
+  public static async getDocsByIds({
+    ids,
+  }: {
+    ids: string[];
+  }): Promise<DocWithMetadataAndId[]> {
+    if (!ids.length) {
+      return [];
+    }
+
+    const r = await PrismaService.instance.$queryRawUnsafe(
+      `
+SELECT id,
+       content,
+       "graphContent",
+       metadata
+FROM "ChatDocumentEmbedding"
+WHERE id IN (${ids.map((id) => `'${id}'`).join(', ')})`,
+    );
+    const results = (r as unknown as any[]).map((row: any) => {
+      const source = row.metadata?.source;
+      const meta = row.metadata?.meta || {};
+      return {
+        id: row.id,
+        content: row.content + '\n\nМЕТАДАННЫЕ:\n' + row.graphContent,
+        source: source,
+        fromLine: meta.loc?.lines?.from,
+        toLine: meta.loc?.lines?.to,
+        distance: row.distance,
+      };
+    });
+
+    Logger.logInfo('Поиск завершен', { found: results.length });
+    return results;
+  }
+
   public static async similaritySearch({
     queryEmbedding,
     limit = 5,

@@ -210,6 +210,28 @@ export class DialogManager {
     return result;
   }
 
+  public static async getDialogFoundDocuments(dialogId: string) {
+    const messages = (
+      await PrismaService.instance.chatMessage.findMany({
+        include: {
+          ChatMessageDocumentEmbedding: {
+            include: {
+              embeddingDocument: true,
+            },
+            where: { isFound: true },
+          },
+        },
+        where: { dialogId },
+      })
+    ).filter((c) => c.ChatMessageDocumentEmbedding.find((d) => d.isFound));
+
+    return messages
+      .map((m) =>
+        m.ChatMessageDocumentEmbedding.map((d) => d.embeddingDocument),
+      )
+      .flat();
+  }
+
   public static async getDialogHistory(
     dialogId: string,
     limit = 20,
