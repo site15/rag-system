@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ChatDialog } from './chat-dialog.entity';
 import { ChatMessage } from './chat-message.entity';
-import { ChatLlmModel } from './chat-llm-model.entity';
 
 export class ChatLlmRequest {
   @ApiProperty({
@@ -86,10 +85,4 @@ export class ChatLlmRequest {
     nullable: true,
   })
   history?: ChatMessage | null;
-  @ApiProperty({
-    type: () => ChatLlmModel,
-    isArray: true,
-    required: false,
-  })
-  ChatLlmModel?: ChatLlmModel[];
 }

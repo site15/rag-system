@@ -108,16 +108,15 @@ model ChatDocumentEmbedding {
   graphEmbedding3072 Unsupported("vector(3072)")?
   metadata           Json?
   contentHash        String                       @db.VarChar(64)
-  embeddingModelId   String?                      @db.Uuid
+  provider           String?                      @db.VarChar(50)
+  model              String?                      @db.VarChar(100)
 
   createdAt DateTime @default(now()) @db.Timestamp(6)
   updatedAt DateTime @default(now()) @db.Timestamp(6)
 
-  embeddingModel               ChatEmbeddingModel?            @relation(fields: [embeddingModelId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_CHAT_DOCUMENT_EMBEDDINGS__EMBEDDING_MODEL_ID")
   ChatMessageDocumentEmbedding ChatMessageDocumentEmbedding[]
 
   @@index([contentHash], map: "IDX_CHAT_DOCUMENT_EMBEDDINGS__CONTENT_HASH")
-  @@index([embeddingModelId], map: "IDX_CHAT_DOCUMENT_EMBEDDINGS__EMBEDDING_MODEL_ID")
 }
 
 model ChatDialog {
@@ -213,13 +212,11 @@ model ChatLlmRequest {
   createdAt DateTime @default(now()) @db.Timestamp(6)
   updatedAt DateTime @default(now()) @db.Timestamp(6)
 
-  dialog       ChatDialog?    @relation(fields: [dialogId], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "FK_CHAT_LLM_REQUESTS__DIALOG_ID")
-  history      ChatMessage?   @relation(fields: [messageId], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "FK_CHAT_LLM_REQUESTS__MESSAGE_ID")
-  ChatLlmModel ChatLlmModel[]
+  dialog  ChatDialog?  @relation(fields: [dialogId], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "FK_CHAT_LLM_REQUESTS__DIALOG_ID")
+  history ChatMessage? @relation(fields: [messageId], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "FK_CHAT_LLM_REQUESTS__MESSAGE_ID")
 
   @@index([createdAt], map: "IDX_CHAT_LLM_REQUESTS__CREATED_AT")
   @@index([provider], map: "IDX_CHAT_LLM_REQUESTS__PROVIDER")
-  @@index([model], map: "IDX_CHAT_LLM_REQUESTS__MODEL")
   @@index([isSuccess], map: "IDX_CHAT_LLM_REQUESTS__IS_SUCCESS")
   @@index([provider, model], map: "IDX_CHAT_LLM_REQUESTS__PROVIDER_MODEL")
   @@index([dialogId], map: "IDX_CHAT_LLM_REQUESTS__DIALOG_ID")
@@ -243,8 +240,6 @@ model ChatLlmModel {
   createdAt DateTime @default(now()) @db.Timestamp(6)
   updatedAt DateTime @default(now()) @db.Timestamp(6)
 
-  chatLlmRequest ChatLlmRequest? @relation(fields: [lastRequestId], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "FK_CHAT_LLM_MODELS__CHAT_LLM_REQUEST_ID")
-
   @@unique(name: "uqConfig", [provider, model, temperature, chunkSize], map: "UK_CHAT_LLM_MODELS__CONFIG")
   @@index([provider], map: "IDX_CHAT_LLM_MODELS__PROVIDER")
   @@index([model], map: "IDX_CHAT_LLM_MODELS__MODEL")
@@ -267,8 +262,6 @@ model ChatEmbeddingModel {
 
   createdAt DateTime @default(now()) @db.Timestamp(6)
   updatedAt DateTime @default(now()) @db.Timestamp(6)
-
-  chatDocumentEmbeddings ChatDocumentEmbedding[]
 
   @@unique(name: "uqDimension", [dimension], map: "UK_CHAT_EMBEDDING_MODELS__DIMENSION")
   @@index([provider], map: "IDX_CHAT_EMBEDDING_MODELS__PROVIDER")

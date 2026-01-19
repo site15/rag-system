@@ -1297,7 +1297,8 @@ export const ChatDocumentEmbeddingScalarFieldEnum = {
   graphContent: 'graphContent',
   metadata: 'metadata',
   contentHash: 'contentHash',
-  embeddingModelId: 'embeddingModelId',
+  provider: 'provider',
+  model: 'model',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
 } as const;

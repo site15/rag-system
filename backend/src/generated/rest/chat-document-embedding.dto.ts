@@ -26,6 +26,16 @@ export class ChatDocumentEmbeddingDto {
   contentHash!: string;
   @ApiProperty({
     type: 'string',
+    nullable: true,
+  })
+  provider!: string | null;
+  @ApiProperty({
+    type: 'string',
+    nullable: true,
+  })
+  model!: string | null;
+  @ApiProperty({
+    type: 'string',
     format: 'date-time',
   })
   createdAt!: Date;

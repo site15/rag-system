@@ -13,18 +13,6 @@ export type AuthSession = {
   AuthUser?: AuthUser;
 };
 
-export type ChatEmbeddingModel = {
-  id: string;
-  name: string;
-  provider: string;
-  model: string;
-  dimension: number;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-  chatDocumentEmbeddings?: Array<ChatDocumentEmbedding>;
-};
-
 export type ChatDocumentEmbedding = {
   id: string;
   content: string;
@@ -33,10 +21,10 @@ export type ChatDocumentEmbedding = {
     [key: string]: unknown;
   } | null;
   contentHash: string;
-  embeddingModelId: string | null;
+  provider: string | null;
+  model: string | null;
   createdAt: string;
   updatedAt: string;
-  embeddingModel?: ChatEmbeddingModel | null;
   ChatMessageDocumentEmbedding?: Array<ChatMessageDocumentEmbedding>;
 };
 
@@ -50,22 +38,6 @@ export type ChatMessageDocumentEmbedding = {
   updatedAt: string;
   chatHistory?: ChatMessage | null;
   embeddingDocument?: ChatDocumentEmbedding | null;
-};
-
-export type ChatLlmModel = {
-  id: string;
-  provider: string;
-  model: string;
-  temperature: number | null;
-  chunkSize: number | null;
-  startTime: string | null;
-  endTime: string | null;
-  status: string;
-  lastRequestId: string | null;
-  isActive: boolean | null;
-  createdAt: string;
-  updatedAt: string;
-  chatLlmRequest?: ChatLlmRequest | null;
 };
 
 export type ChatLlmRequest = {
@@ -86,7 +58,6 @@ export type ChatLlmRequest = {
   updatedAt: string;
   dialog?: ChatDialog | null;
   history?: ChatMessage | null;
-  ChatLlmModel?: Array<ChatLlmModel>;
 };
 
 export type ChatMessage = {
@@ -271,6 +242,8 @@ export type CreateChatDocumentEmbeddingDto = {
     [key: string]: unknown;
   } | null;
   contentHash: string;
+  provider?: string | null;
+  model?: string | null;
 };
 
 export type ChatDocumentEmbeddingDto = {
@@ -281,6 +254,8 @@ export type ChatDocumentEmbeddingDto = {
     [key: string]: unknown;
   } | null;
   contentHash: string;
+  provider: string | null;
+  model: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -292,6 +267,8 @@ export type UpdateChatDocumentEmbeddingDto = {
     [key: string]: unknown;
   } | null;
   contentHash?: string;
+  provider?: string | null;
+  model?: string | null;
 };
 
 export type FindManyChatDialogResponseMeta = {
@@ -465,6 +442,21 @@ export type UpdateChatLlmRequestDto = {
   errorMessage?: string | null;
 };
 
+export type ChatLlmModel = {
+  id: string;
+  provider: string;
+  model: string;
+  temperature: number | null;
+  chunkSize: number | null;
+  startTime: string | null;
+  endTime: string | null;
+  status: string;
+  lastRequestId: string | null;
+  isActive: boolean | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type FindManyChatLlmModelResponseMeta = {
   curPage?: number;
   perPage?: number;
@@ -483,6 +475,7 @@ export type CreateChatLlmModelDto = {
   chunkSize?: number | null;
   startTime?: string | null;
   endTime?: string | null;
+  lastRequestId?: string | null;
   isActive?: boolean | null;
 };
 
@@ -495,6 +488,7 @@ export type ChatLlmModelDto = {
   startTime: string | null;
   endTime: string | null;
   status: string;
+  lastRequestId: string | null;
   isActive: boolean | null;
   createdAt: string;
   updatedAt: string;
@@ -507,7 +501,19 @@ export type UpdateChatLlmModelDto = {
   chunkSize?: number | null;
   startTime?: string | null;
   endTime?: string | null;
+  lastRequestId?: string | null;
   isActive?: boolean | null;
+};
+
+export type ChatEmbeddingModel = {
+  id: string;
+  name: string;
+  provider: string;
+  model: string;
+  dimension: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type FindManyChatEmbeddingModelResponseMeta = {

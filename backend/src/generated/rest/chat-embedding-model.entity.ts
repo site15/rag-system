@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ChatDocumentEmbedding } from './chat-document-embedding.entity';
 
 export class ChatEmbeddingModel {
   @ApiProperty({
@@ -37,10 +36,4 @@ export class ChatEmbeddingModel {
     format: 'date-time',
   })
   updatedAt!: Date;
-  @ApiProperty({
-    type: () => ChatDocumentEmbedding,
-    isArray: true,
-    required: false,
-  })
-  chatDocumentEmbeddings?: ChatDocumentEmbedding[];
 }

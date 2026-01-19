@@ -42,6 +42,11 @@ export class ChatLlmModelDto {
   })
   status!: string;
   @ApiProperty({
+    type: 'string',
+    nullable: true,
+  })
+  lastRequestId!: string | null;
+  @ApiProperty({
     type: 'boolean',
     nullable: true,
   })

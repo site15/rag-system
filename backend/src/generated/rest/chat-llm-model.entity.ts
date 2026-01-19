@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ChatLlmRequest } from './chat-llm-request.entity';
 
 export class ChatLlmModel {
   @ApiProperty({
@@ -62,10 +61,4 @@ export class ChatLlmModel {
     format: 'date-time',
   })
   updatedAt!: Date;
-  @ApiProperty({
-    type: () => ChatLlmRequest,
-    required: false,
-    nullable: true,
-  })
-  chatLlmRequest?: ChatLlmRequest | null;
 }

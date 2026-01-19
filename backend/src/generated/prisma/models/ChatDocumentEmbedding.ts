@@ -29,7 +29,8 @@ export type ChatDocumentEmbeddingMinAggregateOutputType = {
   content: string | null;
   graphContent: string | null;
   contentHash: string | null;
-  embeddingModelId: string | null;
+  provider: string | null;
+  model: string | null;
   createdAt: Date | null;
   updatedAt: Date | null;
 };
@@ -39,7 +40,8 @@ export type ChatDocumentEmbeddingMaxAggregateOutputType = {
   content: string | null;
   graphContent: string | null;
   contentHash: string | null;
-  embeddingModelId: string | null;
+  provider: string | null;
+  model: string | null;
   createdAt: Date | null;
   updatedAt: Date | null;
 };
@@ -50,7 +52,8 @@ export type ChatDocumentEmbeddingCountAggregateOutputType = {
   graphContent: number;
   metadata: number;
   contentHash: number;
-  embeddingModelId: number;
+  provider: number;
+  model: number;
   createdAt: number;
   updatedAt: number;
   _all: number;
@@ -61,7 +64,8 @@ export type ChatDocumentEmbeddingMinAggregateInputType = {
   content?: true;
   graphContent?: true;
   contentHash?: true;
-  embeddingModelId?: true;
+  provider?: true;
+  model?: true;
   createdAt?: true;
   updatedAt?: true;
 };
@@ -71,7 +75,8 @@ export type ChatDocumentEmbeddingMaxAggregateInputType = {
   content?: true;
   graphContent?: true;
   contentHash?: true;
-  embeddingModelId?: true;
+  provider?: true;
+  model?: true;
   createdAt?: true;
   updatedAt?: true;
 };
@@ -82,7 +87,8 @@ export type ChatDocumentEmbeddingCountAggregateInputType = {
   graphContent?: true;
   metadata?: true;
   contentHash?: true;
-  embeddingModelId?: true;
+  provider?: true;
+  model?: true;
   createdAt?: true;
   updatedAt?: true;
   _all?: true;
@@ -179,7 +185,8 @@ export type ChatDocumentEmbeddingGroupByOutputType = {
   graphContent: string | null;
   metadata: runtime.JsonValue | null;
   contentHash: string;
-  embeddingModelId: string | null;
+  provider: string | null;
+  model: string | null;
   createdAt: Date;
   updatedAt: Date;
   _count: ChatDocumentEmbeddingCountAggregateOutputType | null;
@@ -221,16 +228,13 @@ export type ChatDocumentEmbeddingWhereInput = {
     | null;
   metadata?: Prisma.JsonNullableFilter<'ChatDocumentEmbedding'>;
   contentHash?: Prisma.StringFilter<'ChatDocumentEmbedding'> | string;
-  embeddingModelId?:
-    | Prisma.UuidNullableFilter<'ChatDocumentEmbedding'>
+  provider?:
+    | Prisma.StringNullableFilter<'ChatDocumentEmbedding'>
     | string
     | null;
+  model?: Prisma.StringNullableFilter<'ChatDocumentEmbedding'> | string | null;
   createdAt?: Prisma.DateTimeFilter<'ChatDocumentEmbedding'> | Date | string;
   updatedAt?: Prisma.DateTimeFilter<'ChatDocumentEmbedding'> | Date | string;
-  embeddingModel?: Prisma.XOR<
-    Prisma.ChatEmbeddingModelNullableScalarRelationFilter,
-    Prisma.ChatEmbeddingModelWhereInput
-  > | null;
   ChatMessageDocumentEmbedding?: Prisma.ChatMessageDocumentEmbeddingListRelationFilter;
 };
 
@@ -240,10 +244,10 @@ export type ChatDocumentEmbeddingOrderByWithRelationInput = {
   graphContent?: Prisma.SortOrderInput | Prisma.SortOrder;
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder;
   contentHash?: Prisma.SortOrder;
-  embeddingModelId?: Prisma.SortOrderInput | Prisma.SortOrder;
+  provider?: Prisma.SortOrderInput | Prisma.SortOrder;
+  model?: Prisma.SortOrderInput | Prisma.SortOrder;
   createdAt?: Prisma.SortOrder;
   updatedAt?: Prisma.SortOrder;
-  embeddingModel?: Prisma.ChatEmbeddingModelOrderByWithRelationInput;
   ChatMessageDocumentEmbedding?: Prisma.ChatMessageDocumentEmbeddingOrderByRelationAggregateInput;
 };
 
@@ -264,16 +268,16 @@ export type ChatDocumentEmbeddingWhereUniqueInput = Prisma.AtLeast<
       | null;
     metadata?: Prisma.JsonNullableFilter<'ChatDocumentEmbedding'>;
     contentHash?: Prisma.StringFilter<'ChatDocumentEmbedding'> | string;
-    embeddingModelId?:
-      | Prisma.UuidNullableFilter<'ChatDocumentEmbedding'>
+    provider?:
+      | Prisma.StringNullableFilter<'ChatDocumentEmbedding'>
+      | string
+      | null;
+    model?:
+      | Prisma.StringNullableFilter<'ChatDocumentEmbedding'>
       | string
       | null;
     createdAt?: Prisma.DateTimeFilter<'ChatDocumentEmbedding'> | Date | string;
     updatedAt?: Prisma.DateTimeFilter<'ChatDocumentEmbedding'> | Date | string;
-    embeddingModel?: Prisma.XOR<
-      Prisma.ChatEmbeddingModelNullableScalarRelationFilter,
-      Prisma.ChatEmbeddingModelWhereInput
-    > | null;
     ChatMessageDocumentEmbedding?: Prisma.ChatMessageDocumentEmbeddingListRelationFilter;
   },
   'id'
@@ -285,7 +289,8 @@ export type ChatDocumentEmbeddingOrderByWithAggregationInput = {
   graphContent?: Prisma.SortOrderInput | Prisma.SortOrder;
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder;
   contentHash?: Prisma.SortOrder;
-  embeddingModelId?: Prisma.SortOrderInput | Prisma.SortOrder;
+  provider?: Prisma.SortOrderInput | Prisma.SortOrder;
+  model?: Prisma.SortOrderInput | Prisma.SortOrder;
   createdAt?: Prisma.SortOrder;
   updatedAt?: Prisma.SortOrder;
   _count?: Prisma.ChatDocumentEmbeddingCountOrderByAggregateInput;
@@ -311,8 +316,12 @@ export type ChatDocumentEmbeddingScalarWhereWithAggregatesInput = {
   contentHash?:
     | Prisma.StringWithAggregatesFilter<'ChatDocumentEmbedding'>
     | string;
-  embeddingModelId?:
-    | Prisma.UuidNullableWithAggregatesFilter<'ChatDocumentEmbedding'>
+  provider?:
+    | Prisma.StringNullableWithAggregatesFilter<'ChatDocumentEmbedding'>
+    | string
+    | null;
+  model?:
+    | Prisma.StringNullableWithAggregatesFilter<'ChatDocumentEmbedding'>
     | string
     | null;
   createdAt?:
@@ -331,9 +340,10 @@ export type ChatDocumentEmbeddingCreateInput = {
   graphContent?: string | null;
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   contentHash: string;
+  provider?: string | null;
+  model?: string | null;
   createdAt?: Date | string;
   updatedAt?: Date | string;
-  embeddingModel?: Prisma.ChatEmbeddingModelCreateNestedOneWithoutChatDocumentEmbeddingsInput;
   ChatMessageDocumentEmbedding?: Prisma.ChatMessageDocumentEmbeddingCreateNestedManyWithoutEmbeddingDocumentInput;
 };
 
@@ -343,7 +353,8 @@ export type ChatDocumentEmbeddingUncheckedCreateInput = {
   graphContent?: string | null;
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   contentHash: string;
-  embeddingModelId?: string | null;
+  provider?: string | null;
+  model?: string | null;
   createdAt?: Date | string;
   updatedAt?: Date | string;
   ChatMessageDocumentEmbedding?: Prisma.ChatMessageDocumentEmbeddingUncheckedCreateNestedManyWithoutEmbeddingDocumentInput;
@@ -358,9 +369,10 @@ export type ChatDocumentEmbeddingUpdateInput = {
     | null;
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   contentHash?: Prisma.StringFieldUpdateOperationsInput | string;
+  provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-  embeddingModel?: Prisma.ChatEmbeddingModelUpdateOneWithoutChatDocumentEmbeddingsNestedInput;
   ChatMessageDocumentEmbedding?: Prisma.ChatMessageDocumentEmbeddingUpdateManyWithoutEmbeddingDocumentNestedInput;
 };
 
@@ -373,10 +385,8 @@ export type ChatDocumentEmbeddingUncheckedUpdateInput = {
     | null;
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   contentHash?: Prisma.StringFieldUpdateOperationsInput | string;
-  embeddingModelId?:
-    | Prisma.NullableStringFieldUpdateOperationsInput
-    | string
-    | null;
+  provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   ChatMessageDocumentEmbedding?: Prisma.ChatMessageDocumentEmbeddingUncheckedUpdateManyWithoutEmbeddingDocumentNestedInput;
@@ -388,7 +398,8 @@ export type ChatDocumentEmbeddingCreateManyInput = {
   graphContent?: string | null;
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   contentHash: string;
-  embeddingModelId?: string | null;
+  provider?: string | null;
+  model?: string | null;
   createdAt?: Date | string;
   updatedAt?: Date | string;
 };
@@ -402,6 +413,8 @@ export type ChatDocumentEmbeddingUpdateManyMutationInput = {
     | null;
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   contentHash?: Prisma.StringFieldUpdateOperationsInput | string;
+  provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
@@ -415,10 +428,8 @@ export type ChatDocumentEmbeddingUncheckedUpdateManyInput = {
     | null;
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   contentHash?: Prisma.StringFieldUpdateOperationsInput | string;
-  embeddingModelId?:
-    | Prisma.NullableStringFieldUpdateOperationsInput
-    | string
-    | null;
+  provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
@@ -429,7 +440,8 @@ export type ChatDocumentEmbeddingCountOrderByAggregateInput = {
   graphContent?: Prisma.SortOrder;
   metadata?: Prisma.SortOrder;
   contentHash?: Prisma.SortOrder;
-  embeddingModelId?: Prisma.SortOrder;
+  provider?: Prisma.SortOrder;
+  model?: Prisma.SortOrder;
   createdAt?: Prisma.SortOrder;
   updatedAt?: Prisma.SortOrder;
 };
@@ -439,7 +451,8 @@ export type ChatDocumentEmbeddingMaxOrderByAggregateInput = {
   content?: Prisma.SortOrder;
   graphContent?: Prisma.SortOrder;
   contentHash?: Prisma.SortOrder;
-  embeddingModelId?: Prisma.SortOrder;
+  provider?: Prisma.SortOrder;
+  model?: Prisma.SortOrder;
   createdAt?: Prisma.SortOrder;
   updatedAt?: Prisma.SortOrder;
 };
@@ -449,7 +462,8 @@ export type ChatDocumentEmbeddingMinOrderByAggregateInput = {
   content?: Prisma.SortOrder;
   graphContent?: Prisma.SortOrder;
   contentHash?: Prisma.SortOrder;
-  embeddingModelId?: Prisma.SortOrder;
+  provider?: Prisma.SortOrder;
+  model?: Prisma.SortOrder;
   createdAt?: Prisma.SortOrder;
   updatedAt?: Prisma.SortOrder;
 };
@@ -457,16 +471,6 @@ export type ChatDocumentEmbeddingMinOrderByAggregateInput = {
 export type ChatDocumentEmbeddingNullableScalarRelationFilter = {
   is?: Prisma.ChatDocumentEmbeddingWhereInput | null;
   isNot?: Prisma.ChatDocumentEmbeddingWhereInput | null;
-};
-
-export type ChatDocumentEmbeddingListRelationFilter = {
-  every?: Prisma.ChatDocumentEmbeddingWhereInput;
-  some?: Prisma.ChatDocumentEmbeddingWhereInput;
-  none?: Prisma.ChatDocumentEmbeddingWhereInput;
-};
-
-export type ChatDocumentEmbeddingOrderByRelationAggregateInput = {
-  _count?: Prisma.SortOrder;
 };
 
 export type ChatDocumentEmbeddingCreateNestedOneWithoutChatMessageDocumentEmbeddingInput =
@@ -499,118 +503,6 @@ export type ChatDocumentEmbeddingUpdateOneWithoutChatMessageDocumentEmbeddingNes
     >;
   };
 
-export type ChatDocumentEmbeddingCreateNestedManyWithoutEmbeddingModelInput = {
-  create?:
-    | Prisma.XOR<
-        Prisma.ChatDocumentEmbeddingCreateWithoutEmbeddingModelInput,
-        Prisma.ChatDocumentEmbeddingUncheckedCreateWithoutEmbeddingModelInput
-      >
-    | Prisma.ChatDocumentEmbeddingCreateWithoutEmbeddingModelInput[]
-    | Prisma.ChatDocumentEmbeddingUncheckedCreateWithoutEmbeddingModelInput[];
-  connectOrCreate?:
-    | Prisma.ChatDocumentEmbeddingCreateOrConnectWithoutEmbeddingModelInput
-    | Prisma.ChatDocumentEmbeddingCreateOrConnectWithoutEmbeddingModelInput[];
-  createMany?: Prisma.ChatDocumentEmbeddingCreateManyEmbeddingModelInputEnvelope;
-  connect?:
-    | Prisma.ChatDocumentEmbeddingWhereUniqueInput
-    | Prisma.ChatDocumentEmbeddingWhereUniqueInput[];
-};
-
-export type ChatDocumentEmbeddingUncheckedCreateNestedManyWithoutEmbeddingModelInput =
-  {
-    create?:
-      | Prisma.XOR<
-          Prisma.ChatDocumentEmbeddingCreateWithoutEmbeddingModelInput,
-          Prisma.ChatDocumentEmbeddingUncheckedCreateWithoutEmbeddingModelInput
-        >
-      | Prisma.ChatDocumentEmbeddingCreateWithoutEmbeddingModelInput[]
-      | Prisma.ChatDocumentEmbeddingUncheckedCreateWithoutEmbeddingModelInput[];
-    connectOrCreate?:
-      | Prisma.ChatDocumentEmbeddingCreateOrConnectWithoutEmbeddingModelInput
-      | Prisma.ChatDocumentEmbeddingCreateOrConnectWithoutEmbeddingModelInput[];
-    createMany?: Prisma.ChatDocumentEmbeddingCreateManyEmbeddingModelInputEnvelope;
-    connect?:
-      | Prisma.ChatDocumentEmbeddingWhereUniqueInput
-      | Prisma.ChatDocumentEmbeddingWhereUniqueInput[];
-  };
-
-export type ChatDocumentEmbeddingUpdateManyWithoutEmbeddingModelNestedInput = {
-  create?:
-    | Prisma.XOR<
-        Prisma.ChatDocumentEmbeddingCreateWithoutEmbeddingModelInput,
-        Prisma.ChatDocumentEmbeddingUncheckedCreateWithoutEmbeddingModelInput
-      >
-    | Prisma.ChatDocumentEmbeddingCreateWithoutEmbeddingModelInput[]
-    | Prisma.ChatDocumentEmbeddingUncheckedCreateWithoutEmbeddingModelInput[];
-  connectOrCreate?:
-    | Prisma.ChatDocumentEmbeddingCreateOrConnectWithoutEmbeddingModelInput
-    | Prisma.ChatDocumentEmbeddingCreateOrConnectWithoutEmbeddingModelInput[];
-  upsert?:
-    | Prisma.ChatDocumentEmbeddingUpsertWithWhereUniqueWithoutEmbeddingModelInput
-    | Prisma.ChatDocumentEmbeddingUpsertWithWhereUniqueWithoutEmbeddingModelInput[];
-  createMany?: Prisma.ChatDocumentEmbeddingCreateManyEmbeddingModelInputEnvelope;
-  set?:
-    | Prisma.ChatDocumentEmbeddingWhereUniqueInput
-    | Prisma.ChatDocumentEmbeddingWhereUniqueInput[];
-  disconnect?:
-    | Prisma.ChatDocumentEmbeddingWhereUniqueInput
-    | Prisma.ChatDocumentEmbeddingWhereUniqueInput[];
-  delete?:
-    | Prisma.ChatDocumentEmbeddingWhereUniqueInput
-    | Prisma.ChatDocumentEmbeddingWhereUniqueInput[];
-  connect?:
-    | Prisma.ChatDocumentEmbeddingWhereUniqueInput
-    | Prisma.ChatDocumentEmbeddingWhereUniqueInput[];
-  update?:
-    | Prisma.ChatDocumentEmbeddingUpdateWithWhereUniqueWithoutEmbeddingModelInput
-    | Prisma.ChatDocumentEmbeddingUpdateWithWhereUniqueWithoutEmbeddingModelInput[];
-  updateMany?:
-    | Prisma.ChatDocumentEmbeddingUpdateManyWithWhereWithoutEmbeddingModelInput
-    | Prisma.ChatDocumentEmbeddingUpdateManyWithWhereWithoutEmbeddingModelInput[];
-  deleteMany?:
-    | Prisma.ChatDocumentEmbeddingScalarWhereInput
-    | Prisma.ChatDocumentEmbeddingScalarWhereInput[];
-};
-
-export type ChatDocumentEmbeddingUncheckedUpdateManyWithoutEmbeddingModelNestedInput =
-  {
-    create?:
-      | Prisma.XOR<
-          Prisma.ChatDocumentEmbeddingCreateWithoutEmbeddingModelInput,
-          Prisma.ChatDocumentEmbeddingUncheckedCreateWithoutEmbeddingModelInput
-        >
-      | Prisma.ChatDocumentEmbeddingCreateWithoutEmbeddingModelInput[]
-      | Prisma.ChatDocumentEmbeddingUncheckedCreateWithoutEmbeddingModelInput[];
-    connectOrCreate?:
-      | Prisma.ChatDocumentEmbeddingCreateOrConnectWithoutEmbeddingModelInput
-      | Prisma.ChatDocumentEmbeddingCreateOrConnectWithoutEmbeddingModelInput[];
-    upsert?:
-      | Prisma.ChatDocumentEmbeddingUpsertWithWhereUniqueWithoutEmbeddingModelInput
-      | Prisma.ChatDocumentEmbeddingUpsertWithWhereUniqueWithoutEmbeddingModelInput[];
-    createMany?: Prisma.ChatDocumentEmbeddingCreateManyEmbeddingModelInputEnvelope;
-    set?:
-      | Prisma.ChatDocumentEmbeddingWhereUniqueInput
-      | Prisma.ChatDocumentEmbeddingWhereUniqueInput[];
-    disconnect?:
-      | Prisma.ChatDocumentEmbeddingWhereUniqueInput
-      | Prisma.ChatDocumentEmbeddingWhereUniqueInput[];
-    delete?:
-      | Prisma.ChatDocumentEmbeddingWhereUniqueInput
-      | Prisma.ChatDocumentEmbeddingWhereUniqueInput[];
-    connect?:
-      | Prisma.ChatDocumentEmbeddingWhereUniqueInput
-      | Prisma.ChatDocumentEmbeddingWhereUniqueInput[];
-    update?:
-      | Prisma.ChatDocumentEmbeddingUpdateWithWhereUniqueWithoutEmbeddingModelInput
-      | Prisma.ChatDocumentEmbeddingUpdateWithWhereUniqueWithoutEmbeddingModelInput[];
-    updateMany?:
-      | Prisma.ChatDocumentEmbeddingUpdateManyWithWhereWithoutEmbeddingModelInput
-      | Prisma.ChatDocumentEmbeddingUpdateManyWithWhereWithoutEmbeddingModelInput[];
-    deleteMany?:
-      | Prisma.ChatDocumentEmbeddingScalarWhereInput
-      | Prisma.ChatDocumentEmbeddingScalarWhereInput[];
-  };
-
 export type ChatDocumentEmbeddingCreateWithoutChatMessageDocumentEmbeddingInput =
   {
     id?: string;
@@ -618,9 +510,10 @@ export type ChatDocumentEmbeddingCreateWithoutChatMessageDocumentEmbeddingInput 
     graphContent?: string | null;
     metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     contentHash: string;
+    provider?: string | null;
+    model?: string | null;
     createdAt?: Date | string;
     updatedAt?: Date | string;
-    embeddingModel?: Prisma.ChatEmbeddingModelCreateNestedOneWithoutChatDocumentEmbeddingsInput;
   };
 
 export type ChatDocumentEmbeddingUncheckedCreateWithoutChatMessageDocumentEmbeddingInput =
@@ -630,7 +523,8 @@ export type ChatDocumentEmbeddingUncheckedCreateWithoutChatMessageDocumentEmbedd
     graphContent?: string | null;
     metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     contentHash: string;
-    embeddingModelId?: string | null;
+    provider?: string | null;
+    model?: string | null;
     createdAt?: Date | string;
     updatedAt?: Date | string;
   };
@@ -676,9 +570,10 @@ export type ChatDocumentEmbeddingUpdateWithoutChatMessageDocumentEmbeddingInput 
       | null;
     metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     contentHash?: Prisma.StringFieldUpdateOperationsInput | string;
+    provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-    embeddingModel?: Prisma.ChatEmbeddingModelUpdateOneWithoutChatDocumentEmbeddingsNestedInput;
   };
 
 export type ChatDocumentEmbeddingUncheckedUpdateWithoutChatMessageDocumentEmbeddingInput =
@@ -691,154 +586,8 @@ export type ChatDocumentEmbeddingUncheckedUpdateWithoutChatMessageDocumentEmbedd
       | null;
     metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     contentHash?: Prisma.StringFieldUpdateOperationsInput | string;
-    embeddingModelId?:
-      | Prisma.NullableStringFieldUpdateOperationsInput
-      | string
-      | null;
-    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-  };
-
-export type ChatDocumentEmbeddingCreateWithoutEmbeddingModelInput = {
-  id?: string;
-  content: string;
-  graphContent?: string | null;
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
-  contentHash: string;
-  createdAt?: Date | string;
-  updatedAt?: Date | string;
-  ChatMessageDocumentEmbedding?: Prisma.ChatMessageDocumentEmbeddingCreateNestedManyWithoutEmbeddingDocumentInput;
-};
-
-export type ChatDocumentEmbeddingUncheckedCreateWithoutEmbeddingModelInput = {
-  id?: string;
-  content: string;
-  graphContent?: string | null;
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
-  contentHash: string;
-  createdAt?: Date | string;
-  updatedAt?: Date | string;
-  ChatMessageDocumentEmbedding?: Prisma.ChatMessageDocumentEmbeddingUncheckedCreateNestedManyWithoutEmbeddingDocumentInput;
-};
-
-export type ChatDocumentEmbeddingCreateOrConnectWithoutEmbeddingModelInput = {
-  where: Prisma.ChatDocumentEmbeddingWhereUniqueInput;
-  create: Prisma.XOR<
-    Prisma.ChatDocumentEmbeddingCreateWithoutEmbeddingModelInput,
-    Prisma.ChatDocumentEmbeddingUncheckedCreateWithoutEmbeddingModelInput
-  >;
-};
-
-export type ChatDocumentEmbeddingCreateManyEmbeddingModelInputEnvelope = {
-  data:
-    | Prisma.ChatDocumentEmbeddingCreateManyEmbeddingModelInput
-    | Prisma.ChatDocumentEmbeddingCreateManyEmbeddingModelInput[];
-  skipDuplicates?: boolean;
-};
-
-export type ChatDocumentEmbeddingUpsertWithWhereUniqueWithoutEmbeddingModelInput =
-  {
-    where: Prisma.ChatDocumentEmbeddingWhereUniqueInput;
-    update: Prisma.XOR<
-      Prisma.ChatDocumentEmbeddingUpdateWithoutEmbeddingModelInput,
-      Prisma.ChatDocumentEmbeddingUncheckedUpdateWithoutEmbeddingModelInput
-    >;
-    create: Prisma.XOR<
-      Prisma.ChatDocumentEmbeddingCreateWithoutEmbeddingModelInput,
-      Prisma.ChatDocumentEmbeddingUncheckedCreateWithoutEmbeddingModelInput
-    >;
-  };
-
-export type ChatDocumentEmbeddingUpdateWithWhereUniqueWithoutEmbeddingModelInput =
-  {
-    where: Prisma.ChatDocumentEmbeddingWhereUniqueInput;
-    data: Prisma.XOR<
-      Prisma.ChatDocumentEmbeddingUpdateWithoutEmbeddingModelInput,
-      Prisma.ChatDocumentEmbeddingUncheckedUpdateWithoutEmbeddingModelInput
-    >;
-  };
-
-export type ChatDocumentEmbeddingUpdateManyWithWhereWithoutEmbeddingModelInput =
-  {
-    where: Prisma.ChatDocumentEmbeddingScalarWhereInput;
-    data: Prisma.XOR<
-      Prisma.ChatDocumentEmbeddingUpdateManyMutationInput,
-      Prisma.ChatDocumentEmbeddingUncheckedUpdateManyWithoutEmbeddingModelInput
-    >;
-  };
-
-export type ChatDocumentEmbeddingScalarWhereInput = {
-  AND?:
-    | Prisma.ChatDocumentEmbeddingScalarWhereInput
-    | Prisma.ChatDocumentEmbeddingScalarWhereInput[];
-  OR?: Prisma.ChatDocumentEmbeddingScalarWhereInput[];
-  NOT?:
-    | Prisma.ChatDocumentEmbeddingScalarWhereInput
-    | Prisma.ChatDocumentEmbeddingScalarWhereInput[];
-  id?: Prisma.UuidFilter<'ChatDocumentEmbedding'> | string;
-  content?: Prisma.StringFilter<'ChatDocumentEmbedding'> | string;
-  graphContent?:
-    | Prisma.StringNullableFilter<'ChatDocumentEmbedding'>
-    | string
-    | null;
-  metadata?: Prisma.JsonNullableFilter<'ChatDocumentEmbedding'>;
-  contentHash?: Prisma.StringFilter<'ChatDocumentEmbedding'> | string;
-  embeddingModelId?:
-    | Prisma.UuidNullableFilter<'ChatDocumentEmbedding'>
-    | string
-    | null;
-  createdAt?: Prisma.DateTimeFilter<'ChatDocumentEmbedding'> | Date | string;
-  updatedAt?: Prisma.DateTimeFilter<'ChatDocumentEmbedding'> | Date | string;
-};
-
-export type ChatDocumentEmbeddingCreateManyEmbeddingModelInput = {
-  id?: string;
-  content: string;
-  graphContent?: string | null;
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
-  contentHash: string;
-  createdAt?: Date | string;
-  updatedAt?: Date | string;
-};
-
-export type ChatDocumentEmbeddingUpdateWithoutEmbeddingModelInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string;
-  content?: Prisma.StringFieldUpdateOperationsInput | string;
-  graphContent?:
-    | Prisma.NullableStringFieldUpdateOperationsInput
-    | string
-    | null;
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
-  contentHash?: Prisma.StringFieldUpdateOperationsInput | string;
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-  ChatMessageDocumentEmbedding?: Prisma.ChatMessageDocumentEmbeddingUpdateManyWithoutEmbeddingDocumentNestedInput;
-};
-
-export type ChatDocumentEmbeddingUncheckedUpdateWithoutEmbeddingModelInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string;
-  content?: Prisma.StringFieldUpdateOperationsInput | string;
-  graphContent?:
-    | Prisma.NullableStringFieldUpdateOperationsInput
-    | string
-    | null;
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
-  contentHash?: Prisma.StringFieldUpdateOperationsInput | string;
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-  ChatMessageDocumentEmbedding?: Prisma.ChatMessageDocumentEmbeddingUncheckedUpdateManyWithoutEmbeddingDocumentNestedInput;
-};
-
-export type ChatDocumentEmbeddingUncheckedUpdateManyWithoutEmbeddingModelInput =
-  {
-    id?: Prisma.StringFieldUpdateOperationsInput | string;
-    content?: Prisma.StringFieldUpdateOperationsInput | string;
-    graphContent?:
-      | Prisma.NullableStringFieldUpdateOperationsInput
-      | string
-      | null;
-    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
-    contentHash?: Prisma.StringFieldUpdateOperationsInput | string;
+    provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   };
@@ -893,12 +642,10 @@ export type ChatDocumentEmbeddingSelect<
     graphContent?: boolean;
     metadata?: boolean;
     contentHash?: boolean;
-    embeddingModelId?: boolean;
+    provider?: boolean;
+    model?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
-    embeddingModel?:
-      | boolean
-      | Prisma.ChatDocumentEmbedding$embeddingModelArgs<ExtArgs>;
     ChatMessageDocumentEmbedding?:
       | boolean
       | Prisma.ChatDocumentEmbedding$ChatMessageDocumentEmbeddingArgs<ExtArgs>;
@@ -919,12 +666,10 @@ export type ChatDocumentEmbeddingSelectCreateManyAndReturn<
     graphContent?: boolean;
     metadata?: boolean;
     contentHash?: boolean;
-    embeddingModelId?: boolean;
+    provider?: boolean;
+    model?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
-    embeddingModel?:
-      | boolean
-      | Prisma.ChatDocumentEmbedding$embeddingModelArgs<ExtArgs>;
   },
   ExtArgs['result']['chatDocumentEmbedding']
 >;
@@ -939,12 +684,10 @@ export type ChatDocumentEmbeddingSelectUpdateManyAndReturn<
     graphContent?: boolean;
     metadata?: boolean;
     contentHash?: boolean;
-    embeddingModelId?: boolean;
+    provider?: boolean;
+    model?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
-    embeddingModel?:
-      | boolean
-      | Prisma.ChatDocumentEmbedding$embeddingModelArgs<ExtArgs>;
   },
   ExtArgs['result']['chatDocumentEmbedding']
 >;
@@ -955,7 +698,8 @@ export type ChatDocumentEmbeddingSelectScalar = {
   graphContent?: boolean;
   metadata?: boolean;
   contentHash?: boolean;
-  embeddingModelId?: boolean;
+  provider?: boolean;
+  model?: boolean;
   createdAt?: boolean;
   updatedAt?: boolean;
 };
@@ -969,7 +713,8 @@ export type ChatDocumentEmbeddingOmit<
   | 'graphContent'
   | 'metadata'
   | 'contentHash'
-  | 'embeddingModelId'
+  | 'provider'
+  | 'model'
   | 'createdAt'
   | 'updatedAt',
   ExtArgs['result']['chatDocumentEmbedding']
@@ -978,9 +723,6 @@ export type ChatDocumentEmbeddingInclude<
   ExtArgs extends runtime.Types.Extensions.InternalArgs =
     runtime.Types.Extensions.DefaultArgs,
 > = {
-  embeddingModel?:
-    | boolean
-    | Prisma.ChatDocumentEmbedding$embeddingModelArgs<ExtArgs>;
   ChatMessageDocumentEmbedding?:
     | boolean
     | Prisma.ChatDocumentEmbedding$ChatMessageDocumentEmbeddingArgs<ExtArgs>;
@@ -991,19 +733,11 @@ export type ChatDocumentEmbeddingInclude<
 export type ChatDocumentEmbeddingIncludeCreateManyAndReturn<
   ExtArgs extends runtime.Types.Extensions.InternalArgs =
     runtime.Types.Extensions.DefaultArgs,
-> = {
-  embeddingModel?:
-    | boolean
-    | Prisma.ChatDocumentEmbedding$embeddingModelArgs<ExtArgs>;
-};
+> = {};
 export type ChatDocumentEmbeddingIncludeUpdateManyAndReturn<
   ExtArgs extends runtime.Types.Extensions.InternalArgs =
     runtime.Types.Extensions.DefaultArgs,
-> = {
-  embeddingModel?:
-    | boolean
-    | Prisma.ChatDocumentEmbedding$embeddingModelArgs<ExtArgs>;
-};
+> = {};
 
 export type $ChatDocumentEmbeddingPayload<
   ExtArgs extends runtime.Types.Extensions.InternalArgs =
@@ -1011,7 +745,6 @@ export type $ChatDocumentEmbeddingPayload<
 > = {
   name: 'ChatDocumentEmbedding';
   objects: {
-    embeddingModel: Prisma.$ChatEmbeddingModelPayload<ExtArgs> | null;
     ChatMessageDocumentEmbedding: Prisma.$ChatMessageDocumentEmbeddingPayload<ExtArgs>[];
   };
   scalars: runtime.Types.Extensions.GetPayloadResult<
@@ -1021,7 +754,8 @@ export type $ChatDocumentEmbeddingPayload<
       graphContent: string | null;
       metadata: runtime.JsonValue | null;
       contentHash: string;
-      embeddingModelId: string | null;
+      provider: string | null;
+      model: string | null;
       createdAt: Date;
       updatedAt: Date;
     },
@@ -1596,24 +1330,6 @@ export interface Prisma__ChatDocumentEmbeddingClient<
   GlobalOmitOptions = {},
 > extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: 'PrismaPromise';
-  embeddingModel<
-    T extends Prisma.ChatDocumentEmbedding$embeddingModelArgs<ExtArgs> = {},
-  >(
-    args?: Prisma.Subset<
-      T,
-      Prisma.ChatDocumentEmbedding$embeddingModelArgs<ExtArgs>
-    >,
-  ): Prisma.Prisma__ChatEmbeddingModelClient<
-    runtime.Types.Result.GetResult<
-      Prisma.$ChatEmbeddingModelPayload<ExtArgs>,
-      T,
-      'findUniqueOrThrow',
-      GlobalOmitOptions
-    > | null,
-    null,
-    ExtArgs,
-    GlobalOmitOptions
-  >;
   ChatMessageDocumentEmbedding<
     T extends
       Prisma.ChatDocumentEmbedding$ChatMessageDocumentEmbeddingArgs<ExtArgs> =
@@ -1679,7 +1395,8 @@ export interface ChatDocumentEmbeddingFieldRefs {
   readonly graphContent: Prisma.FieldRef<'ChatDocumentEmbedding', 'String'>;
   readonly metadata: Prisma.FieldRef<'ChatDocumentEmbedding', 'Json'>;
   readonly contentHash: Prisma.FieldRef<'ChatDocumentEmbedding', 'String'>;
-  readonly embeddingModelId: Prisma.FieldRef<'ChatDocumentEmbedding', 'String'>;
+  readonly provider: Prisma.FieldRef<'ChatDocumentEmbedding', 'String'>;
+  readonly model: Prisma.FieldRef<'ChatDocumentEmbedding', 'String'>;
   readonly createdAt: Prisma.FieldRef<'ChatDocumentEmbedding', 'DateTime'>;
   readonly updatedAt: Prisma.FieldRef<'ChatDocumentEmbedding', 'DateTime'>;
 }
@@ -1973,10 +1690,6 @@ export type ChatDocumentEmbeddingCreateManyAndReturnArgs<
     | Prisma.ChatDocumentEmbeddingCreateManyInput
     | Prisma.ChatDocumentEmbeddingCreateManyInput[];
   skipDuplicates?: boolean;
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.ChatDocumentEmbeddingIncludeCreateManyAndReturn<ExtArgs> | null;
 };
 
 /**
@@ -2065,10 +1778,6 @@ export type ChatDocumentEmbeddingUpdateManyAndReturnArgs<
    * Limit how many ChatDocumentEmbeddings to update.
    */
   limit?: number;
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.ChatDocumentEmbeddingIncludeUpdateManyAndReturn<ExtArgs> | null;
 };
 
 /**
@@ -2150,28 +1859,6 @@ export type ChatDocumentEmbeddingDeleteManyArgs<
    * Limit how many ChatDocumentEmbeddings to delete.
    */
   limit?: number;
-};
-
-/**
- * ChatDocumentEmbedding.embeddingModel
- */
-export type ChatDocumentEmbedding$embeddingModelArgs<
-  ExtArgs extends runtime.Types.Extensions.InternalArgs =
-    runtime.Types.Extensions.DefaultArgs,
-> = {
-  /**
-   * Select specific fields to fetch from the ChatEmbeddingModel
-   */
-  select?: Prisma.ChatEmbeddingModelSelect<ExtArgs> | null;
-  /**
-   * Omit specific fields from the ChatEmbeddingModel
-   */
-  omit?: Prisma.ChatEmbeddingModelOmit<ExtArgs> | null;
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.ChatEmbeddingModelInclude<ExtArgs> | null;
-  where?: Prisma.ChatEmbeddingModelWhereInput;
 };
 
 /**

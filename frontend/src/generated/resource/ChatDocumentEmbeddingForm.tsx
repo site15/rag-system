@@ -51,6 +51,10 @@ export const ChatDocumentEmbeddingEditForm = () => (
       <TextInput
         source={Prisma.ChatDocumentEmbeddingScalarFieldEnum.contentHash}
       />
+      <TextInput
+        source={Prisma.ChatDocumentEmbeddingScalarFieldEnum.provider}
+      />
+      <TextInput source={Prisma.ChatDocumentEmbeddingScalarFieldEnum.model} />
     </SimpleForm>
   </Edit>
 );
@@ -81,7 +85,11 @@ export const ChatDocumentEmbeddingShowForm = () => (
         readOnly={true}
       />
       <TextInput
-        source={Prisma.ChatDocumentEmbeddingScalarFieldEnum.embeddingModelId}
+        source={Prisma.ChatDocumentEmbeddingScalarFieldEnum.provider}
+        readOnly={true}
+      />
+      <TextInput
+        source={Prisma.ChatDocumentEmbeddingScalarFieldEnum.model}
         readOnly={true}
       />
       <DateTimeInput
@@ -113,6 +121,10 @@ export const ChatDocumentEmbeddingCreateForm = () => (
       <TextInput
         source={Prisma.ChatDocumentEmbeddingScalarFieldEnum.contentHash}
       />
+      <TextInput
+        source={Prisma.ChatDocumentEmbeddingScalarFieldEnum.provider}
+      />
+      <TextInput source={Prisma.ChatDocumentEmbeddingScalarFieldEnum.model} />
     </SimpleForm>
   </Create>
 );

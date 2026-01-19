@@ -32,4 +32,20 @@ export class UpdateChatDocumentEmbeddingDto {
   @IsOptional()
   @IsString()
   contentHash?: string;
+  @ApiProperty({
+    type: 'string',
+    required: false,
+    nullable: true,
+  })
+  @IsOptional()
+  @IsString()
+  provider?: string | null;
+  @ApiProperty({
+    type: 'string',
+    required: false,
+    nullable: true,
+  })
+  @IsOptional()
+  @IsString()
+  model?: string | null;
 }

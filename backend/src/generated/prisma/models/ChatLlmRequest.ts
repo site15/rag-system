@@ -331,7 +331,6 @@ export type ChatLlmRequestWhereInput = {
     Prisma.ChatMessageNullableScalarRelationFilter,
     Prisma.ChatMessageWhereInput
   > | null;
-  ChatLlmModel?: Prisma.ChatLlmModelListRelationFilter;
 };
 
 export type ChatLlmRequestOrderByWithRelationInput = {
@@ -352,7 +351,6 @@ export type ChatLlmRequestOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder;
   dialog?: Prisma.ChatDialogOrderByWithRelationInput;
   history?: Prisma.ChatMessageOrderByWithRelationInput;
-  ChatLlmModel?: Prisma.ChatLlmModelOrderByRelationAggregateInput;
 };
 
 export type ChatLlmRequestWhereUniqueInput = Prisma.AtLeast<
@@ -392,7 +390,6 @@ export type ChatLlmRequestWhereUniqueInput = Prisma.AtLeast<
       Prisma.ChatMessageNullableScalarRelationFilter,
       Prisma.ChatMessageWhereInput
     > | null;
-    ChatLlmModel?: Prisma.ChatLlmModelListRelationFilter;
   },
   'id'
 >;
@@ -487,7 +484,6 @@ export type ChatLlmRequestCreateInput = {
   updatedAt?: Date | string;
   dialog?: Prisma.ChatDialogCreateNestedOneWithoutChatLlmRequestInput;
   history?: Prisma.ChatMessageCreateNestedOneWithoutChatLlmRequestInput;
-  ChatLlmModel?: Prisma.ChatLlmModelCreateNestedManyWithoutChatLlmRequestInput;
 };
 
 export type ChatLlmRequestUncheckedCreateInput = {
@@ -511,7 +507,6 @@ export type ChatLlmRequestUncheckedCreateInput = {
   messageId?: string | null;
   createdAt?: Date | string;
   updatedAt?: Date | string;
-  ChatLlmModel?: Prisma.ChatLlmModelUncheckedCreateNestedManyWithoutChatLlmRequestInput;
 };
 
 export type ChatLlmRequestUpdateInput = {
@@ -539,7 +534,6 @@ export type ChatLlmRequestUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   dialog?: Prisma.ChatDialogUpdateOneWithoutChatLlmRequestNestedInput;
   history?: Prisma.ChatMessageUpdateOneWithoutChatLlmRequestNestedInput;
-  ChatLlmModel?: Prisma.ChatLlmModelUpdateManyWithoutChatLlmRequestNestedInput;
 };
 
 export type ChatLlmRequestUncheckedUpdateInput = {
@@ -567,7 +561,6 @@ export type ChatLlmRequestUncheckedUpdateInput = {
   messageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-  ChatLlmModel?: Prisma.ChatLlmModelUncheckedUpdateManyWithoutChatLlmRequestNestedInput;
 };
 
 export type ChatLlmRequestCreateManyInput = {
@@ -721,11 +714,6 @@ export type ChatLlmRequestSumOrderByAggregateInput = {
   responseLength?: Prisma.SortOrder;
   executionTimeMs?: Prisma.SortOrder;
   temperature?: Prisma.SortOrder;
-};
-
-export type ChatLlmRequestNullableScalarRelationFilter = {
-  is?: Prisma.ChatLlmRequestWhereInput | null;
-  isNot?: Prisma.ChatLlmRequestWhereInput | null;
 };
 
 export type ChatLlmRequestCreateNestedManyWithoutDialogInput = {
@@ -948,34 +936,6 @@ export type ChatLlmRequestUncheckedUpdateManyWithoutHistoryNestedInput = {
     | Prisma.ChatLlmRequestScalarWhereInput[];
 };
 
-export type ChatLlmRequestCreateNestedOneWithoutChatLlmModelInput = {
-  create?: Prisma.XOR<
-    Prisma.ChatLlmRequestCreateWithoutChatLlmModelInput,
-    Prisma.ChatLlmRequestUncheckedCreateWithoutChatLlmModelInput
-  >;
-  connectOrCreate?: Prisma.ChatLlmRequestCreateOrConnectWithoutChatLlmModelInput;
-  connect?: Prisma.ChatLlmRequestWhereUniqueInput;
-};
-
-export type ChatLlmRequestUpdateOneWithoutChatLlmModelNestedInput = {
-  create?: Prisma.XOR<
-    Prisma.ChatLlmRequestCreateWithoutChatLlmModelInput,
-    Prisma.ChatLlmRequestUncheckedCreateWithoutChatLlmModelInput
-  >;
-  connectOrCreate?: Prisma.ChatLlmRequestCreateOrConnectWithoutChatLlmModelInput;
-  upsert?: Prisma.ChatLlmRequestUpsertWithoutChatLlmModelInput;
-  disconnect?: Prisma.ChatLlmRequestWhereInput | boolean;
-  delete?: Prisma.ChatLlmRequestWhereInput | boolean;
-  connect?: Prisma.ChatLlmRequestWhereUniqueInput;
-  update?: Prisma.XOR<
-    Prisma.XOR<
-      Prisma.ChatLlmRequestUpdateToOneWithWhereWithoutChatLlmModelInput,
-      Prisma.ChatLlmRequestUpdateWithoutChatLlmModelInput
-    >,
-    Prisma.ChatLlmRequestUncheckedUpdateWithoutChatLlmModelInput
-  >;
-};
-
 export type ChatLlmRequestCreateWithoutDialogInput = {
   id?: string;
   request: string;
@@ -996,7 +956,6 @@ export type ChatLlmRequestCreateWithoutDialogInput = {
   createdAt?: Date | string;
   updatedAt?: Date | string;
   history?: Prisma.ChatMessageCreateNestedOneWithoutChatLlmRequestInput;
-  ChatLlmModel?: Prisma.ChatLlmModelCreateNestedManyWithoutChatLlmRequestInput;
 };
 
 export type ChatLlmRequestUncheckedCreateWithoutDialogInput = {
@@ -1019,7 +978,6 @@ export type ChatLlmRequestUncheckedCreateWithoutDialogInput = {
   messageId?: string | null;
   createdAt?: Date | string;
   updatedAt?: Date | string;
-  ChatLlmModel?: Prisma.ChatLlmModelUncheckedCreateNestedManyWithoutChatLlmRequestInput;
 };
 
 export type ChatLlmRequestCreateOrConnectWithoutDialogInput = {
@@ -1116,7 +1074,6 @@ export type ChatLlmRequestCreateWithoutHistoryInput = {
   createdAt?: Date | string;
   updatedAt?: Date | string;
   dialog?: Prisma.ChatDialogCreateNestedOneWithoutChatLlmRequestInput;
-  ChatLlmModel?: Prisma.ChatLlmModelCreateNestedManyWithoutChatLlmRequestInput;
 };
 
 export type ChatLlmRequestUncheckedCreateWithoutHistoryInput = {
@@ -1139,7 +1096,6 @@ export type ChatLlmRequestUncheckedCreateWithoutHistoryInput = {
   dialogId?: string | null;
   createdAt?: Date | string;
   updatedAt?: Date | string;
-  ChatLlmModel?: Prisma.ChatLlmModelUncheckedCreateNestedManyWithoutChatLlmRequestInput;
 };
 
 export type ChatLlmRequestCreateOrConnectWithoutHistoryInput = {
@@ -1183,134 +1139,6 @@ export type ChatLlmRequestUpdateManyWithWhereWithoutHistoryInput = {
     Prisma.ChatLlmRequestUpdateManyMutationInput,
     Prisma.ChatLlmRequestUncheckedUpdateManyWithoutHistoryInput
   >;
-};
-
-export type ChatLlmRequestCreateWithoutChatLlmModelInput = {
-  id?: string;
-  request: string;
-  response: string;
-  requestLength: number;
-  responseLength: number;
-  executionTimeMs: number;
-  provider: string;
-  model: string;
-  temperature?:
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
-  isSuccess?: boolean;
-  errorMessage?: string | null;
-  createdAt?: Date | string;
-  updatedAt?: Date | string;
-  dialog?: Prisma.ChatDialogCreateNestedOneWithoutChatLlmRequestInput;
-  history?: Prisma.ChatMessageCreateNestedOneWithoutChatLlmRequestInput;
-};
-
-export type ChatLlmRequestUncheckedCreateWithoutChatLlmModelInput = {
-  id?: string;
-  request: string;
-  response: string;
-  requestLength: number;
-  responseLength: number;
-  executionTimeMs: number;
-  provider: string;
-  model: string;
-  temperature?:
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
-  isSuccess?: boolean;
-  errorMessage?: string | null;
-  dialogId?: string | null;
-  messageId?: string | null;
-  createdAt?: Date | string;
-  updatedAt?: Date | string;
-};
-
-export type ChatLlmRequestCreateOrConnectWithoutChatLlmModelInput = {
-  where: Prisma.ChatLlmRequestWhereUniqueInput;
-  create: Prisma.XOR<
-    Prisma.ChatLlmRequestCreateWithoutChatLlmModelInput,
-    Prisma.ChatLlmRequestUncheckedCreateWithoutChatLlmModelInput
-  >;
-};
-
-export type ChatLlmRequestUpsertWithoutChatLlmModelInput = {
-  update: Prisma.XOR<
-    Prisma.ChatLlmRequestUpdateWithoutChatLlmModelInput,
-    Prisma.ChatLlmRequestUncheckedUpdateWithoutChatLlmModelInput
-  >;
-  create: Prisma.XOR<
-    Prisma.ChatLlmRequestCreateWithoutChatLlmModelInput,
-    Prisma.ChatLlmRequestUncheckedCreateWithoutChatLlmModelInput
-  >;
-  where?: Prisma.ChatLlmRequestWhereInput;
-};
-
-export type ChatLlmRequestUpdateToOneWithWhereWithoutChatLlmModelInput = {
-  where?: Prisma.ChatLlmRequestWhereInput;
-  data: Prisma.XOR<
-    Prisma.ChatLlmRequestUpdateWithoutChatLlmModelInput,
-    Prisma.ChatLlmRequestUncheckedUpdateWithoutChatLlmModelInput
-  >;
-};
-
-export type ChatLlmRequestUpdateWithoutChatLlmModelInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string;
-  request?: Prisma.StringFieldUpdateOperationsInput | string;
-  response?: Prisma.StringFieldUpdateOperationsInput | string;
-  requestLength?: Prisma.IntFieldUpdateOperationsInput | number;
-  responseLength?: Prisma.IntFieldUpdateOperationsInput | number;
-  executionTimeMs?: Prisma.IntFieldUpdateOperationsInput | number;
-  provider?: Prisma.StringFieldUpdateOperationsInput | string;
-  model?: Prisma.StringFieldUpdateOperationsInput | string;
-  temperature?:
-    | Prisma.NullableDecimalFieldUpdateOperationsInput
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
-  isSuccess?: Prisma.BoolFieldUpdateOperationsInput | boolean;
-  errorMessage?:
-    | Prisma.NullableStringFieldUpdateOperationsInput
-    | string
-    | null;
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-  dialog?: Prisma.ChatDialogUpdateOneWithoutChatLlmRequestNestedInput;
-  history?: Prisma.ChatMessageUpdateOneWithoutChatLlmRequestNestedInput;
-};
-
-export type ChatLlmRequestUncheckedUpdateWithoutChatLlmModelInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string;
-  request?: Prisma.StringFieldUpdateOperationsInput | string;
-  response?: Prisma.StringFieldUpdateOperationsInput | string;
-  requestLength?: Prisma.IntFieldUpdateOperationsInput | number;
-  responseLength?: Prisma.IntFieldUpdateOperationsInput | number;
-  executionTimeMs?: Prisma.IntFieldUpdateOperationsInput | number;
-  provider?: Prisma.StringFieldUpdateOperationsInput | string;
-  model?: Prisma.StringFieldUpdateOperationsInput | string;
-  temperature?:
-    | Prisma.NullableDecimalFieldUpdateOperationsInput
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
-  isSuccess?: Prisma.BoolFieldUpdateOperationsInput | boolean;
-  errorMessage?:
-    | Prisma.NullableStringFieldUpdateOperationsInput
-    | string
-    | null;
-  dialogId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
-  messageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
 
 export type ChatLlmRequestCreateManyDialogInput = {
@@ -1359,7 +1187,6 @@ export type ChatLlmRequestUpdateWithoutDialogInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   history?: Prisma.ChatMessageUpdateOneWithoutChatLlmRequestNestedInput;
-  ChatLlmModel?: Prisma.ChatLlmModelUpdateManyWithoutChatLlmRequestNestedInput;
 };
 
 export type ChatLlmRequestUncheckedUpdateWithoutDialogInput = {
@@ -1386,7 +1213,6 @@ export type ChatLlmRequestUncheckedUpdateWithoutDialogInput = {
   messageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-  ChatLlmModel?: Prisma.ChatLlmModelUncheckedUpdateManyWithoutChatLlmRequestNestedInput;
 };
 
 export type ChatLlmRequestUncheckedUpdateManyWithoutDialogInput = {
@@ -1461,7 +1287,6 @@ export type ChatLlmRequestUpdateWithoutHistoryInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   dialog?: Prisma.ChatDialogUpdateOneWithoutChatLlmRequestNestedInput;
-  ChatLlmModel?: Prisma.ChatLlmModelUpdateManyWithoutChatLlmRequestNestedInput;
 };
 
 export type ChatLlmRequestUncheckedUpdateWithoutHistoryInput = {
@@ -1488,7 +1313,6 @@ export type ChatLlmRequestUncheckedUpdateWithoutHistoryInput = {
   dialogId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-  ChatLlmModel?: Prisma.ChatLlmModelUncheckedUpdateManyWithoutChatLlmRequestNestedInput;
 };
 
 export type ChatLlmRequestUncheckedUpdateManyWithoutHistoryInput = {
@@ -1517,44 +1341,6 @@ export type ChatLlmRequestUncheckedUpdateManyWithoutHistoryInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
 
-/**
- * Count Type ChatLlmRequestCountOutputType
- */
-
-export type ChatLlmRequestCountOutputType = {
-  ChatLlmModel: number;
-};
-
-export type ChatLlmRequestCountOutputTypeSelect<
-  ExtArgs extends runtime.Types.Extensions.InternalArgs =
-    runtime.Types.Extensions.DefaultArgs,
-> = {
-  ChatLlmModel?: boolean | ChatLlmRequestCountOutputTypeCountChatLlmModelArgs;
-};
-
-/**
- * ChatLlmRequestCountOutputType without action
- */
-export type ChatLlmRequestCountOutputTypeDefaultArgs<
-  ExtArgs extends runtime.Types.Extensions.InternalArgs =
-    runtime.Types.Extensions.DefaultArgs,
-> = {
-  /**
-   * Select specific fields to fetch from the ChatLlmRequestCountOutputType
-   */
-  select?: Prisma.ChatLlmRequestCountOutputTypeSelect<ExtArgs> | null;
-};
-
-/**
- * ChatLlmRequestCountOutputType without action
- */
-export type ChatLlmRequestCountOutputTypeCountChatLlmModelArgs<
-  ExtArgs extends runtime.Types.Extensions.InternalArgs =
-    runtime.Types.Extensions.DefaultArgs,
-> = {
-  where?: Prisma.ChatLlmModelWhereInput;
-};
-
 export type ChatLlmRequestSelect<
   ExtArgs extends runtime.Types.Extensions.InternalArgs =
     runtime.Types.Extensions.DefaultArgs,
@@ -1577,8 +1363,6 @@ export type ChatLlmRequestSelect<
     updatedAt?: boolean;
     dialog?: boolean | Prisma.ChatLlmRequest$dialogArgs<ExtArgs>;
     history?: boolean | Prisma.ChatLlmRequest$historyArgs<ExtArgs>;
-    ChatLlmModel?: boolean | Prisma.ChatLlmRequest$ChatLlmModelArgs<ExtArgs>;
-    _count?: boolean | Prisma.ChatLlmRequestCountOutputTypeDefaultArgs<ExtArgs>;
   },
   ExtArgs['result']['chatLlmRequest']
 >;
@@ -1680,8 +1464,6 @@ export type ChatLlmRequestInclude<
 > = {
   dialog?: boolean | Prisma.ChatLlmRequest$dialogArgs<ExtArgs>;
   history?: boolean | Prisma.ChatLlmRequest$historyArgs<ExtArgs>;
-  ChatLlmModel?: boolean | Prisma.ChatLlmRequest$ChatLlmModelArgs<ExtArgs>;
-  _count?: boolean | Prisma.ChatLlmRequestCountOutputTypeDefaultArgs<ExtArgs>;
 };
 export type ChatLlmRequestIncludeCreateManyAndReturn<
   ExtArgs extends runtime.Types.Extensions.InternalArgs =
@@ -1706,7 +1488,6 @@ export type $ChatLlmRequestPayload<
   objects: {
     dialog: Prisma.$ChatDialogPayload<ExtArgs> | null;
     history: Prisma.$ChatMessagePayload<ExtArgs> | null;
-    ChatLlmModel: Prisma.$ChatLlmModelPayload<ExtArgs>[];
   };
   scalars: runtime.Types.Extensions.GetPayloadResult<
     {
@@ -2313,17 +2094,6 @@ export interface Prisma__ChatLlmRequestClient<
     ExtArgs,
     GlobalOmitOptions
   >;
-  ChatLlmModel<T extends Prisma.ChatLlmRequest$ChatLlmModelArgs<ExtArgs> = {}>(
-    args?: Prisma.Subset<T, Prisma.ChatLlmRequest$ChatLlmModelArgs<ExtArgs>>,
-  ): Prisma.PrismaPromise<
-    | runtime.Types.Result.GetResult<
-        Prisma.$ChatLlmModelPayload<ExtArgs>,
-        T,
-        'findMany',
-        GlobalOmitOptions
-      >
-    | Null
-  >;
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2893,37 +2663,6 @@ export type ChatLlmRequest$historyArgs<
    */
   include?: Prisma.ChatMessageInclude<ExtArgs> | null;
   where?: Prisma.ChatMessageWhereInput;
-};
-
-/**
- * ChatLlmRequest.ChatLlmModel
- */
-export type ChatLlmRequest$ChatLlmModelArgs<
-  ExtArgs extends runtime.Types.Extensions.InternalArgs =
-    runtime.Types.Extensions.DefaultArgs,
-> = {
-  /**
-   * Select specific fields to fetch from the ChatLlmModel
-   */
-  select?: Prisma.ChatLlmModelSelect<ExtArgs> | null;
-  /**
-   * Omit specific fields from the ChatLlmModel
-   */
-  omit?: Prisma.ChatLlmModelOmit<ExtArgs> | null;
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.ChatLlmModelInclude<ExtArgs> | null;
-  where?: Prisma.ChatLlmModelWhereInput;
-  orderBy?:
-    | Prisma.ChatLlmModelOrderByWithRelationInput
-    | Prisma.ChatLlmModelOrderByWithRelationInput[];
-  cursor?: Prisma.ChatLlmModelWhereUniqueInput;
-  take?: number;
-  skip?: number;
-  distinct?:
-    | Prisma.ChatLlmModelScalarFieldEnum
-    | Prisma.ChatLlmModelScalarFieldEnum[];
 };
 
 /**

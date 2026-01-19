@@ -61,6 +61,14 @@ export class UpdateChatLlmModelDto {
   @IsDateString()
   endTime?: Date | null;
   @ApiProperty({
+    type: 'string',
+    required: false,
+    nullable: true,
+  })
+  @IsOptional()
+  @IsString()
+  lastRequestId?: string | null;
+  @ApiProperty({
     type: 'boolean',
     required: false,
     nullable: true,

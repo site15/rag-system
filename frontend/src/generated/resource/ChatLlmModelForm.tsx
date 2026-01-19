@@ -43,6 +43,7 @@ export const ChatLlmModelEditForm = () => (
       <NumberInput source={Prisma.ChatLlmModelScalarFieldEnum.chunkSize} />
       <DateTimeInput source={Prisma.ChatLlmModelScalarFieldEnum.startTime} />
       <DateTimeInput source={Prisma.ChatLlmModelScalarFieldEnum.endTime} />
+      <TextInput source={Prisma.ChatLlmModelScalarFieldEnum.lastRequestId} />
       <BooleanInput source={Prisma.ChatLlmModelScalarFieldEnum.isActive} />
     </SimpleForm>
   </Edit>
@@ -112,6 +113,7 @@ export const ChatLlmModelCreateForm = () => (
       <NumberInput source={Prisma.ChatLlmModelScalarFieldEnum.chunkSize} />
       <DateTimeInput source={Prisma.ChatLlmModelScalarFieldEnum.startTime} />
       <DateTimeInput source={Prisma.ChatLlmModelScalarFieldEnum.endTime} />
+      <TextInput source={Prisma.ChatLlmModelScalarFieldEnum.lastRequestId} />
       <BooleanInput source={Prisma.ChatLlmModelScalarFieldEnum.isActive} />
     </SimpleForm>
   </Create>
