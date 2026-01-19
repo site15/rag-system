@@ -8,6 +8,8 @@ export const CATEGORY_PROMPTS: Record<Category, string> = {
 Твоя задача — определить, есть ли в Author Message ПРЯМОЙ и ЯВНЫЙ ответ
 на ТЕКУЩИЙ вопрос пользователя.
 
+{{customRules}}
+
 ПРИОРИТЕТ ИСТОРИИ ПЕРЕПИСКИ (КРИТИЧЕСКОЕ ПРАВИЛО):
 - История переписки является ОБЯЗАТЕЛЬНЫМ фильтром
 - Author Message должен логически и лексически продолжать последний вопрос
@@ -86,7 +88,6 @@ Conversation history (use strictly for personal experience context):
 Контекст:
 {{context}}
 
-Вопрос:
 {{questionWithTitle}}
 
 Ответ:
@@ -99,6 +100,8 @@ Conversation history (use strictly for personal experience context):
 
 Твоя задача — определить, относится ли сообщение к рекламным, массовым
 или нерелевантным обращениям.
+
+{{customRules}}
 
 СТРОГИЕ ПРАВИЛА:
 - ЯЗЫК ОТВЕТА ДОЛЖЕН СОВПАДАТЬ С ЯЗЫКОМ ВОПРОСА
@@ -116,7 +119,6 @@ Conversation history (use strictly for personal experience context):
 Контекст:
 {{context}}
 
-Вопрос:
 {{questionWithTitle}}
 
 Ответ:
@@ -129,6 +131,8 @@ Conversation history (use strictly for personal experience context):
 
 Твоя задача — определить, является ли сообщение предложением
 о штатной, постоянной или фултайм-занятости.
+
+{{customRules}}
 
 СТРОГИЕ ПРАВИЛА:
 - ЯЗЫК ОТВЕТА ДОЛЖЕН СОВПАДАТЬ С ЯЗЫКОМ ВОПРОСА
@@ -146,7 +150,6 @@ Conversation history (use strictly for personal experience context):
 Контекст:
 {{context}}
 
-Вопрос:
 {{questionWithTitle}}
 
 Ответ:
@@ -163,6 +166,9 @@ Conversation history (use strictly for personal experience context):
 - почасовой
 - проектной работе
 
+{{customRules}}
+
+
 СТРОГИЕ ПРАВИЛА:
 - ЯЗЫК ОТВЕТА ДОЛЖЕН СОВПАДАТЬ С ЯЗЫКОМ ВОПРОСА
 - Упоминание проекта, сроков, часов, контракта → [FOUND]
@@ -178,7 +184,6 @@ Conversation history (use strictly for personal experience context):
 Контекст:
 {{context}}
 
-Вопрос:
 {{questionWithTitle}}
 
 Ответ:
@@ -196,6 +201,8 @@ Conversation history (use strictly for personal experience context):
 - разовый созвон
 - экспертную помощь за деньги
 
+{{customRules}}
+
 СТРОГИЕ ПРАВИЛА:
 - ЯЗЫК ОТВЕТА ДОЛЖЕН СОВПАДАТЬ С ЯЗЫКОМ ВОПРОСА
 - Если запрашивается экспертное участие → [FOUND]
@@ -211,7 +218,6 @@ Conversation history (use strictly for personal experience context):
 Контекст:
 {{context}}
 
-Вопрос:
 {{questionWithTitle}}
 
 Ответ:
@@ -229,6 +235,8 @@ Conversation history (use strictly for personal experience context):
 - оплате
 - условиях сотрудничества
 
+{{customRules}}
+
 СТРОГИЕ ПРАВИЛА:
 - ЯЗЫК ОТВЕТА ДОЛЖЕН СОВПАДАТЬ С ЯЗЫКОМ ВОПРОСА
 - Любой прямой вопрос о деньгах → [FOUND]
@@ -244,7 +252,6 @@ Conversation history (use strictly for personal experience context):
 Контекст:
 {{context}}
 
-Вопрос:
 {{questionWithTitle}}
 
 Ответ:
@@ -261,6 +268,8 @@ Conversation history (use strictly for personal experience context):
 - партнёрства
 - кофаундинга
 
+{{customRules}}
+
 СТРОГИЕ ПРАВИЛА:
 - ЯЗЫК ОТВЕТА ДОЛЖЕН СОВПАДАТЬ С ЯЗЫКОМ ВОПРОСА
 - Явное предложение совместной деятельности → [FOUND]
@@ -276,7 +285,6 @@ Conversation history (use strictly for personal experience context):
 Контекст:
 {{context}}
 
-Вопрос:
 {{questionWithTitle}}
 
 Ответ:
@@ -291,6 +299,8 @@ Conversation history (use strictly for personal experience context):
 - поиском инвестиций
 - предложением инвестировать
 - обсуждением долей и вложений
+
+{{customRules}}
 
 СТРОГИЕ ПРАВИЛА:
 - ЯЗЫК ОТВЕТА ДОЛЖЕН СОВПАДАТЬ С ЯЗЫКОМ ВОПРОСА
@@ -307,7 +317,6 @@ Conversation history (use strictly for personal experience context):
 Контекст:
 {{context}}
 
-Вопрос:
 {{questionWithTitle}}
 
 Ответ:
@@ -322,6 +331,8 @@ Conversation history (use strictly for personal experience context):
 - подбора сотрудников
 - формирования команды
 - усиления команды
+
+{{customRules}}
 
 СТРОГИЕ ПРАВИЛА:
 - ЯЗЫК ОТВЕТА ДОЛЖЕН СОВПАДАТЬ С ЯЗЫКОМ ВОПРОСА
@@ -338,7 +349,6 @@ Conversation history (use strictly for personal experience context):
 Контекст:
 {{context}}
 
-Вопрос:
 {{questionWithTitle}}
 
 Ответ:
@@ -353,6 +363,8 @@ Conversation history (use strictly for personal experience context):
 - подготовке к интервью
 - проведению интервью
 - оценке кандидатов
+
+{{customRules}}
 
 СТРОГИЕ ПРАВИЛА:
 - ЯЗЫК ОТВЕТА ДОЛЖЕН СОВПАДАТЬ С ЯЗЫКОМ ВОПРОСА
@@ -369,7 +381,6 @@ Conversation history (use strictly for personal experience context):
 Контекст:
 {{context}}
 
-Вопрос:
 {{questionWithTitle}}
 
 Ответ:
@@ -387,6 +398,8 @@ Conversation history (use strictly for personal experience context):
 - стрим
 - выступление
 
+{{customRules}}
+
 СТРОГИЕ ПРАВИЛА:
 - ЯЗЫК ОТВЕТА ДОЛЖЕН СОВПАДАТЬ С ЯЗЫКОМ ВОПРОСА
 - Явное приглашение выступить → [FOUND]
@@ -402,7 +415,6 @@ Conversation history (use strictly for personal experience context):
 Контекст:
 {{context}}
 
-Вопрос:
 {{questionWithTitle}}
 
 Ответ:
@@ -419,6 +431,8 @@ Conversation history (use strictly for personal experience context):
 - комментарию для СМИ
 - публикации
 
+{{customRules}}
+
 СТРОГИЕ ПРАВИЛА:
 - ЯЗЫК ОТВЕТА ДОЛЖЕН СОВПАДАТЬ С ЯЗЫКОМ ВОПРОСА
 - Запрос на публичный комментарий или интервью → [FOUND]
@@ -434,7 +448,6 @@ Conversation history (use strictly for personal experience context):
 Контекст:
 {{context}}
 
-Вопрос:
 {{questionWithTitle}}
 
 Ответ:
@@ -449,6 +462,8 @@ Conversation history (use strictly for personal experience context):
 
 Твоя задача — определить, есть ли ПРЯМОЕ и ЯВНОЕ описание решения
 ТОЙ ЖЕ проблемы, о которой задан вопрос.
+
+{{customRules}}
 
 СТРОГИЕ ПРАВИЛА:
 - ЯЗЫК ОТВЕТА ДОЛЖЕН СОВПАДАТЬ С ЯЗЫКОМ ВОПРОСА
@@ -470,7 +485,6 @@ Conversation history (use strictly for personal experience context):
 Контекст:
 {{context}}
 
-Вопрос:
 {{questionWithTitle}}
 
 Ответ:
@@ -485,6 +499,8 @@ Conversation history (use strictly for personal experience context):
 
 Твоя задача — определить, есть ли в тексте ПРЯМАЯ и ЯВНАЯ оценка
 или вывод автора по предмету вопроса.
+
+{{customRules}}
 
 СТРОГИЕ ПРАВИЛА:
 - ЯЗЫК ОТВЕТА ДОЛЖЕН СОВПАДАТЬ С ЯЗЫКОМ ВОПРОСА
@@ -505,7 +521,6 @@ Conversation history (use strictly for personal experience context):
 Контекст:
 {{context}}
 
-Вопрос:
 {{questionWithTitle}}
 
 Ответ:
@@ -520,6 +535,8 @@ Conversation history (use strictly for personal experience context):
 
 Твоя задача — определить, сделал ли автор ЯВНЫЙ выбор
 или дал ЧЁТКОЕ предпочтение одному варианту.
+
+{{customRules}}
 
 СТРОГИЕ ПРАВИЛА:
 - ЯЗЫК ОТВЕТА ДОЛЖЕН СОВПАДАТЬ С ЯЗЫКОМ ВОПРОСА
@@ -542,7 +559,6 @@ Conversation history (use strictly for personal experience context):
 Контекст:
 {{context}}
 
-Вопрос:
 {{questionWithTitle}}
 
 Ответ:
@@ -555,6 +571,8 @@ Conversation history (use strictly for personal experience context):
 
 Твоя задача — определить, относится ли сообщение к продуктам,
 сервисам или платформам, созданным автором.
+
+{{customRules}}
 
 СТРОГИЕ ПРАВИЛА:
 - ЯЗЫК ОТВЕТА ДОЛЖЕН СОВПАДАТЬ С ЯЗЫКОМ ВОПРОСА
@@ -571,7 +589,6 @@ Conversation history (use strictly for personal experience context):
 Контекст:
 {{context}}
 
-Вопрос:
 {{questionWithTitle}}
 
 Ответ:
@@ -589,6 +606,8 @@ Conversation history (use strictly for personal experience context):
 - курс
 - материалы
 
+{{customRules}}
+
 СТРОГИЕ ПРАВИЛА:
 - ЯЗЫК ОТВЕТА ДОЛЖЕН СОВПАДАТЬ С ЯЗЫКОМ ВОПРОСА
 - Явная просьба предоставить доступ → [FOUND]
@@ -604,7 +623,6 @@ Conversation history (use strictly for personal experience context):
 Контекст:
 {{context}}
 
-Вопрос:
 {{questionWithTitle}}
 
 Ответ:
@@ -621,6 +639,8 @@ Conversation history (use strictly for personal experience context):
 - роль автора / должность
 - организацию или проект
 - технологический стек, если он напрямую упоминается в контексте факта
+
+{{customRules}}
 
 НО:
 - Не добавляй информацию, которая прямо не указана в резюме
@@ -662,7 +682,6 @@ Conversation history (use strictly for personal experience context):
 Контекст:
 {{context}}
 
-Вопрос:
 {{questionWithTitle}}
 
 Ответ:
@@ -675,6 +694,8 @@ Conversation history (use strictly for personal experience context):
 
 Твоя задача — определить, есть ли в тексте ПРЯМОЕ и ЯВНОЕ подтверждение факта,
 о котором спрашивает пользователь.
+
+{{customRules}}
 
 СТРОГИЕ ПРАВИЛА:
 - ЯЗЫК ОТВЕТА ДОЛЖЕН СОВПАДАТЬ С ЯЗЫКОМ ВОПРОСА
@@ -718,7 +739,6 @@ Conversation history (use strictly for personal experience context):
 Контекст:
 {{context}}
 
-Вопрос:
 {{questionWithTitle}}
 
 Ответ:
@@ -731,6 +751,8 @@ Conversation history (use strictly for personal experience context):
 Текст контекста написан одним автором и отражает его опыт, решения и утверждения.
 
 Твоя задача — определить, есть ли в тексте ПРЯМОЙ и ЯВНО СФОРМУЛИРОВАННЫЙ ответ на вопрос пользователя.
+
+{{customRules}}
 
 СТРОГИЕ ПРАВИЛА:
 - ЯЗЫК ОТВЕТА ДОЛЖЕН СОВПАДАТЬ С ЯЗЫКОМ ВОПРОСА
@@ -771,7 +793,6 @@ Conversation history (use strictly for personal experience context):
 Контекст:
 {{context}}
 
-Вопрос:
 {{questionWithTitle}}
 
 Ответ:
@@ -784,6 +805,8 @@ Conversation history (use strictly for personal experience context):
 
 Твоя задача — определить, есть ли ПРЯМОЕ и ЯВНОЕ личное утверждение автора,
 относящееся к вопросу.
+
+{{customRules}}
 
 СТРОГИЕ ПРАВИЛА:
 - ЯЗЫК ОТВЕТА ДОЛЖЕН СОВПАДАТЬ С ЯЗЫКОМ ВОПРОСА
@@ -803,7 +826,6 @@ Conversation history (use strictly for personal experience context):
 Контекст:
 {{context}}
 
-Вопрос:
 {{questionWithTitle}}
 
 Ответ:
@@ -817,6 +839,8 @@ Conversation history (use strictly for personal experience context):
 Контекст:
 - Сообщение пользователя НЕ содержит конкретного вопроса
 - Цель сообщения — начать диалог, поздороваться или установить контакт
+
+{{customRules}}
 
 СТРОГИЕ ПРАВИЛА:
 - ЯЗЫК ОТВЕТА ДОЛЖЕН СОВПАДАТЬ С ЯЗЫКОМ ВОПРОСА
@@ -862,6 +886,8 @@ Conversation history (use strictly for personal experience context):
 - реакцией на предыдущий ответ
 - комментарием без нового запроса
 
+{{customRules}}
+
 Признаки follow-up:
 - нет нового вопроса
 - фразы вроде: "понял", "ок", "да", "интересно", "логично"
@@ -881,7 +907,6 @@ Conversation history (use strictly for personal experience context):
 История:
 {{history}}
 
-Вопрос:
 {{questionWithTitle}}
 
 Ответ:
@@ -891,6 +916,8 @@ Conversation history (use strictly for personal experience context):
    */
   [Category.gratitude]: `
 Ты отвечаешь на сообщение-благодарность.
+
+{{customRules}}
 
 Контекст:
 - Сообщение пользователя НЕ содержит вопроса
@@ -938,6 +965,8 @@ Conversation history (use strictly for personal experience context):
 уточнением, переспрашиванием или конкретизацией
 к ПРЕДЫДУЩЕМУ ответу, а не новым самостоятельным запросом.
 
+{{customRules}}
+
 Признаки уточнения:
 - "а именно", "в смысле", "то есть", "поясни", "уточни"
 - ссылка на предыдущий ответ ("про это", "тот момент", "это")
@@ -957,7 +986,6 @@ Conversation history (use strictly for personal experience context):
 История:
 {{history}}
 
-Вопрос:
 {{questionWithTitle}}
 
 Ответ:
@@ -967,6 +995,8 @@ Conversation history (use strictly for personal experience context):
    */
   [Category.none]: `
 Отвечай ТОЛЬКО на основе предоставленного контекста.
+
+{{customRules}}
 
 СТРОГИЕ ПРАВИЛА:
 - ЯЗЫК ОТВЕТА ДОЛЖЕН СОВПАДАТЬ С ЯЗЫКОМ ВОПРОСА
@@ -993,7 +1023,6 @@ Conversation history (use strictly for personal experience context):
 Контекст:
 {{context}}
 
-Вопрос:
 {{questionWithTitle}}
 
 Ответ:
@@ -1021,6 +1050,8 @@ Conversation history (use strictly for personal experience context):
 
 Название штуки может быть указано на другом языке
 или в транслитерации (например: Dompem ↔ Домпем).
+
+{{customRules}}
 
 ВАЖНО:
 - Если вопрос является уточняющим или мета-вопросом
@@ -1090,7 +1121,6 @@ Conversation history (use strictly for personal experience context):
 Контекст:
 {{context}}
 
-Вопрос:
 {{questionWithTitle}}
 
 Ответ:

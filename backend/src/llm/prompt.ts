@@ -166,6 +166,18 @@ export function createTelegramAnalysisPrompt({
     .replace('{{context}}', chunk || '')
     .replace('{{question}}', question)
     .replace(
+      '{{customRules}}',
+      history.length
+        ? `Если вопрос является follow-up (уточнение, продолжение) и conversation history содержит опыт в первом лице, 
+ориентируйся ТОЛЬКО на этот опыт, а контекст документа используй только для уточнения фактов, связанных с этим опытом. 
+Не берите информацию из контекста, если она относится к другому проекту, не упомянутому в истории.
+
+Если объект или технология упомянуты в истории, а контекст документа содержит другой объект/технологию, 
+игнорируй несвязанный контекст и отвечай только исходя из истории.
+`
+        : '',
+    )
+    .replace(
       '{{questionWithTitle}}',
       history.length ? `Original question (follow-up): ${question}` : question,
     );
@@ -192,6 +204,18 @@ export function createArticleAnalysisPrompt({
     .replace('{{history}}', history.length ? history.join('\n') : 'нет')
     .replace('{{context}}', chunk || '')
     .replace('{{question}}', question)
+    .replace(
+      '{{customRules}}',
+      history.length
+        ? `Если вопрос является follow-up (уточнение, продолжение) и conversation history содержит опыт в первом лице, 
+ориентируйся ТОЛЬКО на этот опыт, а контекст документа используй только для уточнения фактов, связанных с этим опытом. 
+Не берите информацию из контекста, если она относится к другому проекту, не упомянутому в истории.
+
+Если объект или технология упомянуты в истории, а контекст документа содержит другой объект/технологию, 
+игнорируй несвязанный контекст и отвечай только исходя из истории.
+`
+        : '',
+    )
     .replace(
       '{{questionWithTitle}}',
       history.length ? `Original question (follow-up): ${question}` : question,
@@ -220,6 +244,18 @@ export function createPortfolioAnalysisPrompt({
     .replace('{{context}}', chunk || '')
     .replace('{{question}}', question)
     .replace(
+      '{{customRules}}',
+      history.length
+        ? `Если вопрос является follow-up (уточнение, продолжение) и conversation history содержит опыт в первом лице, 
+ориентируйся ТОЛЬКО на этот опыт, а контекст документа используй только для уточнения фактов, связанных с этим опытом. 
+Не берите информацию из контекста, если она относится к другому проекту, не упомянутому в истории.
+
+Если объект или технология упомянуты в истории, а контекст документа содержит другой объект/технологию, 
+игнорируй несвязанный контекст и отвечай только исходя из истории.
+`
+        : '',
+    )
+    .replace(
       '{{questionWithTitle}}',
       history.length ? `Original question (follow-up): ${question}` : question,
     );
@@ -247,6 +283,18 @@ export function createResumeAnalysisPrompt({
     .replace('{{context}}', chunk || '')
     .replace('{{question}}', question)
     .replace(
+      '{{customRules}}',
+      history.length
+        ? `Если вопрос является follow-up (уточнение, продолжение) и conversation history содержит опыт в первом лице, 
+ориентируйся ТОЛЬКО на этот опыт, а контекст документа используй только для уточнения фактов, связанных с этим опытом. 
+Не берите информацию из контекста, если она относится к другому проекту, не упомянутому в истории.
+
+Если объект или технология упомянуты в истории, а контекст документа содержит другой объект/технологию, 
+игнорируй несвязанный контекст и отвечай только исходя из истории.
+`
+        : '',
+    )
+    .replace(
       '{{questionWithTitle}}',
       history.length ? `Original question (follow-up): ${question}` : question,
     );
@@ -272,6 +320,18 @@ export function createGenericAnalysisPrompt({
     .replace('{{history}}', history.length ? history.join('\n') : 'нет')
     .replace('{{context}}', chunk || '')
     .replace('{{question}}', question)
+    .replace(
+      '{{customRules}}',
+      history.length
+        ? `Если вопрос является follow-up (уточнение, продолжение) и conversation history содержит опыт в первом лице, 
+ориентируйся ТОЛЬКО на этот опыт, а контекст документа используй только для уточнения фактов, связанных с этим опытом. 
+Не берите информацию из контекста, если она относится к другому проекту, не упомянутому в истории.
+
+Если объект или технология упомянуты в истории, а контекст документа содержит другой объект/технологию, 
+игнорируй несвязанный контекст и отвечай только исходя из истории.
+`
+        : '',
+    )
     .replace(
       '{{questionWithTitle}}',
       history.length ? `Original question (follow-up): ${question}` : question,
