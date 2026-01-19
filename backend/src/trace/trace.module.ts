@@ -7,17 +7,13 @@ import {
   Injectable,
   Module,
   NestInterceptor,
-  Optional,
 } from '@nestjs/common';
 
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { performance } from 'node:perf_hooks';
-import * as path from 'path';
 import 'reflect-metadata';
 import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
-import { MermaidGenerator, MermaidOptions } from './mermaid-generator';
 
 /* ---------------- Constants ---------------- */
 export const TRACE_META_KEY = Symbol('TRACE_META_KEY');
@@ -46,6 +42,19 @@ export interface TraceStore {
 export interface TraceStorage {
   getStore(): TraceStore | undefined;
   run<T>(store: TraceStore, fn: () => T): T;
+}
+
+export function getTraceStack() {
+  const func = (trace: TraceNode[]): TraceNode[] => {
+    for (let index = 0; index < trace.length; index++) {
+      if (trace[index].children?.length) {
+        trace[index].children = [...func(trace[index].children)];
+      }
+    }
+    return [...trace.filter((t) => t.payload || t.children?.length)];
+  };
+  const result = func(getTraceStorage()?.getStore()?.stack || []);
+  return result.length ? result : null;
 }
 
 /* ---------------- Default Storage ---------------- */
@@ -150,86 +159,15 @@ export async function traceRun<T>(
 /* ---------------- Trace Interceptor ---------------- */
 @Injectable()
 export class TraceInterceptor implements NestInterceptor {
-  constructor(
-    @Optional()
-    private readonly options?: {
-      saveAsMermaid?: boolean;
-      mermaidOptions?: MermaidOptions;
-      outputDir?: string;
-    },
-  ) {}
-
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const storage = getTraceStorage();
     const store: TraceStore = { stack: [] };
 
     return new Observable((observer) => {
       storage.run(store, () => {
-        next
-          .handle()
-          .pipe(
-            tap({
-              finalize: () => {
-                if (store.root) {
-                  if (this.options?.saveAsMermaid) {
-                    this.saveTraceAsMermaid(store, context);
-                  } else {
-                    console.dir(store.root, { depth: null });
-                  }
-                }
-              },
-            }),
-          )
-          .subscribe(observer);
+        next.handle().subscribe(observer);
       });
     });
-  }
-
-  private saveTraceAsMermaid(
-    store: TraceStore,
-    context: ExecutionContext,
-  ): void {
-    try {
-      const mermaidOptions = this.options?.mermaidOptions || {};
-      const outputDir = this.options?.outputDir || './traces';
-
-      // Generate filename based on request info
-      const request = context.switchToHttp().getRequest();
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const method = request.method || 'UNKNOWN';
-      const url = (request.url || 'unknown').replace(/[^a-zA-Z0-9]/g, '_');
-
-      const filename = `trace_${method}_${url}_${timestamp}.md`;
-      const filepath = path.join(outputDir, filename);
-
-      // Generate Mermaid diagram
-      const mermaidContent = MermaidGenerator.generateFlowchart(
-        store,
-        mermaidOptions,
-      );
-
-      // Create markdown content with the diagram
-      const markdownContent = `# Trace Diagram
-
-Generated: ${new Date().toISOString()}
-Method: ${method}
-URL: ${request.url || 'N/A'}
-
-${mermaidContent}
-
-## Trace Data (JSON)
-
-\`\`\`json
-${JSON.stringify(store.root, null, 2)}
-\`\`\``;
-
-      // Save to file
-      MermaidGenerator.saveToFile(markdownContent, filepath);
-    } catch (error) {
-      console.error('Failed to save trace as Mermaid diagram:', error);
-      // Fallback to console output
-      console.dir(store.root, { depth: null });
-    }
   }
 }
 
@@ -237,21 +175,10 @@ ${JSON.stringify(store.root, null, 2)}
 @Global()
 @Module({})
 export class TraceModule {
-  static forRoot(options?: {
-    storage?: TraceStorage;
-    saveTracesAsMermaid?: boolean;
-    mermaidOptions?: MermaidOptions;
-    tracesOutputDir?: string;
-  }): DynamicModule {
+  static forRoot(options?: { storage?: TraceStorage }): DynamicModule {
     if (options?.storage) {
       setTraceStorage(options.storage);
     }
-
-    const interceptorOptions = {
-      saveAsMermaid: options?.saveTracesAsMermaid ?? false,
-      mermaidOptions: options?.mermaidOptions,
-      outputDir: options?.tracesOutputDir,
-    };
 
     return {
       module: TraceModule,
@@ -261,7 +188,7 @@ export class TraceModule {
           : { provide: 'TraceStorage', useClass: AlsTraceStorage },
         {
           provide: APP_INTERCEPTOR,
-          useValue: new TraceInterceptor(interceptorOptions),
+          useClass: TraceInterceptor,
         },
       ],
     };

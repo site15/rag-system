@@ -89,6 +89,15 @@ export const ChatMessageList = () => (
           source={Prisma.ChatMessageScalarFieldEnum.isBadResponse}
         />
       </DataTable.Col>
+      <DataTable.Col source={Prisma.ChatMessageScalarFieldEnum.trace}>
+        <JsonViewerField source={Prisma.ChatMessageScalarFieldEnum.trace} />
+      </DataTable.Col>
+      <DataTable.Col source={Prisma.ChatMessageScalarFieldEnum.deletedAt}>
+        <DateField
+          source={Prisma.ChatMessageScalarFieldEnum.deletedAt}
+          showTime
+        />
+      </DataTable.Col>
       <EditButton />
       <DeleteButton />
     </DataTable>

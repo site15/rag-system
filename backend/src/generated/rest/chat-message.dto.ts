@@ -1,3 +1,4 @@
+import { Prisma } from '../prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class ChatMessageDto {
@@ -57,6 +58,11 @@ export class ChatMessageDto {
   })
   isBadResponse!: boolean;
   @ApiProperty({
+    type: () => Object,
+    nullable: true,
+  })
+  trace!: Prisma.JsonValue | null;
+  @ApiProperty({
     type: 'string',
     format: 'date-time',
   })
@@ -66,4 +72,10 @@ export class ChatMessageDto {
     format: 'date-time',
   })
   updatedAt!: Date;
+  @ApiProperty({
+    type: 'string',
+    format: 'date-time',
+    nullable: true,
+  })
+  deletedAt!: Date | null;
 }

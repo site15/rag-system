@@ -9,6 +9,7 @@
  */
 export type * from './models/AuthUser';
 export type * from './models/AuthSession';
+export type * from './models/ChatPrompt';
 export type * from './models/ChatDocumentEmbedding';
 export type * from './models/ChatDialog';
 export type * from './models/ChatMessage';

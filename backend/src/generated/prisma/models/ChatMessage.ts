@@ -51,6 +51,7 @@ export type ChatMessageMinAggregateOutputType = {
   isBadResponse: boolean | null;
   createdAt: Date | null;
   updatedAt: Date | null;
+  deletedAt: Date | null;
 };
 
 export type ChatMessageMaxAggregateOutputType = {
@@ -70,6 +71,7 @@ export type ChatMessageMaxAggregateOutputType = {
   isBadResponse: boolean | null;
   createdAt: Date | null;
   updatedAt: Date | null;
+  deletedAt: Date | null;
 };
 
 export type ChatMessageCountAggregateOutputType = {
@@ -87,8 +89,10 @@ export type ChatMessageCountAggregateOutputType = {
   temperature: number;
   isGoodResponse: number;
   isBadResponse: number;
+  trace: number;
   createdAt: number;
   updatedAt: number;
+  deletedAt: number;
   _all: number;
 };
 
@@ -117,6 +121,7 @@ export type ChatMessageMinAggregateInputType = {
   isBadResponse?: true;
   createdAt?: true;
   updatedAt?: true;
+  deletedAt?: true;
 };
 
 export type ChatMessageMaxAggregateInputType = {
@@ -136,6 +141,7 @@ export type ChatMessageMaxAggregateInputType = {
   isBadResponse?: true;
   createdAt?: true;
   updatedAt?: true;
+  deletedAt?: true;
 };
 
 export type ChatMessageCountAggregateInputType = {
@@ -153,8 +159,10 @@ export type ChatMessageCountAggregateInputType = {
   temperature?: true;
   isGoodResponse?: true;
   isBadResponse?: true;
+  trace?: true;
   createdAt?: true;
   updatedAt?: true;
+  deletedAt?: true;
   _all?: true;
 };
 
@@ -266,8 +274,10 @@ export type ChatMessageGroupByOutputType = {
   temperature: runtime.Decimal | null;
   isGoodResponse: boolean;
   isBadResponse: boolean;
+  trace: runtime.JsonValue | null;
   createdAt: Date;
   updatedAt: Date;
+  deletedAt: Date | null;
   _count: ChatMessageCountAggregateOutputType | null;
   _avg: ChatMessageAvgAggregateOutputType | null;
   _sum: ChatMessageSumAggregateOutputType | null;
@@ -318,8 +328,14 @@ export type ChatMessageWhereInput = {
     | null;
   isGoodResponse?: Prisma.BoolFilter<'ChatMessage'> | boolean;
   isBadResponse?: Prisma.BoolFilter<'ChatMessage'> | boolean;
+  trace?: Prisma.JsonNullableFilter<'ChatMessage'>;
   createdAt?: Prisma.DateTimeFilter<'ChatMessage'> | Date | string;
   updatedAt?: Prisma.DateTimeFilter<'ChatMessage'> | Date | string;
+  deletedAt?:
+    | Prisma.DateTimeNullableFilter<'ChatMessage'>
+    | Date
+    | string
+    | null;
   AuthUser?: Prisma.XOR<
     Prisma.AuthUserScalarRelationFilter,
     Prisma.AuthUserWhereInput
@@ -347,8 +363,10 @@ export type ChatMessageOrderByWithRelationInput = {
   temperature?: Prisma.SortOrderInput | Prisma.SortOrder;
   isGoodResponse?: Prisma.SortOrder;
   isBadResponse?: Prisma.SortOrder;
+  trace?: Prisma.SortOrderInput | Prisma.SortOrder;
   createdAt?: Prisma.SortOrder;
   updatedAt?: Prisma.SortOrder;
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder;
   AuthUser?: Prisma.AuthUserOrderByWithRelationInput;
   dialog?: Prisma.ChatDialogOrderByWithRelationInput;
   ChatMessageDocumentEmbedding?: Prisma.ChatMessageDocumentEmbeddingOrderByRelationAggregateInput;
@@ -386,8 +404,14 @@ export type ChatMessageWhereUniqueInput = Prisma.AtLeast<
       | null;
     isGoodResponse?: Prisma.BoolFilter<'ChatMessage'> | boolean;
     isBadResponse?: Prisma.BoolFilter<'ChatMessage'> | boolean;
+    trace?: Prisma.JsonNullableFilter<'ChatMessage'>;
     createdAt?: Prisma.DateTimeFilter<'ChatMessage'> | Date | string;
     updatedAt?: Prisma.DateTimeFilter<'ChatMessage'> | Date | string;
+    deletedAt?:
+      | Prisma.DateTimeNullableFilter<'ChatMessage'>
+      | Date
+      | string
+      | null;
     AuthUser?: Prisma.XOR<
       Prisma.AuthUserScalarRelationFilter,
       Prisma.AuthUserWhereInput
@@ -417,8 +441,10 @@ export type ChatMessageOrderByWithAggregationInput = {
   temperature?: Prisma.SortOrderInput | Prisma.SortOrder;
   isGoodResponse?: Prisma.SortOrder;
   isBadResponse?: Prisma.SortOrder;
+  trace?: Prisma.SortOrderInput | Prisma.SortOrder;
   createdAt?: Prisma.SortOrder;
   updatedAt?: Prisma.SortOrder;
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder;
   _count?: Prisma.ChatMessageCountOrderByAggregateInput;
   _avg?: Prisma.ChatMessageAvgOrderByAggregateInput;
   _max?: Prisma.ChatMessageMaxOrderByAggregateInput;
@@ -472,6 +498,7 @@ export type ChatMessageScalarWhereWithAggregatesInput = {
     | null;
   isGoodResponse?: Prisma.BoolWithAggregatesFilter<'ChatMessage'> | boolean;
   isBadResponse?: Prisma.BoolWithAggregatesFilter<'ChatMessage'> | boolean;
+  trace?: Prisma.JsonNullableWithAggregatesFilter<'ChatMessage'>;
   createdAt?:
     | Prisma.DateTimeWithAggregatesFilter<'ChatMessage'>
     | Date
@@ -480,6 +507,11 @@ export type ChatMessageScalarWhereWithAggregatesInput = {
     | Prisma.DateTimeWithAggregatesFilter<'ChatMessage'>
     | Date
     | string;
+  deletedAt?:
+    | Prisma.DateTimeNullableWithAggregatesFilter<'ChatMessage'>
+    | Date
+    | string
+    | null;
 };
 
 export type ChatMessageCreateInput = {
@@ -500,8 +532,10 @@ export type ChatMessageCreateInput = {
     | null;
   isGoodResponse?: boolean;
   isBadResponse?: boolean;
+  trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   createdAt?: Date | string;
   updatedAt?: Date | string;
+  deletedAt?: Date | string | null;
   AuthUser: Prisma.AuthUserCreateNestedOneWithoutChatMessageInput;
   dialog?: Prisma.ChatDialogCreateNestedOneWithoutChatMessageInput;
   ChatMessageDocumentEmbedding?: Prisma.ChatMessageDocumentEmbeddingCreateNestedManyWithoutChatHistoryInput;
@@ -528,8 +562,10 @@ export type ChatMessageUncheckedCreateInput = {
     | null;
   isGoodResponse?: boolean;
   isBadResponse?: boolean;
+  trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   createdAt?: Date | string;
   updatedAt?: Date | string;
+  deletedAt?: Date | string | null;
   ChatMessageDocumentEmbedding?: Prisma.ChatMessageDocumentEmbeddingUncheckedCreateNestedManyWithoutChatHistoryInput;
   ChatLlmRequest?: Prisma.ChatLlmRequestUncheckedCreateNestedManyWithoutHistoryInput;
 };
@@ -559,8 +595,14 @@ export type ChatMessageUpdateInput = {
     | null;
   isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+  trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  deletedAt?:
+    | Prisma.NullableDateTimeFieldUpdateOperationsInput
+    | Date
+    | string
+    | null;
   AuthUser?: Prisma.AuthUserUpdateOneRequiredWithoutChatMessageNestedInput;
   dialog?: Prisma.ChatDialogUpdateOneWithoutChatMessageNestedInput;
   ChatMessageDocumentEmbedding?: Prisma.ChatMessageDocumentEmbeddingUpdateManyWithoutChatHistoryNestedInput;
@@ -594,8 +636,14 @@ export type ChatMessageUncheckedUpdateInput = {
     | null;
   isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+  trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  deletedAt?:
+    | Prisma.NullableDateTimeFieldUpdateOperationsInput
+    | Date
+    | string
+    | null;
   ChatMessageDocumentEmbedding?: Prisma.ChatMessageDocumentEmbeddingUncheckedUpdateManyWithoutChatHistoryNestedInput;
   ChatLlmRequest?: Prisma.ChatLlmRequestUncheckedUpdateManyWithoutHistoryNestedInput;
 };
@@ -620,8 +668,10 @@ export type ChatMessageCreateManyInput = {
     | null;
   isGoodResponse?: boolean;
   isBadResponse?: boolean;
+  trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   createdAt?: Date | string;
   updatedAt?: Date | string;
+  deletedAt?: Date | string | null;
 };
 
 export type ChatMessageUpdateManyMutationInput = {
@@ -649,8 +699,14 @@ export type ChatMessageUpdateManyMutationInput = {
     | null;
   isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+  trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  deletedAt?:
+    | Prisma.NullableDateTimeFieldUpdateOperationsInput
+    | Date
+    | string
+    | null;
 };
 
 export type ChatMessageUncheckedUpdateManyInput = {
@@ -680,8 +736,14 @@ export type ChatMessageUncheckedUpdateManyInput = {
     | null;
   isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+  trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  deletedAt?:
+    | Prisma.NullableDateTimeFieldUpdateOperationsInput
+    | Date
+    | string
+    | null;
 };
 
 export type ChatMessageListRelationFilter = {
@@ -709,8 +771,10 @@ export type ChatMessageCountOrderByAggregateInput = {
   temperature?: Prisma.SortOrder;
   isGoodResponse?: Prisma.SortOrder;
   isBadResponse?: Prisma.SortOrder;
+  trace?: Prisma.SortOrder;
   createdAt?: Prisma.SortOrder;
   updatedAt?: Prisma.SortOrder;
+  deletedAt?: Prisma.SortOrder;
 };
 
 export type ChatMessageAvgOrderByAggregateInput = {
@@ -734,6 +798,7 @@ export type ChatMessageMaxOrderByAggregateInput = {
   isBadResponse?: Prisma.SortOrder;
   createdAt?: Prisma.SortOrder;
   updatedAt?: Prisma.SortOrder;
+  deletedAt?: Prisma.SortOrder;
 };
 
 export type ChatMessageMinOrderByAggregateInput = {
@@ -753,6 +818,7 @@ export type ChatMessageMinOrderByAggregateInput = {
   isBadResponse?: Prisma.SortOrder;
   createdAt?: Prisma.SortOrder;
   updatedAt?: Prisma.SortOrder;
+  deletedAt?: Prisma.SortOrder;
 };
 
 export type ChatMessageSumOrderByAggregateInput = {
@@ -992,6 +1058,10 @@ export type NullableDecimalFieldUpdateOperationsInput = {
   divide?: runtime.Decimal | runtime.DecimalJsLike | number | string;
 };
 
+export type NullableDateTimeFieldUpdateOperationsInput = {
+  set?: Date | string | null;
+};
+
 export type ChatMessageCreateNestedOneWithoutChatMessageDocumentEmbeddingInput =
   {
     create?: Prisma.XOR<
@@ -1068,8 +1138,10 @@ export type ChatMessageCreateWithoutAuthUserInput = {
     | null;
   isGoodResponse?: boolean;
   isBadResponse?: boolean;
+  trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   createdAt?: Date | string;
   updatedAt?: Date | string;
+  deletedAt?: Date | string | null;
   dialog?: Prisma.ChatDialogCreateNestedOneWithoutChatMessageInput;
   ChatMessageDocumentEmbedding?: Prisma.ChatMessageDocumentEmbeddingCreateNestedManyWithoutChatHistoryInput;
   ChatLlmRequest?: Prisma.ChatLlmRequestCreateNestedManyWithoutHistoryInput;
@@ -1094,8 +1166,10 @@ export type ChatMessageUncheckedCreateWithoutAuthUserInput = {
     | null;
   isGoodResponse?: boolean;
   isBadResponse?: boolean;
+  trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   createdAt?: Date | string;
   updatedAt?: Date | string;
+  deletedAt?: Date | string | null;
   ChatMessageDocumentEmbedding?: Prisma.ChatMessageDocumentEmbeddingUncheckedCreateNestedManyWithoutChatHistoryInput;
   ChatLlmRequest?: Prisma.ChatLlmRequestUncheckedCreateNestedManyWithoutHistoryInput;
 };
@@ -1177,8 +1251,14 @@ export type ChatMessageScalarWhereInput = {
     | null;
   isGoodResponse?: Prisma.BoolFilter<'ChatMessage'> | boolean;
   isBadResponse?: Prisma.BoolFilter<'ChatMessage'> | boolean;
+  trace?: Prisma.JsonNullableFilter<'ChatMessage'>;
   createdAt?: Prisma.DateTimeFilter<'ChatMessage'> | Date | string;
   updatedAt?: Prisma.DateTimeFilter<'ChatMessage'> | Date | string;
+  deletedAt?:
+    | Prisma.DateTimeNullableFilter<'ChatMessage'>
+    | Date
+    | string
+    | null;
 };
 
 export type ChatMessageCreateWithoutDialogInput = {
@@ -1199,8 +1279,10 @@ export type ChatMessageCreateWithoutDialogInput = {
     | null;
   isGoodResponse?: boolean;
   isBadResponse?: boolean;
+  trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   createdAt?: Date | string;
   updatedAt?: Date | string;
+  deletedAt?: Date | string | null;
   AuthUser: Prisma.AuthUserCreateNestedOneWithoutChatMessageInput;
   ChatMessageDocumentEmbedding?: Prisma.ChatMessageDocumentEmbeddingCreateNestedManyWithoutChatHistoryInput;
   ChatLlmRequest?: Prisma.ChatLlmRequestCreateNestedManyWithoutHistoryInput;
@@ -1225,8 +1307,10 @@ export type ChatMessageUncheckedCreateWithoutDialogInput = {
     | null;
   isGoodResponse?: boolean;
   isBadResponse?: boolean;
+  trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   createdAt?: Date | string;
   updatedAt?: Date | string;
+  deletedAt?: Date | string | null;
   ChatMessageDocumentEmbedding?: Prisma.ChatMessageDocumentEmbeddingUncheckedCreateNestedManyWithoutChatHistoryInput;
   ChatLlmRequest?: Prisma.ChatLlmRequestUncheckedCreateNestedManyWithoutHistoryInput;
 };
@@ -1292,8 +1376,10 @@ export type ChatMessageCreateWithoutChatMessageDocumentEmbeddingInput = {
     | null;
   isGoodResponse?: boolean;
   isBadResponse?: boolean;
+  trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   createdAt?: Date | string;
   updatedAt?: Date | string;
+  deletedAt?: Date | string | null;
   AuthUser: Prisma.AuthUserCreateNestedOneWithoutChatMessageInput;
   dialog?: Prisma.ChatDialogCreateNestedOneWithoutChatMessageInput;
   ChatLlmRequest?: Prisma.ChatLlmRequestCreateNestedManyWithoutHistoryInput;
@@ -1320,8 +1406,10 @@ export type ChatMessageUncheckedCreateWithoutChatMessageDocumentEmbeddingInput =
       | null;
     isGoodResponse?: boolean;
     isBadResponse?: boolean;
+    trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    deletedAt?: Date | string | null;
     ChatLlmRequest?: Prisma.ChatLlmRequestUncheckedCreateNestedManyWithoutHistoryInput;
   };
 
@@ -1380,8 +1468,14 @@ export type ChatMessageUpdateWithoutChatMessageDocumentEmbeddingInput = {
     | null;
   isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+  trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  deletedAt?:
+    | Prisma.NullableDateTimeFieldUpdateOperationsInput
+    | Date
+    | string
+    | null;
   AuthUser?: Prisma.AuthUserUpdateOneRequiredWithoutChatMessageNestedInput;
   dialog?: Prisma.ChatDialogUpdateOneWithoutChatMessageNestedInput;
   ChatLlmRequest?: Prisma.ChatLlmRequestUpdateManyWithoutHistoryNestedInput;
@@ -1415,8 +1509,14 @@ export type ChatMessageUncheckedUpdateWithoutChatMessageDocumentEmbeddingInput =
       | null;
     isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+    trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    deletedAt?:
+      | Prisma.NullableDateTimeFieldUpdateOperationsInput
+      | Date
+      | string
+      | null;
     ChatLlmRequest?: Prisma.ChatLlmRequestUncheckedUpdateManyWithoutHistoryNestedInput;
   };
 
@@ -1438,8 +1538,10 @@ export type ChatMessageCreateWithoutChatLlmRequestInput = {
     | null;
   isGoodResponse?: boolean;
   isBadResponse?: boolean;
+  trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   createdAt?: Date | string;
   updatedAt?: Date | string;
+  deletedAt?: Date | string | null;
   AuthUser: Prisma.AuthUserCreateNestedOneWithoutChatMessageInput;
   dialog?: Prisma.ChatDialogCreateNestedOneWithoutChatMessageInput;
   ChatMessageDocumentEmbedding?: Prisma.ChatMessageDocumentEmbeddingCreateNestedManyWithoutChatHistoryInput;
@@ -1465,8 +1567,10 @@ export type ChatMessageUncheckedCreateWithoutChatLlmRequestInput = {
     | null;
   isGoodResponse?: boolean;
   isBadResponse?: boolean;
+  trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   createdAt?: Date | string;
   updatedAt?: Date | string;
+  deletedAt?: Date | string | null;
   ChatMessageDocumentEmbedding?: Prisma.ChatMessageDocumentEmbeddingUncheckedCreateNestedManyWithoutChatHistoryInput;
 };
 
@@ -1523,8 +1627,14 @@ export type ChatMessageUpdateWithoutChatLlmRequestInput = {
     | null;
   isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+  trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  deletedAt?:
+    | Prisma.NullableDateTimeFieldUpdateOperationsInput
+    | Date
+    | string
+    | null;
   AuthUser?: Prisma.AuthUserUpdateOneRequiredWithoutChatMessageNestedInput;
   dialog?: Prisma.ChatDialogUpdateOneWithoutChatMessageNestedInput;
   ChatMessageDocumentEmbedding?: Prisma.ChatMessageDocumentEmbeddingUpdateManyWithoutChatHistoryNestedInput;
@@ -1557,8 +1667,14 @@ export type ChatMessageUncheckedUpdateWithoutChatLlmRequestInput = {
     | null;
   isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+  trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  deletedAt?:
+    | Prisma.NullableDateTimeFieldUpdateOperationsInput
+    | Date
+    | string
+    | null;
   ChatMessageDocumentEmbedding?: Prisma.ChatMessageDocumentEmbeddingUncheckedUpdateManyWithoutChatHistoryNestedInput;
 };
 
@@ -1581,8 +1697,10 @@ export type ChatMessageCreateManyAuthUserInput = {
     | null;
   isGoodResponse?: boolean;
   isBadResponse?: boolean;
+  trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   createdAt?: Date | string;
   updatedAt?: Date | string;
+  deletedAt?: Date | string | null;
 };
 
 export type ChatMessageUpdateWithoutAuthUserInput = {
@@ -1610,8 +1728,14 @@ export type ChatMessageUpdateWithoutAuthUserInput = {
     | null;
   isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+  trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  deletedAt?:
+    | Prisma.NullableDateTimeFieldUpdateOperationsInput
+    | Date
+    | string
+    | null;
   dialog?: Prisma.ChatDialogUpdateOneWithoutChatMessageNestedInput;
   ChatMessageDocumentEmbedding?: Prisma.ChatMessageDocumentEmbeddingUpdateManyWithoutChatHistoryNestedInput;
   ChatLlmRequest?: Prisma.ChatLlmRequestUpdateManyWithoutHistoryNestedInput;
@@ -1643,8 +1767,14 @@ export type ChatMessageUncheckedUpdateWithoutAuthUserInput = {
     | null;
   isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+  trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  deletedAt?:
+    | Prisma.NullableDateTimeFieldUpdateOperationsInput
+    | Date
+    | string
+    | null;
   ChatMessageDocumentEmbedding?: Prisma.ChatMessageDocumentEmbeddingUncheckedUpdateManyWithoutChatHistoryNestedInput;
   ChatLlmRequest?: Prisma.ChatLlmRequestUncheckedUpdateManyWithoutHistoryNestedInput;
 };
@@ -1675,8 +1805,14 @@ export type ChatMessageUncheckedUpdateManyWithoutAuthUserInput = {
     | null;
   isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+  trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  deletedAt?:
+    | Prisma.NullableDateTimeFieldUpdateOperationsInput
+    | Date
+    | string
+    | null;
 };
 
 export type ChatMessageCreateManyDialogInput = {
@@ -1698,8 +1834,10 @@ export type ChatMessageCreateManyDialogInput = {
     | null;
   isGoodResponse?: boolean;
   isBadResponse?: boolean;
+  trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   createdAt?: Date | string;
   updatedAt?: Date | string;
+  deletedAt?: Date | string | null;
 };
 
 export type ChatMessageUpdateWithoutDialogInput = {
@@ -1727,8 +1865,14 @@ export type ChatMessageUpdateWithoutDialogInput = {
     | null;
   isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+  trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  deletedAt?:
+    | Prisma.NullableDateTimeFieldUpdateOperationsInput
+    | Date
+    | string
+    | null;
   AuthUser?: Prisma.AuthUserUpdateOneRequiredWithoutChatMessageNestedInput;
   ChatMessageDocumentEmbedding?: Prisma.ChatMessageDocumentEmbeddingUpdateManyWithoutChatHistoryNestedInput;
   ChatLlmRequest?: Prisma.ChatLlmRequestUpdateManyWithoutHistoryNestedInput;
@@ -1760,8 +1904,14 @@ export type ChatMessageUncheckedUpdateWithoutDialogInput = {
     | null;
   isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+  trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  deletedAt?:
+    | Prisma.NullableDateTimeFieldUpdateOperationsInput
+    | Date
+    | string
+    | null;
   ChatMessageDocumentEmbedding?: Prisma.ChatMessageDocumentEmbeddingUncheckedUpdateManyWithoutChatHistoryNestedInput;
   ChatLlmRequest?: Prisma.ChatLlmRequestUncheckedUpdateManyWithoutHistoryNestedInput;
 };
@@ -1792,8 +1942,14 @@ export type ChatMessageUncheckedUpdateManyWithoutDialogInput = {
     | null;
   isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+  trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  deletedAt?:
+    | Prisma.NullableDateTimeFieldUpdateOperationsInput
+    | Date
+    | string
+    | null;
 };
 
 /**
@@ -1867,8 +2023,10 @@ export type ChatMessageSelect<
     temperature?: boolean;
     isGoodResponse?: boolean;
     isBadResponse?: boolean;
+    trace?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
+    deletedAt?: boolean;
     AuthUser?: boolean | Prisma.AuthUserDefaultArgs<ExtArgs>;
     dialog?: boolean | Prisma.ChatMessage$dialogArgs<ExtArgs>;
     ChatMessageDocumentEmbedding?:
@@ -1899,8 +2057,10 @@ export type ChatMessageSelectCreateManyAndReturn<
     temperature?: boolean;
     isGoodResponse?: boolean;
     isBadResponse?: boolean;
+    trace?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
+    deletedAt?: boolean;
     AuthUser?: boolean | Prisma.AuthUserDefaultArgs<ExtArgs>;
     dialog?: boolean | Prisma.ChatMessage$dialogArgs<ExtArgs>;
   },
@@ -1926,8 +2086,10 @@ export type ChatMessageSelectUpdateManyAndReturn<
     temperature?: boolean;
     isGoodResponse?: boolean;
     isBadResponse?: boolean;
+    trace?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
+    deletedAt?: boolean;
     AuthUser?: boolean | Prisma.AuthUserDefaultArgs<ExtArgs>;
     dialog?: boolean | Prisma.ChatMessage$dialogArgs<ExtArgs>;
   },
@@ -1949,8 +2111,10 @@ export type ChatMessageSelectScalar = {
   temperature?: boolean;
   isGoodResponse?: boolean;
   isBadResponse?: boolean;
+  trace?: boolean;
   createdAt?: boolean;
   updatedAt?: boolean;
+  deletedAt?: boolean;
 };
 
 export type ChatMessageOmit<
@@ -1971,8 +2135,10 @@ export type ChatMessageOmit<
   | 'temperature'
   | 'isGoodResponse'
   | 'isBadResponse'
+  | 'trace'
   | 'createdAt'
-  | 'updatedAt',
+  | 'updatedAt'
+  | 'deletedAt',
   ExtArgs['result']['chatMessage']
 >;
 export type ChatMessageInclude<
@@ -2029,8 +2195,10 @@ export type $ChatMessagePayload<
       temperature: runtime.Decimal | null;
       isGoodResponse: boolean;
       isBadResponse: boolean;
+      trace: runtime.JsonValue | null;
       createdAt: Date;
       updatedAt: Date;
+      deletedAt: Date | null;
     },
     ExtArgs['result']['chatMessage']
   >;
@@ -2694,8 +2862,10 @@ export interface ChatMessageFieldRefs {
   readonly temperature: Prisma.FieldRef<'ChatMessage', 'Decimal'>;
   readonly isGoodResponse: Prisma.FieldRef<'ChatMessage', 'Boolean'>;
   readonly isBadResponse: Prisma.FieldRef<'ChatMessage', 'Boolean'>;
+  readonly trace: Prisma.FieldRef<'ChatMessage', 'Json'>;
   readonly createdAt: Prisma.FieldRef<'ChatMessage', 'DateTime'>;
   readonly updatedAt: Prisma.FieldRef<'ChatMessage', 'DateTime'>;
+  readonly deletedAt: Prisma.FieldRef<'ChatMessage', 'DateTime'>;
 }
 
 // Custom InputTypes

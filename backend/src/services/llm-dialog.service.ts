@@ -59,18 +59,12 @@ export class LlmDialogService {
       // === DATABASE QUERIES ===
       // First get total count of messages for this dialog
       const totalCount = await this.prismaService.chatMessage.count({
-        where: {
-          dialogId: dialogId,
-          userId,
-        },
+        where: { deletedAt: null, dialogId: dialogId, userId },
       });
 
       // Then get the paginated messages
       const messagesResult = await this.prismaService.chatMessage.findMany({
-        where: {
-          dialogId: dialogId,
-          userId,
-        },
+        where: { deletedAt: null, dialogId: dialogId, userId },
         select: {
           id: true,
           createdAt: true,

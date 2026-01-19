@@ -11,12 +11,7 @@ import { PrismaService } from './services/prisma.service';
 import { TraceModule } from './trace/trace.module';
 
 @Module({
-  imports: [
-    JwtModule,
-    TraceModule.forRoot({
-      saveTracesAsMermaid: true,
-    }),
-  ],
+  imports: [JwtModule, TraceModule.forRoot()],
   controllers: [...CONTROLLERS, FlowController],
   providers: [
     PrismaService,

@@ -34,18 +34,18 @@ async function bootstrap() {
     .setDescription('The RAG-system API description')
     .setVersion('1.0')
     .build();
-  const documentFactory = () => {
-    const document = SwaggerModule.createDocument(app, config);
-    try {
-      writeFileSync('./swagger.json', JSON.stringify(document));
-    } catch (error) {
-      //
-      Logger.error(error, error.stack);
-    }
-    return document;
-  };
 
-  SwaggerModule.setup('swagger', app, documentFactory);
+  Logger.log('Generating Swagger documentation');
+  const document = SwaggerModule.createDocument(app, config);
+  try {
+    writeFileSync('./swagger.json', JSON.stringify(document));
+  } catch (error) {
+    //
+    Logger.error(error, error.stack);
+  }
+  Logger.log('Swagger documentation generated');
+
+  SwaggerModule.setup('swagger', app, document);
 
   await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
   Logger.log(`Application is running on port ${process.env.PORT ?? 3000}`);

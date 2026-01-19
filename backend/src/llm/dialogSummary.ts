@@ -17,9 +17,7 @@ export class DialogSummary {
     Logger.logInfo('Проверка необходимости суммаризации', { dialogId });
 
     const messageCount = await PrismaService.instance.chatMessage.count({
-      where: {
-        dialogId: dialogId,
-      },
+      where: { deletedAt: null, dialogId: dialogId },
     });
 
     const should = messageCount >= 1;

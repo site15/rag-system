@@ -34,6 +34,9 @@ export const generateController = ({
   const prismaModelName =
     modelName.charAt(0).toLowerCase() + modelName.slice(1);
 
+  // Check if model has deletedAt field for soft delete support
+  const hasDeletedAt = fields.some((f) => f.name === 'deletedAt');
+
   return `import {
   Body,
   Controller,
@@ -117,6 +120,7 @@ export class ${controllerName} {
             ],
           }
         : {}),
+      ${hasDeletedAt ? 'deletedAt: null,' : ''}
     };
 
     const result = await this.${serviceName.toLowerCase()}.$transaction(async (prisma) => {
@@ -170,9 +174,11 @@ export class ${controllerName} {
       data: {
         ...args,
         updatedAt: new Date(),
+        ${hasDeletedAt ? 'deletedAt: null,' : ''}
       },
       where: {
         id,
+        ${hasDeletedAt ? 'deletedAt: null,' : ''}
       },
     });
   }
@@ -180,11 +186,23 @@ export class ${controllerName} {
   @Delete(':id')
   @ApiOkResponse({ type: StatusResponse })
   async deleteOne(@Param('id', new ParseUUIDPipe()) id: string) {
-    await this.${serviceName.toLowerCase()}.${prismaModelName}.delete({
+    ${
+      hasDeletedAt
+        ? `await this.${serviceName.toLowerCase()}.${prismaModelName}.update({
+      where: {
+        id,
+        deletedAt: null,
+      },
+      data: {
+        deletedAt: new Date(),
+      },
+    });`
+        : `await this.${serviceName.toLowerCase()}.${prismaModelName}.delete({
       where: {
         id,
       },
-    });
+    });`
+    }
     return { message: 'ok' };
   }
 
@@ -194,6 +212,7 @@ export class ${controllerName} {
     return await this.${serviceName.toLowerCase()}.${prismaModelName}.findFirstOrThrow({
       where: {
         id,
+        ${hasDeletedAt ? 'deletedAt: null,' : ''}
       },
     });
   }

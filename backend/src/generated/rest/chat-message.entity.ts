@@ -1,3 +1,4 @@
+import { Prisma } from '../prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
 import { AuthUser } from './auth-user.entity';
 import { ChatDialog } from './chat-dialog.entity';
@@ -70,6 +71,11 @@ export class ChatMessage {
   })
   isBadResponse!: boolean;
   @ApiProperty({
+    type: () => Object,
+    nullable: true,
+  })
+  trace!: Prisma.JsonValue | null;
+  @ApiProperty({
     type: 'string',
     format: 'date-time',
   })
@@ -79,6 +85,12 @@ export class ChatMessage {
     format: 'date-time',
   })
   updatedAt!: Date;
+  @ApiProperty({
+    type: 'string',
+    format: 'date-time',
+    nullable: true,
+  })
+  deletedAt!: Date | null;
   @ApiProperty({
     type: () => AuthUser,
     required: false,

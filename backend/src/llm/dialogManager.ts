@@ -1,5 +1,6 @@
 // dialogManager.ts
 import { PrismaService } from '../services/prisma.service';
+import { TraceNode } from '../trace/trace.module';
 import { Logger } from './logger';
 import { FailureTracker } from './services/failureTracker';
 import { Category } from './services/questionTransformer';
@@ -20,6 +21,34 @@ export class DialogManager {
 
     Logger.logInfo('Диалог создан', { dialogId: dialog.id });
     return dialog.id;
+  }
+
+  public static async setMessageTrace(
+    messageId: string,
+    trace: TraceNode[] | null,
+  ): Promise<void> {
+    Logger.logInfo('Setting message trace', {
+      messageId,
+    });
+
+    await PrismaService.instance.chatDialog.updateMany({
+      where: {
+        ChatMessage: { some: { id: messageId } },
+      },
+      data: {
+        consecutiveFailures: 0,
+      },
+    });
+
+    // Mark the chat history entry as successful
+    await PrismaService.instance.chatMessage.update({
+      where: { deletedAt: null, id: messageId },
+      data: {
+        trace: trace as any,
+      },
+    });
+
+    Logger.logInfo('Message trace set', { messageId });
   }
 
   public static async saveMessage({
@@ -156,9 +185,7 @@ export class DialogManager {
     Logger.logInfo('Получение истории диалога', { dialogId, limit });
 
     const messages = await PrismaService.instance.chatMessage.findMany({
-      where: {
-        dialogId: dialogId,
-      },
+      where: { deletedAt: null, dialogId: dialogId },
       select: {
         id: true,
         question: true,
@@ -189,9 +216,7 @@ export class DialogManager {
     Logger.logInfo('Получение истории диалога', { dialogId, limit });
 
     const messages = await PrismaService.instance.chatMessage.findMany({
-      where: {
-        dialogId: dialogId,
-      },
+      where: { deletedAt: null, dialogId: dialogId },
       select: {
         question: true,
         answer: true,
@@ -232,5 +257,97 @@ export class DialogManager {
     });
 
     return summary;
+  }
+
+  public static async getMessageTrace(messageId: string): Promise<any> {
+    Logger.logInfo('Getting message trace', {
+      messageId,
+    });
+
+    const message = await PrismaService.instance.chatMessage.findFirst({
+      where: { deletedAt: null, id: messageId },
+      select: {
+        trace: true,
+      },
+    });
+
+    if (!message) {
+      Logger.logInfo('Message not found', { messageId });
+      return null;
+    }
+
+    Logger.logInfo('Message trace retrieved', {
+      messageId,
+      hasTrace: !!message.trace,
+    });
+
+    return message.trace;
+  }
+
+  public static async deleteMessage(
+    messageId: string,
+  ): Promise<{ success: boolean; dialogId?: string }> {
+    Logger.logInfo('Soft deleting message', {
+      messageId,
+    });
+
+    try {
+      // First, get the message with its dialog relationship
+      const message = await PrismaService.instance.chatMessage.findFirst({
+        where: { deletedAt: null, id: messageId },
+        select: {
+          id: true,
+          dialogId: true,
+          deletedAt: true,
+        },
+      });
+
+      if (!message) {
+        Logger.logInfo('Message not found for deletion', { messageId });
+        return { success: false };
+      }
+
+      if (message.deletedAt) {
+        Logger.logInfo('Message already deleted', { messageId });
+        return { success: false };
+      }
+
+      // Soft delete the message by setting deletedAt
+      await PrismaService.instance.chatMessage.update({
+        where: { deletedAt: null, id: messageId },
+        data: {
+          deletedAt: new Date(),
+        },
+      });
+
+      // Reset dialog parameters if message had a dialog
+      if (message.dialogId) {
+        await PrismaService.instance.chatDialog.update({
+          where: {
+            id: message.dialogId,
+          },
+          data: {
+            consecutiveFailures: 0,
+            isFailed: false,
+          },
+        });
+
+        Logger.logInfo('Message deleted and dialog parameters reset', {
+          messageId,
+          dialogId: message.dialogId,
+        });
+
+        return { success: true, dialogId: message.dialogId };
+      }
+
+      Logger.logInfo('Message deleted without dialog', { messageId });
+      return { success: true };
+    } catch (error) {
+      Logger.logError('Error deleting message', {
+        messageId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw error;
+    }
   }
 }

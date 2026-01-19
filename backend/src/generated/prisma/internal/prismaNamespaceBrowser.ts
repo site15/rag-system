@@ -56,6 +56,7 @@ export const AnyNull = runtime.AnyNull;
 export const ModelName = {
   AuthUser: 'AuthUser',
   AuthSession: 'AuthSession',
+  ChatPrompt: 'ChatPrompt',
   ChatDocumentEmbedding: 'ChatDocumentEmbedding',
   ChatDialog: 'ChatDialog',
   ChatMessage: 'ChatMessage',
@@ -105,6 +106,17 @@ export const AuthSessionScalarFieldEnum = {
 export type AuthSessionScalarFieldEnum =
   (typeof AuthSessionScalarFieldEnum)[keyof typeof AuthSessionScalarFieldEnum];
 
+export const ChatPromptScalarFieldEnum = {
+  id: 'id',
+  key: 'key',
+  prompt: 'prompt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+} as const;
+
+export type ChatPromptScalarFieldEnum =
+  (typeof ChatPromptScalarFieldEnum)[keyof typeof ChatPromptScalarFieldEnum];
+
 export const ChatDocumentEmbeddingScalarFieldEnum = {
   id: 'id',
   content: 'content',
@@ -148,8 +160,10 @@ export const ChatMessageScalarFieldEnum = {
   temperature: 'temperature',
   isGoodResponse: 'isGoodResponse',
   isBadResponse: 'isBadResponse',
+  trace: 'trace',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt',
 } as const;
 
 export type ChatMessageScalarFieldEnum =

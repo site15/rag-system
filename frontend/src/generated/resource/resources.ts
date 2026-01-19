@@ -2,6 +2,7 @@
 import { DataProvider } from "react-admin";
 import { AuthUserDataProvider } from "./AuthUserDataProvider";
 import { AuthSessionDataProvider } from "./AuthSessionDataProvider";
+import { ChatPromptDataProvider } from "./ChatPromptDataProvider";
 import { ChatDocumentEmbeddingDataProvider } from "./ChatDocumentEmbeddingDataProvider";
 import { ChatDialogDataProvider } from "./ChatDialogDataProvider";
 import { ChatMessageDataProvider } from "./ChatMessageDataProvider";
@@ -19,6 +20,11 @@ import {
   AuthSessionEditForm,
   AuthSessionShowForm,
 } from "./AuthSessionForm";
+import {
+  ChatPromptCreateForm,
+  ChatPromptEditForm,
+  ChatPromptShowForm,
+} from "./ChatPromptForm";
 import {
   ChatDocumentEmbeddingCreateForm,
   ChatDocumentEmbeddingEditForm,
@@ -56,6 +62,7 @@ import {
 } from "./ChatEmbeddingModelForm";
 import { AuthUserList } from "./AuthUserList";
 import { AuthSessionList } from "./AuthSessionList";
+import { ChatPromptList } from "./ChatPromptList";
 import { ChatDocumentEmbeddingList } from "./ChatDocumentEmbeddingList";
 import { ChatDialogList } from "./ChatDialogList";
 import { ChatMessageList } from "./ChatMessageList";
@@ -92,6 +99,14 @@ export const resources: Partial<
     create: AuthSessionCreateForm,
     edit: AuthSessionEditForm,
     show: AuthSessionShowForm,
+  },
+  ChatPrompt: {
+    dataProvider: ChatPromptDataProvider,
+    label: "Chat Prompt",
+    list: ChatPromptList,
+    create: ChatPromptCreateForm,
+    edit: ChatPromptEditForm,
+    show: ChatPromptShowForm,
   },
   ChatDocumentEmbedding: {
     dataProvider: ChatDocumentEmbeddingDataProvider,

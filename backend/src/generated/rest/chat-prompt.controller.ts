@@ -24,34 +24,33 @@ import {
   PrismaSdk,
   PrismaService,
 } from '../../services/prisma.service';
-import { AppRequest, CurrentAppRequest } from '../../types/request';
 import { StatusResponse } from '../../types/status-response';
 import { Prisma } from '../prisma/client';
-import { ChatMessageDto } from './chat-message.dto';
-import { ChatMessage } from './chat-message.entity';
-import { CreateChatMessageDto } from './create-chat-message.dto';
-import { UpdateChatMessageDto } from './update-chat-message.dto';
+import { ChatPromptDto } from './chat-prompt.dto';
+import { ChatPrompt } from './chat-prompt.entity';
+import { CreateChatPromptDto } from './create-chat-prompt.dto';
+import { UpdateChatPromptDto } from './update-chat-prompt.dto';
 
-export class FindManyChatMessageArgs extends FindManyArgs {}
+export class FindManyChatPromptArgs extends FindManyArgs {}
 
-export class FindManyChatMessageResponseMeta extends FindManyResponseMeta {}
+export class FindManyChatPromptResponseMeta extends FindManyResponseMeta {}
 
-export class FindManyChatMessageResponse {
-  @ApiProperty({ type: () => [ChatMessage] })
-  items!: ChatMessage[];
+export class FindManyChatPromptResponse {
+  @ApiProperty({ type: () => [ChatPrompt] })
+  items!: ChatPrompt[];
 
-  @ApiProperty({ type: () => FindManyChatMessageResponseMeta })
-  meta!: FindManyChatMessageResponseMeta;
+  @ApiProperty({ type: () => FindManyChatPromptResponseMeta })
+  meta!: FindManyChatPromptResponseMeta;
 }
 
 @ApiTags('chat')
-@Controller('chat/message')
-export class ChatMessageController {
+@Controller('chat/prompt')
+export class ChatPromptController {
   constructor(private readonly prismaservice: PrismaService) {}
 
   @Get()
-  @ApiOkResponse({ type: FindManyChatMessageResponse })
-  async findMany(@Query() args: FindManyChatMessageArgs) {
+  @ApiOkResponse({ type: FindManyChatPromptResponse })
+  async findMany(@Query() args: FindManyChatPromptArgs) {
     const { skip, take, curPage, perPage } = getFirstSkipFromCurPerPage(args);
     const searchText = args.searchText;
 
@@ -61,7 +60,7 @@ export class ChatMessageController {
       .reduce(
         (all, [key, value]) => ({
           ...all,
-          ...(key in PrismaSdk.Prisma.ChatMessageScalarFieldEnum
+          ...(key in PrismaSdk.Prisma.ChatPromptScalarFieldEnum
             ? {
                 [key]: value === 'desc' ? 'desc' : 'asc',
               }
@@ -70,7 +69,7 @@ export class ChatMessageController {
         {},
       );
 
-    const chatMessageWhereInput: Prisma.ChatMessageWhereInput = {
+    const chatPromptWhereInput: Prisma.ChatPromptWhereInput = {
       ...(searchText
         ? {
             OR: [
@@ -78,19 +77,18 @@ export class ChatMessageController {
             ],
           }
         : {}),
-      deletedAt: null,
     };
 
     const result = await this.prismaservice.$transaction(async (prisma) => {
       return {
-        items: await prisma.chatMessage.findMany({
-          where: chatMessageWhereInput,
+        items: await prisma.chatPrompt.findMany({
+          where: chatPromptWhereInput,
           take,
           skip,
           orderBy,
         }),
-        totalResults: await prisma.chatMessage.count({
-          where: chatMessageWhereInput,
+        totalResults: await prisma.chatPrompt.count({
+          where: chatPromptWhereInput,
         }),
       };
     });
@@ -105,34 +103,28 @@ export class ChatMessageController {
   }
 
   @Post()
-  @ApiCreatedResponse({ type: ChatMessageDto })
-  async createOne(
-    @CurrentAppRequest() req: AppRequest,
-    @Body() args: CreateChatMessageDto,
-  ) {
-    return await this.prismaservice.chatMessage.create({
+  @ApiCreatedResponse({ type: ChatPromptDto })
+  async createOne(@Body() args: CreateChatPromptDto) {
+    return await this.prismaservice.chatPrompt.create({
       data: {
         ...args,
-        userId: req.user.id,
       },
     });
   }
 
   @Put(':id')
-  @ApiOkResponse({ type: ChatMessageDto })
+  @ApiOkResponse({ type: ChatPromptDto })
   async updateOne(
     @Param('id', new ParseUUIDPipe()) id: string,
-    @Body() args: UpdateChatMessageDto,
+    @Body() args: UpdateChatPromptDto,
   ) {
-    return await this.prismaservice.chatMessage.update({
+    return await this.prismaservice.chatPrompt.update({
       data: {
         ...args,
         updatedAt: new Date(),
-        deletedAt: null,
       },
       where: {
         id,
-        deletedAt: null,
       },
     });
   }
@@ -140,25 +132,20 @@ export class ChatMessageController {
   @Delete(':id')
   @ApiOkResponse({ type: StatusResponse })
   async deleteOne(@Param('id', new ParseUUIDPipe()) id: string) {
-    await this.prismaservice.chatMessage.update({
+    await this.prismaservice.chatPrompt.delete({
       where: {
         id,
-        deletedAt: null,
-      },
-      data: {
-        deletedAt: new Date(),
       },
     });
     return { message: 'ok' };
   }
 
   @Get(':id')
-  @ApiOkResponse({ type: ChatMessageDto })
+  @ApiOkResponse({ type: ChatPromptDto })
   async findOne(@Param('id', new ParseUUIDPipe()) id: string) {
-    return await this.prismaservice.chatMessage.findFirstOrThrow({
+    return await this.prismaservice.chatPrompt.findFirstOrThrow({
       where: {
         id,
-        deletedAt: null,
       },
     });
   }

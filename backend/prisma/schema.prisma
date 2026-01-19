@@ -80,6 +80,18 @@ model AuthSession {
   @@index([userId], map: "IDX_AUTH_SESSION__USER_ID")
 }
 
+model ChatPrompt {
+  id     String  @id(map: "PK_CHAT_PROMPTS") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  key    String? @db.VarChar(255)
+  prompt String? @db.Text
+
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @default(now()) @db.Timestamp(6)
+
+  @@index([key], map: "IDX_CHAT_PROMPTS__KEY")
+  @@index([prompt], map: "IDX_CHAT_PROMPTS__PROMPT")
+}
+
 model ChatDocumentEmbedding {
   id                 String                       @id(map: "PK_CHAT_DOCUMENT_EMBEDDINGS") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   content            String                       @db.Text
@@ -143,9 +155,11 @@ model ChatMessage {
   temperature               Decimal? @db.Decimal(3, 2)
   isGoodResponse            Boolean  @default(false)
   isBadResponse             Boolean  @default(false)
+  trace                     Json?
 
-  createdAt DateTime @default(now()) @db.Timestamp(6)
-  updatedAt DateTime @default(now()) @db.Timestamp(6)
+  createdAt DateTime  @default(now()) @db.Timestamp(6)
+  updatedAt DateTime  @default(now()) @db.Timestamp(6)
+  deletedAt DateTime? @db.Timestamp(6)
 
   AuthUser AuthUser    @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_CHAT_MESSAGES__USER_ID")
   dialog   ChatDialog? @relation(fields: [dialogId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_CHAT_MESSAGES__DIALOG_ID")

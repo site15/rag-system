@@ -53,6 +53,11 @@ export type AuthUser = Prisma.AuthUserModel;
  */
 export type AuthSession = Prisma.AuthSessionModel;
 /**
+ * Model ChatPrompt
+ *
+ */
+export type ChatPrompt = Prisma.ChatPromptModel;
+/**
  * Model ChatDocumentEmbedding
  *
  */

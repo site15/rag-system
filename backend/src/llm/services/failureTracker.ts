@@ -26,9 +26,7 @@ export class FailureTracker {
 
     // Mark the chat history entry as successful
     await PrismaService.instance.chatMessage.update({
-      where: {
-        id: messageId,
-      },
+      where: { deletedAt: null, id: messageId },
       data: {
         isGoodResponse: true,
       },
@@ -70,9 +68,7 @@ export class FailureTracker {
 
     // Mark the chat history entry as failed
     await PrismaService.instance.chatMessage.update({
-      where: {
-        id: messageId,
-      },
+      where: { deletedAt: null, id: messageId },
       data: {
         isBadResponse: true,
       },

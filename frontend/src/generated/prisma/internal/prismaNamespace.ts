@@ -414,6 +414,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never
 export const ModelName = {
   AuthUser: "AuthUser",
   AuthSession: "AuthSession",
+  ChatPrompt: "ChatPrompt",
   ChatDocumentEmbedding: "ChatDocumentEmbedding",
   ChatDialog: "ChatDialog",
   ChatMessage: "ChatMessage",
@@ -445,6 +446,7 @@ export type TypeMap<
     modelProps:
       | "authUser"
       | "authSession"
+      | "chatPrompt"
       | "chatDocumentEmbedding"
       | "chatDialog"
       | "chatMessage"
@@ -603,6 +605,82 @@ export type TypeMap<
           args: Prisma.AuthSessionCountArgs<ExtArgs>;
           result:
             | runtime.Types.Utils.Optional<Prisma.AuthSessionCountAggregateOutputType>
+            | number;
+        };
+      };
+    };
+    ChatPrompt: {
+      payload: Prisma.$ChatPromptPayload<ExtArgs>;
+      fields: Prisma.ChatPromptFieldRefs;
+      operations: {
+        findUnique: {
+          args: Prisma.ChatPromptFindUniqueArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatPromptPayload> | null;
+        };
+        findUniqueOrThrow: {
+          args: Prisma.ChatPromptFindUniqueOrThrowArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatPromptPayload>;
+        };
+        findFirst: {
+          args: Prisma.ChatPromptFindFirstArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatPromptPayload> | null;
+        };
+        findFirstOrThrow: {
+          args: Prisma.ChatPromptFindFirstOrThrowArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatPromptPayload>;
+        };
+        findMany: {
+          args: Prisma.ChatPromptFindManyArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatPromptPayload>[];
+        };
+        create: {
+          args: Prisma.ChatPromptCreateArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatPromptPayload>;
+        };
+        createMany: {
+          args: Prisma.ChatPromptCreateManyArgs<ExtArgs>;
+          result: BatchPayload;
+        };
+        createManyAndReturn: {
+          args: Prisma.ChatPromptCreateManyAndReturnArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatPromptPayload>[];
+        };
+        delete: {
+          args: Prisma.ChatPromptDeleteArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatPromptPayload>;
+        };
+        update: {
+          args: Prisma.ChatPromptUpdateArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatPromptPayload>;
+        };
+        deleteMany: {
+          args: Prisma.ChatPromptDeleteManyArgs<ExtArgs>;
+          result: BatchPayload;
+        };
+        updateMany: {
+          args: Prisma.ChatPromptUpdateManyArgs<ExtArgs>;
+          result: BatchPayload;
+        };
+        updateManyAndReturn: {
+          args: Prisma.ChatPromptUpdateManyAndReturnArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatPromptPayload>[];
+        };
+        upsert: {
+          args: Prisma.ChatPromptUpsertArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatPromptPayload>;
+        };
+        aggregate: {
+          args: Prisma.ChatPromptAggregateArgs<ExtArgs>;
+          result: runtime.Types.Utils.Optional<Prisma.AggregateChatPrompt>;
+        };
+        groupBy: {
+          args: Prisma.ChatPromptGroupByArgs<ExtArgs>;
+          result: runtime.Types.Utils.Optional<Prisma.ChatPromptGroupByOutputType>[];
+        };
+        count: {
+          args: Prisma.ChatPromptCountArgs<ExtArgs>;
+          result:
+            | runtime.Types.Utils.Optional<Prisma.ChatPromptCountAggregateOutputType>
             | number;
         };
       };
@@ -1202,6 +1280,17 @@ export const AuthSessionScalarFieldEnum = {
 export type AuthSessionScalarFieldEnum =
   (typeof AuthSessionScalarFieldEnum)[keyof typeof AuthSessionScalarFieldEnum];
 
+export const ChatPromptScalarFieldEnum = {
+  id: "id",
+  key: "key",
+  prompt: "prompt",
+  createdAt: "createdAt",
+  updatedAt: "updatedAt",
+} as const;
+
+export type ChatPromptScalarFieldEnum =
+  (typeof ChatPromptScalarFieldEnum)[keyof typeof ChatPromptScalarFieldEnum];
+
 export const ChatDocumentEmbeddingScalarFieldEnum = {
   id: "id",
   content: "content",
@@ -1245,8 +1334,10 @@ export const ChatMessageScalarFieldEnum = {
   temperature: "temperature",
   isGoodResponse: "isGoodResponse",
   isBadResponse: "isBadResponse",
+  trace: "trace",
   createdAt: "createdAt",
   updatedAt: "updatedAt",
+  deletedAt: "deletedAt",
 } as const;
 
 export type ChatMessageScalarFieldEnum =
@@ -1569,6 +1660,7 @@ export type PrismaClientOptions = (
 export type GlobalOmitConfig = {
   authUser?: Prisma.AuthUserOmit;
   authSession?: Prisma.AuthSessionOmit;
+  chatPrompt?: Prisma.ChatPromptOmit;
   chatDocumentEmbedding?: Prisma.ChatDocumentEmbeddingOmit;
   chatDialog?: Prisma.ChatDialogOmit;
   chatMessage?: Prisma.ChatMessageOmit;

@@ -9,6 +9,7 @@
  */
 export type * from "./models/AuthUser.js";
 export type * from "./models/AuthSession.js";
+export type * from "./models/ChatPrompt.js";
 export type * from "./models/ChatDocumentEmbedding.js";
 export type * from "./models/ChatDialog.js";
 export type * from "./models/ChatMessage.js";

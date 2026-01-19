@@ -1,5 +1,6 @@
+import { Prisma } from '../prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsDateString, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class UpdateChatMessageDto {
   @ApiProperty({
@@ -65,4 +66,20 @@ export class UpdateChatMessageDto {
   @IsOptional()
   @IsNumber()
   temperature?: number | null;
+  @ApiProperty({
+    type: () => Object,
+    required: false,
+    nullable: true,
+  })
+  @IsOptional()
+  trace?: Prisma.InputJsonValue | Prisma.NullableJsonNullValueInput;
+  @ApiProperty({
+    type: 'string',
+    format: 'date-time',
+    required: false,
+    nullable: true,
+  })
+  @IsOptional()
+  @IsDateString()
+  deletedAt?: Date | null;
 }

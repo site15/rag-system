@@ -3,8 +3,6 @@
 import type { Client, Options as Options2, TDataShape } from "./client";
 import { client } from "./client.gen";
 import type {
-  AppControllerGetHelloData,
-  AppControllerGetHelloResponses,
   AuthSessionControllerCreateOneData,
   AuthSessionControllerCreateOneErrors,
   AuthSessionControllerCreateOneResponses,
@@ -140,6 +138,33 @@ import type {
   ChatMessageDocumentEmbeddingControllerUpdateOneData,
   ChatMessageDocumentEmbeddingControllerUpdateOneErrors,
   ChatMessageDocumentEmbeddingControllerUpdateOneResponses,
+  ChatPromptControllerCreateOneData,
+  ChatPromptControllerCreateOneErrors,
+  ChatPromptControllerCreateOneResponses,
+  ChatPromptControllerDeleteOneData,
+  ChatPromptControllerDeleteOneErrors,
+  ChatPromptControllerDeleteOneResponses,
+  ChatPromptControllerFindManyData,
+  ChatPromptControllerFindManyErrors,
+  ChatPromptControllerFindManyResponses,
+  ChatPromptControllerFindOneData,
+  ChatPromptControllerFindOneErrors,
+  ChatPromptControllerFindOneResponses,
+  ChatPromptControllerUpdateOneData,
+  ChatPromptControllerUpdateOneErrors,
+  ChatPromptControllerUpdateOneResponses,
+  FlowControllerCancelMessageData,
+  FlowControllerCancelMessageErrors,
+  FlowControllerCancelMessageResponses,
+  FlowControllerDialogData,
+  FlowControllerDialogErrors,
+  FlowControllerDialogResponses,
+  FlowControllerGetMessageTraceData,
+  FlowControllerGetMessageTraceErrors,
+  FlowControllerGetMessageTraceResponses,
+  FlowControllerMessageSendData,
+  FlowControllerMessageSendErrors,
+  FlowControllerMessageSendResponses,
 } from "./types.gen";
 
 export type Options<
@@ -288,6 +313,75 @@ export const authSessionControllerUpdateOne = <
     ThrowOnError
   >({
     url: "/auth/session/{id}",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+export const chatPromptControllerFindMany = <
+  ThrowOnError extends boolean = false,
+>(
+  options?: Options<ChatPromptControllerFindManyData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    ChatPromptControllerFindManyResponses,
+    ChatPromptControllerFindManyErrors,
+    ThrowOnError
+  >({ url: "/chat/prompt", ...options });
+
+export const chatPromptControllerCreateOne = <
+  ThrowOnError extends boolean = false,
+>(
+  options: Options<ChatPromptControllerCreateOneData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    ChatPromptControllerCreateOneResponses,
+    ChatPromptControllerCreateOneErrors,
+    ThrowOnError
+  >({
+    url: "/chat/prompt",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+export const chatPromptControllerDeleteOne = <
+  ThrowOnError extends boolean = false,
+>(
+  options: Options<ChatPromptControllerDeleteOneData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    ChatPromptControllerDeleteOneResponses,
+    ChatPromptControllerDeleteOneErrors,
+    ThrowOnError
+  >({ url: "/chat/prompt/{id}", ...options });
+
+export const chatPromptControllerFindOne = <
+  ThrowOnError extends boolean = false,
+>(
+  options: Options<ChatPromptControllerFindOneData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    ChatPromptControllerFindOneResponses,
+    ChatPromptControllerFindOneErrors,
+    ThrowOnError
+  >({ url: "/chat/prompt/{id}", ...options });
+
+export const chatPromptControllerUpdateOne = <
+  ThrowOnError extends boolean = false,
+>(
+  options: Options<ChatPromptControllerUpdateOneData, ThrowOnError>,
+) =>
+  (options.client ?? client).put<
+    ChatPromptControllerUpdateOneResponses,
+    ChatPromptControllerUpdateOneErrors,
+    ThrowOnError
+  >({
+    url: "/chat/prompt/{id}",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -793,11 +887,56 @@ export const chatEmbeddingModelControllerUpdateOne = <
     },
   });
 
-export const appControllerGetHello = <ThrowOnError extends boolean = false>(
-  options?: Options<AppControllerGetHelloData, ThrowOnError>,
+export const flowControllerDialog = <ThrowOnError extends boolean = false>(
+  options: Options<FlowControllerDialogData, ThrowOnError>,
 ) =>
-  (options?.client ?? client).get<
-    AppControllerGetHelloResponses,
-    unknown,
+  (options.client ?? client).get<
+    FlowControllerDialogResponses,
+    FlowControllerDialogErrors,
     ThrowOnError
-  >({ url: "/", ...options });
+  >({ url: "/flow/dialog", ...options });
+
+export const flowControllerGetMessageTrace = <
+  ThrowOnError extends boolean = false,
+>(
+  options: Options<FlowControllerGetMessageTraceData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    FlowControllerGetMessageTraceResponses,
+    FlowControllerGetMessageTraceErrors,
+    ThrowOnError
+  >({ url: "/flow/message/trace", ...options });
+
+export const flowControllerMessageSend = <ThrowOnError extends boolean = false>(
+  options: Options<FlowControllerMessageSendData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    FlowControllerMessageSendResponses,
+    FlowControllerMessageSendErrors,
+    ThrowOnError
+  >({
+    url: "/flow/message/send",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+export const flowControllerCancelMessage = <
+  ThrowOnError extends boolean = false,
+>(
+  options: Options<FlowControllerCancelMessageData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    FlowControllerCancelMessageResponses,
+    FlowControllerCancelMessageErrors,
+    ThrowOnError
+  >({
+    url: "/flow/message/cancel",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });

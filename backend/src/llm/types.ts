@@ -29,6 +29,7 @@ export interface DocWithMetadataAndId {
 export type AppConfig = {
   chatProvider: string;
   embeddingsProvider: string;
+  processDocuments: boolean;
 };
 
 export type ChatConfig = {

@@ -89,11 +89,12 @@ LIMIT ${limit};
       `,
     );
     const results = (r as unknown as any[]).map((row: any) => {
-      const meta = row.metadata || {};
+      const source = row.metadata?.source;
+      const meta = row.metadata?.meta || {};
       return {
         id: row.id,
         content: row.content + '\n\nМЕТАДАННЫЕ:\n' + row.graphContent,
-        source: meta.source,
+        source: source,
         fromLine: meta.loc?.lines?.from,
         toLine: meta.loc?.lines?.to,
         distance: row.distance,

@@ -1,6 +1,7 @@
 // config.ts - Provider-specific configuration management
 
 import { PROVIDER_NAMES } from './constants';
+import { AppConfig } from './types';
 
 /**
  * Configuration manager for provider-specific environment variables
@@ -151,7 +152,7 @@ export class ConfigManager {
   /**
    * Get general application configuration
    */
-  public static getAppConfig() {
+  public static getAppConfig(): AppConfig {
     if (!process.env.CHAT_PROVIDER) {
       throw new Error('CHAT_PROVIDER environment variable is missing');
     }
@@ -161,6 +162,7 @@ export class ConfigManager {
     const config = {
       chatProvider: process.env.CHAT_PROVIDER,
       embeddingsProvider: process.env.EMBEDDINGS_PROVIDER,
+      processDocuments: process.env.PROCESS_DOCUMENTS === 'true',
     };
     return config;
   }

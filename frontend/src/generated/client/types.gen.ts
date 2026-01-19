@@ -28,6 +28,7 @@ export type ChatEmbeddingModel = {
 export type ChatDocumentEmbedding = {
   id: string;
   content: string;
+  graphContent: string | null;
   metadata: {
     [key: string]: unknown;
   } | null;
@@ -44,7 +45,7 @@ export type ChatMessageDocumentEmbedding = {
   messageId: string | null;
   embeddingDocumentId: string | null;
   isFound: boolean;
-  relevanceScore: string | null;
+  relevanceScore: number | null;
   createdAt: string;
   updatedAt: string;
   chatHistory?: ChatMessage | null;
@@ -55,12 +56,12 @@ export type ChatLlmModel = {
   id: string;
   provider: string;
   model: string;
-  temperature: string | null;
+  temperature: number | null;
   chunkSize: number | null;
   startTime: string | null;
   endTime: string | null;
   status: string;
-  requestId: string | null;
+  lastRequestId: string | null;
   isActive: boolean | null;
   createdAt: string;
   updatedAt: string;
@@ -76,7 +77,7 @@ export type ChatLlmRequest = {
   executionTimeMs: number;
   provider: string;
   model: string;
-  temperature: string | null;
+  temperature: number | null;
   isSuccess: boolean;
   errorMessage: string | null;
   dialogId: string | null;
@@ -100,11 +101,15 @@ export type ChatMessage = {
   transformedEmbeddingQuery: string | null;
   provider: string | null;
   model: string | null;
-  temperature: string | null;
+  temperature: number | null;
   isGoodResponse: boolean;
   isBadResponse: boolean;
+  trace: {
+    [key: string]: unknown;
+  } | null;
   createdAt: string;
   updatedAt: string;
+  deletedAt: string | null;
   AuthUser?: AuthUser;
   dialog?: ChatDialog | null;
   ChatMessageDocumentEmbedding?: Array<ChatMessageDocumentEmbedding>;
@@ -211,6 +216,43 @@ export type UpdateAuthSessionDto = {
   isActive?: boolean | null;
 };
 
+export type ChatPrompt = {
+  id: string;
+  key: string | null;
+  prompt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type FindManyChatPromptResponseMeta = {
+  curPage?: number;
+  perPage?: number;
+  totalResults: number;
+};
+
+export type FindManyChatPromptResponse = {
+  items: Array<ChatPrompt>;
+  meta: FindManyChatPromptResponseMeta;
+};
+
+export type CreateChatPromptDto = {
+  key?: string | null;
+  prompt?: string | null;
+};
+
+export type ChatPromptDto = {
+  id: string;
+  key: string | null;
+  prompt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type UpdateChatPromptDto = {
+  key?: string | null;
+  prompt?: string | null;
+};
+
 export type FindManyChatDocumentEmbeddingResponseMeta = {
   curPage?: number;
   perPage?: number;
@@ -224,6 +266,7 @@ export type FindManyChatDocumentEmbeddingResponse = {
 
 export type CreateChatDocumentEmbeddingDto = {
   content: string;
+  graphContent?: string | null;
   metadata?: {
     [key: string]: unknown;
   } | null;
@@ -233,6 +276,7 @@ export type CreateChatDocumentEmbeddingDto = {
 export type ChatDocumentEmbeddingDto = {
   id: string;
   content: string;
+  graphContent: string | null;
   metadata: {
     [key: string]: unknown;
   } | null;
@@ -243,6 +287,7 @@ export type ChatDocumentEmbeddingDto = {
 
 export type UpdateChatDocumentEmbeddingDto = {
   content?: string;
+  graphContent?: string | null;
   metadata?: {
     [key: string]: unknown;
   } | null;
@@ -300,6 +345,10 @@ export type CreateChatMessageDto = {
   provider?: string | null;
   model?: string | null;
   temperature?: string | null;
+  trace?: {
+    [key: string]: unknown;
+  } | null;
+  deletedAt?: string | null;
 };
 
 export type ChatMessageDto = {
@@ -312,11 +361,15 @@ export type ChatMessageDto = {
   transformedEmbeddingQuery: string | null;
   provider: string | null;
   model: string | null;
-  temperature: string | null;
+  temperature: number | null;
   isGoodResponse: boolean;
   isBadResponse: boolean;
+  trace: {
+    [key: string]: unknown;
+  } | null;
   createdAt: string;
   updatedAt: string;
+  deletedAt: string | null;
 };
 
 export type UpdateChatMessageDto = {
@@ -327,7 +380,11 @@ export type UpdateChatMessageDto = {
   transformedEmbeddingQuery?: string | null;
   provider?: string | null;
   model?: string | null;
-  temperature?: string | null;
+  temperature?: number | null;
+  trace?: {
+    [key: string]: unknown;
+  } | null;
+  deletedAt?: string | null;
 };
 
 export type FindManyChatMessageDocumentEmbeddingResponseMeta = {
@@ -348,13 +405,13 @@ export type CreateChatMessageDocumentEmbeddingDto = {
 export type ChatMessageDocumentEmbeddingDto = {
   id: string;
   isFound: boolean;
-  relevanceScore: string | null;
+  relevanceScore: number | null;
   createdAt: string;
   updatedAt: string;
 };
 
 export type UpdateChatMessageDocumentEmbeddingDto = {
-  relevanceScore?: string | null;
+  relevanceScore?: number | null;
 };
 
 export type FindManyChatLlmRequestResponseMeta = {
@@ -389,7 +446,7 @@ export type ChatLlmRequestDto = {
   executionTimeMs: number;
   provider: string;
   model: string;
-  temperature: string | null;
+  temperature: number | null;
   isSuccess: boolean;
   errorMessage: string | null;
   createdAt: string;
@@ -404,7 +461,7 @@ export type UpdateChatLlmRequestDto = {
   executionTimeMs?: number;
   provider?: string;
   model?: string;
-  temperature?: string | null;
+  temperature?: number | null;
   errorMessage?: string | null;
 };
 
@@ -422,7 +479,7 @@ export type FindManyChatLlmModelResponse = {
 export type CreateChatLlmModelDto = {
   provider: string;
   model: string;
-  temperature?: string | null;
+  temperature?: number | null;
   chunkSize?: number | null;
   startTime?: string | null;
   endTime?: string | null;
@@ -433,7 +490,7 @@ export type ChatLlmModelDto = {
   id: string;
   provider: string;
   model: string;
-  temperature: string | null;
+  temperature: number | null;
   chunkSize: number | null;
   startTime: string | null;
   endTime: string | null;
@@ -446,7 +503,7 @@ export type ChatLlmModelDto = {
 export type UpdateChatLlmModelDto = {
   provider?: string;
   model?: string;
-  temperature?: string | null;
+  temperature?: number | null;
   chunkSize?: number | null;
   startTime?: string | null;
   endTime?: string | null;
@@ -487,6 +544,61 @@ export type UpdateChatEmbeddingModelDto = {
   provider?: string;
   model?: string;
   dimension?: number;
+};
+
+export type DialogMessage = {
+  id: string;
+  question: string;
+  answer: string;
+  createdAt: string;
+};
+
+export type DialogFlowResponseMeta = {
+  curPage?: number;
+  perPage?: number;
+  totalResults: number;
+};
+
+export type DialogFlowResponse = {
+  items: Array<DialogMessage>;
+  meta: DialogFlowResponseMeta;
+};
+
+export type GetMessageTraceResponse = {
+  messageId: string | null;
+  /**
+   * Trace data for the message
+   */
+  trace: {
+    [key: string]: unknown;
+  } | null;
+};
+
+export type SendMessageFlowArgs = {
+  message: string;
+  dialogId?: string | null;
+  goodResponse?: boolean | null;
+  badResponse?: boolean | null;
+  provider?: string | null;
+  model?: string | null;
+  temperature?: number | null;
+};
+
+export type SendMessageFlowResponse = {
+  dialogId: string | null;
+  question: string;
+  answer: string;
+  messageId: string | null;
+};
+
+export type CancelMessageArgs = {
+  messageId: string;
+};
+
+export type CancelMessageResponse = {
+  success: boolean;
+  dialogId: string | null;
+  message: string;
 };
 
 export type AuthUserControllerFindManyData = {
@@ -690,6 +802,107 @@ export type AuthSessionControllerUpdateOneResponses = {
 
 export type AuthSessionControllerUpdateOneResponse =
   AuthSessionControllerUpdateOneResponses[keyof AuthSessionControllerUpdateOneResponses];
+
+export type ChatPromptControllerFindManyData = {
+  body?: never;
+  path?: never;
+  query?: {
+    curPage?: number;
+    perPage?: number;
+    searchText?: string;
+    sort?: string;
+  };
+  url: "/chat/prompt";
+};
+
+export type ChatPromptControllerFindManyErrors = {
+  default: unknown;
+};
+
+export type ChatPromptControllerFindManyResponses = {
+  200: FindManyChatPromptResponse;
+};
+
+export type ChatPromptControllerFindManyResponse =
+  ChatPromptControllerFindManyResponses[keyof ChatPromptControllerFindManyResponses];
+
+export type ChatPromptControllerCreateOneData = {
+  body: CreateChatPromptDto;
+  path?: never;
+  query?: never;
+  url: "/chat/prompt";
+};
+
+export type ChatPromptControllerCreateOneErrors = {
+  default: unknown;
+};
+
+export type ChatPromptControllerCreateOneResponses = {
+  201: ChatPromptDto;
+};
+
+export type ChatPromptControllerCreateOneResponse =
+  ChatPromptControllerCreateOneResponses[keyof ChatPromptControllerCreateOneResponses];
+
+export type ChatPromptControllerDeleteOneData = {
+  body?: never;
+  path: {
+    id: string;
+  };
+  query?: never;
+  url: "/chat/prompt/{id}";
+};
+
+export type ChatPromptControllerDeleteOneErrors = {
+  default: unknown;
+};
+
+export type ChatPromptControllerDeleteOneResponses = {
+  200: StatusResponse;
+};
+
+export type ChatPromptControllerDeleteOneResponse =
+  ChatPromptControllerDeleteOneResponses[keyof ChatPromptControllerDeleteOneResponses];
+
+export type ChatPromptControllerFindOneData = {
+  body?: never;
+  path: {
+    id: string;
+  };
+  query?: never;
+  url: "/chat/prompt/{id}";
+};
+
+export type ChatPromptControllerFindOneErrors = {
+  default: unknown;
+};
+
+export type ChatPromptControllerFindOneResponses = {
+  200: ChatPromptDto;
+};
+
+export type ChatPromptControllerFindOneResponse =
+  ChatPromptControllerFindOneResponses[keyof ChatPromptControllerFindOneResponses];
+
+export type ChatPromptControllerUpdateOneData = {
+  body: UpdateChatPromptDto;
+  path: {
+    id: string;
+  };
+  query?: never;
+  url: "/chat/prompt/{id}";
+};
+
+export type ChatPromptControllerUpdateOneErrors = {
+  default: unknown;
+};
+
+export type ChatPromptControllerUpdateOneResponses = {
+  200: ChatPromptDto;
+};
+
+export type ChatPromptControllerUpdateOneResponse =
+  ChatPromptControllerUpdateOneResponses[keyof ChatPromptControllerUpdateOneResponses];
 
 export type ChatDocumentEmbeddingControllerFindManyData = {
   body?: never;
@@ -1398,16 +1611,94 @@ export type ChatEmbeddingModelControllerUpdateOneResponses = {
 export type ChatEmbeddingModelControllerUpdateOneResponse =
   ChatEmbeddingModelControllerUpdateOneResponses[keyof ChatEmbeddingModelControllerUpdateOneResponses];
 
-export type AppControllerGetHelloData = {
+export type FlowControllerDialogData = {
   body?: never;
   path?: never;
+  query: {
+    curPage?: number;
+    perPage?: number;
+    searchText?: string;
+    sort?: string;
+    dialogId: string;
+  };
+  url: "/flow/dialog";
+};
+
+export type FlowControllerDialogErrors = {
+  default: DialogFlowResponse;
+};
+
+export type FlowControllerDialogError =
+  FlowControllerDialogErrors[keyof FlowControllerDialogErrors];
+
+export type FlowControllerDialogResponses = {
+  200: DialogFlowResponse;
+};
+
+export type FlowControllerDialogResponse =
+  FlowControllerDialogResponses[keyof FlowControllerDialogResponses];
+
+export type FlowControllerGetMessageTraceData = {
+  body?: never;
+  path?: never;
+  query: {
+    messageId: string;
+  };
+  url: "/flow/message/trace";
+};
+
+export type FlowControllerGetMessageTraceErrors = {
+  default: GetMessageTraceResponse;
+};
+
+export type FlowControllerGetMessageTraceError =
+  FlowControllerGetMessageTraceErrors[keyof FlowControllerGetMessageTraceErrors];
+
+export type FlowControllerGetMessageTraceResponses = {
+  200: GetMessageTraceResponse;
+};
+
+export type FlowControllerGetMessageTraceResponse =
+  FlowControllerGetMessageTraceResponses[keyof FlowControllerGetMessageTraceResponses];
+
+export type FlowControllerMessageSendData = {
+  body: SendMessageFlowArgs;
+  path?: never;
   query?: never;
-  url: "/";
+  url: "/flow/message/send";
 };
 
-export type AppControllerGetHelloResponses = {
-  default: string;
+export type FlowControllerMessageSendErrors = {
+  default: SendMessageFlowResponse;
 };
 
-export type AppControllerGetHelloResponse =
-  AppControllerGetHelloResponses[keyof AppControllerGetHelloResponses];
+export type FlowControllerMessageSendError =
+  FlowControllerMessageSendErrors[keyof FlowControllerMessageSendErrors];
+
+export type FlowControllerMessageSendResponses = {
+  201: SendMessageFlowResponse;
+};
+
+export type FlowControllerMessageSendResponse =
+  FlowControllerMessageSendResponses[keyof FlowControllerMessageSendResponses];
+
+export type FlowControllerCancelMessageData = {
+  body: CancelMessageArgs;
+  path?: never;
+  query?: never;
+  url: "/flow/message/cancel";
+};
+
+export type FlowControllerCancelMessageErrors = {
+  default: CancelMessageResponse;
+};
+
+export type FlowControllerCancelMessageError =
+  FlowControllerCancelMessageErrors[keyof FlowControllerCancelMessageErrors];
+
+export type FlowControllerCancelMessageResponses = {
+  201: CancelMessageResponse;
+};
+
+export type FlowControllerCancelMessageResponse =
+  FlowControllerCancelMessageResponses[keyof FlowControllerCancelMessageResponses];

@@ -8,7 +8,7 @@
     "type-check": "tsc --noEmit",
     "lint": "eslint --fix --ext .js,.jsx,.ts,.tsx ./src",
     "format": "prettier --write ./src",
-    "openapi-ts:generate": "openapi-ts"
+    "generate": "openapi-ts"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

@@ -37,8 +37,10 @@ export class RAGApplication {
       // Initialize models with configuration
       const models = await RAGApplication.initializeModels(fullConfig);
 
-      // Load and process documents
-      await RAGApplication.processDocuments(models.embeddings);
+      if (fullConfig.app.processDocuments) {
+        // Load and process documents
+        await RAGApplication.processDocuments(models.embeddings);
+      }
     } catch (e) {
       Logger.logError(
         'Критическая ошибка',
