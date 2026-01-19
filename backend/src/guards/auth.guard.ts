@@ -8,7 +8,9 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { DEFAULT_ALLOWED_IPS, ERROR_MESSAGES } from '../llm/constants';
 import { PrismaService } from '../services/prisma.service';
-import { AppRequest, getRequestFromExecutionContext } from '../types/request';
+import { AppRequest } from '../types/request';
+import { getRequestFromExecutionContext } from '../utils/get-request-fromExecution-context';
+import { getClientIp } from '../utils/request-ip';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -22,31 +24,29 @@ export class AuthGuard implements CanActivate {
 
     // todo: remove mock logic
     req.userId = req.headers.authorization || process.env.ADMIN_ID || '';
-    req.userIp = '127.0.0.1';
+    req.userIp = '127.0.0.1'; // getClientIp(req as any);
 
     // List of allowed IP addresses for security filtering
     const ALLOWED_IPS = process.env.ALLOWED_IPS
       ? [...(process.env.ALLOWED_IPS?.split(',') || [])]
       : [...DEFAULT_ALLOWED_IPS];
 
-    const userId = req.userId;
-    if (!userId) {
+    if (!req.userId) {
       throw new UnauthorizedException({ error: ERROR_MESSAGES.UNAUTHORIZED });
     }
 
-    const clientIp = req.userIp;
-    if (!clientIp || !ALLOWED_IPS.includes(clientIp)) {
+    if (!req.userIp || !ALLOWED_IPS.includes(req.userIp)) {
       Logger.log('Blocked request from unauthorized IP', {
-        clientIp,
+        userIp: req.userIp,
         allowedIps: ALLOWED_IPS,
       });
       throw new UnauthorizedException({ error: ERROR_MESSAGES.FORBIDDEN_IP });
     }
 
     await this.prismaService.authUser.upsert({
-      where: { id: userId },
+      where: { id: req.userId },
       update: {},
-      create: { id: userId },
+      create: { id: req.userId },
     });
 
     return true;

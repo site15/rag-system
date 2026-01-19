@@ -17,6 +17,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { isUUID } from 'class-validator';
+import { CurrentAppRequest } from '../../decorators/current-app-request.decorator';
 import {
   FindManyArgs,
   FindManyResponseMeta,
@@ -24,7 +25,7 @@ import {
   PrismaSdk,
   PrismaService,
 } from '../../services/prisma.service';
-import { AppRequest, CurrentAppRequest } from '../../types/request';
+import { AppRequest } from '../../types/request';
 import { StatusResponse } from '../../types/status-response';
 import { Prisma } from '../prisma/client';
 import { ChatDialogDto } from './chat-dialog.dto';

@@ -56,7 +56,11 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { isUUID } from 'class-validator';
-import {
+${
+  fields.find((f) => f.name === 'userId')
+    ? `import { CurrentAppRequest } from '../../decorators/current-app-request.decorator';`
+    : ''
+}import {
   FindManyArgs,
   FindManyResponseMeta,
   getFirstSkipFromCurPerPage,
@@ -65,7 +69,7 @@ import {
 } from '../../services/prisma.service';
 ${
   fields.find((f) => f.name === 'userId')
-    ? `import { AppRequest, CurrentAppRequest } from '../../types/request';`
+    ? `import { AppRequest } from '../../types/request';`
     : ''
 }import { StatusResponse } from '../../types/status-response';
 import { Prisma } from '../prisma/client';

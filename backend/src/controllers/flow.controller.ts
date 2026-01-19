@@ -14,6 +14,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { CurrentAppRequest } from '../decorators/current-app-request.decorator';
 import { DialogManager } from '../llm/dialogManager';
 import { LlmDialogService } from '../services/llm-dialog.service';
 import { LlmSendMessageService } from '../services/llm-send-message.service';
@@ -23,7 +24,7 @@ import {
   getFirstSkipFromCurPerPage,
 } from '../services/prisma.service';
 import { getTraceStack } from '../trace/trace.module';
-import { AppRequest, CurrentAppRequest } from '../types/request';
+import { AppRequest } from '../types/request';
 import { StatusResponse } from '../types/status-response';
 
 ///////////
