@@ -4,6 +4,16 @@ export type ClientOptions = {
   baseUrl: string;
 };
 
+export type AuthApiKey = {
+  id: string;
+  userId: string;
+  apiKey: string | null;
+  isActive: boolean | null;
+  createdAt: string;
+  updatedAt: string;
+  AuthUser?: AuthUser;
+};
+
 export type AuthSession = {
   id: string;
   userId: string;
@@ -111,6 +121,7 @@ export type AuthUser = {
   isActive: boolean | null;
   createdAt: string;
   updatedAt: string;
+  AuthApiKey?: Array<AuthApiKey>;
   AuthSession?: Array<AuthSession>;
   ChatDialog?: Array<ChatDialog>;
   ChatMessage?: Array<ChatMessage>;
@@ -159,6 +170,35 @@ export type UpdateAuthUserDto = {
 
 export type StatusResponse = {
   message: string;
+};
+
+export type FindManyAuthApiKeyResponseMeta = {
+  curPage?: number;
+  perPage?: number;
+  totalResults: number;
+};
+
+export type FindManyAuthApiKeyResponse = {
+  items: Array<AuthApiKey>;
+  meta: FindManyAuthApiKeyResponseMeta;
+};
+
+export type CreateAuthApiKeyDto = {
+  apiKey?: string | null;
+  isActive?: boolean | null;
+};
+
+export type AuthApiKeyDto = {
+  id: string;
+  apiKey: string | null;
+  isActive: boolean | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type UpdateAuthApiKeyDto = {
+  apiKey?: string | null;
+  isActive?: boolean | null;
 };
 
 export type FindManyAuthSessionResponseMeta = {
@@ -701,6 +741,107 @@ export type AuthUserControllerUpdateOneResponses = {
 
 export type AuthUserControllerUpdateOneResponse =
   AuthUserControllerUpdateOneResponses[keyof AuthUserControllerUpdateOneResponses];
+
+export type AuthApiKeyControllerFindManyData = {
+  body?: never;
+  path?: never;
+  query?: {
+    curPage?: number;
+    perPage?: number;
+    searchText?: string;
+    sort?: string;
+  };
+  url: "/auth/api-key";
+};
+
+export type AuthApiKeyControllerFindManyErrors = {
+  default: unknown;
+};
+
+export type AuthApiKeyControllerFindManyResponses = {
+  200: FindManyAuthApiKeyResponse;
+};
+
+export type AuthApiKeyControllerFindManyResponse =
+  AuthApiKeyControllerFindManyResponses[keyof AuthApiKeyControllerFindManyResponses];
+
+export type AuthApiKeyControllerCreateOneData = {
+  body: CreateAuthApiKeyDto;
+  path?: never;
+  query?: never;
+  url: "/auth/api-key";
+};
+
+export type AuthApiKeyControllerCreateOneErrors = {
+  default: unknown;
+};
+
+export type AuthApiKeyControllerCreateOneResponses = {
+  201: AuthApiKeyDto;
+};
+
+export type AuthApiKeyControllerCreateOneResponse =
+  AuthApiKeyControllerCreateOneResponses[keyof AuthApiKeyControllerCreateOneResponses];
+
+export type AuthApiKeyControllerDeleteOneData = {
+  body?: never;
+  path: {
+    id: string;
+  };
+  query?: never;
+  url: "/auth/api-key/{id}";
+};
+
+export type AuthApiKeyControllerDeleteOneErrors = {
+  default: unknown;
+};
+
+export type AuthApiKeyControllerDeleteOneResponses = {
+  200: StatusResponse;
+};
+
+export type AuthApiKeyControllerDeleteOneResponse =
+  AuthApiKeyControllerDeleteOneResponses[keyof AuthApiKeyControllerDeleteOneResponses];
+
+export type AuthApiKeyControllerFindOneData = {
+  body?: never;
+  path: {
+    id: string;
+  };
+  query?: never;
+  url: "/auth/api-key/{id}";
+};
+
+export type AuthApiKeyControllerFindOneErrors = {
+  default: unknown;
+};
+
+export type AuthApiKeyControllerFindOneResponses = {
+  200: AuthApiKeyDto;
+};
+
+export type AuthApiKeyControllerFindOneResponse =
+  AuthApiKeyControllerFindOneResponses[keyof AuthApiKeyControllerFindOneResponses];
+
+export type AuthApiKeyControllerUpdateOneData = {
+  body: UpdateAuthApiKeyDto;
+  path: {
+    id: string;
+  };
+  query?: never;
+  url: "/auth/api-key/{id}";
+};
+
+export type AuthApiKeyControllerUpdateOneErrors = {
+  default: unknown;
+};
+
+export type AuthApiKeyControllerUpdateOneResponses = {
+  200: AuthApiKeyDto;
+};
+
+export type AuthApiKeyControllerUpdateOneResponse =
+  AuthApiKeyControllerUpdateOneResponses[keyof AuthApiKeyControllerUpdateOneResponses];
 
 export type AuthSessionControllerFindManyData = {
   body?: never;

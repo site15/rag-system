@@ -10,6 +10,7 @@ import Mustache from 'mustache';
 import { AppModule } from './app.module';
 
 import 'dotenv/config';
+import { X_API_KEY_HEADER_NAME } from './guards/auth.guard';
 
 Mustache.escape = function (text) {
   return text;
@@ -40,6 +41,16 @@ async function bootstrap() {
     .setTitle('RAG-system')
     .setDescription('The RAG-system API description')
     .setVersion('1.0')
+    // Add the API key security definition
+    .addApiKey(
+      {
+        type: 'apiKey',
+        name: X_API_KEY_HEADER_NAME, // The name of the header or query parameter
+        in: 'header', // The location (header, query, or cookie)
+        description: 'Enter your API key',
+      },
+      'api_key', // A unique name for the security scheme reference
+    )
     .build();
 
   Logger.log('Generating Swagger documentation');

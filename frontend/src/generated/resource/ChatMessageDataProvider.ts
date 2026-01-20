@@ -33,6 +33,11 @@ export const ChatMessageDataProvider: DataProvider<any> = {
       },
       signal: params.signal,
     });
+
+    if (result?.error) {
+      throw Object.assign(new Error(), result.error);
+    }
+
     return {
       data: result.data?.items || [],
       total: result.data?.meta.totalResults || 0,
@@ -44,6 +49,11 @@ export const ChatMessageDataProvider: DataProvider<any> = {
       path: { id: String(params.id) },
       signal: params.signal,
     });
+
+    if (result?.error) {
+      throw Object.assign(new Error(), result.error);
+    }
+
     return { data: result.data } as GetOneResult<any>;
   },
 
@@ -55,6 +65,14 @@ export const ChatMessageDataProvider: DataProvider<any> = {
       }),
     );
     const results = await Promise.all(promises);
+
+    if ((results || []).some((result) => result?.error)) {
+      throw Object.assign(
+        new Error(),
+        results.find((result) => result?.error),
+      );
+    }
+
     return { data: results.map((result) => result.data) } as GetManyResult<any>;
   },
 
@@ -75,6 +93,10 @@ export const ChatMessageDataProvider: DataProvider<any> = {
       signal: params.signal,
     });
 
+    if (result?.error) {
+      throw Object.assign(new Error(), result.error);
+    }
+
     return {
       data: result.data?.items || [],
       total: result.data?.meta.totalResults || 0,
@@ -85,6 +107,11 @@ export const ChatMessageDataProvider: DataProvider<any> = {
     const result = await chatMessageControllerCreateOne({
       body: params.data as CreateChatMessageDto,
     });
+
+    if (result?.error) {
+      throw Object.assign(new Error(), result.error);
+    }
+
     return { data: result.data } as CreateResult<any>;
   },
 
@@ -93,6 +120,11 @@ export const ChatMessageDataProvider: DataProvider<any> = {
       path: { id: params.id },
       body: params.data,
     });
+
+    if (result?.error) {
+      throw Object.assign(new Error(), result.error);
+    }
+
     return { data: result.data } as UpdateResult<any>;
   },
 
@@ -104,6 +136,14 @@ export const ChatMessageDataProvider: DataProvider<any> = {
       }),
     );
     const results = await Promise.all(promises);
+
+    if ((results || []).some((result) => result?.error)) {
+      throw Object.assign(
+        new Error(),
+        results.find((result) => result.error),
+      );
+    }
+
     return {
       data: results.map((result) => result.data),
     } as UpdateManyResult<any>;
@@ -113,6 +153,11 @@ export const ChatMessageDataProvider: DataProvider<any> = {
     const result = await chatMessageControllerDeleteOne({
       path: { id: String(params.id) },
     });
+
+    if (result?.error) {
+      throw Object.assign(new Error(), result.error);
+    }
+
     return { data: result.data } as DeleteResult<any>;
   },
 
@@ -123,6 +168,14 @@ export const ChatMessageDataProvider: DataProvider<any> = {
       }),
     );
     const results = await Promise.all(promises);
+
+    if ((results || []).some((result) => result?.error)) {
+      throw Object.assign(
+        new Error(),
+        results.find((result) => result.error),
+      );
+    }
+
     return {
       data: results.map((result) => result.data),
     } as DeleteManyResult<any>;

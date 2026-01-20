@@ -55,6 +55,9 @@ export const ERROR_MESSAGES = {
   /** Generic unauthorized access message */
   UNAUTHORIZED: 'Unauthorized',
 
+  /** Api key is missing or invalid message */
+  INVALID_API_KEY: 'Invalid API key',
+
   /** IP address not allowed message */
   FORBIDDEN_IP: 'Forbidden: IP address not allowed',
 

@@ -1,4 +1,6 @@
 import {
+  BadGatewayException,
+  BadRequestException,
   CanActivate,
   ExecutionContext,
   Injectable,
@@ -11,6 +13,8 @@ import { AppRequest } from '../types/request';
 import { getRequestFromExecutionContext } from '../utils/get-request-fromExecution-context';
 import { getClientIp } from '../utils/request-ip';
 
+export const X_API_KEY_HEADER_NAME = 'x-api-key';
+
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(private readonly prismaService: PrismaService) {}
@@ -18,12 +22,22 @@ export class AuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = getRequestFromExecutionContext(context) as AppRequest;
 
-    // todo: remove mock logic
-    req.userId = (
-      process.env.CHECK_ADMIN_ID === 'true'
-        ? req.headers.authorization
-        : process.env.ADMIN_ID
-    )!;
+    if (req.headers[X_API_KEY_HEADER_NAME]) {
+      const apiKey = await this.prismaService.authApiKey.findFirst({
+        select: { AuthUser: true },
+        where: { apiKey: req.headers[X_API_KEY_HEADER_NAME] },
+      });
+      if (apiKey && apiKey.AuthUser) {
+        req.userId = apiKey.AuthUser.id;
+        req.user = apiKey.AuthUser;
+      } else {
+        throw new BadRequestException({
+          code: 'INVALID_API_KEY',
+          error: ERROR_MESSAGES.INVALID_API_KEY,
+        });
+      }
+    }
+
     req.userIp =
       process.env.CHECK_IP === 'true' ? getClientIp(req as any) : '127.0.0.1';
 
@@ -32,8 +46,11 @@ export class AuthGuard implements CanActivate {
       ? [...(process.env.ALLOWED_IPS?.split(',') || [])]
       : [...DEFAULT_ALLOWED_IPS];
 
-    if (!req.userId || req.userId !== process.env.ADMIN_ID) {
-      throw new UnauthorizedException({ error: ERROR_MESSAGES.UNAUTHORIZED });
+    if (!req.userId) {
+      throw new UnauthorizedException({
+        code: 'UNAUTHORIZED',
+        error: ERROR_MESSAGES.UNAUTHORIZED,
+      });
     }
 
     if (!req.userIp || !ALLOWED_IPS.includes(req.userIp)) {
@@ -41,14 +58,11 @@ export class AuthGuard implements CanActivate {
         userIp: req.userIp,
         allowedIps: ALLOWED_IPS,
       });
-      throw new UnauthorizedException({ error: ERROR_MESSAGES.FORBIDDEN_IP });
+      throw new UnauthorizedException({
+        code: 'FORBIDDEN_IP',
+        error: ERROR_MESSAGES.FORBIDDEN_IP,
+      });
     }
-
-    await this.prismaService.authUser.upsert({
-      where: { id: req.userId },
-      update: {},
-      create: { id: req.userId },
-    });
 
     return true;
 

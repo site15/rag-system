@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DataProvider } from "react-admin";
 import { AuthUserDataProvider } from "./AuthUserDataProvider";
+import { AuthApiKeyDataProvider } from "./AuthApiKeyDataProvider";
 import { AuthSessionDataProvider } from "./AuthSessionDataProvider";
 import { ChatPromptDataProvider } from "./ChatPromptDataProvider";
 import { ChatDocumentEmbeddingDataProvider } from "./ChatDocumentEmbeddingDataProvider";
@@ -15,6 +16,11 @@ import {
   AuthUserEditForm,
   AuthUserShowForm,
 } from "./AuthUserForm";
+import {
+  AuthApiKeyCreateForm,
+  AuthApiKeyEditForm,
+  AuthApiKeyShowForm,
+} from "./AuthApiKeyForm";
 import {
   AuthSessionCreateForm,
   AuthSessionEditForm,
@@ -61,6 +67,7 @@ import {
   ChatEmbeddingModelShowForm,
 } from "./ChatEmbeddingModelForm";
 import { AuthUserList } from "./AuthUserList";
+import { AuthApiKeyList } from "./AuthApiKeyList";
 import { AuthSessionList } from "./AuthSessionList";
 import { ChatPromptList } from "./ChatPromptList";
 import { ChatDocumentEmbeddingList } from "./ChatDocumentEmbeddingList";
@@ -91,6 +98,14 @@ export const resources: Partial<
     create: AuthUserCreateForm,
     edit: AuthUserEditForm,
     show: AuthUserShowForm,
+  },
+  AuthApiKey: {
+    dataProvider: AuthApiKeyDataProvider,
+    label: "Auth Api Key",
+    list: AuthApiKeyList,
+    create: AuthApiKeyCreateForm,
+    edit: AuthApiKeyEditForm,
+    show: AuthApiKeyShowForm,
   },
   AuthSession: {
     dataProvider: AuthSessionDataProvider,

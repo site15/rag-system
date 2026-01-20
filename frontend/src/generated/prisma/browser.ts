@@ -22,6 +22,11 @@ export * from "./enums.js";
  */
 export type AuthUser = Prisma.AuthUserModel;
 /**
+ * Model AuthApiKey
+ *
+ */
+export type AuthApiKey = Prisma.AuthApiKeyModel;
+/**
  * Model AuthSession
  *
  */

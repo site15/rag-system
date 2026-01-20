@@ -413,6 +413,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never
 
 export const ModelName = {
   AuthUser: "AuthUser",
+  AuthApiKey: "AuthApiKey",
   AuthSession: "AuthSession",
   ChatPrompt: "ChatPrompt",
   ChatDocumentEmbedding: "ChatDocumentEmbedding",
@@ -445,6 +446,7 @@ export type TypeMap<
   meta: {
     modelProps:
       | "authUser"
+      | "authApiKey"
       | "authSession"
       | "chatPrompt"
       | "chatDocumentEmbedding"
@@ -529,6 +531,82 @@ export type TypeMap<
           args: Prisma.AuthUserCountArgs<ExtArgs>;
           result:
             | runtime.Types.Utils.Optional<Prisma.AuthUserCountAggregateOutputType>
+            | number;
+        };
+      };
+    };
+    AuthApiKey: {
+      payload: Prisma.$AuthApiKeyPayload<ExtArgs>;
+      fields: Prisma.AuthApiKeyFieldRefs;
+      operations: {
+        findUnique: {
+          args: Prisma.AuthApiKeyFindUniqueArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthApiKeyPayload> | null;
+        };
+        findUniqueOrThrow: {
+          args: Prisma.AuthApiKeyFindUniqueOrThrowArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthApiKeyPayload>;
+        };
+        findFirst: {
+          args: Prisma.AuthApiKeyFindFirstArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthApiKeyPayload> | null;
+        };
+        findFirstOrThrow: {
+          args: Prisma.AuthApiKeyFindFirstOrThrowArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthApiKeyPayload>;
+        };
+        findMany: {
+          args: Prisma.AuthApiKeyFindManyArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthApiKeyPayload>[];
+        };
+        create: {
+          args: Prisma.AuthApiKeyCreateArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthApiKeyPayload>;
+        };
+        createMany: {
+          args: Prisma.AuthApiKeyCreateManyArgs<ExtArgs>;
+          result: BatchPayload;
+        };
+        createManyAndReturn: {
+          args: Prisma.AuthApiKeyCreateManyAndReturnArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthApiKeyPayload>[];
+        };
+        delete: {
+          args: Prisma.AuthApiKeyDeleteArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthApiKeyPayload>;
+        };
+        update: {
+          args: Prisma.AuthApiKeyUpdateArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthApiKeyPayload>;
+        };
+        deleteMany: {
+          args: Prisma.AuthApiKeyDeleteManyArgs<ExtArgs>;
+          result: BatchPayload;
+        };
+        updateMany: {
+          args: Prisma.AuthApiKeyUpdateManyArgs<ExtArgs>;
+          result: BatchPayload;
+        };
+        updateManyAndReturn: {
+          args: Prisma.AuthApiKeyUpdateManyAndReturnArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthApiKeyPayload>[];
+        };
+        upsert: {
+          args: Prisma.AuthApiKeyUpsertArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthApiKeyPayload>;
+        };
+        aggregate: {
+          args: Prisma.AuthApiKeyAggregateArgs<ExtArgs>;
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAuthApiKey>;
+        };
+        groupBy: {
+          args: Prisma.AuthApiKeyGroupByArgs<ExtArgs>;
+          result: runtime.Types.Utils.Optional<Prisma.AuthApiKeyGroupByOutputType>[];
+        };
+        count: {
+          args: Prisma.AuthApiKeyCountArgs<ExtArgs>;
+          result:
+            | runtime.Types.Utils.Optional<Prisma.AuthApiKeyCountAggregateOutputType>
             | number;
         };
       };
@@ -1269,6 +1347,18 @@ export const AuthUserScalarFieldEnum = {
 export type AuthUserScalarFieldEnum =
   (typeof AuthUserScalarFieldEnum)[keyof typeof AuthUserScalarFieldEnum];
 
+export const AuthApiKeyScalarFieldEnum = {
+  id: "id",
+  userId: "userId",
+  apiKey: "apiKey",
+  isActive: "isActive",
+  createdAt: "createdAt",
+  updatedAt: "updatedAt",
+} as const;
+
+export type AuthApiKeyScalarFieldEnum =
+  (typeof AuthApiKeyScalarFieldEnum)[keyof typeof AuthApiKeyScalarFieldEnum];
+
 export const AuthSessionScalarFieldEnum = {
   id: "id",
   userId: "userId",
@@ -1660,6 +1750,7 @@ export type PrismaClientOptions = (
 };
 export type GlobalOmitConfig = {
   authUser?: Prisma.AuthUserOmit;
+  authApiKey?: Prisma.AuthApiKeyOmit;
   authSession?: Prisma.AuthSessionOmit;
   chatPrompt?: Prisma.ChatPromptOmit;
   chatDocumentEmbedding?: Prisma.ChatDocumentEmbeddingOmit;

@@ -11,19 +11,19 @@ import {
   UpdateManyResult,
   UpdateResult,
 } from "react-admin";
-import { CreateChatLlmModelDto } from "../client";
+import { CreateAuthApiKeyDto } from "../client";
 import {
-  chatLlmModelControllerCreateOne,
-  chatLlmModelControllerDeleteOne,
-  chatLlmModelControllerFindMany,
-  chatLlmModelControllerFindOne,
-  chatLlmModelControllerUpdateOne,
+  authApiKeyControllerCreateOne,
+  authApiKeyControllerDeleteOne,
+  authApiKeyControllerFindMany,
+  authApiKeyControllerFindOne,
+  authApiKeyControllerUpdateOne,
 } from "../client/sdk.gen";
 
-export const ChatLlmModelDataProvider: DataProvider<any> = {
+export const AuthApiKeyDataProvider: DataProvider<any> = {
   getList: async (_, params) => {
     const { page, perPage } = params.pagination || {};
-    const result = await chatLlmModelControllerFindMany({
+    const result = await authApiKeyControllerFindMany({
       query: {
         curPage: page,
         perPage,
@@ -45,7 +45,7 @@ export const ChatLlmModelDataProvider: DataProvider<any> = {
   },
 
   getOne: async (_, params) => {
-    const result = await chatLlmModelControllerFindOne({
+    const result = await authApiKeyControllerFindOne({
       path: { id: String(params.id) },
       signal: params.signal,
     });
@@ -59,7 +59,7 @@ export const ChatLlmModelDataProvider: DataProvider<any> = {
 
   getMany: async (_, params) => {
     const promises = params.ids.map((id) =>
-      chatLlmModelControllerFindOne({
+      authApiKeyControllerFindOne({
         path: { id: String(id) },
         signal: params.signal,
       }),
@@ -88,7 +88,7 @@ export const ChatLlmModelDataProvider: DataProvider<any> = {
       ...params.filter,
     };
 
-    const result = await chatLlmModelControllerFindMany({
+    const result = await authApiKeyControllerFindMany({
       query,
       signal: params.signal,
     });
@@ -104,8 +104,8 @@ export const ChatLlmModelDataProvider: DataProvider<any> = {
   },
 
   create: async (_, params) => {
-    const result = await chatLlmModelControllerCreateOne({
-      body: params.data as CreateChatLlmModelDto,
+    const result = await authApiKeyControllerCreateOne({
+      body: params.data as CreateAuthApiKeyDto,
     });
 
     if (result?.error) {
@@ -116,7 +116,7 @@ export const ChatLlmModelDataProvider: DataProvider<any> = {
   },
 
   update: async (_, params) => {
-    const result = await chatLlmModelControllerUpdateOne({
+    const result = await authApiKeyControllerUpdateOne({
       path: { id: params.id },
       body: params.data,
     });
@@ -130,7 +130,7 @@ export const ChatLlmModelDataProvider: DataProvider<any> = {
 
   updateMany: async (_, params) => {
     const promises = params.ids.map((id) =>
-      chatLlmModelControllerUpdateOne({
+      authApiKeyControllerUpdateOne({
         path: { id: String(id) },
         body: params.data,
       }),
@@ -150,7 +150,7 @@ export const ChatLlmModelDataProvider: DataProvider<any> = {
   },
 
   delete: async (_: any, params) => {
-    const result = await chatLlmModelControllerDeleteOne({
+    const result = await authApiKeyControllerDeleteOne({
       path: { id: String(params.id) },
     });
 
@@ -163,7 +163,7 @@ export const ChatLlmModelDataProvider: DataProvider<any> = {
 
   deleteMany: async (_, params) => {
     const promises = params.ids.map((id) =>
-      chatLlmModelControllerDeleteOne({
+      authApiKeyControllerDeleteOne({
         path: { id: String(id) },
       }),
     );
