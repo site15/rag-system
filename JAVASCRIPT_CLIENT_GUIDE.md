@@ -1,62 +1,18 @@
-# JavaScript Client Guide for Flow Controller
+# JavaScript Client Guide for Flow Controller API
 
 This guide explains how to interact with the Flow Controller API using JavaScript's `fetch` API.
 
-## Base URL Configuration
+## Base API URL
 
-First, configure your base API URL:
-
-```javascript
-const API_BASE_URL = 'http://localhost:3000'; // Adjust for your environment
-```
-
-## API Key Management
-
-### Obtaining an API Key
-
-API keys must be obtained from your system administrator or generated through your application's admin panel. The API key should be kept secure and never exposed in client-side code in production.
-
-### Environment-based Configuration
+The API is available at: `http://localhost:3000/api`
 
 ```javascript
-// For development
-const API_KEY = process.env.DEV_API_KEY || 'your-development-key';
-
-// For production (recommended approach)
-const API_KEY = process.env.PROD_API_KEY;
-
-// In browser environments, consider using environment variables
-// or secure storage mechanisms
+const API_BASE_URL = 'http://localhost:3000/api'; // Base URL for all API calls
 ```
-
-### Secure Storage Options
-
-1. **Environment Variables** (Node.js/Backend):
-   ```bash
-   export API_KEY="your-secret-api-key"
-   ```
-
-2. **Browser Storage** (Frontend):
-   ```javascript
-   // Store in sessionStorage (cleared on tab close)
-   sessionStorage.setItem('api_key', apiKey);
-   
-   // Or localStorage (persists until cleared)
-   localStorage.setItem('api_key', apiKey);
-   ```
-
-3. **Secure HTTP Headers** (Production):
-   Consider implementing server-side proxy that adds the API key header automatically.
-
-### Important Security Notes
-
-- **IP Restrictions**: The API may have IP-based access controls. Ensure your requests originate from allowed IP addresses.
-- **Rate Limiting**: Be aware of request rate limits to avoid being temporarily blocked.
-- **HTTPS Required**: Always use HTTPS in production to protect your API key in transit.
 
 ## Authentication
 
-All endpoints require API key authentication. You'll need to include the API key in the `x-api-key` header:
+All endpoints require API key authentication via the `x-api-key` header:
 
 ```javascript
 // Replace with your actual API key
@@ -66,25 +22,19 @@ const getAuthHeaders = () => ({
   'Content-Type': 'application/json',
   'x-api-key': API_KEY
 });
-
-// Or if you want to pass it dynamically:
-const getAuthHeadersWithKey = (apiKey) => ({
-  'Content-Type': 'application/json',
-  'x-api-key': apiKey
-});
 ```
 
-## Available Endpoints
+## Available Methods
 
 ### 1. Send Message (`POST /flow/message/send`)
 
 Send a message to start or continue a conversation.
 
 ```javascript
-async function sendMessage(messageData, apiKey) {
+async function sendMessage(messageData) {
   const response = await fetch(`${API_BASE_URL}/flow/message/send`, {
     method: 'POST',
-    headers: getAuthHeadersWithKey(apiKey),
+    headers: getAuthHeaders(),
     body: JSON.stringify({
       message: messageData.message,           // Required: The user's message
       dialogId: messageData.dialogId,         // Optional: Existing dialog ID to continue conversation
@@ -113,7 +63,7 @@ try {
     provider: "openai",
     model: "gpt-4",
     temperature: 0.7
-  }, API_KEY);
+  });
   
   console.log('Message sent successfully:');
   console.log('Dialog ID:', result.dialogId);
@@ -130,7 +80,7 @@ try {
 Retrieve messages from a specific dialog conversation.
 
 ```javascript
-async function getDialogMessages(dialogId, apiKey, page = 1, perPage = 20) {
+async function getDialogMessages(dialogId, page = 1, perPage = 20) {
   const params = new URLSearchParams({
     dialogId: dialogId,
     curPage: page.toString(),
@@ -139,7 +89,7 @@ async function getDialogMessages(dialogId, apiKey, page = 1, perPage = 20) {
 
   const response = await fetch(`${API_BASE_URL}/flow/dialog?${params}`, {
     method: 'GET',
-    headers: getAuthHeadersWithKey(apiKey)
+    headers: getAuthHeaders()
   });
 
   if (!response.ok) {
@@ -153,7 +103,7 @@ async function getDialogMessages(dialogId, apiKey, page = 1, perPage = 20) {
 const API_KEY = 'your-actual-api-key-here';
 
 try {
-  const dialogData = await getDialogMessages('your-dialog-id', API_KEY, 1, 10);
+  const dialogData = await getDialogMessages('your-dialog-id', 1, 10);
   
   console.log('Dialog messages:');
   console.log('Total results:', dialogData.meta.totalResults);
@@ -176,14 +126,14 @@ try {
 Retrieve trace/debug information for a specific message.
 
 ```javascript
-async function getMessageTrace(messageId, apiKey) {
+async function getMessageTrace(messageId) {
   const params = new URLSearchParams({
     messageId: messageId
   });
 
   const response = await fetch(`${API_BASE_URL}/flow/message/trace?${params}`, {
     method: 'GET',
-    headers: getAuthHeadersWithKey(apiKey)
+    headers: getAuthHeaders()
   });
 
   if (!response.ok) {
@@ -197,7 +147,7 @@ async function getMessageTrace(messageId, apiKey) {
 const API_KEY = 'your-actual-api-key-here';
 
 try {
-  const traceData = await getMessageTrace('your-message-id', API_KEY);
+  const traceData = await getMessageTrace('your-message-id');
   
   console.log('Message trace:');
   console.log('Message ID:', traceData.messageId);
@@ -212,10 +162,10 @@ try {
 Soft delete a message from the conversation.
 
 ```javascript
-async function cancelMessage(messageId, apiKey) {
+async function cancelMessage(messageId) {
   const response = await fetch(`${API_BASE_URL}/flow/message/cancel`, {
     method: 'POST',
-    headers: getAuthHeadersWithKey(apiKey),
+    headers: getAuthHeaders(),
     body: JSON.stringify({
       messageId: messageId
     })
@@ -232,265 +182,279 @@ async function cancelMessage(messageId, apiKey) {
 const API_KEY = 'your-actual-api-key-here';
 
 try {
-  const result = await cancelMessage('message-to-delete-id', API_KEY);
+  const result = await cancelMessage('message-to-delete-id');
   console.log('Message cancelled successfully:', result.message);
 } catch (error) {
   console.error('Error cancelling message:', error);
 }
 ```
 
-## Complete Example: Conversation Flow
+## Frontend Integration Examples
 
-Here's a complete example showing how to have a conversation:
+### React Component Example
+
+```jsx
+import React, { useState } from 'react';
+
+const ChatComponent = ({ apiKey }) => {
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const sendMessage = async () => {
+    if (!input.trim()) return;
+    
+    setLoading(true);
+    try {
+      const API_KEY = apiKey; // Pass API key as prop
+      
+      const response = await fetch('http://localhost:3000/api/flow/message/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': API_KEY
+        },
+        body: JSON.stringify({
+          message: input,
+          dialogId: messages.length > 0 ? messages[0].dialogId : null
+        })
+      });
+
+      const data = await response.json();
+      
+      setMessages(prev => [{
+        id: data.messageId,
+        question: data.question,
+        answer: data.answer,
+        dialogId: data.dialogId
+      }, ...prev]);
+      
+      setInput('');
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="chat-container">
+      <div className="messages">
+        {messages.map(msg => (
+          <div key={msg.id} className="message-pair">
+            <div className="user-message">You: {msg.question}</div>
+            <div className="bot-message">Bot: {msg.answer}</div>
+          </div>
+        ))}
+      </div>
+      
+      <div className="input-area">
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+          placeholder="Type your message..."
+          disabled={loading}
+        />
+        <button onClick={sendMessage} disabled={loading}>
+          {loading ? 'Sending...' : 'Send'}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default ChatComponent;
+```
+
+### Vanilla JavaScript Class
 
 ```javascript
-class ChatClient {
-  constructor(apiKey, baseUrl = 'http://localhost:3000') {
+class FlowApiClient {
+  constructor(apiKey, baseUrl = 'http://localhost:3000/api') {
     this.apiKey = apiKey;
     this.baseUrl = baseUrl;
-    this.currentDialogId = null;
+  }
+
+  getHeaders() {
+    return {
+      'Content-Type': 'application/json',
+      'x-api-key': this.apiKey
+    };
   }
 
   async sendMessage(message, options = {}) {
-    const payload = {
-      message: message,
-      dialogId: this.currentDialogId || null,
-      ...options
-    };
-
     const response = await fetch(`${this.baseUrl}/flow/message/send`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': this.apiKey
-      },
-      body: JSON.stringify(payload)
+      headers: this.getHeaders(),
+      body: JSON.stringify({
+        message: message,
+        ...options
+      })
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to send message: ${response.status}`);
+      throw new Error(`API Error: ${response.status}`);
     }
 
-    const result = await response.json();
-    
-    // Store dialog ID for continuation
-    if (result.dialogId && !this.currentDialogId) {
-      this.currentDialogId = result.dialogId;
-    }
-
-    return result;
+    return await response.json();
   }
 
-  async getConversationHistory(page = 1, perPage = 20) {
-    if (!this.currentDialogId) {
-      throw new Error('No active dialog');
-    }
-
+  async getDialog(dialogId, page = 1, perPage = 20) {
     const params = new URLSearchParams({
-      dialogId: this.currentDialogId,
+      dialogId,
       curPage: page.toString(),
       perPage: perPage.toString()
     });
 
     const response = await fetch(`${this.baseUrl}/flow/dialog?${params}`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': this.apiKey
-      }
+      headers: this.getHeaders()
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to get history: ${response.status}`);
+      throw new Error(`API Error: ${response.status}`);
     }
 
     return await response.json();
   }
 
-  reset() {
-    this.currentDialogId = null;
+  async getMessageTrace(messageId) {
+    const params = new URLSearchParams({ messageId });
+    const response = await fetch(`${this.baseUrl}/flow/message/trace?${params}`, {
+      method: 'GET',
+      headers: this.getHeaders()
+    });
+
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status}`);
+    }
+
+    return await response.json();
+  }
+
+  async cancelMessage(messageId) {
+    const response = await fetch(`${this.baseUrl}/flow/message/cancel`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify({ messageId })
+    });
+
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status}`);
+    }
+
+    return await response.json();
   }
 }
 
 // Usage example:
-async function demonstrateConversation() {
-  // Replace with your actual API key
-  const API_KEY = 'your-actual-api-key-here';
-  
-  const chat = new ChatClient(API_KEY);
+const client = new FlowApiClient('your-api-key');
 
-  try {
-    // First message
-    console.log('Sending first message...');
-    let response = await chat.sendMessage("Hi! Tell me about NestJS");
-    console.log('Bot:', response.answer);
+// Send a message
+client.sendMessage('Hello!')
+  .then(response => console.log('Sent:', response))
+  .catch(error => console.error('Error:', error));
 
-    // Follow-up message
-    console.log('\nSending follow-up...');
-    response = await chat.sendMessage("What are the main features?");
-    console.log('Bot:', response.answer);
-
-    // Get conversation history
-    console.log('\nGetting conversation history...');
-    const history = await chat.getConversationHistory();
-    console.log(`Total messages: ${history.meta.totalResults}`);
-    
-    history.items.forEach((msg, i) => {
-      console.log(`\nMessage ${i + 1}:`);
-      console.log(`Q: ${msg.question}`);
-      console.log(`A: ${msg.answer}`);
-    });
-
-  } catch (error) {
-    console.error('Chat error:', error);
-  }
-}
-
-// Run the demonstration
-demonstrateConversation();
+// Get dialog history
+client.getDialog('dialog-id')
+  .then(history => console.log('History:', history))
+  .catch(error => console.error('Error:', error));
 ```
 
-## Error Handling
-
-Always implement proper error handling, especially for authentication errors:
+### Browser Fetch Wrapper
 
 ```javascript
-async function safeApiCall(apiFunction, ...args) {
+// Simple wrapper for browser usage
+const FlowAPI = {
+  baseUrl: 'http://localhost:3000/api',
+  
+  async call(method, endpoint, data = null, apiKey) {
+    const url = `${this.baseUrl}${endpoint}`;
+    const headers = {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey
+    };
+
+    const config = {
+      method,
+      headers
+    };
+
+    if (data && (method === 'POST' || method === 'PUT')) {
+      config.body = JSON.stringify(data);
+    }
+
+    const response = await fetch(url, config);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    
+    return await response.json();
+  },
+
+  // Convenience methods
+  sendMessage: (data, apiKey) => 
+    FlowAPI.call('POST', '/flow/message/send', data, apiKey),
+    
+  getDialog: (dialogId, page = 1, perPage = 20, apiKey) => 
+    FlowAPI.call('GET', `/flow/dialog?dialogId=${dialogId}&curPage=${page}&perPage=${perPage}`, null, apiKey),
+    
+  getMessageTrace: (messageId, apiKey) => 
+    FlowAPI.call('GET', `/flow/message/trace?messageId=${messageId}`, null, apiKey),
+    
+  cancelMessage: (messageId, apiKey) => 
+    FlowAPI.call('POST', '/flow/message/cancel', { messageId }, apiKey)
+};
+
+// Usage in browser:
+// FlowAPI.sendMessage({ message: "Hello!" }, 'your-api-key')
+//   .then(result => console.log(result));
+```
+
+## Error Handling Best Practices
+
+```javascript
+// Comprehensive error handler
+async function apiCallWithErrorHandling(apiFunction, ...args) {
   try {
     const result = await apiFunction(...args);
     return { success: true, data: result };
   } catch (error) {
-    // Handle specific error cases
-    if (error.status === 401) {
-      return { 
-        success: false, 
-        error: 'Invalid or missing API key',
-        status: 401,
-        code: 'INVALID_API_KEY'
-      };
-    }
-    if (error.status === 403) {
-      return { 
-        success: false, 
-        error: 'Access forbidden - check your permissions',
-        status: 403,
-        code: 'FORBIDDEN'
-      };
+    let errorMessage = 'An unknown error occurred';
+    
+    if (error.message.includes('401')) {
+      errorMessage = 'Invalid or missing API key';
+    } else if (error.message.includes('403')) {
+      errorMessage = 'Access forbidden';
+    } else if (error.message.includes('404')) {
+      errorMessage = 'Resource not found';
+    } else if (error.message.includes('500')) {
+      errorMessage = 'Server error';
     }
     
     return { 
       success: false, 
-      error: error.message,
-      status: error.status 
+      error: errorMessage,
+      originalError: error.message
     };
   }
 }
 
-// Enhanced error handling with automatic retry for temporary issues
-async function robustApiCall(apiFunction, maxRetries = 3, ...args) {
-  let lastError;
-  
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      const result = await apiFunction(...args);
-      return { success: true, data: result };
-    } catch (error) {
-      lastError = error;
-      
-      // Don't retry on authentication errors
-      if (error.status === 401 || error.status === 403) {
-        break;
-      }
-      
-      // Wait before retry (exponential backoff)
-      if (attempt < maxRetries) {
-        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
-      }
-    }
-  }
-  
-  return { 
-    success: false, 
-    error: lastError.message,
-    status: lastError.status,
-    retries: maxRetries
-  };
-}
-```
-// Usage with API key:
-const API_KEY = 'your-actual-api-key-here';
-
-const result = await safeApiCall(sendMessage, {
-  message: "Hello world"
-}, API_KEY);
+// Usage:
+const result = await apiCallWithErrorHandling(
+  FlowAPI.sendMessage, 
+  { message: "Test message" }, 
+  'your-api-key'
+);
 
 if (result.success) {
   console.log('Success:', result.data);
 } else {
-  console.error('API Error:', result.error);
+  console.error('Error:', result.error);
 }
 ```
 
-## Environment Configuration
-
-Create a config file for different environments:
-
-```javascript
-// config.js
-const CONFIG = {
-  development: {
-    apiUrl: 'http://localhost:3000',
-    timeout: 30000
-  },
-  production: {
-    apiUrl: 'https://your-production-api.com',
-    timeout: 15000
-  }
-};
-
-const getCurrentConfig = () => {
-  const env = process.env.NODE_ENV || 'development';
-  return CONFIG[env];
-};
-
-module.exports = { getCurrentConfig };
-```
-
-## TypeScript Types (if using TypeScript)
-
-```typescript
-interface SendMessageRequest {
-  message: string;
-  dialogId?: string;
-  goodResponse?: boolean;
-  badResponse?: boolean;
-  provider?: string;
-  model?: string;
-  temperature?: number;
-}
-
-interface SendMessageResponse {
-  dialogId: string | null;
-  question: string;
-  answer: string;
-  messageId: string | null;
-}
-
-interface DialogMessage {
-  id: string;
-  question: string;
-  answer: string;
-  createdAt: string;
-}
-
-interface DialogResponse {
-  items: DialogMessage[];
-  meta: {
-    curPage: number;
-    perPage: number;
-    totalResults: number;
-  };
-}
-```
-
-This guide provides all the necessary information to integrate with the Flow Controller API using vanilla JavaScript fetch.
+This guide provides complete documentation for integrating with the Flow Controller API on the frontend using JavaScript fetch, with practical examples for React, vanilla JavaScript, and browser usage.
