@@ -4,6 +4,7 @@
   },
   "scripts": {
     "prepare": "husky",
+    "postinstall": "npm install --force --prefix backend && npm install --force --prefix frontend && npm install --force --prefix prisma-generator-nestjs-dto",
     "format": "npm run format --prefix backend && npm run format --prefix frontend && npm run format --prefix prisma-generator-nestjs-dto",
     "format:backend": "npm run format --prefix backend",
     "format:frontend": "npm run format --prefix frontend",

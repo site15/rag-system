@@ -3,12 +3,7 @@
  * Contains all hardcoded values, string literals, and numeric constants
  */
 
-export const DEFAULT_ALLOWED_IPS = [
-  '127.0.0.1',
-  '192.168.168.1',
-  '94.41.68.16',
-  '::1',
-];
+export const DEFAULT_ALLOWED_IPS = ['127.0.0.1', '192.168.168.1', '::1'];
 
 export const CATEGORY: Record<string, string> = {
   technology:
