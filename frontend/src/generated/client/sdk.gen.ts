@@ -210,7 +210,7 @@ export const authUserControllerFindMany = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/auth/user",
+    url: "/api/auth/user",
     ...options,
   });
 
@@ -225,7 +225,7 @@ export const authUserControllerCreateOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/auth/user",
+    url: "/api/auth/user",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -244,7 +244,7 @@ export const authUserControllerDeleteOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/auth/user/{id}",
+    url: "/api/auth/user/{id}",
     ...options,
   });
 
@@ -257,7 +257,7 @@ export const authUserControllerFindOne = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/auth/user/{id}",
+    url: "/api/auth/user/{id}",
     ...options,
   });
 
@@ -272,7 +272,7 @@ export const authUserControllerUpdateOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/auth/user/{id}",
+    url: "/api/auth/user/{id}",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -291,7 +291,7 @@ export const authApiKeyControllerFindMany = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/auth/api-key",
+    url: "/api/auth/api-key",
     ...options,
   });
 
@@ -306,7 +306,7 @@ export const authApiKeyControllerCreateOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/auth/api-key",
+    url: "/api/auth/api-key",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -325,7 +325,7 @@ export const authApiKeyControllerDeleteOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/auth/api-key/{id}",
+    url: "/api/auth/api-key/{id}",
     ...options,
   });
 
@@ -340,7 +340,7 @@ export const authApiKeyControllerFindOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/auth/api-key/{id}",
+    url: "/api/auth/api-key/{id}",
     ...options,
   });
 
@@ -355,7 +355,7 @@ export const authApiKeyControllerUpdateOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/auth/api-key/{id}",
+    url: "/api/auth/api-key/{id}",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -374,7 +374,7 @@ export const authSessionControllerFindMany = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/auth/session",
+    url: "/api/auth/session",
     ...options,
   });
 
@@ -389,7 +389,7 @@ export const authSessionControllerCreateOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/auth/session",
+    url: "/api/auth/session",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -408,7 +408,7 @@ export const authSessionControllerDeleteOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/auth/session/{id}",
+    url: "/api/auth/session/{id}",
     ...options,
   });
 
@@ -423,7 +423,7 @@ export const authSessionControllerFindOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/auth/session/{id}",
+    url: "/api/auth/session/{id}",
     ...options,
   });
 
@@ -438,7 +438,7 @@ export const authSessionControllerUpdateOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/auth/session/{id}",
+    url: "/api/auth/session/{id}",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -457,7 +457,7 @@ export const chatPromptControllerFindMany = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/chat/prompt",
+    url: "/api/chat/prompt",
     ...options,
   });
 
@@ -472,7 +472,7 @@ export const chatPromptControllerCreateOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/chat/prompt",
+    url: "/api/chat/prompt",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -491,7 +491,7 @@ export const chatPromptControllerDeleteOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/chat/prompt/{id}",
+    url: "/api/chat/prompt/{id}",
     ...options,
   });
 
@@ -506,7 +506,7 @@ export const chatPromptControllerFindOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/chat/prompt/{id}",
+    url: "/api/chat/prompt/{id}",
     ...options,
   });
 
@@ -521,7 +521,7 @@ export const chatPromptControllerUpdateOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/chat/prompt/{id}",
+    url: "/api/chat/prompt/{id}",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -540,7 +540,7 @@ export const chatDocumentEmbeddingControllerFindMany = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/chat/document-embedding",
+    url: "/api/chat/document-embedding",
     ...options,
   });
 
@@ -555,7 +555,7 @@ export const chatDocumentEmbeddingControllerCreateOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/chat/document-embedding",
+    url: "/api/chat/document-embedding",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -574,7 +574,7 @@ export const chatDocumentEmbeddingControllerDeleteOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/chat/document-embedding/{id}",
+    url: "/api/chat/document-embedding/{id}",
     ...options,
   });
 
@@ -589,7 +589,7 @@ export const chatDocumentEmbeddingControllerFindOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/chat/document-embedding/{id}",
+    url: "/api/chat/document-embedding/{id}",
     ...options,
   });
 
@@ -604,7 +604,7 @@ export const chatDocumentEmbeddingControllerUpdateOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/chat/document-embedding/{id}",
+    url: "/api/chat/document-embedding/{id}",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -623,7 +623,7 @@ export const chatDialogControllerFindMany = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/chat/dialog",
+    url: "/api/chat/dialog",
     ...options,
   });
 
@@ -638,7 +638,7 @@ export const chatDialogControllerCreateOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/chat/dialog",
+    url: "/api/chat/dialog",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -657,7 +657,7 @@ export const chatDialogControllerDeleteOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/chat/dialog/{id}",
+    url: "/api/chat/dialog/{id}",
     ...options,
   });
 
@@ -672,7 +672,7 @@ export const chatDialogControllerFindOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/chat/dialog/{id}",
+    url: "/api/chat/dialog/{id}",
     ...options,
   });
 
@@ -687,7 +687,7 @@ export const chatDialogControllerUpdateOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/chat/dialog/{id}",
+    url: "/api/chat/dialog/{id}",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -706,7 +706,7 @@ export const chatMessageControllerFindMany = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/chat/message",
+    url: "/api/chat/message",
     ...options,
   });
 
@@ -721,7 +721,7 @@ export const chatMessageControllerCreateOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/chat/message",
+    url: "/api/chat/message",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -740,7 +740,7 @@ export const chatMessageControllerDeleteOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/chat/message/{id}",
+    url: "/api/chat/message/{id}",
     ...options,
   });
 
@@ -755,7 +755,7 @@ export const chatMessageControllerFindOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/chat/message/{id}",
+    url: "/api/chat/message/{id}",
     ...options,
   });
 
@@ -770,7 +770,7 @@ export const chatMessageControllerUpdateOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/chat/message/{id}",
+    url: "/api/chat/message/{id}",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -792,7 +792,7 @@ export const chatMessageDocumentEmbeddingControllerFindMany = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/chat/message-document-embedding",
+    url: "/api/chat/message-document-embedding",
     ...options,
   });
 
@@ -810,7 +810,7 @@ export const chatMessageDocumentEmbeddingControllerCreateOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/chat/message-document-embedding",
+    url: "/api/chat/message-document-embedding",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -832,7 +832,7 @@ export const chatMessageDocumentEmbeddingControllerDeleteOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/chat/message-document-embedding/{id}",
+    url: "/api/chat/message-document-embedding/{id}",
     ...options,
   });
 
@@ -850,7 +850,7 @@ export const chatMessageDocumentEmbeddingControllerFindOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/chat/message-document-embedding/{id}",
+    url: "/api/chat/message-document-embedding/{id}",
     ...options,
   });
 
@@ -868,7 +868,7 @@ export const chatMessageDocumentEmbeddingControllerUpdateOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/chat/message-document-embedding/{id}",
+    url: "/api/chat/message-document-embedding/{id}",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -887,7 +887,7 @@ export const chatLlmRequestControllerFindMany = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/chat/llm-request",
+    url: "/api/chat/llm-request",
     ...options,
   });
 
@@ -902,7 +902,7 @@ export const chatLlmRequestControllerCreateOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/chat/llm-request",
+    url: "/api/chat/llm-request",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -921,7 +921,7 @@ export const chatLlmRequestControllerDeleteOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/chat/llm-request/{id}",
+    url: "/api/chat/llm-request/{id}",
     ...options,
   });
 
@@ -936,7 +936,7 @@ export const chatLlmRequestControllerFindOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/chat/llm-request/{id}",
+    url: "/api/chat/llm-request/{id}",
     ...options,
   });
 
@@ -951,7 +951,7 @@ export const chatLlmRequestControllerUpdateOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/chat/llm-request/{id}",
+    url: "/api/chat/llm-request/{id}",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -970,7 +970,7 @@ export const chatLlmModelControllerFindMany = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/chat/llm-model",
+    url: "/api/chat/llm-model",
     ...options,
   });
 
@@ -985,7 +985,7 @@ export const chatLlmModelControllerCreateOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/chat/llm-model",
+    url: "/api/chat/llm-model",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -1004,7 +1004,7 @@ export const chatLlmModelControllerDeleteOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/chat/llm-model/{id}",
+    url: "/api/chat/llm-model/{id}",
     ...options,
   });
 
@@ -1019,7 +1019,7 @@ export const chatLlmModelControllerFindOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/chat/llm-model/{id}",
+    url: "/api/chat/llm-model/{id}",
     ...options,
   });
 
@@ -1034,7 +1034,7 @@ export const chatLlmModelControllerUpdateOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/chat/llm-model/{id}",
+    url: "/api/chat/llm-model/{id}",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -1053,7 +1053,7 @@ export const chatEmbeddingModelControllerFindMany = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/chat/embedding-model",
+    url: "/api/chat/embedding-model",
     ...options,
   });
 
@@ -1068,7 +1068,7 @@ export const chatEmbeddingModelControllerCreateOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/chat/embedding-model",
+    url: "/api/chat/embedding-model",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -1087,7 +1087,7 @@ export const chatEmbeddingModelControllerDeleteOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/chat/embedding-model/{id}",
+    url: "/api/chat/embedding-model/{id}",
     ...options,
   });
 
@@ -1102,7 +1102,7 @@ export const chatEmbeddingModelControllerFindOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/chat/embedding-model/{id}",
+    url: "/api/chat/embedding-model/{id}",
     ...options,
   });
 
@@ -1117,7 +1117,7 @@ export const chatEmbeddingModelControllerUpdateOne = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/chat/embedding-model/{id}",
+    url: "/api/chat/embedding-model/{id}",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -1134,7 +1134,7 @@ export const flowControllerDialog = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/flow/dialog",
+    url: "/api/flow/dialog",
     ...options,
   });
 
@@ -1149,7 +1149,7 @@ export const flowControllerGetMessageTrace = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/flow/message/trace",
+    url: "/api/flow/message/trace",
     ...options,
   });
 
@@ -1162,7 +1162,7 @@ export const flowControllerMessageSend = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/flow/message/send",
+    url: "/api/flow/message/send",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -1181,7 +1181,7 @@ export const flowControllerCancelMessage = <
     ThrowOnError
   >({
     security: [{ name: "x-api-key", type: "apiKey" }],
-    url: "/flow/message/cancel",
+    url: "/api/flow/message/cancel",
     ...options,
     headers: {
       "Content-Type": "application/json",

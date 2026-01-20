@@ -650,7 +650,7 @@ export type AuthUserControllerFindManyData = {
     searchText?: string;
     sort?: string;
   };
-  url: "/auth/user";
+  url: "/api/auth/user";
 };
 
 export type AuthUserControllerFindManyErrors = {
@@ -668,7 +668,7 @@ export type AuthUserControllerCreateOneData = {
   body: CreateAuthUserDto;
   path?: never;
   query?: never;
-  url: "/auth/user";
+  url: "/api/auth/user";
 };
 
 export type AuthUserControllerCreateOneErrors = {
@@ -688,7 +688,7 @@ export type AuthUserControllerDeleteOneData = {
     id: string;
   };
   query?: never;
-  url: "/auth/user/{id}";
+  url: "/api/auth/user/{id}";
 };
 
 export type AuthUserControllerDeleteOneErrors = {
@@ -708,7 +708,7 @@ export type AuthUserControllerFindOneData = {
     id: string;
   };
   query?: never;
-  url: "/auth/user/{id}";
+  url: "/api/auth/user/{id}";
 };
 
 export type AuthUserControllerFindOneErrors = {
@@ -728,7 +728,7 @@ export type AuthUserControllerUpdateOneData = {
     id: string;
   };
   query?: never;
-  url: "/auth/user/{id}";
+  url: "/api/auth/user/{id}";
 };
 
 export type AuthUserControllerUpdateOneErrors = {
@@ -751,7 +751,7 @@ export type AuthApiKeyControllerFindManyData = {
     searchText?: string;
     sort?: string;
   };
-  url: "/auth/api-key";
+  url: "/api/auth/api-key";
 };
 
 export type AuthApiKeyControllerFindManyErrors = {
@@ -769,7 +769,7 @@ export type AuthApiKeyControllerCreateOneData = {
   body: CreateAuthApiKeyDto;
   path?: never;
   query?: never;
-  url: "/auth/api-key";
+  url: "/api/auth/api-key";
 };
 
 export type AuthApiKeyControllerCreateOneErrors = {
@@ -789,7 +789,7 @@ export type AuthApiKeyControllerDeleteOneData = {
     id: string;
   };
   query?: never;
-  url: "/auth/api-key/{id}";
+  url: "/api/auth/api-key/{id}";
 };
 
 export type AuthApiKeyControllerDeleteOneErrors = {
@@ -809,7 +809,7 @@ export type AuthApiKeyControllerFindOneData = {
     id: string;
   };
   query?: never;
-  url: "/auth/api-key/{id}";
+  url: "/api/auth/api-key/{id}";
 };
 
 export type AuthApiKeyControllerFindOneErrors = {
@@ -829,7 +829,7 @@ export type AuthApiKeyControllerUpdateOneData = {
     id: string;
   };
   query?: never;
-  url: "/auth/api-key/{id}";
+  url: "/api/auth/api-key/{id}";
 };
 
 export type AuthApiKeyControllerUpdateOneErrors = {
@@ -852,7 +852,7 @@ export type AuthSessionControllerFindManyData = {
     searchText?: string;
     sort?: string;
   };
-  url: "/auth/session";
+  url: "/api/auth/session";
 };
 
 export type AuthSessionControllerFindManyErrors = {
@@ -870,7 +870,7 @@ export type AuthSessionControllerCreateOneData = {
   body: CreateAuthSessionDto;
   path?: never;
   query?: never;
-  url: "/auth/session";
+  url: "/api/auth/session";
 };
 
 export type AuthSessionControllerCreateOneErrors = {
@@ -890,7 +890,7 @@ export type AuthSessionControllerDeleteOneData = {
     id: string;
   };
   query?: never;
-  url: "/auth/session/{id}";
+  url: "/api/auth/session/{id}";
 };
 
 export type AuthSessionControllerDeleteOneErrors = {
@@ -910,7 +910,7 @@ export type AuthSessionControllerFindOneData = {
     id: string;
   };
   query?: never;
-  url: "/auth/session/{id}";
+  url: "/api/auth/session/{id}";
 };
 
 export type AuthSessionControllerFindOneErrors = {
@@ -930,7 +930,7 @@ export type AuthSessionControllerUpdateOneData = {
     id: string;
   };
   query?: never;
-  url: "/auth/session/{id}";
+  url: "/api/auth/session/{id}";
 };
 
 export type AuthSessionControllerUpdateOneErrors = {
@@ -953,7 +953,7 @@ export type ChatPromptControllerFindManyData = {
     searchText?: string;
     sort?: string;
   };
-  url: "/chat/prompt";
+  url: "/api/chat/prompt";
 };
 
 export type ChatPromptControllerFindManyErrors = {
@@ -971,7 +971,7 @@ export type ChatPromptControllerCreateOneData = {
   body: CreateChatPromptDto;
   path?: never;
   query?: never;
-  url: "/chat/prompt";
+  url: "/api/chat/prompt";
 };
 
 export type ChatPromptControllerCreateOneErrors = {
@@ -991,7 +991,7 @@ export type ChatPromptControllerDeleteOneData = {
     id: string;
   };
   query?: never;
-  url: "/chat/prompt/{id}";
+  url: "/api/chat/prompt/{id}";
 };
 
 export type ChatPromptControllerDeleteOneErrors = {
@@ -1011,7 +1011,7 @@ export type ChatPromptControllerFindOneData = {
     id: string;
   };
   query?: never;
-  url: "/chat/prompt/{id}";
+  url: "/api/chat/prompt/{id}";
 };
 
 export type ChatPromptControllerFindOneErrors = {
@@ -1031,7 +1031,7 @@ export type ChatPromptControllerUpdateOneData = {
     id: string;
   };
   query?: never;
-  url: "/chat/prompt/{id}";
+  url: "/api/chat/prompt/{id}";
 };
 
 export type ChatPromptControllerUpdateOneErrors = {
@@ -1054,7 +1054,7 @@ export type ChatDocumentEmbeddingControllerFindManyData = {
     searchText?: string;
     sort?: string;
   };
-  url: "/chat/document-embedding";
+  url: "/api/chat/document-embedding";
 };
 
 export type ChatDocumentEmbeddingControllerFindManyErrors = {
@@ -1072,7 +1072,7 @@ export type ChatDocumentEmbeddingControllerCreateOneData = {
   body: CreateChatDocumentEmbeddingDto;
   path?: never;
   query?: never;
-  url: "/chat/document-embedding";
+  url: "/api/chat/document-embedding";
 };
 
 export type ChatDocumentEmbeddingControllerCreateOneErrors = {
@@ -1092,7 +1092,7 @@ export type ChatDocumentEmbeddingControllerDeleteOneData = {
     id: string;
   };
   query?: never;
-  url: "/chat/document-embedding/{id}";
+  url: "/api/chat/document-embedding/{id}";
 };
 
 export type ChatDocumentEmbeddingControllerDeleteOneErrors = {
@@ -1112,7 +1112,7 @@ export type ChatDocumentEmbeddingControllerFindOneData = {
     id: string;
   };
   query?: never;
-  url: "/chat/document-embedding/{id}";
+  url: "/api/chat/document-embedding/{id}";
 };
 
 export type ChatDocumentEmbeddingControllerFindOneErrors = {
@@ -1132,7 +1132,7 @@ export type ChatDocumentEmbeddingControllerUpdateOneData = {
     id: string;
   };
   query?: never;
-  url: "/chat/document-embedding/{id}";
+  url: "/api/chat/document-embedding/{id}";
 };
 
 export type ChatDocumentEmbeddingControllerUpdateOneErrors = {
@@ -1155,7 +1155,7 @@ export type ChatDialogControllerFindManyData = {
     searchText?: string;
     sort?: string;
   };
-  url: "/chat/dialog";
+  url: "/api/chat/dialog";
 };
 
 export type ChatDialogControllerFindManyErrors = {
@@ -1173,7 +1173,7 @@ export type ChatDialogControllerCreateOneData = {
   body: CreateChatDialogDto;
   path?: never;
   query?: never;
-  url: "/chat/dialog";
+  url: "/api/chat/dialog";
 };
 
 export type ChatDialogControllerCreateOneErrors = {
@@ -1193,7 +1193,7 @@ export type ChatDialogControllerDeleteOneData = {
     id: string;
   };
   query?: never;
-  url: "/chat/dialog/{id}";
+  url: "/api/chat/dialog/{id}";
 };
 
 export type ChatDialogControllerDeleteOneErrors = {
@@ -1213,7 +1213,7 @@ export type ChatDialogControllerFindOneData = {
     id: string;
   };
   query?: never;
-  url: "/chat/dialog/{id}";
+  url: "/api/chat/dialog/{id}";
 };
 
 export type ChatDialogControllerFindOneErrors = {
@@ -1233,7 +1233,7 @@ export type ChatDialogControllerUpdateOneData = {
     id: string;
   };
   query?: never;
-  url: "/chat/dialog/{id}";
+  url: "/api/chat/dialog/{id}";
 };
 
 export type ChatDialogControllerUpdateOneErrors = {
@@ -1256,7 +1256,7 @@ export type ChatMessageControllerFindManyData = {
     searchText?: string;
     sort?: string;
   };
-  url: "/chat/message";
+  url: "/api/chat/message";
 };
 
 export type ChatMessageControllerFindManyErrors = {
@@ -1274,7 +1274,7 @@ export type ChatMessageControllerCreateOneData = {
   body: CreateChatMessageDto;
   path?: never;
   query?: never;
-  url: "/chat/message";
+  url: "/api/chat/message";
 };
 
 export type ChatMessageControllerCreateOneErrors = {
@@ -1294,7 +1294,7 @@ export type ChatMessageControllerDeleteOneData = {
     id: string;
   };
   query?: never;
-  url: "/chat/message/{id}";
+  url: "/api/chat/message/{id}";
 };
 
 export type ChatMessageControllerDeleteOneErrors = {
@@ -1314,7 +1314,7 @@ export type ChatMessageControllerFindOneData = {
     id: string;
   };
   query?: never;
-  url: "/chat/message/{id}";
+  url: "/api/chat/message/{id}";
 };
 
 export type ChatMessageControllerFindOneErrors = {
@@ -1334,7 +1334,7 @@ export type ChatMessageControllerUpdateOneData = {
     id: string;
   };
   query?: never;
-  url: "/chat/message/{id}";
+  url: "/api/chat/message/{id}";
 };
 
 export type ChatMessageControllerUpdateOneErrors = {
@@ -1357,7 +1357,7 @@ export type ChatMessageDocumentEmbeddingControllerFindManyData = {
     searchText?: string;
     sort?: string;
   };
-  url: "/chat/message-document-embedding";
+  url: "/api/chat/message-document-embedding";
 };
 
 export type ChatMessageDocumentEmbeddingControllerFindManyErrors = {
@@ -1375,7 +1375,7 @@ export type ChatMessageDocumentEmbeddingControllerCreateOneData = {
   body: CreateChatMessageDocumentEmbeddingDto;
   path?: never;
   query?: never;
-  url: "/chat/message-document-embedding";
+  url: "/api/chat/message-document-embedding";
 };
 
 export type ChatMessageDocumentEmbeddingControllerCreateOneErrors = {
@@ -1395,7 +1395,7 @@ export type ChatMessageDocumentEmbeddingControllerDeleteOneData = {
     id: string;
   };
   query?: never;
-  url: "/chat/message-document-embedding/{id}";
+  url: "/api/chat/message-document-embedding/{id}";
 };
 
 export type ChatMessageDocumentEmbeddingControllerDeleteOneErrors = {
@@ -1415,7 +1415,7 @@ export type ChatMessageDocumentEmbeddingControllerFindOneData = {
     id: string;
   };
   query?: never;
-  url: "/chat/message-document-embedding/{id}";
+  url: "/api/chat/message-document-embedding/{id}";
 };
 
 export type ChatMessageDocumentEmbeddingControllerFindOneErrors = {
@@ -1435,7 +1435,7 @@ export type ChatMessageDocumentEmbeddingControllerUpdateOneData = {
     id: string;
   };
   query?: never;
-  url: "/chat/message-document-embedding/{id}";
+  url: "/api/chat/message-document-embedding/{id}";
 };
 
 export type ChatMessageDocumentEmbeddingControllerUpdateOneErrors = {
@@ -1458,7 +1458,7 @@ export type ChatLlmRequestControllerFindManyData = {
     searchText?: string;
     sort?: string;
   };
-  url: "/chat/llm-request";
+  url: "/api/chat/llm-request";
 };
 
 export type ChatLlmRequestControllerFindManyErrors = {
@@ -1476,7 +1476,7 @@ export type ChatLlmRequestControllerCreateOneData = {
   body: CreateChatLlmRequestDto;
   path?: never;
   query?: never;
-  url: "/chat/llm-request";
+  url: "/api/chat/llm-request";
 };
 
 export type ChatLlmRequestControllerCreateOneErrors = {
@@ -1496,7 +1496,7 @@ export type ChatLlmRequestControllerDeleteOneData = {
     id: string;
   };
   query?: never;
-  url: "/chat/llm-request/{id}";
+  url: "/api/chat/llm-request/{id}";
 };
 
 export type ChatLlmRequestControllerDeleteOneErrors = {
@@ -1516,7 +1516,7 @@ export type ChatLlmRequestControllerFindOneData = {
     id: string;
   };
   query?: never;
-  url: "/chat/llm-request/{id}";
+  url: "/api/chat/llm-request/{id}";
 };
 
 export type ChatLlmRequestControllerFindOneErrors = {
@@ -1536,7 +1536,7 @@ export type ChatLlmRequestControllerUpdateOneData = {
     id: string;
   };
   query?: never;
-  url: "/chat/llm-request/{id}";
+  url: "/api/chat/llm-request/{id}";
 };
 
 export type ChatLlmRequestControllerUpdateOneErrors = {
@@ -1559,7 +1559,7 @@ export type ChatLlmModelControllerFindManyData = {
     searchText?: string;
     sort?: string;
   };
-  url: "/chat/llm-model";
+  url: "/api/chat/llm-model";
 };
 
 export type ChatLlmModelControllerFindManyErrors = {
@@ -1577,7 +1577,7 @@ export type ChatLlmModelControllerCreateOneData = {
   body: CreateChatLlmModelDto;
   path?: never;
   query?: never;
-  url: "/chat/llm-model";
+  url: "/api/chat/llm-model";
 };
 
 export type ChatLlmModelControllerCreateOneErrors = {
@@ -1597,7 +1597,7 @@ export type ChatLlmModelControllerDeleteOneData = {
     id: string;
   };
   query?: never;
-  url: "/chat/llm-model/{id}";
+  url: "/api/chat/llm-model/{id}";
 };
 
 export type ChatLlmModelControllerDeleteOneErrors = {
@@ -1617,7 +1617,7 @@ export type ChatLlmModelControllerFindOneData = {
     id: string;
   };
   query?: never;
-  url: "/chat/llm-model/{id}";
+  url: "/api/chat/llm-model/{id}";
 };
 
 export type ChatLlmModelControllerFindOneErrors = {
@@ -1637,7 +1637,7 @@ export type ChatLlmModelControllerUpdateOneData = {
     id: string;
   };
   query?: never;
-  url: "/chat/llm-model/{id}";
+  url: "/api/chat/llm-model/{id}";
 };
 
 export type ChatLlmModelControllerUpdateOneErrors = {
@@ -1660,7 +1660,7 @@ export type ChatEmbeddingModelControllerFindManyData = {
     searchText?: string;
     sort?: string;
   };
-  url: "/chat/embedding-model";
+  url: "/api/chat/embedding-model";
 };
 
 export type ChatEmbeddingModelControllerFindManyErrors = {
@@ -1678,7 +1678,7 @@ export type ChatEmbeddingModelControllerCreateOneData = {
   body: CreateChatEmbeddingModelDto;
   path?: never;
   query?: never;
-  url: "/chat/embedding-model";
+  url: "/api/chat/embedding-model";
 };
 
 export type ChatEmbeddingModelControllerCreateOneErrors = {
@@ -1698,7 +1698,7 @@ export type ChatEmbeddingModelControllerDeleteOneData = {
     id: string;
   };
   query?: never;
-  url: "/chat/embedding-model/{id}";
+  url: "/api/chat/embedding-model/{id}";
 };
 
 export type ChatEmbeddingModelControllerDeleteOneErrors = {
@@ -1718,7 +1718,7 @@ export type ChatEmbeddingModelControllerFindOneData = {
     id: string;
   };
   query?: never;
-  url: "/chat/embedding-model/{id}";
+  url: "/api/chat/embedding-model/{id}";
 };
 
 export type ChatEmbeddingModelControllerFindOneErrors = {
@@ -1738,7 +1738,7 @@ export type ChatEmbeddingModelControllerUpdateOneData = {
     id: string;
   };
   query?: never;
-  url: "/chat/embedding-model/{id}";
+  url: "/api/chat/embedding-model/{id}";
 };
 
 export type ChatEmbeddingModelControllerUpdateOneErrors = {
@@ -1762,7 +1762,7 @@ export type FlowControllerDialogData = {
     sort?: string;
     dialogId: string;
   };
-  url: "/flow/dialog";
+  url: "/api/flow/dialog";
 };
 
 export type FlowControllerDialogErrors = {
@@ -1785,7 +1785,7 @@ export type FlowControllerGetMessageTraceData = {
   query: {
     messageId: string;
   };
-  url: "/flow/message/trace";
+  url: "/api/flow/message/trace";
 };
 
 export type FlowControllerGetMessageTraceErrors = {
@@ -1806,7 +1806,7 @@ export type FlowControllerMessageSendData = {
   body: SendMessageFlowArgs;
   path?: never;
   query?: never;
-  url: "/flow/message/send";
+  url: "/api/flow/message/send";
 };
 
 export type FlowControllerMessageSendErrors = {
@@ -1827,7 +1827,7 @@ export type FlowControllerCancelMessageData = {
   body: CancelMessageArgs;
   path?: never;
   query?: never;
-  url: "/flow/message/cancel";
+  url: "/api/flow/message/cancel";
 };
 
 export type FlowControllerCancelMessageErrors = {
