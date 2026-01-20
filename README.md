@@ -102,6 +102,8 @@ The system uses a custom Prisma generator to automatically create:
 - React Admin components (Lists, Forms, DataProviders)
 - Database entities
 
+**Frontend Table Generation**: The generator automatically includes `createdAt` fields in list views with proper date formatting. See [Frontend Table Generator Documentation](./FRONTEND_TABLE_GENERATOR_DOCS.md) for details.
+
 To regenerate after schema changes:
 ```bash
 cd backend
