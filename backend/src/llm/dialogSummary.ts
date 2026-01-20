@@ -48,7 +48,7 @@ export class DialogSummary {
     messageId: string;
   }) {
     Logger.logInfo('Начало суммаризации диалога', { dialogId, messageId });
-    const history = await DialogManager.getDialogHistory(dialogId);
+    const { history } = await DialogManager.getDialogHistory({ dialogId });
     const prompt = createDialogSummaryPrompt(history);
     Logger.logInfo('Отправка запроса на суммаризацию', {
       dialogId,

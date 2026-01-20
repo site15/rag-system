@@ -65,6 +65,9 @@ export const ERROR_MESSAGES = {
   /** Internal server error */
   INTERNAL_SERVER_ERROR: 'Internal server error',
 
+  /** Dialog is already processing */
+  DIALOG_IS_ALREADY_PROCESSING: 'Dialog is already processing',
+
   /** Provider-specific API key requirements */
   PROVIDER_ERRORS: {
     A4F: 'CHAT_API_KEY is required for A4F.co provider',

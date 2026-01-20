@@ -54,38 +54,48 @@ export class DialogManager {
     Logger.logInfo('Message trace set', { messageId });
   }
 
-  public static async saveMessage({
+  public static async createMessage({
     dialogId,
     userId,
     question,
-    answer,
-    selectedDocumentIds = [],
-    answerDocumentId,
-    isSuccess = true,
-    detectedCategory,
-    transformedQuestion,
-    transformedEmbeddingQuery,
     llmProvider,
     llmModel,
     llmTemperature,
-    goodResponse,
-    badResponse,
   }: {
     dialogId: string;
     userId: string;
     question: string;
-    answer: string;
-    selectedDocumentIds?: string[];
-    answerDocumentId?: string;
-    isSuccess?: boolean;
-    detectedCategory?: string;
-    transformedQuestion?: string;
-    transformedEmbeddingQuery?: string;
     llmProvider?: string;
     llmModel?: string;
     llmTemperature?: number;
-    goodResponse?: boolean;
-    badResponse?: boolean;
+  }) {
+    dialogId = await DialogManager.getGetOrCreateDialogId({ dialogId, userId });
+
+    const chatMessage = await PrismaService.instance.chatMessage.create({
+      data: {
+        dialogId: dialogId,
+        userId: userId,
+        question: question,
+        provider: llmProvider,
+        model: llmModel,
+        temperature: llmTemperature,
+        answer: '',
+        isProcessing: true,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    return { dialogId, messageId: chatMessage.id };
+  }
+
+  private static async getGetOrCreateDialogId({
+    dialogId,
+    userId,
+  }: {
+    dialogId: string;
+    userId: string;
   }) {
     const dialog = await PrismaService.instance.chatDialog.findUnique({
       where: {
@@ -110,41 +120,59 @@ export class DialogManager {
         dialogId = await DialogManager.createDialog(userId);
       }
     }
+    return dialogId;
+  }
 
-    Logger.logInfo('Сохранение сообщения в историю', {
-      dialogId,
-      userId,
-    });
-
+  public static async updateMessage({
+    messageId,
+    answer,
+    selectedDocumentIds = [],
+    answerDocumentId,
+    isSuccess = true,
+    detectedCategory,
+    transformedQuestion,
+    transformedEmbeddingQuery,
+    goodResponse,
+    badResponse,
+    isProcessing,
+  }: {
+    messageId: string;
+    answer: string;
+    selectedDocumentIds?: string[];
+    answerDocumentId?: string;
+    isSuccess?: boolean;
+    detectedCategory?: string;
+    transformedQuestion?: string;
+    transformedEmbeddingQuery?: string;
+    goodResponse?: boolean;
+    badResponse?: boolean;
+    isProcessing?: boolean;
+  }) {
     // Insert the chat history record and get the ID
-    const chatMessage = await PrismaService.instance.chatMessage.create({
+    const chatMessage = await PrismaService.instance.chatMessage.update({
       data: {
-        dialogId: dialogId,
-        userId: userId,
-        question: question,
         answer: answer,
         category: detectedCategory,
         transformedQuestion: transformedQuestion,
         transformedEmbeddingQuery: transformedEmbeddingQuery,
-        provider: llmProvider,
-        model: llmModel,
-        temperature: llmTemperature,
         isGoodResponse: goodResponse,
         isBadResponse: badResponse,
+        isProcessing,
       },
       select: {
         id: true,
+        dialogId: true,
       },
+      where: { id: messageId },
     });
 
-    const messageId = chatMessage.id;
-    Logger.logInfo('Сообщение сохранено', { messageId });
-
-    // Track success/failure
-    if (isSuccess) {
-      await FailureTracker.recordSuccess(dialogId, messageId);
-    } else {
-      await FailureTracker.recordFailure(dialogId, messageId);
+    if (chatMessage.dialogId) {
+      // Track success/failure
+      if (isSuccess) {
+        await FailureTracker.recordSuccess(chatMessage.dialogId, messageId);
+      } else {
+        await FailureTracker.recordFailure(chatMessage.dialogId, messageId);
+      }
     }
 
     // Save associations between chat history and embedding documents
@@ -171,7 +199,7 @@ export class DialogManager {
       });
     }
 
-    return { dialogId, messageId: messageId };
+    return { dialogId: chatMessage.dialogId, messageId: messageId };
   }
 
   public static async getDialogRawHistory(
@@ -234,22 +262,18 @@ export class DialogManager {
       .flat();
   }
 
-  public static async getDialogHistory(
-    dialogId: string,
+  public static async getDialogHistory({
+    dialogId,
     limit = 20,
-  ): Promise<string[]> {
+  }: {
+    dialogId: string;
+    limit?: number;
+  }) {
     Logger.logInfo('Получение истории диалога', { dialogId, limit });
 
-    const messages = await PrismaService.instance.chatMessage.findMany({
-      where: { deletedAt: null, dialogId: dialogId },
-      select: {
-        question: true,
-        answer: true,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-      take: limit,
+    const messages = await DialogManager.getDialogHistoryRaw({
+      dialogId,
+      limit,
     });
 
     const history = messages.reverse().map((x) =>
@@ -260,7 +284,23 @@ export class DialogManager {
     );
 
     Logger.logInfo('История диалога получена', { count: history.length });
-    return history;
+    return { history, messages };
+  }
+
+  public static async getDialogHistoryRaw({
+    dialogId,
+    limit = 20,
+  }: {
+    dialogId: string;
+    limit: number;
+  }) {
+    return await PrismaService.instance.chatMessage.findMany({
+      where: { deletedAt: null, dialogId: dialogId },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: limit,
+    });
   }
 
   public static async getDialogSummary(

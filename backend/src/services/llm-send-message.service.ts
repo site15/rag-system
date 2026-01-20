@@ -349,6 +349,29 @@ export class LlmSendMessageService {
         overrideModel,
       });
 
+      const { history, messages } = await DialogManager.getDialogHistory({
+        dialogId,
+      });
+
+      if (messages.find((m) => m.isProcessing)) {
+        throw new HttpException(
+          {
+            error: ERROR_MESSAGES.DIALOG_IS_ALREADY_PROCESSING,
+            details: 'Dialog is already processing',
+          },
+          400,
+        );
+      }
+
+      const { messageId } = await DialogManager.createMessage({
+        dialogId,
+        userId,
+        question: message,
+        llmProvider: fullConfig.providers.chat.provider,
+        llmModel: fullConfig.providers.chat.model,
+        llmTemperature: fullConfig.providers.chat.temperature,
+      });
+
       const embeddings = EmbeddingsFactory.createEmbeddings(
         appConfig.embeddingsProvider,
         fullConfig.providers.embeddings,
@@ -358,8 +381,6 @@ export class LlmSendMessageService {
         appConfig.chatProvider,
         fullConfig.providers.chat,
       );
-
-      const history = await DialogManager.getDialogHistory(dialogId);
 
       addPayloadToTrace({ history });
 
@@ -481,23 +502,22 @@ export class LlmSendMessageService {
       }
 
       ///
+      // Extract document IDs from the docsWithMeta array
+      const selectedDocumentIds = docsWithMeta.map((doc) => doc.id);
 
-      const { messageId, ...saveDialogMessageResult } =
-        await this.saveDialogMessage(
-          dialogId,
-          userId,
-          isSuccess,
-          docsWithMeta,
-          llmResult.answerDocumentId,
-          message,
-          answer,
-          categorizedQuestion,
-          appConfig,
-          fullConfig,
-          goodResponse,
-          badResponse,
-        );
-      dialogId = saveDialogMessageResult.dialogId;
+      await DialogManager.updateMessage({
+        messageId,
+        answer,
+        selectedDocumentIds,
+        answerDocumentId: llmResult.answerDocumentId,
+        isSuccess,
+        detectedCategory: categorizedQuestion.detectedCategory,
+        transformedQuestion: categorizedQuestion.transformedQuestion,
+        transformedEmbeddingQuery: categorizedQuestion.transformedEmbedded,
+        goodResponse,
+        badResponse,
+        isProcessing: false,
+      });
 
       LLMQueryLogger.updateQueryReferences(
         [
@@ -610,74 +630,6 @@ export class LlmSendMessageService {
     } else {
       Logger.logInfo('Суммаризация не требуется', { dialogId });
     }
-  }
-
-  private async saveDialogMessage(
-    dialogId: string,
-    userId: string,
-    isSuccess: boolean,
-    docsWithMeta: DocWithMetadataAndId[],
-    answerDocumentId: string | undefined,
-    message: string,
-    answer: string,
-    categorizedQuestion: CategorizedQuestion,
-    appConfig: { chatProvider: string; embeddingsProvider: string },
-    fullConfig: {
-      providers: {
-        chat: {
-          provider: string;
-          model: string;
-          temperature: number;
-          baseUrl: string;
-          apiKey: string | undefined;
-          chunkSize: number;
-        };
-        embeddings: {
-          provider: string;
-          model: string;
-          baseUrl: string;
-          apiKey: string | undefined;
-        };
-      };
-    },
-    goodResponse: boolean | undefined,
-    badResponse: boolean | undefined,
-  ) {
-    Logger.logInfo('Сохранение сообщения', {
-      dialogId,
-      userId: userId,
-    });
-
-    // Extract document IDs from the docsWithMeta array
-    const selectedDocumentIds = docsWithMeta.map((doc) => doc.id);
-
-    const saveResult = await DialogManager.saveMessage({
-      dialogId,
-      userId: userId,
-      question: message,
-      answer,
-      selectedDocumentIds,
-      answerDocumentId,
-      isSuccess,
-      detectedCategory: categorizedQuestion.detectedCategory,
-      transformedQuestion: categorizedQuestion.transformedQuestion,
-      transformedEmbeddingQuery: categorizedQuestion.transformedEmbedded,
-      llmProvider: appConfig.chatProvider,
-      llmModel: fullConfig.providers.chat.model,
-      llmTemperature: fullConfig.providers.chat.temperature,
-      goodResponse,
-      badResponse,
-    });
-
-    dialogId = saveResult.dialogId;
-    const messageId = saveResult.messageId;
-
-    Logger.logInfo('Сохранение сообщения завершено', {
-      dialogId,
-      messageId,
-    });
-
-    return { messageId, dialogId };
   }
 
   private logAfterAskLLMChunked(
