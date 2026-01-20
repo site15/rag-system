@@ -63,6 +63,22 @@ export class ChatMessageDto {
   })
   trace!: Prisma.JsonValue | null;
   @ApiProperty({
+    type: 'boolean',
+  })
+  isProcessing!: boolean;
+  @ApiProperty({
+    type: 'string',
+    format: 'date-time',
+    nullable: true,
+  })
+  questionReceivedAt!: Date | null;
+  @ApiProperty({
+    type: 'string',
+    format: 'date-time',
+    nullable: true,
+  })
+  answerSentAt!: Date | null;
+  @ApiProperty({
     type: 'string',
     format: 'date-time',
   })

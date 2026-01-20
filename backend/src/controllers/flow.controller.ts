@@ -125,18 +125,24 @@ export class DialogMessage {
   answer!: string;
 
   @ApiProperty({
-    type: 'string',
-    format: 'date-time',
+    type: 'boolean',
   })
   @IsDefined()
-  createdAt!: Date;
+  isProcessing!: boolean;
 
   @ApiProperty({
     type: 'string',
     format: 'date-time',
   })
   @IsDefined()
-  updatedAt!: Date;
+  questionReceivedAt!: Date | null;
+
+  @ApiProperty({
+    type: 'string',
+    format: 'date-time',
+  })
+  @IsDefined()
+  answerSentAt!: Date | null;
 }
 
 export class DialogFlowResponse {
@@ -215,8 +221,9 @@ export class FlowController {
         id: m.id,
         question: m.question,
         answer: m.answer,
-        createdAt: m.createdAt,
-        updatedAt: m.updatedAt,
+        isProcessing: m.isProcessing,
+        questionReceivedAt: m.questionReceivedAt,
+        answerSentAt: m.answerSentAt,
       })),
       meta: { curPage, perPage, totalResults: response.totalCount },
     };

@@ -88,6 +88,9 @@ export type ChatMessage = {
   trace: {
     [key: string]: unknown;
   } | null;
+  isProcessing: boolean;
+  questionReceivedAt: string | null;
+  answerSentAt: string | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
@@ -365,6 +368,8 @@ export type CreateChatMessageDto = {
   trace?: {
     [key: string]: unknown;
   } | null;
+  questionReceivedAt?: string | null;
+  answerSentAt?: string | null;
   deletedAt?: string | null;
 };
 
@@ -384,6 +389,9 @@ export type ChatMessageDto = {
   trace: {
     [key: string]: unknown;
   } | null;
+  isProcessing: boolean;
+  questionReceivedAt: string | null;
+  answerSentAt: string | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
@@ -401,6 +409,8 @@ export type UpdateChatMessageDto = {
   trace?: {
     [key: string]: unknown;
   } | null;
+  questionReceivedAt?: string | null;
+  answerSentAt?: string | null;
   deletedAt?: string | null;
 };
 

@@ -19,8 +19,9 @@ export interface DialogMessagesQuery {
 // Response interface for individual messages
 export interface DialogMessage {
   id: string;
-  createdAt: Date;
-  updatedAt: Date;
+  isProcessing: boolean;
+  answerSentAt: Date | null;
+  questionReceivedAt: Date | null;
   question: string;
   answer: string;
 }
@@ -68,10 +69,11 @@ export class LlmDialogService {
         where: { deletedAt: null, dialogId: dialogId, userId },
         select: {
           id: true,
-          createdAt: true,
-          updatedAt: true,
           question: true,
           answer: true,
+          isProcessing: true,
+          answerSentAt: true,
+          questionReceivedAt: true,
         },
         orderBy: {
           createdAt: 'asc',
@@ -82,8 +84,9 @@ export class LlmDialogService {
 
       const messages: DialogMessage[] = messagesResult.map((row) => ({
         id: row.id,
-        createdAt: row.createdAt,
-        updatedAt: row.updatedAt,
+        isProcessing: row.isProcessing,
+        answerSentAt: row.answerSentAt,
+        questionReceivedAt: row.questionReceivedAt,
         question: row.question,
         answer: row.answer,
       }));

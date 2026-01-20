@@ -172,6 +172,10 @@ model ChatMessage {
   isBadResponse             Boolean  @default(false)
   trace                     Json?
 
+  isProcessing       Boolean   @default(false)
+  questionReceivedAt DateTime? @db.Timestamp(6)
+  answerSentAt       DateTime? @db.Timestamp(6)
+
   createdAt DateTime  @default(now()) @db.Timestamp(6)
   updatedAt DateTime  @default(now()) @db.Timestamp(6)
   deletedAt DateTime? @db.Timestamp(6)

@@ -55,6 +55,10 @@ export const ChatMessageEditForm = () => (
       <TextInput source={Prisma.ChatMessageScalarFieldEnum.model} />
       <NumberInput source={Prisma.ChatMessageScalarFieldEnum.temperature} />
       <JsonViewerField source={Prisma.ChatMessageScalarFieldEnum.trace} />
+      <DateTimeInput
+        source={Prisma.ChatMessageScalarFieldEnum.questionReceivedAt}
+      />
+      <DateTimeInput source={Prisma.ChatMessageScalarFieldEnum.answerSentAt} />
     </SimpleForm>
   </Edit>
 );
@@ -126,6 +130,18 @@ export const ChatMessageShowForm = () => (
         source={Prisma.ChatMessageScalarFieldEnum.trace}
         readOnly={true}
       />
+      <BooleanInput
+        source={Prisma.ChatMessageScalarFieldEnum.isProcessing}
+        readOnly={true}
+      />
+      <DateTimeInput
+        source={Prisma.ChatMessageScalarFieldEnum.questionReceivedAt}
+        readOnly={true}
+      />
+      <DateTimeInput
+        source={Prisma.ChatMessageScalarFieldEnum.answerSentAt}
+        readOnly={true}
+      />
       <DateTimeInput
         source={Prisma.ChatMessageScalarFieldEnum.createdAt}
         readOnly={true}
@@ -159,6 +175,10 @@ export const ChatMessageCreateForm = () => (
       <TextInput source={Prisma.ChatMessageScalarFieldEnum.model} />
       <NumberInput source={Prisma.ChatMessageScalarFieldEnum.temperature} />
       <JsonViewerField source={Prisma.ChatMessageScalarFieldEnum.trace} />
+      <DateTimeInput
+        source={Prisma.ChatMessageScalarFieldEnum.questionReceivedAt}
+      />
+      <DateTimeInput source={Prisma.ChatMessageScalarFieldEnum.answerSentAt} />
     </SimpleForm>
   </Create>
 );

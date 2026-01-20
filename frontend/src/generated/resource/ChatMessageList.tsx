@@ -92,6 +92,23 @@ export const ChatMessageList = () => (
       <DataTable.Col source={Prisma.ChatMessageScalarFieldEnum.trace}>
         <JsonViewerField source={Prisma.ChatMessageScalarFieldEnum.trace} />
       </DataTable.Col>
+      <DataTable.Col source={Prisma.ChatMessageScalarFieldEnum.isProcessing}>
+        <BooleanField source={Prisma.ChatMessageScalarFieldEnum.isProcessing} />
+      </DataTable.Col>
+      <DataTable.Col
+        source={Prisma.ChatMessageScalarFieldEnum.questionReceivedAt}
+      >
+        <DateField
+          source={Prisma.ChatMessageScalarFieldEnum.questionReceivedAt}
+          showTime
+        />
+      </DataTable.Col>
+      <DataTable.Col source={Prisma.ChatMessageScalarFieldEnum.answerSentAt}>
+        <DateField
+          source={Prisma.ChatMessageScalarFieldEnum.answerSentAt}
+          showTime
+        />
+      </DataTable.Col>
       <DataTable.Col source={Prisma.ChatMessageScalarFieldEnum.createdAt}>
         <DateField
           source={Prisma.ChatMessageScalarFieldEnum.createdAt}

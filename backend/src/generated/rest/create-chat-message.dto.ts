@@ -85,5 +85,23 @@ export class CreateChatMessageDto {
   })
   @IsOptional()
   @IsDateString()
+  questionReceivedAt?: Date | null;
+  @ApiProperty({
+    type: 'string',
+    format: 'date-time',
+    required: false,
+    nullable: true,
+  })
+  @IsOptional()
+  @IsDateString()
+  answerSentAt?: Date | null;
+  @ApiProperty({
+    type: 'string',
+    format: 'date-time',
+    required: false,
+    nullable: true,
+  })
+  @IsOptional()
+  @IsDateString()
   deletedAt?: Date | null;
 }
