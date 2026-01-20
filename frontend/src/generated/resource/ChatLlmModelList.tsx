@@ -55,6 +55,12 @@ export const ChatLlmModelList = () => (
       <DataTable.Col source={Prisma.ChatLlmModelScalarFieldEnum.isActive}>
         <BooleanField source={Prisma.ChatLlmModelScalarFieldEnum.isActive} />
       </DataTable.Col>
+      <DataTable.Col source={Prisma.ChatLlmModelScalarFieldEnum.createdAt}>
+        <DateField
+          source={Prisma.ChatLlmModelScalarFieldEnum.createdAt}
+          showTime
+        />
+      </DataTable.Col>
       <EditButton />
       <DeleteButton />
     </DataTable>

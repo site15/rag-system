@@ -46,6 +46,12 @@ export const ChatDialogList = () => (
       <DataTable.Col source={Prisma.ChatDialogScalarFieldEnum.isFailed}>
         <BooleanField source={Prisma.ChatDialogScalarFieldEnum.isFailed} />
       </DataTable.Col>
+      <DataTable.Col source={Prisma.ChatDialogScalarFieldEnum.createdAt}>
+        <DateField
+          source={Prisma.ChatDialogScalarFieldEnum.createdAt}
+          showTime
+        />
+      </DataTable.Col>
       <EditButton />
       <DeleteButton />
     </DataTable>

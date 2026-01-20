@@ -21,6 +21,7 @@ export class FailureTracker {
       },
       data: {
         consecutiveFailures: 0,
+        updatedAt: new Date(),
       },
     });
 
@@ -29,6 +30,7 @@ export class FailureTracker {
       where: { deletedAt: null, id: messageId },
       data: {
         isGoodResponse: true,
+        updatedAt: new Date(),
       },
     });
 
@@ -53,6 +55,7 @@ export class FailureTracker {
         consecutiveFailures: {
           increment: 1,
         },
+        updatedAt: new Date(),
       },
       select: {
         consecutiveFailures: true,
@@ -71,6 +74,7 @@ export class FailureTracker {
       where: { deletedAt: null, id: messageId },
       data: {
         isBadResponse: true,
+        updatedAt: new Date(),
       },
     });
 
@@ -82,6 +86,7 @@ export class FailureTracker {
         },
         data: {
           isFailed: true,
+          updatedAt: new Date(),
         },
       });
       Logger.logInfo('Dialog marked as failed due to consecutive failures', {

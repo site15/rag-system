@@ -29,8 +29,8 @@ export const generateList = ({
   const scalarFields = model.fields.filter(
     (field) =>
       field.kind === 'scalar' &&
-      field.name !== 'createdAt' &&
-      field.name !== 'updatedAt',
+      field.name !== 'updatedAt' &&
+      field.name !== 'deletedAt',
   );
 
   return `import { DataTable, DeleteButton, EditButton, List, BooleanField, DateField } from "react-admin";

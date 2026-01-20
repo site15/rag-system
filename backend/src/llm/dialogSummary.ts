@@ -1,16 +1,16 @@
 // dialogSummary.ts
-import { PrismaService } from '../services/prisma.service';
-import { Logger } from './logger';
-import { ChatOllama } from '@langchain/community/chat_models/ollama';
-import { ChatOpenAI } from '@langchain/openai';
 import { ChatAnthropic } from '@langchain/anthropic';
-import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
+import { ChatOllama } from '@langchain/community/chat_models/ollama';
 import { HuggingFaceInference } from '@langchain/community/llms/hf';
+import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { ChatGroq } from '@langchain/groq';
+import { ChatOpenAI } from '@langchain/openai';
+import { PrismaService } from '../services/prisma.service';
+import { addPayloadToTrace, Trace } from '../trace/trace.module';
 import { DialogManager } from './dialogManager';
 import { LLMLogger } from './llmLogger';
+import { Logger } from './logger';
 import { createDialogSummaryPrompt } from './prompt';
-import { addPayloadToTrace, Trace } from '../trace/trace.module';
 
 export class DialogSummary {
   public static async shouldSummarize(dialogId: string): Promise<boolean> {
@@ -92,6 +92,7 @@ export class DialogSummary {
           typeof content === 'string'
             ? content.trim()
             : JSON.stringify(content),
+        updatedAt: new Date(),
       },
     });
     Logger.logInfo('Суммаризация сохранена в БД', { dialogId });

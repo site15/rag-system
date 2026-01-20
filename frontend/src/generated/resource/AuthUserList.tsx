@@ -38,6 +38,9 @@ export const AuthUserList = () => (
       <DataTable.Col source={Prisma.AuthUserScalarFieldEnum.isActive}>
         <BooleanField source={Prisma.AuthUserScalarFieldEnum.isActive} />
       </DataTable.Col>
+      <DataTable.Col source={Prisma.AuthUserScalarFieldEnum.createdAt}>
+        <DateField source={Prisma.AuthUserScalarFieldEnum.createdAt} showTime />
+      </DataTable.Col>
       <EditButton />
       <DeleteButton />
     </DataTable>

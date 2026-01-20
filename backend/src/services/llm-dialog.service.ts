@@ -20,6 +20,7 @@ export interface DialogMessagesQuery {
 export interface DialogMessage {
   id: string;
   createdAt: Date;
+  updatedAt: Date;
   question: string;
   answer: string;
 }
@@ -68,6 +69,7 @@ export class LlmDialogService {
         select: {
           id: true,
           createdAt: true,
+          updatedAt: true,
           question: true,
           answer: true,
         },
@@ -81,6 +83,7 @@ export class LlmDialogService {
       const messages: DialogMessage[] = messagesResult.map((row) => ({
         id: row.id,
         createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
         question: row.question,
         answer: row.answer,
       }));

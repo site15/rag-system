@@ -1,6 +1,5 @@
 // modelExecutionTracker.ts - Service for tracking model execution timing and status
 import { PrismaService } from '../../services/prisma.service';
-import { Prisma } from '../../generated/prisma/client';
 import { Logger } from '../logger';
 
 export interface ModelExecutionOptions {
@@ -54,6 +53,7 @@ export class ModelExecutionTracker {
             startTime: new Date(),
             status: 'running',
             lastRequestId: options.llmQueryLogId?.toString(),
+            updatedAt: new Date(),
           },
           select: {
             id: true,
@@ -126,6 +126,7 @@ export class ModelExecutionTracker {
           endTime: new Date(),
           status: 'success',
           lastRequestId: llmQueryLogId?.toString(),
+          updatedAt: new Date(),
         },
       });
 
@@ -159,6 +160,7 @@ export class ModelExecutionTracker {
         data: {
           endTime: new Date(),
           status: 'failure',
+          updatedAt: new Date(),
         },
       });
 
@@ -190,6 +192,7 @@ export class ModelExecutionTracker {
         data: {
           endTime: new Date(),
           status: 'timeout',
+          updatedAt: new Date(),
         },
       });
 

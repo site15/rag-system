@@ -17,14 +17,22 @@ export const generateForm = ({
   const createFormName = `${entityClassName}CreateForm`;
 
   // Get fields for different form types
-  const allFields = model.fields.filter((field) => field.kind === 'scalar');
+  const allFields = model.fields.filter(
+    (field) => field.kind === 'scalar' && field.name !== 'deletedAt',
+  );
   const editableFields = allFields.filter(
     (field) =>
-      !field.isId && field.name !== 'createdAt' && field.name !== 'updatedAt',
+      !field.isId &&
+      field.name !== 'createdAt' &&
+      field.name !== 'updatedAt' &&
+      field.name !== 'deletedAt',
   );
   const readOnlyFields = allFields.filter(
     (field) =>
-      field.isId || field.name === 'createdAt' || field.name === 'updatedAt',
+      field.isId ||
+      field.name === 'createdAt' ||
+      field.name === 'updatedAt' ||
+      field.name === 'deletedAt',
   );
 
   // Map Prisma types to React Admin input components

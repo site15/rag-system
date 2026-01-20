@@ -130,6 +130,13 @@ export class DialogMessage {
   })
   @IsDefined()
   createdAt!: Date;
+
+  @ApiProperty({
+    type: 'string',
+    format: 'date-time',
+  })
+  @IsDefined()
+  updatedAt!: Date;
 }
 
 export class DialogFlowResponse {
@@ -209,6 +216,7 @@ export class FlowController {
         question: m.question,
         answer: m.answer,
         createdAt: m.createdAt,
+        updatedAt: m.updatedAt,
       })),
       meta: { curPage, perPage, totalResults: response.totalCount },
     };

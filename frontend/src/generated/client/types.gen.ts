@@ -597,6 +597,7 @@ export type DialogMessage = {
   question: string;
   answer: string;
   createdAt: string;
+  updatedAt: string;
 };
 
 export type DialogFlowResponseMeta = {

@@ -38,6 +38,7 @@ export class DialogManager {
       },
       data: {
         consecutiveFailures: 0,
+        updatedAt: new Date(),
       },
     });
 
@@ -46,6 +47,7 @@ export class DialogManager {
       where: { deletedAt: null, id: messageId },
       data: {
         trace: trace as any,
+        updatedAt: new Date(),
       },
     });
 
@@ -343,6 +345,7 @@ export class DialogManager {
         where: { deletedAt: null, id: messageId },
         data: {
           deletedAt: new Date(),
+          updatedAt: new Date(),
         },
       });
 
@@ -355,6 +358,7 @@ export class DialogManager {
           data: {
             consecutiveFailures: 0,
             isFailed: false,
+            updatedAt: new Date(),
           },
         });
 

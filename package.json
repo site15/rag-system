@@ -9,7 +9,7 @@
     "format:backend": "npm run format --prefix backend",
     "format:frontend": "npm run format --prefix frontend",
     "format:generator": "npm run format --prefix prisma-generator-nestjs-dto",
-    "generate": "npm run generate --prefix backend && npm run generate --prefix frontend",
+    "generate": "npm run generate --prefix backend && npm run generate --prefix frontend && npm run build --prefix frontend",
     "generate:backend": "npm run generate --prefix backend",
     "generate:frontend": "npm run generate --prefix frontend",
     "start:dev": "./start-dev.sh",

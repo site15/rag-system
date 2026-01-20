@@ -39,6 +39,12 @@ export const ChatPromptList = () => (
           whiteSpace: "nowrap",
         }}
       />
+      <DataTable.Col source={Prisma.ChatPromptScalarFieldEnum.createdAt}>
+        <DateField
+          source={Prisma.ChatPromptScalarFieldEnum.createdAt}
+          showTime
+        />
+      </DataTable.Col>
       <EditButton />
       <DeleteButton />
     </DataTable>

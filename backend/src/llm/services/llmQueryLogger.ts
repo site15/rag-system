@@ -157,6 +157,7 @@ export class LLMQueryLogger {
         data: {
           dialogId: dialogId || null,
           messageId: messageId || null,
+          updatedAt: new Date(),
         },
       });
 

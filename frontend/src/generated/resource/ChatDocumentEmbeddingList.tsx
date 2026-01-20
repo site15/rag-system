@@ -64,6 +64,14 @@ export const ChatDocumentEmbeddingList = () => (
       <DataTable.Col
         source={Prisma.ChatDocumentEmbeddingScalarFieldEnum.model}
       />
+      <DataTable.Col
+        source={Prisma.ChatDocumentEmbeddingScalarFieldEnum.createdAt}
+      >
+        <DateField
+          source={Prisma.ChatDocumentEmbeddingScalarFieldEnum.createdAt}
+          showTime
+        />
+      </DataTable.Col>
       <EditButton />
       <DeleteButton />
     </DataTable>

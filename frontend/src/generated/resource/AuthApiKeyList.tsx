@@ -33,6 +33,12 @@ export const AuthApiKeyList = () => (
       <DataTable.Col source={Prisma.AuthApiKeyScalarFieldEnum.isActive}>
         <BooleanField source={Prisma.AuthApiKeyScalarFieldEnum.isActive} />
       </DataTable.Col>
+      <DataTable.Col source={Prisma.AuthApiKeyScalarFieldEnum.createdAt}>
+        <DateField
+          source={Prisma.AuthApiKeyScalarFieldEnum.createdAt}
+          showTime
+        />
+      </DataTable.Col>
       <EditButton />
       <DeleteButton />
     </DataTable>

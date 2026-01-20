@@ -154,6 +154,7 @@ export class DefaultProvidersInitializer {
             data: {
               isActive: isActive,
               status: status,
+              updatedAt: new Date(),
             },
           });
 
@@ -232,6 +233,7 @@ export class DefaultProvidersInitializer {
             temperature: config.temperature,
             chunkSize: config.chunkSize,
             isActive: true, // Default to active if not set
+            updatedAt: new Date(),
           },
         });
 
