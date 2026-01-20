@@ -17,7 +17,7 @@ import { Logger } from './logger';
 import { ChatConfig } from './types';
 
 export class LLMFactory {
-  public static createLLM(llmProvider: string, chatConfig: ChatConfig) {
+  public static createLLM(chatConfig: ChatConfig) {
     const model = chatConfig.model;
     const temperature = chatConfig.temperature ? +chatConfig.temperature : 1;
     const baseUrl = chatConfig.baseUrl;
@@ -27,7 +27,7 @@ export class LLMFactory {
     }
 
     Logger.logInfo('Creating LLM instance', {
-      llmProvider,
+      llmProvider: chatConfig.provider,
       model,
       temperature,
       baseUrl,
@@ -35,7 +35,7 @@ export class LLMFactory {
     });
 
     if (
-      llmProvider === PROVIDER_NAMES.A4F ||
+      chatConfig.provider === PROVIDER_NAMES.A4F ||
       baseUrl?.includes(PROVIDER_DOMAINS.A4F)
     ) {
       // A4F.co uses OpenAI-compatible API
@@ -80,7 +80,7 @@ export class LLMFactory {
 
       return new ChatOpenAI(openaiOptions);
     } else if (
-      llmProvider === PROVIDER_NAMES.Z_AI ||
+      chatConfig.provider === PROVIDER_NAMES.Z_AI ||
       baseUrl?.includes(PROVIDER_DOMAINS.Z_AI)
     ) {
       // Z.AI uses OpenAI-compatible API
@@ -125,7 +125,7 @@ export class LLMFactory {
 
       return new ChatOpenAI(openaiOptions);
     } else if (
-      llmProvider === PROVIDER_NAMES.DEEPSEEK ||
+      chatConfig.provider === PROVIDER_NAMES.DEEPSEEK ||
       baseUrl?.includes(PROVIDER_DOMAINS.DEEPSEEK)
     ) {
       // DeepSeek uses OpenAI-compatible API
@@ -170,7 +170,7 @@ export class LLMFactory {
 
       return new ChatOpenAI(openaiOptions);
     } else if (
-      llmProvider === PROVIDER_NAMES.ANTHROPIC ||
+      chatConfig.provider === PROVIDER_NAMES.ANTHROPIC ||
       baseUrl?.includes(PROVIDER_DOMAINS.ANTHROPIC)
     ) {
       // Anthropic uses Anthropic API
@@ -210,7 +210,7 @@ export class LLMFactory {
       }
 
       return new ChatAnthropic(anthropicOptions);
-    } else if (llmProvider === PROVIDER_NAMES.GEMINI) {
+    } else if (chatConfig.provider === PROVIDER_NAMES.GEMINI) {
       // Google Gemini uses Google Generative AI API
       if (!apiKey) {
         throw new Error(ERROR_MESSAGES.PROVIDER_ERRORS.GEMINI);
@@ -225,7 +225,7 @@ export class LLMFactory {
         apiVersion: 'v1',
       });
     } else if (
-      llmProvider === PROVIDER_NAMES.HUGGINGFACE ||
+      chatConfig.provider === PROVIDER_NAMES.HUGGINGFACE ||
       (baseUrl && baseUrl.includes(PROVIDER_DOMAINS.HUGGINGFACE))
     ) {
       // Hugging Face uses Hugging Face Inference API
@@ -267,7 +267,7 @@ export class LLMFactory {
 
       return new HuggingFaceInference(hfOptions);
     } else if (
-      llmProvider === PROVIDER_NAMES.GROQ ||
+      chatConfig.provider === PROVIDER_NAMES.GROQ ||
       (baseUrl && baseUrl.includes('groq.com'))
     ) {
       // Groq uses Groq API
@@ -398,7 +398,7 @@ export class LLMFactory {
       };
 
       return wrappedGroq;
-    } else if (llmProvider === PROVIDER_NAMES.OLLAMA) {
+    } else if (chatConfig.provider === PROVIDER_NAMES.OLLAMA) {
       return new ChatOllama({
         model: model,
         temperature: temperature ? +temperature : 1,

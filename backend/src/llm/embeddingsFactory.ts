@@ -13,10 +13,7 @@ import { Logger } from './logger';
 import { EmbeddingsConfig } from './types';
 
 export class EmbeddingsFactory {
-  public static createEmbeddings(
-    embeddingsProvider: string,
-    embeddingsConfig: EmbeddingsConfig,
-  ) {
+  public static createEmbeddings(embeddingsConfig: EmbeddingsConfig) {
     // Get provider-specific configuration
     const config = embeddingsConfig;
     const embeddingsModel = config.model;
@@ -24,13 +21,13 @@ export class EmbeddingsFactory {
     const embeddingsApiKey = config.apiKey;
 
     Logger.logInfo('Creating Embeddings instance', {
-      embeddingsProvider,
+      mbeddingsProvider: embeddingsConfig.provider,
       embeddingsModel,
       embeddingsBaseUrl,
     });
 
     if (
-      embeddingsProvider === PROVIDER_NAMES.A4F ||
+      config.provider === PROVIDER_NAMES.A4F ||
       embeddingsBaseUrl.includes(PROVIDER_DOMAINS.A4F)
     ) {
       // A4F.co uses OpenAI-compatible API for embeddings
@@ -74,7 +71,7 @@ export class EmbeddingsFactory {
 
       return new OpenAIEmbeddings(openaiOptions);
     } else if (
-      embeddingsProvider === PROVIDER_NAMES.Z_AI ||
+      config.provider === PROVIDER_NAMES.Z_AI ||
       embeddingsBaseUrl.includes(PROVIDER_DOMAINS.Z_AI)
     ) {
       // Z.AI uses OpenAI-compatible API for embeddings
@@ -118,7 +115,7 @@ export class EmbeddingsFactory {
 
       return new OpenAIEmbeddings(openaiOptions);
     } else if (
-      embeddingsProvider === PROVIDER_NAMES.DEEPSEEK ||
+      config.provider === PROVIDER_NAMES.DEEPSEEK ||
       embeddingsBaseUrl.includes(PROVIDER_DOMAINS.DEEPSEEK)
     ) {
       // DeepSeek uses OpenAI-compatible API for embeddings
@@ -161,19 +158,19 @@ export class EmbeddingsFactory {
       }
 
       return new OpenAIEmbeddings(openaiOptions);
-    } else if (embeddingsProvider === PROVIDER_NAMES.ANTHROPIC) {
+    } else if (config.provider === PROVIDER_NAMES.ANTHROPIC) {
       // Anthropic does not provide embedding services, so throw an error
       throw new Error(ERROR_MESSAGES.UNSUPPORTED_EMBEDDINGS.ANTHROPIC);
-    } else if (embeddingsProvider === PROVIDER_NAMES.GEMINI) {
+    } else if (config.provider === PROVIDER_NAMES.GEMINI) {
       // Google Gemini does not provide embedding services in the same way, so throw an error
       throw new Error(ERROR_MESSAGES.UNSUPPORTED_EMBEDDINGS.GEMINI);
-    } else if (embeddingsProvider === PROVIDER_NAMES.HUGGINGFACE) {
+    } else if (config.provider === PROVIDER_NAMES.HUGGINGFACE) {
       // Hugging Face does not provide embedding services in the same way, so throw an error
       throw new Error(ERROR_MESSAGES.UNSUPPORTED_EMBEDDINGS.HUGGINGFACE);
-    } else if (embeddingsProvider === PROVIDER_NAMES.GROQ) {
+    } else if (config.provider === PROVIDER_NAMES.GROQ) {
       // Groq does not provide embedding services in the same way, so throw an error
       throw new Error(ERROR_MESSAGES.UNSUPPORTED_EMBEDDINGS.GROQ);
-    } else if (embeddingsProvider === PROVIDER_NAMES.OLLAMA) {
+    } else if (config.provider === PROVIDER_NAMES.OLLAMA) {
       return new OllamaEmbeddings({
         model: embeddingsModel,
         baseUrl: embeddingsBaseUrl,

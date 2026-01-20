@@ -24,6 +24,7 @@ export interface DialogMessage {
   questionReceivedAt: Date | null;
   question: string;
   answer: string;
+  dialogId: string;
 }
 
 // Response interface for the endpoint
@@ -74,6 +75,7 @@ export class LlmDialogService {
           isProcessing: true,
           answerSentAt: true,
           questionReceivedAt: true,
+          dialogId: true,
         },
         orderBy: {
           createdAt: 'asc',
@@ -89,6 +91,7 @@ export class LlmDialogService {
         questionReceivedAt: row.questionReceivedAt,
         question: row.question,
         answer: row.answer,
+        dialogId: row.dialogId!,
       }));
 
       Logger.logInfo('Dialog messages retrieved successfully', {

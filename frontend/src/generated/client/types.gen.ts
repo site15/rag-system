@@ -609,6 +609,7 @@ export type DialogMessage = {
   isProcessing: boolean;
   questionReceivedAt: string;
   answerSentAt: string;
+  dialogId: string;
 };
 
 export type DialogFlowResponseMeta = {
@@ -635,18 +636,9 @@ export type GetMessageTraceResponse = {
 export type SendMessageFlowArgs = {
   message: string;
   dialogId?: string | null;
-  goodResponse?: boolean | null;
-  badResponse?: boolean | null;
   provider?: string | null;
   model?: string | null;
   temperature?: number | null;
-};
-
-export type SendMessageFlowResponse = {
-  dialogId: string | null;
-  question: string;
-  answer: string;
-  messageId: string | null;
 };
 
 export type CancelMessageArgs = {
@@ -1822,14 +1814,14 @@ export type FlowControllerMessageSendData = {
 };
 
 export type FlowControllerMessageSendErrors = {
-  default: SendMessageFlowResponse;
+  default: DialogMessage;
 };
 
 export type FlowControllerMessageSendError =
   FlowControllerMessageSendErrors[keyof FlowControllerMessageSendErrors];
 
 export type FlowControllerMessageSendResponses = {
-  201: SendMessageFlowResponse;
+  201: DialogMessage;
 };
 
 export type FlowControllerMessageSendResponse =

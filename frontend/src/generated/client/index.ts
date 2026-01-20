@@ -365,7 +365,6 @@ export type {
   FlowControllerMessageSendResponses,
   GetMessageTraceResponse,
   SendMessageFlowArgs,
-  SendMessageFlowResponse,
   StatusResponse,
   UpdateAuthApiKeyDto,
   UpdateAuthSessionDto,

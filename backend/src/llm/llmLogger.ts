@@ -138,9 +138,6 @@ export class LLMLogger {
         metadata,
       });
 
-      // Set up timeout handling
-      const TIMEOUT_MS = parseInt(process.env.LLM_TIMEOUT_MS || '0', 10);
-
       // Start model execution tracking with the logId
       try {
         const modelOptions: ModelExecutionOptions = {
@@ -161,13 +158,6 @@ export class LLMLogger {
         });
         // Continue execution even if tracking fails
       }
-
-      // Create promise that rejects on timeout
-      const timeoutPromise = new Promise<never>((_, reject) => {
-        timeoutId = setTimeout(() => {
-          reject(new Error(`LLM call timed out after ${TIMEOUT_MS}ms`));
-        }, TIMEOUT_MS);
-      });
 
       // Check if the LLM is blocked before making the call
       const modelName = (llm as any).modelName || (llm as any).model;
@@ -203,11 +193,7 @@ export class LLMLogger {
         throw new Error(errorMsg);
       }
 
-      // Call the LLM with abort signal if provided
-      const llmCallPromise = await callback(prompt);
-
-      // Race between LLM call and timeout
-      const result = await Promise.race([llmCallPromise, timeoutPromise]);
+      const result = await callback(prompt);
       const response = LLMLogger.getResponseString(result);
 
       // Log the successful call

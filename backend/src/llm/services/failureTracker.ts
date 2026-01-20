@@ -25,15 +25,6 @@ export class FailureTracker {
       },
     });
 
-    // Mark the chat history entry as successful
-    await PrismaService.instance.chatMessage.update({
-      where: { deletedAt: null, id: messageId },
-      data: {
-        isGoodResponse: true,
-        updatedAt: new Date(),
-      },
-    });
-
     Logger.logInfo('Success recorded', { dialogId, messageId });
   }
 
@@ -67,15 +58,6 @@ export class FailureTracker {
       dialogId,
       currentFailures,
       maxAllowed: this.getMaxConsecutiveFailures(),
-    });
-
-    // Mark the chat history entry as failed
-    await PrismaService.instance.chatMessage.update({
-      where: { deletedAt: null, id: messageId },
-      data: {
-        isBadResponse: true,
-        updatedAt: new Date(),
-      },
     });
 
     // If we've reached the maximum consecutive failures, mark dialog as failed

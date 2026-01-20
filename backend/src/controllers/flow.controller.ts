@@ -7,15 +7,10 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import {
-  IsBoolean,
-  IsDefined,
-  IsNumber,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsDefined, IsNumber, IsOptional, IsString } from 'class-validator';
 import { CurrentAppRequest } from '../decorators/current-app-request.decorator';
 import { DialogManager } from '../llm/dialogManager';
+import { LlmBootstrapService } from '../services/llm-bootstrap.service';
 import { LlmDialogService } from '../services/llm-dialog.service';
 import { LlmSendMessageService } from '../services/llm-send-message.service';
 import {
@@ -23,39 +18,10 @@ import {
   FindManyResponseMeta,
   getFirstSkipFromCurPerPage,
 } from '../services/prisma.service';
-import { getTraceStack } from '../trace/trace.module';
 import { AppRequest } from '../types/request';
 import { StatusResponse } from '../types/status-response';
 
 ///////////
-export class SendMessageFlowResponse {
-  @ApiProperty({
-    type: 'string',
-    nullable: true,
-  })
-  @IsDefined()
-  dialogId!: string | null;
-
-  @ApiProperty({
-    type: 'string',
-  })
-  @IsDefined()
-  question!: string;
-
-  @ApiProperty({
-    type: 'string',
-  })
-  @IsDefined()
-  answer!: string;
-
-  @ApiProperty({
-    type: 'string',
-    nullable: true,
-  })
-  @IsDefined()
-  messageId!: string | null;
-}
-
 export class SendMessageFlowArgs {
   @ApiProperty({ type: 'string', required: true })
   @IsDefined()
@@ -66,18 +32,6 @@ export class SendMessageFlowArgs {
   @IsOptional()
   @IsString()
   dialogId?: string;
-
-  @ApiPropertyOptional({ type: 'boolean', required: false, nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  @Type(() => Boolean)
-  goodResponse?: boolean;
-
-  @ApiPropertyOptional({ type: 'boolean', required: false, nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  @Type(() => Boolean)
-  badResponse?: boolean;
 
   @ApiPropertyOptional({ type: 'string', required: false, nullable: true })
   @IsOptional()
@@ -143,6 +97,10 @@ export class DialogMessage {
   })
   @IsDefined()
   answerSentAt!: Date | null;
+
+  @ApiProperty({ type: 'string' })
+  @IsString()
+  dialogId!: string;
 }
 
 export class DialogFlowResponse {
@@ -201,6 +159,7 @@ export class FlowController {
   constructor(
     private readonly llmDialogService: LlmDialogService,
     private readonly llmSendMessageService: LlmSendMessageService,
+    private readonly llmBootstrapService: LlmBootstrapService,
   ) {}
 
   @Get('dialog')
@@ -224,6 +183,7 @@ export class FlowController {
         isProcessing: m.isProcessing,
         questionReceivedAt: m.questionReceivedAt,
         answerSentAt: m.answerSentAt,
+        dialogId: m.dialogId,
       })),
       meta: { curPage, perPage, totalResults: response.totalCount },
     };
@@ -244,34 +204,35 @@ export class FlowController {
   }
 
   @Post('message/send')
-  @ApiCreatedResponse({ type: SendMessageFlowResponse })
+  @ApiCreatedResponse({ type: DialogMessage })
   async messageSend(
     @CurrentAppRequest() req: AppRequest,
     @Body() args: SendMessageFlowArgs,
-  ): Promise<SendMessageFlowResponse> {
-    const result = await this.llmSendMessageService.processMessageWithRetry({
-      messageRequest: {
-        message: args.message,
-        dialogId: args.dialogId,
-        goodResponse: args.goodResponse,
-        badResponse: args.badResponse,
-        provider: args.provider,
-        model: args.model,
-        temperature: args.temperature,
-      },
+  ): Promise<DialogMessage> {
+    const result = await this.llmSendMessageService.createMessage({
+      message: args.message,
+      dialogId: args.dialogId,
       userId: req.userId,
-      maxRetries: 3,
     });
 
-    DialogManager.setMessageTrace(result.messageId, getTraceStack()).catch(
-      (error) => this.logger.error(error, error.stack),
-    );
+    this.llmBootstrapService.addMessageToProccess({
+      messageId: result.id,
+      dialogId: result.dialogId!,
+      userId: req.userId,
+      maxRetries: 3,
+      provider: args.provider,
+      model: args.model,
+      temperature: args.temperature,
+    });
 
     return {
-      messageId: result.messageId,
-      dialogId: result.dialogId,
-      question: args.message,
-      answer: result.response,
+      id: result.id,
+      answerSentAt: result.answerSentAt,
+      questionReceivedAt: result.questionReceivedAt,
+      question: result.question,
+      answer: result.answer,
+      isProcessing: result.isProcessing,
+      dialogId: result.dialogId!,
     };
   }
 

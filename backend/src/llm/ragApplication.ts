@@ -68,15 +68,11 @@ export class RAGApplication {
   }) {
     Logger.logInfo('Инициализация моделей', fullConfig);
     const embeddings = EmbeddingsFactory.createEmbeddings(
-      fullConfig.app.embeddingsProvider,
       fullConfig.providers.embeddings,
     );
     if (fullConfig.providers.chat) {
       // Use the new function that supports multiple providers
-      const llm = LLMFactory.createLLM(
-        fullConfig.app.chatProvider,
-        fullConfig.providers.chat,
-      ); // Use the new function that supports multiple providers
+      const llm = LLMFactory.createLLM(fullConfig.providers.chat); // Use the new function that supports multiple providers
       Logger.logInfo('Модели инициализированы');
       return { embeddings, llm };
     }
@@ -287,7 +283,7 @@ VALUES (${trimmedContent}, ${vectorValue}::vector, ${metadata || '{}'}, ${hash})
       // Get chat configuration for LLM
       const appConfig = ConfigManager.getAppConfig();
       const chatConfig = ConfigManager.getChatConfig(appConfig.chatProvider);
-      const llm = LLMFactory.createLLM(chatConfig.provider, chatConfig);
+      const llm = LLMFactory.createLLM(chatConfig);
 
       // If embeddings not provided, initialize them
       let embeddingModel: OpenAIEmbeddings | OllamaEmbeddings;
@@ -297,10 +293,7 @@ VALUES (${trimmedContent}, ${vectorValue}::vector, ${metadata || '{}'}, ${hash})
         const embeddingsConfig = ConfigManager.getEmbeddingsConfig(
           appConfig.embeddingsProvider,
         );
-        embeddingModel = EmbeddingsFactory.createEmbeddings(
-          appConfig.embeddingsProvider,
-          embeddingsConfig,
-        );
+        embeddingModel = EmbeddingsFactory.createEmbeddings(embeddingsConfig);
       }
 
       // Find all documents without graphContent

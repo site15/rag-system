@@ -9,6 +9,7 @@ import Mustache from 'mustache';
 import { addPayloadToTrace, Trace } from '../trace/trace.module';
 import { CATEGORY_PROMPTS } from './category-prompts';
 import { DialogManager } from './dialogManager';
+import { getCategoryByDetectedCategory } from './getCategoryByDetectedCategory';
 import { LLMLogger } from './llmLogger';
 import { Logger } from './logger';
 import {
@@ -21,7 +22,6 @@ import { FailureTracker } from './services/failureTracker';
 import { Category } from './services/questionTransformer';
 import { DocWithMetadataAndId } from './types';
 import { removeCodeWrappers } from './utils';
-import { getCategoryByDetectedCategory } from './getCategoryByDetectedCategory';
 
 // Question types for classification
 enum QuestionType {

@@ -58,16 +58,10 @@ export class DialogManager {
     dialogId,
     userId,
     question,
-    llmProvider,
-    llmModel,
-    llmTemperature,
   }: {
     dialogId: string;
     userId: string;
     question: string;
-    llmProvider?: string;
-    llmModel?: string;
-    llmTemperature?: number;
   }) {
     dialogId = await DialogManager.getGetOrCreateDialogId({ dialogId, userId });
 
@@ -76,18 +70,13 @@ export class DialogManager {
         dialogId: dialogId,
         userId: userId,
         question: question,
-        provider: llmProvider,
-        model: llmModel,
-        temperature: llmTemperature,
         answer: '',
         isProcessing: true,
-      },
-      select: {
-        id: true,
+        questionReceivedAt: question ? new Date() : null,
       },
     });
 
-    return { dialogId, messageId: chatMessage.id };
+    return chatMessage;
   }
 
   private static async getGetOrCreateDialogId({
@@ -128,36 +117,40 @@ export class DialogManager {
     answer,
     selectedDocumentIds = [],
     answerDocumentId,
-    isSuccess = true,
+    isSuccess,
     detectedCategory,
     transformedQuestion,
     transformedEmbeddingQuery,
-    goodResponse,
-    badResponse,
     isProcessing,
+    llmProvider,
+    llmModel,
+    llmTemperature,
   }: {
     messageId: string;
     answer: string;
     selectedDocumentIds?: string[];
     answerDocumentId?: string;
-    isSuccess?: boolean;
+    isSuccess: boolean;
     detectedCategory?: string;
     transformedQuestion?: string;
     transformedEmbeddingQuery?: string;
-    goodResponse?: boolean;
-    badResponse?: boolean;
     isProcessing?: boolean;
+    llmProvider?: string;
+    llmModel?: string;
+    llmTemperature?: number;
   }) {
     // Insert the chat history record and get the ID
     const chatMessage = await PrismaService.instance.chatMessage.update({
       data: {
+        provider: llmProvider,
+        model: llmModel,
+        temperature: llmTemperature,
         answer: answer,
         category: detectedCategory,
         transformedQuestion: transformedQuestion,
         transformedEmbeddingQuery: transformedEmbeddingQuery,
-        isGoodResponse: goodResponse,
-        isBadResponse: badResponse,
         isProcessing,
+        answerSentAt: answer ? new Date() : null,
       },
       select: {
         id: true,
@@ -419,5 +412,11 @@ export class DialogManager {
       });
       throw error;
     }
+  }
+
+  public static async getMessage(messageId: string) {
+    return await PrismaService.instance.chatMessage.findFirst({
+      where: { deletedAt: null, id: messageId },
+    });
   }
 }
