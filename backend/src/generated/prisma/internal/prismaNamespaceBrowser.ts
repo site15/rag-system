@@ -55,6 +55,7 @@ export const AnyNull = runtime.AnyNull;
 
 export const ModelName = {
   AuthUser: 'AuthUser',
+  AuthApiKey: 'AuthApiKey',
   AuthSession: 'AuthSession',
   ChatPrompt: 'ChatPrompt',
   ChatDocumentEmbedding: 'ChatDocumentEmbedding',
@@ -94,6 +95,18 @@ export const AuthUserScalarFieldEnum = {
 
 export type AuthUserScalarFieldEnum =
   (typeof AuthUserScalarFieldEnum)[keyof typeof AuthUserScalarFieldEnum];
+
+export const AuthApiKeyScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  apiKey: 'apiKey',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+} as const;
+
+export type AuthApiKeyScalarFieldEnum =
+  (typeof AuthApiKeyScalarFieldEnum)[keyof typeof AuthApiKeyScalarFieldEnum];
 
 export const AuthSessionScalarFieldEnum = {
   id: 'id',

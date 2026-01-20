@@ -8,6 +8,7 @@
  * 🟢 You can import this file directly.
  */
 export type * from './models/AuthUser';
+export type * from './models/AuthApiKey';
 export type * from './models/AuthSession';
 export type * from './models/ChatPrompt';
 export type * from './models/ChatDocumentEmbedding';

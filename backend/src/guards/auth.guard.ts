@@ -24,7 +24,8 @@ export class AuthGuard implements CanActivate {
         ? req.headers.authorization
         : process.env.ADMIN_ID
     )!;
-    req.userIp = process.env.CHECK_IP ? getClientIp(req as any) : '127.0.0.1';
+    req.userIp =
+      process.env.CHECK_IP === 'true' ? getClientIp(req as any) : '127.0.0.1';
 
     // List of allowed IP addresses for security filtering
     const ALLOWED_IPS = process.env.ALLOWED_IPS

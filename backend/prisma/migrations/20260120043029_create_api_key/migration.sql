@@ -1,0 +1,20 @@
+-- CreateTable
+CREATE TABLE "AuthApiKey" (
+    "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
+    "userId" UUID NOT NULL,
+    "apiKey" VARCHAR(255),
+    "isActive" BOOLEAN,
+    "createdAt" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "PK_AUTH_API_KEY" PRIMARY KEY ("id")
+);
+
+-- CreateIndex
+CREATE INDEX "IDX_AUTH_API_KEY__USER_ID" ON "AuthApiKey"("userId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "UQ_AUTH_API_KEY__API_KEY" ON "AuthApiKey"("apiKey");
+
+-- AddForeignKey
+ALTER TABLE "AuthApiKey" ADD CONSTRAINT "FK_AUTH_API_KEY__USER_ID" FOREIGN KEY ("userId") REFERENCES "AuthUser"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;

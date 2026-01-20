@@ -1,4 +1,5 @@
 import { AuthUserController } from './auth-user.controller';
+import { AuthApiKeyController } from './auth-api-key.controller';
 import { AuthSessionController } from './auth-session.controller';
 import { ChatPromptController } from './chat-prompt.controller';
 import { ChatDocumentEmbeddingController } from './chat-document-embedding.controller';
@@ -11,6 +12,7 @@ import { ChatEmbeddingModelController } from './chat-embedding-model.controller'
 
 export const CONTROLLERS = [
   AuthUserController,
+  AuthApiKeyController,
   AuthSessionController,
   ChatPromptController,
   ChatDocumentEmbeddingController,

@@ -198,6 +198,7 @@ export type AuthUserWhereInput = {
   isActive?: Prisma.BoolNullableFilter<'AuthUser'> | boolean | null;
   createdAt?: Prisma.DateTimeFilter<'AuthUser'> | Date | string;
   updatedAt?: Prisma.DateTimeFilter<'AuthUser'> | Date | string;
+  AuthApiKey?: Prisma.AuthApiKeyListRelationFilter;
   AuthSession?: Prisma.AuthSessionListRelationFilter;
   ChatDialog?: Prisma.ChatDialogListRelationFilter;
   ChatMessage?: Prisma.ChatMessageListRelationFilter;
@@ -211,6 +212,7 @@ export type AuthUserOrderByWithRelationInput = {
   isActive?: Prisma.SortOrderInput | Prisma.SortOrder;
   createdAt?: Prisma.SortOrder;
   updatedAt?: Prisma.SortOrder;
+  AuthApiKey?: Prisma.AuthApiKeyOrderByRelationAggregateInput;
   AuthSession?: Prisma.AuthSessionOrderByRelationAggregateInput;
   ChatDialog?: Prisma.ChatDialogOrderByRelationAggregateInput;
   ChatMessage?: Prisma.ChatMessageOrderByRelationAggregateInput;
@@ -228,6 +230,7 @@ export type AuthUserWhereUniqueInput = Prisma.AtLeast<
     isActive?: Prisma.BoolNullableFilter<'AuthUser'> | boolean | null;
     createdAt?: Prisma.DateTimeFilter<'AuthUser'> | Date | string;
     updatedAt?: Prisma.DateTimeFilter<'AuthUser'> | Date | string;
+    AuthApiKey?: Prisma.AuthApiKeyListRelationFilter;
     AuthSession?: Prisma.AuthSessionListRelationFilter;
     ChatDialog?: Prisma.ChatDialogListRelationFilter;
     ChatMessage?: Prisma.ChatMessageListRelationFilter;
@@ -282,6 +285,7 @@ export type AuthUserCreateInput = {
   isActive?: boolean | null;
   createdAt?: Date | string;
   updatedAt?: Date | string;
+  AuthApiKey?: Prisma.AuthApiKeyCreateNestedManyWithoutAuthUserInput;
   AuthSession?: Prisma.AuthSessionCreateNestedManyWithoutAuthUserInput;
   ChatDialog?: Prisma.ChatDialogCreateNestedManyWithoutAuthUserInput;
   ChatMessage?: Prisma.ChatMessageCreateNestedManyWithoutAuthUserInput;
@@ -295,6 +299,7 @@ export type AuthUserUncheckedCreateInput = {
   isActive?: boolean | null;
   createdAt?: Date | string;
   updatedAt?: Date | string;
+  AuthApiKey?: Prisma.AuthApiKeyUncheckedCreateNestedManyWithoutAuthUserInput;
   AuthSession?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutAuthUserInput;
   ChatDialog?: Prisma.ChatDialogUncheckedCreateNestedManyWithoutAuthUserInput;
   ChatMessage?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutAuthUserInput;
@@ -311,6 +316,7 @@ export type AuthUserUpdateInput = {
   isActive?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  AuthApiKey?: Prisma.AuthApiKeyUpdateManyWithoutAuthUserNestedInput;
   AuthSession?: Prisma.AuthSessionUpdateManyWithoutAuthUserNestedInput;
   ChatDialog?: Prisma.ChatDialogUpdateManyWithoutAuthUserNestedInput;
   ChatMessage?: Prisma.ChatMessageUpdateManyWithoutAuthUserNestedInput;
@@ -327,6 +333,7 @@ export type AuthUserUncheckedUpdateInput = {
   isActive?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  AuthApiKey?: Prisma.AuthApiKeyUncheckedUpdateManyWithoutAuthUserNestedInput;
   AuthSession?: Prisma.AuthSessionUncheckedUpdateManyWithoutAuthUserNestedInput;
   ChatDialog?: Prisma.ChatDialogUncheckedUpdateManyWithoutAuthUserNestedInput;
   ChatMessage?: Prisma.ChatMessageUncheckedUpdateManyWithoutAuthUserNestedInput;
@@ -417,6 +424,32 @@ export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string;
 };
 
+export type AuthUserCreateNestedOneWithoutAuthApiKeyInput = {
+  create?: Prisma.XOR<
+    Prisma.AuthUserCreateWithoutAuthApiKeyInput,
+    Prisma.AuthUserUncheckedCreateWithoutAuthApiKeyInput
+  >;
+  connectOrCreate?: Prisma.AuthUserCreateOrConnectWithoutAuthApiKeyInput;
+  connect?: Prisma.AuthUserWhereUniqueInput;
+};
+
+export type AuthUserUpdateOneRequiredWithoutAuthApiKeyNestedInput = {
+  create?: Prisma.XOR<
+    Prisma.AuthUserCreateWithoutAuthApiKeyInput,
+    Prisma.AuthUserUncheckedCreateWithoutAuthApiKeyInput
+  >;
+  connectOrCreate?: Prisma.AuthUserCreateOrConnectWithoutAuthApiKeyInput;
+  upsert?: Prisma.AuthUserUpsertWithoutAuthApiKeyInput;
+  connect?: Prisma.AuthUserWhereUniqueInput;
+  update?: Prisma.XOR<
+    Prisma.XOR<
+      Prisma.AuthUserUpdateToOneWithWhereWithoutAuthApiKeyInput,
+      Prisma.AuthUserUpdateWithoutAuthApiKeyInput
+    >,
+    Prisma.AuthUserUncheckedUpdateWithoutAuthApiKeyInput
+  >;
+};
+
 export type AuthUserCreateNestedOneWithoutAuthSessionInput = {
   create?: Prisma.XOR<
     Prisma.AuthUserCreateWithoutAuthSessionInput,
@@ -495,6 +528,92 @@ export type AuthUserUpdateOneRequiredWithoutChatMessageNestedInput = {
   >;
 };
 
+export type AuthUserCreateWithoutAuthApiKeyInput = {
+  id?: string;
+  anonymousId?: string | null;
+  supabaseUserId?: string | null;
+  supabaseUserData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
+  isActive?: boolean | null;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
+  AuthSession?: Prisma.AuthSessionCreateNestedManyWithoutAuthUserInput;
+  ChatDialog?: Prisma.ChatDialogCreateNestedManyWithoutAuthUserInput;
+  ChatMessage?: Prisma.ChatMessageCreateNestedManyWithoutAuthUserInput;
+};
+
+export type AuthUserUncheckedCreateWithoutAuthApiKeyInput = {
+  id?: string;
+  anonymousId?: string | null;
+  supabaseUserId?: string | null;
+  supabaseUserData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
+  isActive?: boolean | null;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
+  AuthSession?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutAuthUserInput;
+  ChatDialog?: Prisma.ChatDialogUncheckedCreateNestedManyWithoutAuthUserInput;
+  ChatMessage?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutAuthUserInput;
+};
+
+export type AuthUserCreateOrConnectWithoutAuthApiKeyInput = {
+  where: Prisma.AuthUserWhereUniqueInput;
+  create: Prisma.XOR<
+    Prisma.AuthUserCreateWithoutAuthApiKeyInput,
+    Prisma.AuthUserUncheckedCreateWithoutAuthApiKeyInput
+  >;
+};
+
+export type AuthUserUpsertWithoutAuthApiKeyInput = {
+  update: Prisma.XOR<
+    Prisma.AuthUserUpdateWithoutAuthApiKeyInput,
+    Prisma.AuthUserUncheckedUpdateWithoutAuthApiKeyInput
+  >;
+  create: Prisma.XOR<
+    Prisma.AuthUserCreateWithoutAuthApiKeyInput,
+    Prisma.AuthUserUncheckedCreateWithoutAuthApiKeyInput
+  >;
+  where?: Prisma.AuthUserWhereInput;
+};
+
+export type AuthUserUpdateToOneWithWhereWithoutAuthApiKeyInput = {
+  where?: Prisma.AuthUserWhereInput;
+  data: Prisma.XOR<
+    Prisma.AuthUserUpdateWithoutAuthApiKeyInput,
+    Prisma.AuthUserUncheckedUpdateWithoutAuthApiKeyInput
+  >;
+};
+
+export type AuthUserUpdateWithoutAuthApiKeyInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string;
+  anonymousId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  supabaseUserId?:
+    | Prisma.NullableStringFieldUpdateOperationsInput
+    | string
+    | null;
+  supabaseUserData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
+  isActive?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null;
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  AuthSession?: Prisma.AuthSessionUpdateManyWithoutAuthUserNestedInput;
+  ChatDialog?: Prisma.ChatDialogUpdateManyWithoutAuthUserNestedInput;
+  ChatMessage?: Prisma.ChatMessageUpdateManyWithoutAuthUserNestedInput;
+};
+
+export type AuthUserUncheckedUpdateWithoutAuthApiKeyInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string;
+  anonymousId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  supabaseUserId?:
+    | Prisma.NullableStringFieldUpdateOperationsInput
+    | string
+    | null;
+  supabaseUserData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
+  isActive?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null;
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  AuthSession?: Prisma.AuthSessionUncheckedUpdateManyWithoutAuthUserNestedInput;
+  ChatDialog?: Prisma.ChatDialogUncheckedUpdateManyWithoutAuthUserNestedInput;
+  ChatMessage?: Prisma.ChatMessageUncheckedUpdateManyWithoutAuthUserNestedInput;
+};
+
 export type AuthUserCreateWithoutAuthSessionInput = {
   id?: string;
   anonymousId?: string | null;
@@ -503,6 +622,7 @@ export type AuthUserCreateWithoutAuthSessionInput = {
   isActive?: boolean | null;
   createdAt?: Date | string;
   updatedAt?: Date | string;
+  AuthApiKey?: Prisma.AuthApiKeyCreateNestedManyWithoutAuthUserInput;
   ChatDialog?: Prisma.ChatDialogCreateNestedManyWithoutAuthUserInput;
   ChatMessage?: Prisma.ChatMessageCreateNestedManyWithoutAuthUserInput;
 };
@@ -515,6 +635,7 @@ export type AuthUserUncheckedCreateWithoutAuthSessionInput = {
   isActive?: boolean | null;
   createdAt?: Date | string;
   updatedAt?: Date | string;
+  AuthApiKey?: Prisma.AuthApiKeyUncheckedCreateNestedManyWithoutAuthUserInput;
   ChatDialog?: Prisma.ChatDialogUncheckedCreateNestedManyWithoutAuthUserInput;
   ChatMessage?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutAuthUserInput;
 };
@@ -558,6 +679,7 @@ export type AuthUserUpdateWithoutAuthSessionInput = {
   isActive?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  AuthApiKey?: Prisma.AuthApiKeyUpdateManyWithoutAuthUserNestedInput;
   ChatDialog?: Prisma.ChatDialogUpdateManyWithoutAuthUserNestedInput;
   ChatMessage?: Prisma.ChatMessageUpdateManyWithoutAuthUserNestedInput;
 };
@@ -573,6 +695,7 @@ export type AuthUserUncheckedUpdateWithoutAuthSessionInput = {
   isActive?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  AuthApiKey?: Prisma.AuthApiKeyUncheckedUpdateManyWithoutAuthUserNestedInput;
   ChatDialog?: Prisma.ChatDialogUncheckedUpdateManyWithoutAuthUserNestedInput;
   ChatMessage?: Prisma.ChatMessageUncheckedUpdateManyWithoutAuthUserNestedInput;
 };
@@ -585,6 +708,7 @@ export type AuthUserCreateWithoutChatDialogInput = {
   isActive?: boolean | null;
   createdAt?: Date | string;
   updatedAt?: Date | string;
+  AuthApiKey?: Prisma.AuthApiKeyCreateNestedManyWithoutAuthUserInput;
   AuthSession?: Prisma.AuthSessionCreateNestedManyWithoutAuthUserInput;
   ChatMessage?: Prisma.ChatMessageCreateNestedManyWithoutAuthUserInput;
 };
@@ -597,6 +721,7 @@ export type AuthUserUncheckedCreateWithoutChatDialogInput = {
   isActive?: boolean | null;
   createdAt?: Date | string;
   updatedAt?: Date | string;
+  AuthApiKey?: Prisma.AuthApiKeyUncheckedCreateNestedManyWithoutAuthUserInput;
   AuthSession?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutAuthUserInput;
   ChatMessage?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutAuthUserInput;
 };
@@ -640,6 +765,7 @@ export type AuthUserUpdateWithoutChatDialogInput = {
   isActive?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  AuthApiKey?: Prisma.AuthApiKeyUpdateManyWithoutAuthUserNestedInput;
   AuthSession?: Prisma.AuthSessionUpdateManyWithoutAuthUserNestedInput;
   ChatMessage?: Prisma.ChatMessageUpdateManyWithoutAuthUserNestedInput;
 };
@@ -655,6 +781,7 @@ export type AuthUserUncheckedUpdateWithoutChatDialogInput = {
   isActive?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  AuthApiKey?: Prisma.AuthApiKeyUncheckedUpdateManyWithoutAuthUserNestedInput;
   AuthSession?: Prisma.AuthSessionUncheckedUpdateManyWithoutAuthUserNestedInput;
   ChatMessage?: Prisma.ChatMessageUncheckedUpdateManyWithoutAuthUserNestedInput;
 };
@@ -667,6 +794,7 @@ export type AuthUserCreateWithoutChatMessageInput = {
   isActive?: boolean | null;
   createdAt?: Date | string;
   updatedAt?: Date | string;
+  AuthApiKey?: Prisma.AuthApiKeyCreateNestedManyWithoutAuthUserInput;
   AuthSession?: Prisma.AuthSessionCreateNestedManyWithoutAuthUserInput;
   ChatDialog?: Prisma.ChatDialogCreateNestedManyWithoutAuthUserInput;
 };
@@ -679,6 +807,7 @@ export type AuthUserUncheckedCreateWithoutChatMessageInput = {
   isActive?: boolean | null;
   createdAt?: Date | string;
   updatedAt?: Date | string;
+  AuthApiKey?: Prisma.AuthApiKeyUncheckedCreateNestedManyWithoutAuthUserInput;
   AuthSession?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutAuthUserInput;
   ChatDialog?: Prisma.ChatDialogUncheckedCreateNestedManyWithoutAuthUserInput;
 };
@@ -722,6 +851,7 @@ export type AuthUserUpdateWithoutChatMessageInput = {
   isActive?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  AuthApiKey?: Prisma.AuthApiKeyUpdateManyWithoutAuthUserNestedInput;
   AuthSession?: Prisma.AuthSessionUpdateManyWithoutAuthUserNestedInput;
   ChatDialog?: Prisma.ChatDialogUpdateManyWithoutAuthUserNestedInput;
 };
@@ -737,6 +867,7 @@ export type AuthUserUncheckedUpdateWithoutChatMessageInput = {
   isActive?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  AuthApiKey?: Prisma.AuthApiKeyUncheckedUpdateManyWithoutAuthUserNestedInput;
   AuthSession?: Prisma.AuthSessionUncheckedUpdateManyWithoutAuthUserNestedInput;
   ChatDialog?: Prisma.ChatDialogUncheckedUpdateManyWithoutAuthUserNestedInput;
 };
@@ -746,6 +877,7 @@ export type AuthUserUncheckedUpdateWithoutChatMessageInput = {
  */
 
 export type AuthUserCountOutputType = {
+  AuthApiKey: number;
   AuthSession: number;
   ChatDialog: number;
   ChatMessage: number;
@@ -755,6 +887,7 @@ export type AuthUserCountOutputTypeSelect<
   ExtArgs extends runtime.Types.Extensions.InternalArgs =
     runtime.Types.Extensions.DefaultArgs,
 > = {
+  AuthApiKey?: boolean | AuthUserCountOutputTypeCountAuthApiKeyArgs;
   AuthSession?: boolean | AuthUserCountOutputTypeCountAuthSessionArgs;
   ChatDialog?: boolean | AuthUserCountOutputTypeCountChatDialogArgs;
   ChatMessage?: boolean | AuthUserCountOutputTypeCountChatMessageArgs;
@@ -771,6 +904,16 @@ export type AuthUserCountOutputTypeDefaultArgs<
    * Select specific fields to fetch from the AuthUserCountOutputType
    */
   select?: Prisma.AuthUserCountOutputTypeSelect<ExtArgs> | null;
+};
+
+/**
+ * AuthUserCountOutputType without action
+ */
+export type AuthUserCountOutputTypeCountAuthApiKeyArgs<
+  ExtArgs extends runtime.Types.Extensions.InternalArgs =
+    runtime.Types.Extensions.DefaultArgs,
+> = {
+  where?: Prisma.AuthApiKeyWhereInput;
 };
 
 /**
@@ -815,6 +958,7 @@ export type AuthUserSelect<
     isActive?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
+    AuthApiKey?: boolean | Prisma.AuthUser$AuthApiKeyArgs<ExtArgs>;
     AuthSession?: boolean | Prisma.AuthUser$AuthSessionArgs<ExtArgs>;
     ChatDialog?: boolean | Prisma.AuthUser$ChatDialogArgs<ExtArgs>;
     ChatMessage?: boolean | Prisma.AuthUser$ChatMessageArgs<ExtArgs>;
@@ -882,6 +1026,7 @@ export type AuthUserInclude<
   ExtArgs extends runtime.Types.Extensions.InternalArgs =
     runtime.Types.Extensions.DefaultArgs,
 > = {
+  AuthApiKey?: boolean | Prisma.AuthUser$AuthApiKeyArgs<ExtArgs>;
   AuthSession?: boolean | Prisma.AuthUser$AuthSessionArgs<ExtArgs>;
   ChatDialog?: boolean | Prisma.AuthUser$ChatDialogArgs<ExtArgs>;
   ChatMessage?: boolean | Prisma.AuthUser$ChatMessageArgs<ExtArgs>;
@@ -902,6 +1047,7 @@ export type $AuthUserPayload<
 > = {
   name: 'AuthUser';
   objects: {
+    AuthApiKey: Prisma.$AuthApiKeyPayload<ExtArgs>[];
     AuthSession: Prisma.$AuthSessionPayload<ExtArgs>[];
     ChatDialog: Prisma.$ChatDialogPayload<ExtArgs>[];
     ChatMessage: Prisma.$ChatMessagePayload<ExtArgs>[];
@@ -1465,6 +1611,17 @@ export interface Prisma__AuthUserClient<
   GlobalOmitOptions = {},
 > extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: 'PrismaPromise';
+  AuthApiKey<T extends Prisma.AuthUser$AuthApiKeyArgs<ExtArgs> = {}>(
+    args?: Prisma.Subset<T, Prisma.AuthUser$AuthApiKeyArgs<ExtArgs>>,
+  ): Prisma.PrismaPromise<
+    | runtime.Types.Result.GetResult<
+        Prisma.$AuthApiKeyPayload<ExtArgs>,
+        T,
+        'findMany',
+        GlobalOmitOptions
+      >
+    | Null
+  >;
   AuthSession<T extends Prisma.AuthUser$AuthSessionArgs<ExtArgs> = {}>(
     args?: Prisma.Subset<T, Prisma.AuthUser$AuthSessionArgs<ExtArgs>>,
   ): Prisma.PrismaPromise<
@@ -1997,6 +2154,37 @@ export type AuthUserDeleteManyArgs<
    * Limit how many AuthUsers to delete.
    */
   limit?: number;
+};
+
+/**
+ * AuthUser.AuthApiKey
+ */
+export type AuthUser$AuthApiKeyArgs<
+  ExtArgs extends runtime.Types.Extensions.InternalArgs =
+    runtime.Types.Extensions.DefaultArgs,
+> = {
+  /**
+   * Select specific fields to fetch from the AuthApiKey
+   */
+  select?: Prisma.AuthApiKeySelect<ExtArgs> | null;
+  /**
+   * Omit specific fields from the AuthApiKey
+   */
+  omit?: Prisma.AuthApiKeyOmit<ExtArgs> | null;
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AuthApiKeyInclude<ExtArgs> | null;
+  where?: Prisma.AuthApiKeyWhereInput;
+  orderBy?:
+    | Prisma.AuthApiKeyOrderByWithRelationInput
+    | Prisma.AuthApiKeyOrderByWithRelationInput[];
+  cursor?: Prisma.AuthApiKeyWhereUniqueInput;
+  take?: number;
+  skip?: number;
+  distinct?:
+    | Prisma.AuthApiKeyScalarFieldEnum
+    | Prisma.AuthApiKeyScalarFieldEnum[];
 };
 
 /**

@@ -60,11 +60,27 @@ model AuthUser {
   createdAt DateTime @default(now()) @db.Timestamp(6)
   updatedAt DateTime @default(now()) @db.Timestamp(6)
 
+  AuthApiKey  AuthApiKey[]
   AuthSession AuthSession[]
   ChatDialog  ChatDialog[]
   ChatMessage ChatMessage[]
 
   @@unique(name: "uqSupabaseUserId", [supabaseUserId], map: "UQ_AUTH_USER__SUPABASE_USER_ID")
+}
+
+model AuthApiKey {
+  id       String   @id(map: "PK_AUTH_API_KEY") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId   String   @db.Uuid
+  apiKey   String?  @db.VarChar(255)
+  isActive Boolean?
+
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @default(now()) @db.Timestamp(6)
+
+  AuthUser AuthUser @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_AUTH_API_KEY__USER_ID")
+
+  @@unique(name: "uqApiKey", [apiKey], map: "UQ_AUTH_API_KEY__API_KEY")
+  @@index([userId], map: "IDX_AUTH_API_KEY__USER_ID")
 }
 
 model AuthSession {
