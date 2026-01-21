@@ -110,12 +110,35 @@ CREATE INDEX ON "ChatDocumentEmbedding" USING hnsw (graphEmbedding1536 vector_co
 
 ### Main Routes
 ```
-POST /api/chat/completions    - Response generation
-GET  /api/documents/search    - Document search
-POST /api/documents/process   - Document processing
-GET  /api/dump/full           - Full dump
-GET  /api/dump/filtered       - Filtered dump
-GET  /swagger                 - Swagger documentation
+POST /api/flow/message/send   - Send message to start/continue conversation
+GET  /api/flow/dialog         - Get dialog messages with pagination
+GET  /api/flow/message/trace  - Get message trace/debug information
+POST /api/flow/message/cancel - Cancel/delete a message
+GET  /swagger                 - Swagger API documentation
+```
+
+### Generated REST API Routes
+The system automatically generates CRUD endpoints for all Prisma models:
+```
+# Authentication
+GET  /api/auth/user           - Get users
+GET  /api/auth/user/:id       - Get user by ID
+POST /api/auth/user           - Create user
+...
+
+# Chat Models
+GET  /api/chat/document-embedding     - Get document embeddings
+GET  /api/chat/document-embedding/:id - Get embedding by ID
+POST /api/chat/document-embedding     - Create embedding
+...
+
+# Other Models
+GET  /api/chat/dialog
+GET  /api/chat/message
+GET  /api/chat/llm-model
+GET  /api/chat/embedding-model
+GET  /api/chat/prompt
+GET  /api/chat/llm-request
 ```
 
 ## Development

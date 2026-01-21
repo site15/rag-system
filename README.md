@@ -84,6 +84,7 @@ Core RAG system with complete document processing and search pipeline implementa
 Web interface for system management and functionality testing.
 
 📁 [Документация Frontend / Frontend Documentation](docs/FRONTEND_README_RU.md) | [English](docs/FRONTEND_README_EN.md)
+📄 [Подробная документация Frontend / Detailed Frontend Documentation](docs/FRONTEND_DETAILED_RU.md) | [English](docs/FRONTEND_DETAILED_EN.md)
 
 ### 🛠️ Prisma Generator
 Пользовательский генератор DTO для автоматической генерации кода NestJS.
@@ -91,6 +92,7 @@ Web interface for system management and functionality testing.
 Custom DTO generator for automatic NestJS code generation.
 
 📁 [Документация Prisma Generator](docs/PRISMA_GENERATOR_README_RU.md) | [English](docs/PRISMA_GENERATOR_README_EN.md)
+📄 [Подробная документация Generator / Detailed Generator Documentation](docs/PRISMA_GENERATOR_DETAILED_RU.md) | [English](docs/PRISMA_GENERATOR_DETAILED_EN.md)
 
 ### 📚 Sources
 Источники знаний системы - документы, статьи и другие материалы для обучения.
@@ -111,13 +113,15 @@ System knowledge sources - documents, articles and other materials for training.
 - [ДОКУМЕНТАЦИЯ_RAG_СИСТЕМЫ_RU.md](docs/ДОКУМЕНТАЦИЯ_RAG_СИСТЕМЫ_RU.md) - Комплексная документация на русском
 - [RAG_SYSTEM_DOCUMENTATION_EN.md](docs/RAG_SYSTEM_DOCUMENTATION_EN.md) - Comprehensive English documentation
 
-### Дополнительные материалы / Additional Materials
+### Additional Materials
 
-📁 **Процесс разработки / Development Process**
-- [PROCESS_RU.md](PROCESS_RU.md) - Подробное описание процесса разработки
+📁 **Technical Guides**
+- [FILES.md](docs/FILES.md) - Detailed file structure and development process description
+- [JAVASCRIPT_CLIENT_GUIDE.md](docs/JAVASCRIPT_CLIENT_GUIDE.md) - Guide for using JavaScript client with the API
 
-📁 **Сводка обновлений / Update Summary**
-- [DOCUMENTATION_UPDATES_SUMMARY.md](docs/DOCUMENTATION_UPDATES_SUMMARY.md) - Сводка по обновленной документации
+📁 **Технические руководства / Technical Guides**
+- [FILES.md](docs/FILES.md) - Подробное описание файловой структуры и процесса разработки
+- [JAVASCRIPT_CLIENT_GUIDE.md](docs/JAVASCRIPT_CLIENT_GUIDE.md) - Руководство по использованию JavaScript клиента для API
 
 ## Лицензия / License
 

@@ -12,9 +12,65 @@ Custom Prisma generator for automatically creating Data Transfer Objects (DTOs) 
 - **Serialization decorators** from `class-transformer`
 - **Swagger/OpenAPI documentation**
 - **CRUD controllers** and services
-- **Migrations** and database schemas
+- **Complete REST API endpoints** with proper routing
+- **Frontend integration code** generation
+- **TypeScript interfaces** and types
+- **Database migrations** and schema management
 
-### Supported Decorators
+## Generated Artifacts
+
+The generator creates a complete set of artifacts for each Prisma model, enabling rapid development of full-stack applications:
+
+### 1. DTO Classes
+- `Create<ModelName>Dto` - for POST requests with required fields
+- `Update<ModelName>Dto` - for PATCH/PUT requests with optional fields
+- `<ModelName>Dto` - for response serialization with all fields
+
+### 2. Entity Classes
+- `<ModelName>Entity` - typed entity representations matching Prisma schema
+- Properly mapped scalar and relation fields
+- Type-safe property definitions
+
+### 3. Controllers
+- Full CRUD REST controllers with proper routing
+- Swagger documentation annotations (`@ApiTags`, `@ApiOkResponse`, etc.)
+- Validation pipeline integration with `class-validator`
+- Soft delete support for models with `deletedAt` field
+- User context integration for models with `userId` field
+- Automatic pagination and sorting support
+- UUID parameter validation
+
+### 4. Services
+- Database operation services with transaction support
+- Query building utilities for complex filtering
+- Relation handling and eager loading
+- Data transformation logic
+
+### 5. Frontend Integration
+- **React Admin Forms**: Auto-generated create/edit/show forms with appropriate input components
+  - `TextInput` for strings
+  - `NumberInput` for numeric fields
+  - `BooleanInput` for boolean fields
+  - `DateTimeInput` for date/time fields
+  - `JsonViewerField` for JSON data with collapsible viewer
+- **Data Providers**: Complete React Admin data providers implementing all CRUD operations
+  - Automatic API endpoint mapping
+  - Error handling and authentication integration
+  - Pagination and sorting support
+- **List Views**: Auto-generated list components with searchable columns
+- **TypeScript Interfaces**: Full type safety for frontend consumption
+
+### 6. API Client Code
+- Generated SDK with typed API calls
+- Automatic route parameter extraction
+- Request/response type definitions
+- Error handling utilities
+
+### 7. Documentation
+- OpenAPI/Swagger schema definitions
+- API endpoint documentation
+- Model relationship diagrams
+- Integration examples
 - `@ApiProperty()` for Swagger documentation
 - `@IsString()`, `@IsNumber()`, `@IsBoolean()` for validation
 - `@Expose()`, `@Exclude()` for serialization
