@@ -250,20 +250,22 @@ export class QuestionTransformer {
     // For regular questions, determine if contextual rewriting is needed
     const isSelfContained = this.isQuestionSelfContained(question, history);
 
-    // Transform the question using appropriate method
-    const transformedQuestion = await this.transformWithLLM({
-      question,
-      llm,
-      category: detectedCategory,
-      history,
-      isSelfContained,
-      provider,
-      dialogId,
-      messageId,
-    });
-
-    const transformedEmbeddedActionBased =
-      await this.transformToEmbeddedWithLLM({
+    const [
+      transformedQuestion,
+      transformedEmbeddedActionBased,
+      transformedEmbeddedEntityBased,
+    ] = await Promise.all([
+      this.transformWithLLM({
+        question,
+        llm,
+        category: detectedCategory,
+        history,
+        isSelfContained,
+        provider,
+        dialogId,
+        messageId,
+      }),
+      this.transformToEmbeddedWithLLM({
         type: 'action-based',
         question,
         llm,
@@ -333,10 +335,8 @@ export class QuestionTransformer {
             question: question,
           },
         ),
-      });
-
-    const transformedEmbeddedEntityBased =
-      await this.transformToEmbeddedWithLLM({
+      }),
+      this.transformToEmbeddedWithLLM({
         type: 'entity-based',
         question,
         llm,
@@ -415,7 +415,8 @@ export class QuestionTransformer {
             question: question,
           },
         ),
-      });
+      }),
+    ]);
 
     Logger.logInfo('Question transformation completed', {
       original: question,

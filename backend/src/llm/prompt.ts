@@ -189,7 +189,7 @@ export function createTelegramAnalysisPrompt({
     context: removeCodeWrappers(chunk || ''),
     question: question,
     customRules: customRules,
-    isFollowUp: history.length > 0,
+    isFollowUp: history?.[0],
   });
 }
 
@@ -224,7 +224,7 @@ export function createArticleAnalysisPrompt({
     context: removeCodeWrappers(chunk || ''),
     question: question,
     customRules: customRules,
-    isFollowUp: history.length > 0,
+    isFollowUp: history?.[0],
   });
 }
 
@@ -259,7 +259,7 @@ export function createPortfolioAnalysisPrompt({
     context: removeCodeWrappers(chunk || ''),
     question: question,
     customRules: customRules,
-    isFollowUp: history.length > 0,
+    isFollowUp: history?.[0],
   });
 }
 
@@ -294,7 +294,7 @@ export function createResumeAnalysisPrompt({
     context: removeCodeWrappers(chunk || ''),
     question: question,
     customRules: customRules,
-    isFollowUp: history.length > 0,
+    isFollowUp: history?.[0],
   });
 }
 
@@ -328,7 +328,7 @@ export function createGenericAnalysisPrompt({
     context: removeCodeWrappers(chunk || ''),
     question: question,
     customRules: customRules,
-    isFollowUp: history.length > 0,
+    isFollowUp: history?.[0],
   });
 }
 
@@ -352,20 +352,19 @@ export function createContextualRewritePrompt({
   const hasCategory = !!category;
   const categoryName = category ? CATEGORY[category] || category : '';
 
-  const historyContext =
-    history && history.length > 0
-      ? Mustache.render(
-          `
+  const isFollowUp = history?.[0];
+
+  const historyContext = isFollowUp
+    ? Mustache.render(
+        `
 
 Conversation history (use only for context of prior assistant experience):
 \`\`\`
 {{history}}
 \`\`\``,
-          { history: removeCodeWrappers(history.join('\n')) },
-        )
-      : '';
-
-  const questionType = historyContext ? 'follow-up' : 'original';
+        { history: removeCodeWrappers(history.join('\n')) },
+      )
+    : '';
 
   // Template for the contextual rewrite prompt
   const template = `
@@ -442,7 +441,7 @@ Rewritten self-contained question:
     hasCategory: hasCategory,
     categoryName: categoryName,
     historyContext: historyContext,
-    isFollowUp: !!historyContext,
+    isFollowUp,
     question: question,
   });
 }

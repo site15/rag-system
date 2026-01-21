@@ -6,7 +6,7 @@ import { ChatGroq } from '@langchain/groq';
 import { ChatOpenAI } from '@langchain/openai';
 import Mustache from 'mustache';
 import { PrismaService } from '../services/prisma.service';
-import { Trace } from '../trace/trace.module';
+import { addPayloadToTrace, Trace } from '../trace/trace.module';
 import { Logger } from './logger';
 import { LLMQueryLogger } from './services/llmQueryLogger';
 import {
@@ -127,8 +127,13 @@ export class LLMLogger {
     messageId: string | undefined;
     callback: (prompt: string) => Promise<any>;
   }): Promise<{ logId: string | undefined; content: string }> {
+    addPayloadToTrace({
+      messageId,
+      dialogId,
+      prompt,
+    });
+
     const startTime = Date.now();
-    let timeoutId: NodeJS.Timeout | null = null;
     let executionTrackingId: string | null = null;
 
     try {
@@ -299,11 +304,6 @@ export class LLMLogger {
       });
 
       throw error;
-    } finally {
-      // Clean up timeout if it exists
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
     }
   }
 

@@ -321,7 +321,7 @@ export class LlmSendMessageService {
     const message = (await DialogManager.getMessage(messageId))?.question || '';
     const foundLogIds: (string | undefined)[] = [];
 
-    let docsWithMeta: DocWithMetadataAndId[] = [];
+    let contextDocs: DocWithMetadataAndId[] = [];
     try {
       addPayloadToTrace({ dialogId, userId });
 
@@ -372,7 +372,7 @@ export class LlmSendMessageService {
       const getDialogFoundDocuments =
         await DialogManager.getDialogFoundDocuments(dialogId);
 
-      let contextDocs: DocWithMetadataAndId[] =
+      contextDocs =
         (await RAGSearcher.getDocsByIds({
           ids:
             getDialogFoundDocuments
@@ -381,11 +381,10 @@ export class LlmSendMessageService {
         })) || [];
 
       for (let index = 0; index < normalizedQuestionArray.length; index++) {
-        docsWithMeta = await this.searchContextDocs({
+        let docsWithMeta = await this.searchContextDocs({
           embeddings,
           normalizedQuestion: normalizedQuestionArray[index],
           categorizedQuestion,
-          docsWithMeta,
         });
 
         // Update prompt log data with context documents
@@ -393,7 +392,7 @@ export class LlmSendMessageService {
       }
 
       Logger.logInfo('[GLOBAL] Отправка запроса к LLM', {
-        contextDocsCount: docsWithMeta.length,
+        contextDocsCount: contextDocs.length,
         historyLength: history.length,
       });
 
@@ -424,7 +423,7 @@ export class LlmSendMessageService {
         .reduce((acc, curr) => ({ ...acc, ...curr }), {});
 
       Logger.logInfo('[GLOBAL] Получен ответ от LLM', {
-        documentCount: docsWithMeta.length,
+        documentCount: contextDocs.length,
         ...documentInfo,
       });
       /**
@@ -447,8 +446,8 @@ export class LlmSendMessageService {
       }
 
       ///
-      // Extract document IDs from the docsWithMeta array
-      const selectedDocumentIds = docsWithMeta.map((doc) => doc.id);
+      // Extract document IDs from the contextDocs array
+      const selectedDocumentIds = contextDocs.map((doc) => doc.id);
 
       await DialogManager.updateMessage({
         messageId,
@@ -480,12 +479,12 @@ export class LlmSendMessageService {
       Logger.logInfo('Ответ пользователю сформирован');
       console.log('\n🧠 Ответ:\n', answer);
       console.log('\n📂 Источники:');
-      docsWithMeta.forEach((d, i) =>
+      contextDocs.forEach((d, i) =>
         console.log(`  ${i + 1}) ${d.source}:${d.fromLine}-${d.toLine}`),
       );
 
       // Prepare source references for the response
-      const sourceReferences = docsWithMeta.map((doc, index) =>
+      const sourceReferences = contextDocs.map((doc, index) =>
         createSourceReference({
           doc,
           index,
@@ -502,21 +501,21 @@ export class LlmSendMessageService {
       };
     } catch (error: any) {
       // Check if it's a rate limit error
-      this.handleAfterProcessMessageError(error, docsWithMeta);
+      this.handleAfterProcessMessageError(error, contextDocs);
       throw error;
     }
   }
 
   private handleAfterProcessMessageError(
     error: any,
-    docsWithMeta: DocWithMetadataAndId[],
+    contextDocs: DocWithMetadataAndId[],
   ) {
     if (
       error.code === 'RATE_LIMIT_EXCEEDED' ||
       error.message?.includes('403')
     ) {
       // Prepare source references for the response
-      const sourceReferences = docsWithMeta.map((doc, index) => ({
+      const sourceReferences = contextDocs.map((doc, index) => ({
         id: doc.id,
         source: doc.source,
         fromLine: doc.fromLine,
@@ -576,13 +575,13 @@ export class LlmSendMessageService {
     embeddings,
     normalizedQuestion,
     categorizedQuestion,
-    docsWithMeta,
   }: {
     embeddings: OpenAIEmbeddings | OllamaEmbeddings;
     normalizedQuestion: string;
     categorizedQuestion: CategorizedQuestion;
-    docsWithMeta: DocWithMetadataAndId[];
   }) {
+    let contextDocs: DocWithMetadataAndId[] = [];
+    addPayloadToTrace({ normalizedQuestion });
     const qEmbedding = await embeddings.embedQuery(normalizedQuestion);
 
     Logger.logInfo('Поиск похожих документов', {
@@ -594,21 +593,23 @@ export class LlmSendMessageService {
      */
     // Use the transformed question and apply category-based filtering if available
     if (categorizedQuestion.sourceFilter) {
-      docsWithMeta = await RAGSearcher.similaritySearch({
+      contextDocs = await RAGSearcher.similaritySearch({
         queryEmbedding: qEmbedding,
         limit: categorizedQuestion.searchLimit,
         filterBySource: categorizedQuestion.sourceFilter.pattern,
         filterBySourceRule: categorizedQuestion.sourceFilter.rule,
+        queryEmbeddingText: normalizedQuestion,
       });
     } else {
-      docsWithMeta = await RAGSearcher.similaritySearch({
+      contextDocs = await RAGSearcher.similaritySearch({
         queryEmbedding: qEmbedding,
         limit: RAG_SEARCH_CONFIG.TELEGRAM_SEARCH_LIMIT,
         filterBySource: RAG_SEARCH_CONFIG.GLOBAL_TELEGRAM_EXCLUDE_PATTERN,
         filterBySourceRule: RAG_SEARCH_CONFIG.GLOBAL_TELEGRAM_EXCLUDE_RULE,
+        queryEmbeddingText: normalizedQuestion,
       });
     }
-    return docsWithMeta;
+    return contextDocs;
   }
 
   private async prepareDialog({

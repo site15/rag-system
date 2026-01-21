@@ -906,8 +906,8 @@ export class LLMChunkProcessor {
               i + 1
             }/${totalChunks} для контекста ${contextIndex}`,
             {
-              chunkLength: totalChunks,
-              chunk,
+              totalChunks: totalChunks,
+              chunkLength: chunk.content.length,
             },
           );
 
@@ -1221,7 +1221,7 @@ export class LLMChunkProcessor {
       context: removeCodeWrappers(chunk || ''),
       question: question,
       customRules: customRules,
-      isFollowUp: history.length > 0,
+      isFollowUp: history?.[0],
     };
 
     if (CATEGORY_PROMPTS[detectedCategory]) {

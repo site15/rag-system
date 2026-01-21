@@ -1,14 +1,20 @@
 // ragSearcher.ts
 import { PrismaService } from '../services/prisma.service';
+import { addPayloadToTrace, Trace } from '../trace/trace.module';
 import { Logger } from './logger';
 import { DocWithMetadataAndId } from './types';
 
 export class RAGSearcher {
+  @Trace()
   public static async getDocsByIds({
     ids,
   }: {
     ids: string[];
   }): Promise<DocWithMetadataAndId[]> {
+    addPayloadToTrace({
+      ids,
+    });
+
     if (!ids.length) {
       return [];
     }
@@ -39,39 +45,36 @@ WHERE id IN (${ids.map((id) => `'${id}'`).join(', ')})`,
     return results;
   }
 
+  @Trace()
   public static async similaritySearch({
     queryEmbedding,
     limit = 5,
     filterBySource,
     filterBySourceRule,
+    queryEmbeddingText,
   }: {
     queryEmbedding: number[];
     limit?: number;
     filterBySource?: string;
     filterBySourceRule?: 'not ilike' | 'ilike';
+    queryEmbeddingText: string;
   }): Promise<DocWithMetadataAndId[]> {
+    addPayloadToTrace({
+      queryEmbeddingText,
+    });
+
+    const queryEmbeddingLength = queryEmbedding.length;
     Logger.logInfo('Выполнение поиска по эмбеддингам', {
       limit,
-      queryEmbeddingLength: queryEmbedding.length,
+      queryEmbeddingLength,
     });
     const r = await PrismaService.instance.$queryRawUnsafe(
       `
-WITH candidates AS (
     SELECT 
     id, 
     content, 
     "graphContent", 
-    metadata, 
-    "embedding384" <-> '[${queryEmbedding.join(',')}]' AS "distance384", 
-    "embedding768" <-> '[${queryEmbedding.join(',')}]' AS "distance768", 
-    "embedding1024" <-> '[${queryEmbedding.join(',')}]' AS "distance1024", 
-    "embedding1536" <-> '[${queryEmbedding.join(',')}]' AS "distance1536", 
-    "embedding3072" <-> '[${queryEmbedding.join(',')}]' AS "distance3072", 
-    "graphEmbedding384" <-> '[${queryEmbedding.join(',')}]' AS "graphDistance384", 
-    "graphEmbedding768" <-> '[${queryEmbedding.join(',')}]' AS "graphDistance768", 
-    "graphEmbedding1024" <-> '[${queryEmbedding.join(',')}]' AS "graphDistance1024", 
-    "graphEmbedding1536" <-> '[${queryEmbedding.join(',')}]' AS "graphDistance1536", 
-    "graphEmbedding3072" <-> '[${queryEmbedding.join(',')}]' AS "graphDistance3072"
+    metadata
     FROM "ChatDocumentEmbedding"
     ${
       filterBySource
@@ -81,46 +84,9 @@ WITH candidates AS (
         : ''
     }
     ORDER BY 
-    "embedding384" <-> '[${queryEmbedding.join(',')}]', 
-    "embedding768" <-> '[${queryEmbedding.join(',')}]', 
-    "embedding1024" <-> '[${queryEmbedding.join(',')}]', 
-    "embedding1536" <-> '[${queryEmbedding.join(',')}]',
-    "embedding3072" <-> '[${queryEmbedding.join(',')}]',
-    "graphEmbedding384" <-> '[${queryEmbedding.join(',')}]', 
-    "graphEmbedding768" <-> '[${queryEmbedding.join(',')}]', 
-    "graphEmbedding1024" <-> '[${queryEmbedding.join(',')}]', 
-    "graphEmbedding1536" <-> '[${queryEmbedding.join(',')}]',
-    "graphEmbedding3072" <-> '[${queryEmbedding.join(',')}]'
-    LIMIT ${limit}* 5
-)
-SELECT 
-id, 
-content,
-"graphContent", 
-metadata, 
-"distance384", 
-"distance768", 
-"distance1024", 
-"distance1536", 
-"distance3072", 
-"graphDistance384", 
-"graphDistance768", 
-"graphDistance1024", 
-"graphDistance1536", 
-"graphDistance3072"
-FROM candidates
-ORDER BY 
-"distance384", 
-"distance768", 
-"distance1024", 
-"distance1536", 
-"distance3072", 
-"graphDistance384", 
-"graphDistance768", 
-"graphDistance1024", 
-"graphDistance1536", 
-"graphDistance3072"
-LIMIT ${limit};
+    "embedding${queryEmbeddingLength}" <-> '[${queryEmbedding.join(',')}]',
+    "graphEmbedding${queryEmbeddingLength}" <-> '[${queryEmbedding.join(',')}]'
+    LIMIT ${limit}
       `,
     );
     const results = (r as unknown as any[]).map((row: any) => {

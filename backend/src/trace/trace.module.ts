@@ -14,6 +14,7 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 import { performance } from 'node:perf_hooks';
 import 'reflect-metadata';
 import { Observable } from 'rxjs';
+import { Logger } from '../llm/logger';
 
 /* ---------------- Constants ---------------- */
 export const TRACE_META_KEY = Symbol('TRACE_META_KEY');
@@ -128,6 +129,9 @@ export async function traceRun<T>(
   const storage = getTraceStorage();
   const store = storage.getStore();
   if (!store) {
+    Logger.logInfo(
+      `Trace storage not found, running without tracing [${name}]`,
+    );
     return fn();
   }
 
