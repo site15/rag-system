@@ -211,10 +211,9 @@ export class QuestionTransformer {
       (detectedCategory === Category.clarification ||
         detectedCategory === Category.followup)
     ) {
-      const lastHistoryItem = await DialogManager.getDialogRawHistory(
-        dialogId,
-        1,
-      );
+      const lastHistoryItem = (
+        await DialogManager.getDialogRawHistory(dialogId, 5)
+      ).filter((r) => r.answer);
       Logger.logInfo('Last history item', lastHistoryItem);
 
       if (lastHistoryItem.length) {
@@ -233,172 +232,122 @@ export class QuestionTransformer {
     // For regular questions, determine if contextual rewriting is needed
     const isSelfContained = this.isQuestionSelfContained(question, history);
 
-    const [
-      transformedQuestion,
-      transformedEmbeddedActionBased,
-      transformedEmbeddedEntityBased,
-    ] = await Promise.all([
-      this.transformWithLLM({
-        question,
-        category: detectedCategory,
-        history,
-        isSelfContained,
-        dialogId,
-        messageId,
-      }),
-      this.transformToEmbeddedWithLLM({
-        type: 'action-based',
-        question,
-        category,
-        dialogId,
-        messageId,
-        prompt: Mustache.render(
-          `Ты — переписчик пользовательских запросов для action-based semantic search.
+    const [transformedQuestion, transformedEmbeddedActionBased] =
+      await Promise.all([
+        this.transformWithLLM({
+          question,
+          category: detectedCategory,
+          history,
+          isSelfContained,
+          dialogId,
+          messageId,
+        }),
+        this.transformToEmbeddedWithLLM({
+          question,
+          category,
+          dialogId,
+          messageId,
+          prompt: Mustache.render(
+            `Ты — переписчик пользовательских запросов для semantic search.
+Ты работаешь в ДВУХ РЕЖИМАХ ОДНОВРЕМЕННО: entity-based и action-based.
 
-Твоя задача — преобразовать ВОПРОС в ПОИСКОВЫЙ ЗАПРОС об ОПЫТЕ ИСПОЛЬЗОВАНИЯ.
+Твоя задача — на основе контекста диалога и входного вопроса:
+1. Извлечь ИМЯ СУЩНОСТИ (entity-based)
+2. Сформировать ПОИСКОВЫЙ ЗАПРОС ОБ ОПЫТЕ ИСПОЛЬЗОВАНИЯ (action-based)
 
-ЖЁСТКИЕ ПРАВИЛА:
-1. НИКОГДА не отвечай на вопрос пользователя
-2. НИКОГДА не добавляй годы, даты, числа, места, временные периоды
-3. Используй ТОЛЬКО разрешённые слова-действия: "использование", "применение", "опыт", "пример", "реализация"
-4. Результат — "Действие + Сущность"
+Ты НИКОГДА не отвечаешь на вопрос пользователя.
+Ты ТОЛЬКО готовишь поисковые якоря.
 
-КРИТИЧЕСКИ ВАЖНО:
-- Ты не отвечаешь на вопрос "в каком году?", а ищешь документы про ОПЫТ ИСПОЛЬЗОВАНИЯ
-- Вопрос "когда?" → ищем документы про "использование [технология]"
-- Вопрос "где?" → ищем документы про "применение [технология]"
-- Вопрос "какой?" → ищем документы про "опыт [технология]"
+────────────────────
+ENTITY-BASED ПРАВИЛА:
+────────────────────
+1. Результат — ТОЛЬКО имена сущностей (существительные, термины, технологии)
+2. НИКОГДА не добавляй:
+   - годы
+   - даты
+   - числа
+   - версии
+   - места
+   - временные периоды
+3. Не используй:
+   - глаголы
+   - предлоги
+   - местоимения
+4. Для вопросов:
+   - "когда?"
+   - "в каком году?"
+   - "где?"
+   - "какой?"
+   результат ВСЕГДА — ТОЛЬКО имя сущности
 
-СТРОГИЕ ПРИМЕРЫ ДЛЯ ВОПРОСА "В КАКОМ ГОДУ?":
-Контекст: "Использовал флюрби"
+Пример:
+Контекст: "Использовал NestJS"
 Вопрос: "в каком году?"
-Результат: "использование флюрби" ✅
+entity-based → "nestjs"
 
-Контекст: "Работал с зорбиком"
-Вопрос: "когда?"
-Результат: "опыт зорбика" ✅
+────────────────────
+ACTION-BASED ПРАВИЛА:
+────────────────────
+1. Результат — "ДЕЙСТВИЕ + СУЩНОСТЬ"
+2. Разрешённые действия (ТОЛЬКО ОНИ):
+   - использование
+   - применение
+   - опыт
+   - пример
+   - реализация
+3. НИКОГДА не добавляй:
+   - годы
+   - даты
+   - числа
+   - места
+   - временные периоды
+4. Не отвечай на вопрос — ищи ДОКУМЕНТЫ ОБ ОПЫТЕ
 
-Контекст: "Применял кваксу"
-Вопрос: "где применял?"
-Результат: "применение кваксы" ✅
+Правила сопоставления вопросов:
+- "когда?" / "в каком году?" → "использование [сущность]" или "опыт [сущность]"
+- "где?" → "применение [сущность]"
+- "какой?" → "опыт [сущность]"
 
-ЗАПРЕЩЕНО ДЛЯ ВОПРОСА "В КАКОМ ГОДУ?":
-- "использование флюрби в 2005" ❌ (добавлен год)
-- "опыт зорбика в 2018" ❌ (добавлен год)
-- "применение кваксы в продакшене" ❌ (добавлено место)
-- "флюрби использовал в 2005" ❌ (это утверждение, не поисковый запрос)
-
-КРИТИЧЕСКОЕ ПРАВИЛО ПОВТОРЕНИЕ:
-- Ты не ищешь ОТВЕТ на вопрос
-- Ты ищешь документы, где описывается ОПЫТ ИСПОЛЬЗОВАНИЯ технологии
-- "2005" — это ОТВЕТ, а не поисковый запрос
-- "использование флюрби" — это поисковый запрос для нахождения документов об опыте
-
-Формат результата:
-- одна строка
-- только одно действие + одна сущность
-- строчными буквами
-- без точек, запятых, пояснений
-
-Контекст диалога:
-\`\`\`
-{{history}}
-\`\`\` 
-
-Вопрос:
-{{question}}
-
-Результат:`,
-          {
-            history: removeCodeWrappers((history || []).join('\n')),
-            question: question,
-          },
-        ),
-      }),
-      this.transformToEmbeddedWithLLM({
-        type: 'entity-based',
-        question,
-        category,
-        dialogId,
-        messageId,
-        prompt: Mustache.render(
-          `Ты — переписчик пользовательских запросов для entity-based semantic search.
-
-Твоя ЕДИНСТВЕННАЯ задача — извлечь ИМЕНА СУЩНОСТЕЙ из контекста диалога для поиска.
-
-ЖЁСТКИЕ ПРАВИЛА:
-1. НИКОГДА не отвечай на вопрос пользователя
-2. НИКОГДА не добавляй годы, даты, числа, версии, места, время
-3. Для вопросов "когда?", "в каком году?", "где?", "какой?" результат ДОЛЖЕН быть ТОЛЬКО имя сущности
-4. Результат — только существительные/имена
-
-КРИТИЧЕСКИ ВАЖНО:
-- Ты не ищешь ответ, ты ищешь ПО ЧЕМУ ИСКАТЬ
-- "2005" — это НЕ поисковый якорь, это попытка ответить
-- "флюрби" — это поисковый якорь, по которому можно искать
-
-СТРОГИЕ ПРИМЕРЫ ДЛЯ ВОПРОСА "В КАКОМ ГОДУ?":
-Контекст: "Использовал флюрби"
+Пример:
+Контекст: "Использовал NestJS"
 Вопрос: "в каком году?"
-Результат: "флюрби" ✅
+action-based → "опыт nestjs"
 
-Контекст: "Работал с зорбиком"
-Вопрос: "где?"
-Результат: "зорбик" ✅
-
-Контекст: "Знаю кваксу"
-Вопрос: "какую версию?"
-Результат: "квакса" ✅
-
-Контекст: "Разрабатывал на мурзике"
-Вопрос: "когда?"
-Результат: "мурзик" ✅
-
-ЗАПРЕЩЕНО ДЛЯ ВОПРОСА "В КАКОМ ГОДУ?":
-- "2005" ❌ (это не сущность)
-- "флюрби 2005" ❌ (добавлен год)
-- "2005 года" ❌ (это не сущность)
-- "Использовал в 2005" ❌ (это не сущность)
-
-ДОПОЛНИТЕЛЬНЫЕ ПРАВИЛА:
-1. Не используй глаголы
-2. Не используй предлоги
-3. Не используй местоимения
-4. Только имена, термины, технологии
-
-КРАТКОЕ НАПОМИНАНИЕ:
-- Вопрос: "в каком году?" → ответ: "ИмяСущности"
-- Вопрос: "когда?" → ответ: "ИмяСущности"
-- Вопрос: "где?" → ответ: "ИмяСущности"
-- Вопрос: "какой?" → ответ: "ИмяСущности"
+────────────────────
+ФОРМАТ ВЫХОДА (СТРОГО):
+────────────────────
+- Всегда возвращай JSON
+- Всегда два поля
+- Строчными буквами
+- Без пояснений
+- Без лишних символов
 
 Формат:
-- одна строка
-- только имена/термины
-- можно перечисление через запятую
-- без точек, без пояснений
+{
+  "actionBased": "<сущность>",
+  "entityBased": "<действие + сущность>"
+}
 
+────────────────────
 Контекст диалога:
-\`\`\`
 {{history}}
-\`\`\` 
 
-Входной вопрос:
+Вопрос пользователя:
 {{question}}
 
 Результат:`,
-          {
-            history: removeCodeWrappers((history || []).join('\n')),
-            question: question,
-          },
-        ),
-      }),
-    ]);
+            {
+              history: removeCodeWrappers((history || []).join('\n')),
+              question: question,
+            },
+          ),
+        }),
+      ]);
 
     Logger.logInfo('Question transformation completed', {
       original: question,
       transformedQuestion,
-      transformedEmbedded: transformedEmbeddedActionBased.question,
+      transformedEmbedded: transformedEmbeddedActionBased.result,
       category,
       detectedCategory,
       sourceFilter,
@@ -411,13 +360,12 @@ export class QuestionTransformer {
       logIds: [
         transformedQuestion.logId,
         transformedEmbeddedActionBased.logId,
-        transformedEmbeddedEntityBased.logId,
         detectCategoryResult.logId,
       ],
-      transformedEmbedded: Mustache.render(`{{actionBased}}, {{entityBased}}`, {
-        actionBased: transformedEmbeddedActionBased.question,
-        entityBased: transformedEmbeddedEntityBased.question,
-      }),
+      transformedEmbedded: Mustache.render(
+        `{{actionBased}}, {{entityBased}}`,
+        transformedEmbeddedActionBased.result,
+      ),
       category,
       sourceFilter,
       searchLimit:
@@ -539,14 +487,12 @@ export class QuestionTransformer {
    */
   @Trace()
   private static async transformToEmbeddedWithLLM({
-    type,
     question,
     category,
     dialogId,
     messageId,
     prompt,
   }: {
-    type: string;
     dialogId: string | undefined;
     messageId: string | undefined;
     question: string;
@@ -554,10 +500,6 @@ export class QuestionTransformer {
     prompt: string;
   }) {
     try {
-      addPayloadToTrace({
-        type,
-      });
-
       const { content: transformed, logId } = await LLMLogger.callWithLogging({
         prompt,
         metadata: {
@@ -579,10 +521,31 @@ export class QuestionTransformer {
           original: question,
           transformed,
         });
-        return { question, logId };
+        return {
+          result: {
+            actionBased: question,
+            entityBased: question,
+          },
+          logId,
+        };
       }
 
-      return { question: transformed, logId };
+      try {
+        return {
+          result: JSON.parse(
+            transformed.replace('```json', '').replace('```', ''),
+          ),
+          logId,
+        };
+      } catch (error) {
+        return {
+          result: {
+            actionBased: question,
+            entityBased: question,
+          },
+          logId,
+        };
+      }
     } catch (error) {
       Logger.logError(
         'Error transforming question with LLM',
@@ -595,7 +558,13 @@ export class QuestionTransformer {
       ) {
         throw error;
       }
-      return { question, logId: undefined };
+      return {
+        result: {
+          actionBased: question,
+          entityBased: question,
+        },
+        logId: undefined,
+      };
     }
   }
 

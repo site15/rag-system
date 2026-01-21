@@ -1051,10 +1051,9 @@ export class LLMChunkProcessor {
       detectedCategory === Category.clarification ||
       detectedCategory === Category.followup
     ) {
-      const lastHistoryItem = await DialogManager.getDialogRawHistory(
-        dialogId,
-        1,
-      );
+      const lastHistoryItem = (
+        await DialogManager.getDialogRawHistory(dialogId, 5)
+      ).filter((r) => r.answer);
       Logger.logInfo('Last history item', lastHistoryItem);
 
       if (lastHistoryItem.length) {
