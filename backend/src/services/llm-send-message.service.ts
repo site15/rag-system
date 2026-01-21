@@ -1,11 +1,8 @@
 // messageController.ts - Main controller for handling chat message requests
 // Implements retry logic, provider failover, and comprehensive error handling
 
-import { OllamaEmbeddings } from '@langchain/community/embeddings/ollama';
-import { OpenAIEmbeddings } from '@langchain/openai';
 import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
 import { isUUID } from 'class-validator';
-import { ConfigManager } from '../llm/config';
 import {
   createDocumentInfo,
   createSourceReference,
@@ -16,7 +13,6 @@ import { DialogManager } from '../llm/dialogManager';
 import { DialogSummary } from '../llm/dialogSummary';
 import { EmbeddingsFactory } from '../llm/embeddingsFactory';
 import { LLMChunkProcessor } from '../llm/llmChunkProcessor';
-import { LLMFactory } from '../llm/llmFactory';
 import { Logger } from '../llm/logger';
 import { RAGSearcher } from '../llm/ragSearcher';
 import { DefaultProvidersInitializer } from '../llm/services/defaultProvidersInitializer';
@@ -29,11 +25,7 @@ import {
 } from '../llm/services/questionTransformer';
 import { SummarizationService } from '../llm/services/summarizationService';
 import { TextHelpers } from '../llm/textHelpers';
-import {
-  ChatConfig,
-  DocWithMetadataAndId,
-  EmbeddingsConfig,
-} from '../llm/types';
+import { DocWithMetadataAndId } from '../llm/types';
 import { addPayloadToTrace, Trace } from '../trace/trace.module';
 
 type ProcessMessageResponse = {
@@ -85,65 +77,26 @@ export class LlmSendMessageService {
     dialogId,
     userId,
     maxRetries,
-    provider,
-    model,
-    temperature,
-    chunkSize,
   }: {
     messageId: string;
     dialogId: string;
     userId: string;
     maxRetries: number;
-    provider?: string;
-    model?: string;
-    temperature?: number;
-    chunkSize?: number;
   }): Promise<ProcessMessageResponse> {
     const { history } = await DialogManager.getDialogHistory({
       dialogId,
     });
 
-    let { currentProvider, currentModel } = await this.prepareProviderAndModel({
-      provider,
-      model,
-    });
+    let llmConfig = await DefaultProvidersInitializer.getActiveProvider();
 
     let currentAttempt = 0;
 
     while (currentAttempt < maxRetries) {
-      const appConfig = {
-        ...ConfigManager.getAppConfig(),
-        ...(provider ? { chatProvider: provider } : {}),
-      };
-
-      const modelConfig = {
-        providers: {
-          chat: {
-            ...ConfigManager.getChatConfig(appConfig.chatProvider),
-            ...(model ? { model } : {}),
-            ...(temperature ? { temperature } : {}),
-            ...(chunkSize ? { chunkSize } : {}),
-          },
-          embeddings: ConfigManager.getEmbeddingsConfig(
-            appConfig.embeddingsProvider,
-          ),
-        },
-      };
-
-      // Initialize models with configuration
-      if (!modelConfig.providers.embeddings || !modelConfig.providers.chat) {
-        const errorMsg =
-          'Provider configurations are required in messageController';
-        Logger.logError(errorMsg);
-        throw new Error(errorMsg);
-      }
-
       try {
         Logger.logInfo(
           `Processing message attempt ${currentAttempt + 1}/${maxRetries}`,
           {
-            provider: currentProvider,
-            model: currentModel,
+            llmConfig: llmConfig,
             attempt: currentAttempt + 1,
           },
         );
@@ -151,22 +104,19 @@ export class LlmSendMessageService {
         addPayloadToTrace({
           currentAttempt,
           maxRetries,
-          currentProvider,
-          currentModel,
+          llmConfig: llmConfig,
         });
 
         return await this.processMessage({
           userId,
           dialogId,
           messageId,
-          embeddingsConfig: modelConfig.providers.embeddings,
-          llmConfig: modelConfig.providers.chat,
           history,
         });
       } catch (error: any) {
         currentAttempt++;
 
-        if (error.message.includes('403')) {
+        if (error.message.includes('429')) {
           throw error;
         }
 
@@ -174,8 +124,7 @@ export class LlmSendMessageService {
           `Message processing failed on attempt ${currentAttempt}`,
           {
             error: error.message,
-            provider: currentProvider,
-            model: currentModel,
+            llmConfig: llmConfig,
             attempt: currentAttempt,
           },
         );
@@ -184,8 +133,6 @@ export class LlmSendMessageService {
           Logger.logError('Max retry attempts reached, returning error', {
             maxRetries: maxRetries,
             currentAttempt,
-            originalProvider: provider,
-            originalModel: model,
           });
           throw new HttpException(
             {
@@ -197,97 +144,11 @@ export class LlmSendMessageService {
           );
         }
 
-        const nextProvider = await this.switchToNextProvider(provider, model);
-
-        if (nextProvider) {
-          currentProvider = nextProvider.provider;
-          currentModel = nextProvider.model;
-
-          await new Promise((resolve) =>
-            setTimeout(resolve, 1000 * currentAttempt),
-          );
-
-          continue;
-        } else {
-          Logger.logError('No active providers available for retry', {
-            currentAttempt,
-            maxRetries: maxRetries,
-          });
-          throw new HttpException(
-            {
-              error: 'No active providers available',
-              details: 'All configured providers are currently unavailable',
-            },
-            500,
-          );
-        }
+        llmConfig = await DefaultProvidersInitializer.getNextActiveProvider();
       }
     }
 
     throw new HttpException({ error: 'Unexpected error in retry logic' }, 500);
-  }
-
-  async switchToNextProvider(
-    currentProvider: string | undefined,
-    currentModel: string | undefined,
-  ) {
-    const nextProvider =
-      await DefaultProvidersInitializer.getNextActiveProvider(
-        currentProvider || '',
-        currentModel || '',
-      );
-
-    if (nextProvider) {
-      Logger.logInfo('Switching to next active provider', {
-        fromProvider: currentProvider,
-        fromModel: currentModel,
-        toProvider: nextProvider.provider,
-        toModel: nextProvider.model,
-      });
-
-      currentProvider = nextProvider.provider;
-      currentModel = nextProvider.model;
-
-      // Update request body for the next attempt
-      return {
-        provider: nextProvider.provider,
-        model: nextProvider.model,
-        temperature: nextProvider.temperature,
-        chunkSize:
-          nextProvider.chunkSize !== null ? nextProvider.chunkSize : undefined,
-      };
-    }
-    return null;
-  }
-
-  private async prepareProviderAndModel(options: {
-    provider?: string;
-    model?: string;
-  }) {
-    let currentProvider = options.provider;
-    let currentModel = options.model;
-
-    const activeProviders =
-      await DefaultProvidersInitializer.getSortedActiveProviders();
-    if (
-      !activeProviders.find(
-        (a) => a.provider === currentProvider && a.model === currentModel,
-      )
-    ) {
-      const nextProvider =
-        await DefaultProvidersInitializer.getNextActiveProvider(
-          currentProvider || '',
-          currentModel || '',
-        );
-      if (nextProvider?.provider && nextProvider?.model) {
-        currentProvider = nextProvider?.provider;
-        currentModel = nextProvider?.model;
-      }
-    }
-    return {
-      currentProvider,
-      currentModel,
-    };
   }
 
   @Trace()
@@ -295,15 +156,11 @@ export class LlmSendMessageService {
     dialogId,
     messageId,
     userId,
-    embeddingsConfig,
-    llmConfig,
     history,
   }: {
     dialogId: string;
     messageId: string;
     userId: string;
-    embeddingsConfig: EmbeddingsConfig;
-    llmConfig: ChatConfig;
     history: string[];
   }): Promise<{
     messageId: string;
@@ -323,13 +180,7 @@ export class LlmSendMessageService {
 
     let contextDocs: DocWithMetadataAndId[] = [];
     try {
-      addPayloadToTrace({ dialogId, userId });
-
-      const embeddings = EmbeddingsFactory.createEmbeddings(embeddingsConfig);
-
-      const llm = LLMFactory.createLLM(llmConfig);
-
-      addPayloadToTrace({ history });
+      addPayloadToTrace({ dialogId, userId, history });
 
       Logger.logInfo('Создание эмбеддинга для вопроса', {
         messageLength: message.length,
@@ -341,9 +192,7 @@ export class LlmSendMessageService {
         dialogId,
         messageId: undefined,
         question: message,
-        llm,
         history,
-        provider: llmConfig.provider,
       });
       const processedQuestion = categorizedQuestion.transformedQuestion;
 
@@ -382,7 +231,6 @@ export class LlmSendMessageService {
 
       for (let index = 0; index < normalizedQuestionArray.length; index++) {
         let docsWithMeta = await this.searchContextDocs({
-          embeddings,
           normalizedQuestion: normalizedQuestionArray[index],
           categorizedQuestion,
         });
@@ -397,14 +245,11 @@ export class LlmSendMessageService {
       });
 
       const llmResult = await LLMChunkProcessor.askLLMChunked({
-        llm,
         dialogId,
         history,
         contextDocs,
         question: processedQuestion,
         category: categorizedQuestion.category,
-        provider: llmConfig.provider,
-        chatChunkSize: llmConfig.chunkSize,
         detectedCategory: categorizedQuestion.detectedCategory,
       });
 
@@ -413,7 +258,6 @@ export class LlmSendMessageService {
         answer !== null && answer !== undefined && answer.trim() !== '';
 
       addPayloadToTrace({
-        answer,
         isSuccess,
       });
 
@@ -436,9 +280,6 @@ export class LlmSendMessageService {
           category: Category.none,
           chunk: history.join('\n') || '', // Use dialog summary as chunk, or empty if none
           question: message,
-          llm,
-          provider: llmConfig.provider,
-          detectedCategory: categorizedQuestion.detectedCategory,
         });
 
         answer = noAnswerResponse.foundText;
@@ -471,10 +312,7 @@ export class LlmSendMessageService {
         messageId,
       ).catch((err) => Logger.logError(err));
 
-      await this.summarizeIfNeeded(dialogId, messageId, llm, {
-        chatProvider: llmConfig.provider,
-        embeddingsProvider: embeddingsConfig.provider,
-      });
+      await this.summarizeIfNeeded(dialogId, messageId);
 
       Logger.logInfo('Ответ пользователю сформирован');
       console.log('\n🧠 Ответ:\n', answer);
@@ -512,7 +350,7 @@ export class LlmSendMessageService {
   ) {
     if (
       error.code === 'RATE_LIMIT_EXCEEDED' ||
-      error.message?.includes('403')
+      error.message?.includes('429')
     ) {
       // Prepare source references for the response
       const sourceReferences = contextDocs.map((doc, index) => ({
@@ -550,20 +388,13 @@ export class LlmSendMessageService {
     }
   }
 
-  private async summarizeIfNeeded(
-    dialogId: string,
-    messageId: string,
-    llm: any,
-    appConfig: { chatProvider: string; embeddingsProvider: string },
-  ) {
+  private async summarizeIfNeeded(dialogId: string, messageId: string) {
     if (await DialogSummary.shouldSummarize(dialogId)) {
       Logger.logInfo('Диалог требует суммаризации', { dialogId });
       // Run summarization in background to avoid blocking user request
       SummarizationService.queueSummarizationWithoutBlocking({
         messageId,
         dialogId,
-        llm,
-        provider: appConfig.chatProvider,
       });
     } else {
       Logger.logInfo('Суммаризация не требуется', { dialogId });
@@ -572,17 +403,15 @@ export class LlmSendMessageService {
 
   @Trace()
   private async searchContextDocs({
-    embeddings,
     normalizedQuestion,
     categorizedQuestion,
   }: {
-    embeddings: OpenAIEmbeddings | OllamaEmbeddings;
     normalizedQuestion: string;
     categorizedQuestion: CategorizedQuestion;
   }) {
     let contextDocs: DocWithMetadataAndId[] = [];
     addPayloadToTrace({ normalizedQuestion });
-    const qEmbedding = await embeddings.embedQuery(normalizedQuestion);
+    const qEmbedding = await EmbeddingsFactory.embedQuery(normalizedQuestion);
 
     Logger.logInfo('Поиск похожих документов', {
       embeddingLength: qEmbedding.length,

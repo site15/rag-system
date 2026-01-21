@@ -36,6 +36,7 @@ export const ChatLlmModelList = () => (
       <DataTable.NumberCol
         source={Prisma.ChatLlmModelScalarFieldEnum.chunkSize}
       />
+      <DataTable.Col source={Prisma.ChatLlmModelScalarFieldEnum.baseUrl} />
       <DataTable.Col source={Prisma.ChatLlmModelScalarFieldEnum.startTime}>
         <DateField
           source={Prisma.ChatLlmModelScalarFieldEnum.startTime}

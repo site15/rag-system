@@ -13,6 +13,13 @@ import { Logger } from './logger';
 import { EmbeddingsConfig } from './types';
 
 export class EmbeddingsFactory {
+  public static async embedQuery(response: string) {
+    const embeddingModel = EmbeddingsFactory.createEmbeddings(
+      ConfigManager.getEmbeddingsConfig(),
+    );
+    return await embeddingModel.embedQuery(response);
+  }
+
   public static createEmbeddings(embeddingsConfig: EmbeddingsConfig) {
     // Get provider-specific configuration
     const config = embeddingsConfig;

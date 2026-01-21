@@ -1477,6 +1477,7 @@ export const ChatLlmModelScalarFieldEnum = {
   model: "model",
   temperature: "temperature",
   chunkSize: "chunkSize",
+  baseUrl: "baseUrl",
   startTime: "startTime",
   endTime: "endTime",
   status: "status",

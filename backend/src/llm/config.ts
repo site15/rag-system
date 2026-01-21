@@ -7,39 +7,56 @@ import { AppConfig } from './types';
  * Configuration manager for provider-specific environment variables
  */
 export class ConfigManager {
-  public static getChatConfig(provider: string) {
+  /**
+   * Get general application configuration
+   */
+  public static getAppConfig(): AppConfig {
+    if (!process.env.CHAT_PROVIDER) {
+      throw new Error('CHAT_PROVIDER environment variable is missing');
+    }
+    if (!process.env.EMBEDDINGS_PROVIDER) {
+      throw new Error('EMBEDDINGS_PROVIDER environment variable is missing');
+    }
+    return {
+      chatProvider: process.env.CHAT_PROVIDER,
+      embeddingsProvider: process.env.EMBEDDINGS_PROVIDER,
+    };
+  }
+  /**
+   * Get proxy configuration
+   */
+  public static getProxyConfig() {
+    return {
+      httpsProxy: process.env.GLOBAL_HTTPS_PROXY,
+      httpProxy: process.env.GLOBAL_HTTP_PROXY,
+    };
+  }
+  /**
+   * Get default chat configuration for provider
+   */
+  public static getChatConfig(provider?: string) {
+    provider = provider || ConfigManager.getAppConfig().chatProvider;
     const providerUpper = provider.toUpperCase();
-
     return {
       provider,
-      model:
-        process.env[`${providerUpper}_CHAT_MODEL`] ||
-        this.getDefaultChatModel(provider),
-      temperature: parseFloat(
-        process.env[`${providerUpper}_CHAT_TEMPERATURE`] ||
-          this.getDefaultTemperature(provider),
-      ),
-      baseUrl:
-        process.env[`${providerUpper}_CHAT_BASE_URL`] ||
-        this.getDefaultBaseUrl(provider),
+      model: this.getDefaultChatModel(provider),
+      temperature: parseFloat(this.getDefaultTemperature(provider)),
+      baseUrl: this.getDefaultBaseUrl(provider),
       apiKey: process.env[`${providerUpper}_CHAT_API_KEY`],
-      chunkSize: parseInt(
-        process.env[`${providerUpper}_CHAT_CHUNK_SIZE`] || '2000',
-      ),
+      chunkSize: 8000,
     };
   }
 
-  public static getEmbeddingsConfig(provider: string) {
+  /**
+   * Get default embeddings configuration for provider
+   */
+  public static getEmbeddingsConfig(provider?: string) {
+    provider = provider || ConfigManager.getAppConfig().embeddingsProvider;
     const providerUpper = provider.toUpperCase();
-
     return {
-      provider: process.env[`${providerUpper}_EMBEDDINGS_PROVIDER`] || provider,
-      model:
-        process.env[`${providerUpper}_EMBEDDINGS_MODEL`] ||
-        this.getDefaultEmbeddingsModel(provider),
-      baseUrl:
-        process.env[`${providerUpper}_EMBEDDINGS_BASE_URL`] ||
-        this.getDefaultEmbeddingsBaseUrl(provider),
+      provider: provider,
+      model: this.getDefaultEmbeddingsModel(provider),
+      baseUrl: this.getDefaultBaseUrl(provider),
       apiKey: process.env[`${providerUpper}_EMBEDDINGS_API_KEY`],
     };
   }
@@ -128,68 +145,5 @@ export class ConfigManager {
       default:
         return 'nomic-embed-text';
     }
-  }
-
-  /**
-   * Get default embeddings base URL for provider
-   */
-  private static getDefaultEmbeddingsBaseUrl(provider: string): string {
-    switch (provider) {
-      case PROVIDER_NAMES.OPENAI:
-        return 'https://api.openai.com/v1';
-      case PROVIDER_NAMES.A4F:
-        return 'https://api.a4f.co/v1';
-      case PROVIDER_NAMES.Z_AI:
-        return 'https://api.z.ai/api/paas/v4';
-      case PROVIDER_NAMES.DEEPSEEK:
-        return 'https://api.deepseek.com';
-      case PROVIDER_NAMES.OLLAMA:
-      default:
-        return 'http://localhost:21434';
-    }
-  }
-
-  /**
-   * Get general application configuration
-   */
-  public static getAppConfig(): AppConfig {
-    if (!process.env.CHAT_PROVIDER) {
-      throw new Error('CHAT_PROVIDER environment variable is missing');
-    }
-    if (!process.env.EMBEDDINGS_PROVIDER) {
-      throw new Error('EMBEDDINGS_PROVIDER environment variable is missing');
-    }
-    const config = {
-      chatProvider: process.env.CHAT_PROVIDER,
-      embeddingsProvider: process.env.EMBEDDINGS_PROVIDER,
-      processDocuments: process.env.PROCESS_DOCUMENTS === 'true',
-    };
-    return config;
-  }
-  /**
-   * Get proxy configuration
-   */
-  public static getProxyConfig() {
-    return {
-      httpsProxy: process.env.GLOBAL_HTTPS_PROXY,
-      httpProxy: process.env.GLOBAL_HTTP_PROXY,
-    };
-  }
-
-  /**
-   * Get all available provider configurations for documentation
-   */
-  public static getProviderConfigs() {
-    const providers = Object.values(PROVIDER_NAMES);
-    const configs: Record<string, any> = {};
-
-    for (const provider of providers) {
-      configs[provider] = {
-        chat: this.getChatConfig(provider),
-        embeddings: this.getEmbeddingsConfig(provider),
-      };
-    }
-
-    return configs;
   }
 }

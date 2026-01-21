@@ -1,45 +1,28 @@
 // ragApplication.ts
-import { OllamaEmbeddings } from '@langchain/community/embeddings/ollama';
-import { OpenAIEmbeddings } from '@langchain/openai';
 import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
 import { TextLoader } from 'langchain/document_loaders/fs/text';
 import Mustache from 'mustache';
 import { resolve } from 'path';
 import { PrismaService } from '../services/prisma.service';
-import { ConfigManager } from './config';
 import { EmbeddingsDB } from './embeddingsDB';
 import { EmbeddingsFactory } from './embeddingsFactory';
 import { LLMFactory } from './llmFactory';
-import { LLMLogger } from './llmLogger';
 import { Logger } from './logger';
 import { RAGSearcher } from './ragSearcher';
 import { DefaultProvidersInitializer } from './services/defaultProvidersInitializer';
 import { TextHelpers } from './textHelpers';
-import {
-  AppConfig,
-  ChatConfig,
-  EmbeddingsConfig,
-  EmbedingMetadata,
-} from './types';
+import { EmbedingMetadata } from './types';
 
 export class RAGApplication {
-  public static async start(fullConfig: {
-    app: AppConfig;
-    providers: {
-      embeddings: EmbeddingsConfig;
-    };
-  }) {
+  public static async start() {
     Logger.logInfo('Запуск ingestion и RAG');
 
     try {
       await DefaultProvidersInitializer.initializeDefaultProviders();
 
-      // Initialize models with configuration
-      const models = await RAGApplication.initializeModels(fullConfig);
-
-      if (fullConfig.app.processDocuments) {
+      if (process.env.PROCESS_DOCUMENTS === 'true') {
         // Load and process documents
-        await RAGApplication.processDocuments(models.embeddings);
+        await RAGApplication.processDocuments();
       }
     } catch (e) {
       Logger.logError(
@@ -59,34 +42,12 @@ export class RAGApplication {
     await RAGApplication.cleanup();
   }
 
-  private static async initializeModels(fullConfig: {
-    app: AppConfig;
-    providers: {
-      chat?: ChatConfig;
-      embeddings: EmbeddingsConfig;
-    };
-  }) {
-    Logger.logInfo('Инициализация моделей', fullConfig);
-    const embeddings = EmbeddingsFactory.createEmbeddings(
-      fullConfig.providers.embeddings,
-    );
-    if (fullConfig.providers.chat) {
-      // Use the new function that supports multiple providers
-      const llm = LLMFactory.createLLM(fullConfig.providers.chat); // Use the new function that supports multiple providers
-      Logger.logInfo('Модели инициализированы');
-      return { embeddings, llm };
-    }
-    return { embeddings, llm: undefined };
-  }
-
-  private static async processDocuments(
-    embeddings: OpenAIEmbeddings | OllamaEmbeddings,
-  ) {
+  private static async processDocuments() {
     // Load documents
     const docs = await RAGApplication.loadDocuments();
 
     // Process and embed documents
-    await RAGApplication.embedDocuments({ docs, embeddings });
+    await RAGApplication.embedDocuments({ docs });
 
     Logger.logInfo('Запуск заполнения graphContent для документов');
 
@@ -108,26 +69,9 @@ export class RAGApplication {
     return docs;
   }
 
-  private static async embedDocuments({
-    docs,
-    embeddings,
-  }: {
-    docs: any[];
-    embeddings: OpenAIEmbeddings | OllamaEmbeddings;
-  }) {
+  private static async embedDocuments({ docs }: { docs: any[] }) {
     // === Вставка эмбеддингов ===
     Logger.logInfo('Начало процесса вставки эмбеддингов');
-    // const splitterTelegram = new RecursiveCharacterTextSplitter({
-    //   chunkSize: 2000,
-    //   chunkOverlap: 0,
-    //   separators: ['\n--\n'],
-    // });
-    //
-    // const splitterGlobal = new RecursiveCharacterTextSplitter({
-    //   chunkSize: 1500,
-    //   chunkOverlap: 250,
-    //   separators: ['\n--\n', '\n\n', '\n', ' ', ''],
-    // });
 
     let totalChunks = 0;
     for (const doc of docs) {
@@ -192,7 +136,7 @@ export class RAGApplication {
               normalizedLength: normalized.length,
             });
 
-            const vector = await embeddings.embedQuery(normalized);
+            const vector = await EmbeddingsFactory.embedQuery(normalized);
             const vectorValue = `[${vector.join(',')}]`;
 
             if (vector.length === 384) {
@@ -241,7 +185,7 @@ VALUES (${trimmedContent}, ${vectorValue}::vector, ${metadata || '{}'}, ${hash})
             if (retryCount <= maxRetries) {
               // Log retry attempt
               Logger.logWarn(
-                'Ошибка при создании эмбеддинга для чанка, повторная попытка через 2 секунды',
+                'Ошибка при создании эмбеддинга для чанка, повторная попытка через 0.5 секунды',
                 {
                   chunkNumber: totalChunks,
                   retryAttempt: retryCount,
@@ -250,7 +194,7 @@ VALUES (${trimmedContent}, ${vectorValue}::vector, ${metadata || '{}'}, ${hash})
               );
 
               // Wait 2 seconds before retry
-              await new Promise((resolve) => setTimeout(resolve, 2000));
+              await new Promise((resolve) => setTimeout(resolve, 500));
             } else {
               // Max retries exceeded - log final error and move to next chunk
               Logger.logError(
@@ -272,30 +216,12 @@ VALUES (${trimmedContent}, ${vectorValue}::vector, ${metadata || '{}'}, ${hash})
     Logger.logInfo('Процесс вставки эмбеддингов завершен', { totalChunks });
   }
 
-  public static async fillGraphEmbedDocuments(
-    embeddings?: OpenAIEmbeddings | OllamaEmbeddings,
-  ) {
+  public static async fillGraphEmbedDocuments() {
     Logger.logInfo(
       'Начало заполнения graphContent и graphEmbeddings для документов',
     );
 
     try {
-      // Get chat configuration for LLM
-      const appConfig = ConfigManager.getAppConfig();
-      const chatConfig = ConfigManager.getChatConfig(appConfig.chatProvider);
-      const llm = LLMFactory.createLLM(chatConfig);
-
-      // If embeddings not provided, initialize them
-      let embeddingModel: OpenAIEmbeddings | OllamaEmbeddings;
-      if (embeddings) {
-        embeddingModel = embeddings;
-      } else {
-        const embeddingsConfig = ConfigManager.getEmbeddingsConfig(
-          appConfig.embeddingsProvider,
-        );
-        embeddingModel = EmbeddingsFactory.createEmbeddings(embeddingsConfig);
-      }
-
       // Find all documents without graphContent
       const documents =
         await PrismaService.instance.chatDocumentEmbedding.findMany({
@@ -424,8 +350,7 @@ TEXT TO ANALYZE: {{content}}`,
           );
 
           // Call LLM
-          const result = await llm.invoke(prompt);
-          let response = LLMLogger.getResponseString(result);
+          let response = await LLMFactory.invoke(prompt);
 
           // Validate JSON structure
           try {
@@ -438,7 +363,7 @@ TEXT TO ANALYZE: {{content}}`,
           }
 
           // Generate embedding for the graph content (JSON string)
-          const graphVector = await embeddingModel.embedQuery(response);
+          const graphVector = await EmbeddingsFactory.embedQuery(response);
           const graphVectorValue = `[${graphVector.join(',')}]`;
 
           // Use raw SQL for vector operations since Prisma doesn't support vectors natively

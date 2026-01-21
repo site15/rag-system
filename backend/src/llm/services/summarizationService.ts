@@ -1,10 +1,10 @@
-import { Worker } from 'worker_threads';
-import { ChatOllama } from '@langchain/community/chat_models/ollama';
-import { ChatOpenAI } from '@langchain/openai';
 import { ChatAnthropic } from '@langchain/anthropic';
-import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
+import { ChatOllama } from '@langchain/community/chat_models/ollama';
 import { HuggingFaceInference } from '@langchain/community/llms/hf';
+import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { ChatGroq } from '@langchain/groq';
+import { ChatOpenAI } from '@langchain/openai';
+import { Worker } from 'worker_threads';
 import { DialogSummary } from '../dialogSummary';
 import { Logger } from '../logger';
 
@@ -24,13 +24,6 @@ export class SummarizationService {
   // Queue for pending summarization tasks
   private static pendingTasks: Array<{
     dialogId: string;
-    llm:
-      | ChatOllama
-      | ChatOpenAI
-      | ChatAnthropic
-      | ChatGoogleGenerativeAI
-      | HuggingFaceInference
-      | ChatGroq;
   }> = [];
 
   // Track active summarizations to prevent duplicates
@@ -60,28 +53,28 @@ export class SummarizationService {
     }
 
     // Add to pending tasks
-    this.pendingTasks.push({ dialogId, llm });
+    this.pendingTasks.push({ dialogId });
 
     Logger.logInfo('Добавление задачи суммаризации в очередь', { dialogId });
 
     // Process the queue asynchronously without blocking
-    this.processQueue(provider, messageId);
+    this.processQueue(messageId);
   }
 
-  private static processQueue(provider: string, messageId: string) {
+  private static processQueue(messageId: string) {
     // Process one task at a time from the queue
     if (this.pendingTasks.length > 0 && this.activeSummarizations.size < 5) {
       // Limit concurrent summarizations
       const task = this.pendingTasks.shift();
 
       if (task) {
-        const { dialogId, llm } = task;
+        const { dialogId } = task;
 
         // Mark as active to prevent duplicate processing
         this.activeSummarizations.add(dialogId);
 
         // Run summarization in the background without blocking
-        this.performSummarization({ provider, dialogId, messageId, llm })
+        this.performSummarization({ dialogId, messageId })
           .catch((error) => {
             Logger.logError(
               'Ошибка при суммаризации',
@@ -96,7 +89,7 @@ export class SummarizationService {
             // Remove from active set when done
             this.activeSummarizations.delete(dialogId);
             // Process next task if available
-            setImmediate(() => this.processQueue(provider, messageId));
+            setImmediate(() => this.processQueue(messageId));
           });
       }
     }
@@ -104,19 +97,9 @@ export class SummarizationService {
 
   private static async performSummarization({
     dialogId,
-    llm,
-    provider,
     messageId,
   }: {
     dialogId: string;
-    llm:
-      | ChatOllama
-      | ChatOpenAI
-      | ChatAnthropic
-      | ChatGoogleGenerativeAI
-      | HuggingFaceInference
-      | ChatGroq;
-    provider: string;
     messageId: string;
   }) {
     try {
@@ -125,9 +108,7 @@ export class SummarizationService {
         messageId,
       });
       const result = await DialogSummary.summarizeDialog({
-        provider,
         dialogId,
-        llm,
         messageId,
       });
       Logger.logInfo('Суммаризация завершена успешно', { dialogId, messageId });
@@ -149,19 +130,9 @@ export class SummarizationService {
   public static queueSummarizationWithoutBlocking({
     messageId,
     dialogId,
-    llm,
-    provider,
   }: {
     messageId: string;
     dialogId: string;
-    llm:
-      | ChatOllama
-      | ChatOpenAI
-      | ChatAnthropic
-      | ChatGoogleGenerativeAI
-      | HuggingFaceInference
-      | ChatGroq;
-    provider: string;
   }) {
     // This version doesn't wait for the summarization to complete
     // It just queues the task and returns immediately
@@ -173,7 +144,7 @@ export class SummarizationService {
       }
 
       // Add to pending tasks
-      this.pendingTasks.push({ dialogId, llm });
+      this.pendingTasks.push({ dialogId });
 
       Logger.logInfo(
         'Добавление задачи суммаризации в очередь (без ожидания)',
@@ -181,7 +152,7 @@ export class SummarizationService {
       );
 
       // Process the queue asynchronously without blocking
-      this.processQueue(provider, messageId);
+      this.processQueue(messageId);
     } catch (error) {
       Logger.logError(
         'Ошибка при постановке задачи суммаризации в очередь',
@@ -193,7 +164,7 @@ export class SummarizationService {
       );
       if (
         (error as any).code === 'RATE_LIMIT_EXCEEDED' ||
-        error.message?.includes('403')
+        error.message?.includes('429')
       ) {
         throw error;
       }

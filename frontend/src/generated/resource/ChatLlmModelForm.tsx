@@ -41,6 +41,7 @@ export const ChatLlmModelEditForm = () => (
       <TextInput source={Prisma.ChatLlmModelScalarFieldEnum.model} />
       <NumberInput source={Prisma.ChatLlmModelScalarFieldEnum.temperature} />
       <NumberInput source={Prisma.ChatLlmModelScalarFieldEnum.chunkSize} />
+      <TextInput source={Prisma.ChatLlmModelScalarFieldEnum.baseUrl} />
       <DateTimeInput source={Prisma.ChatLlmModelScalarFieldEnum.startTime} />
       <DateTimeInput source={Prisma.ChatLlmModelScalarFieldEnum.endTime} />
       <TextInput source={Prisma.ChatLlmModelScalarFieldEnum.lastRequestId} />
@@ -70,6 +71,10 @@ export const ChatLlmModelShowForm = () => (
       />
       <NumberInput
         source={Prisma.ChatLlmModelScalarFieldEnum.chunkSize}
+        readOnly={true}
+      />
+      <TextInput
+        source={Prisma.ChatLlmModelScalarFieldEnum.baseUrl}
         readOnly={true}
       />
       <DateTimeInput
@@ -111,6 +116,7 @@ export const ChatLlmModelCreateForm = () => (
       <TextInput source={Prisma.ChatLlmModelScalarFieldEnum.model} />
       <NumberInput source={Prisma.ChatLlmModelScalarFieldEnum.temperature} />
       <NumberInput source={Prisma.ChatLlmModelScalarFieldEnum.chunkSize} />
+      <TextInput source={Prisma.ChatLlmModelScalarFieldEnum.baseUrl} />
       <DateTimeInput source={Prisma.ChatLlmModelScalarFieldEnum.startTime} />
       <DateTimeInput source={Prisma.ChatLlmModelScalarFieldEnum.endTime} />
       <TextInput source={Prisma.ChatLlmModelScalarFieldEnum.lastRequestId} />

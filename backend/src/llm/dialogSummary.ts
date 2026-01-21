@@ -1,13 +1,8 @@
 // dialogSummary.ts
-import { ChatAnthropic } from '@langchain/anthropic';
-import { ChatOllama } from '@langchain/community/chat_models/ollama';
-import { HuggingFaceInference } from '@langchain/community/llms/hf';
-import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
-import { ChatGroq } from '@langchain/groq';
-import { ChatOpenAI } from '@langchain/openai';
 import { PrismaService } from '../services/prisma.service';
-import { addPayloadToTrace, Trace } from '../trace/trace.module';
+import { Trace } from '../trace/trace.module';
 import { DialogManager } from './dialogManager';
+import { LLMFactory } from './llmFactory';
 import { LLMLogger } from './llmLogger';
 import { Logger } from './logger';
 import { createDialogSummaryPrompt } from './prompt';
@@ -32,19 +27,9 @@ export class DialogSummary {
   @Trace()
   public static async summarizeDialog({
     dialogId,
-    llm,
-    provider,
     messageId,
   }: {
     dialogId: string;
-    llm:
-      | ChatOllama
-      | ChatOpenAI
-      | ChatAnthropic
-      | ChatGoogleGenerativeAI
-      | HuggingFaceInference
-      | ChatGroq;
-    provider: string;
     messageId: string;
   }) {
     Logger.logInfo('Начало суммаризации диалога', { dialogId, messageId });
@@ -55,27 +40,12 @@ export class DialogSummary {
       promptLength: prompt.length,
     });
 
-    addPayloadToTrace({
-      prompt,
-    });
-
     const { content, logId } = await LLMLogger.callWithLogging({
-      provider,
-      llm,
       prompt,
       metadata: { dialogId, operation: 'summarization' },
       dialogId,
       messageId,
-      callback: (prompt) =>
-        llm
-          .invoke(prompt)
-          .then(async (result) =>
-            typeof result === 'string' ? result.trim() : result,
-          ),
-    });
-
-    addPayloadToTrace({
-      content,
+      callback: (prompt) => LLMFactory.invoke(prompt),
     });
 
     Logger.logInfo('Получен ответ от LLM для суммаризации', {

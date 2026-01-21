@@ -42,6 +42,7 @@ export type ChatLlmModelMinAggregateOutputType = {
   model: string | null;
   temperature: runtime.Decimal | null;
   chunkSize: number | null;
+  baseUrl: string | null;
   startTime: Date | null;
   endTime: Date | null;
   status: string | null;
@@ -57,6 +58,7 @@ export type ChatLlmModelMaxAggregateOutputType = {
   model: string | null;
   temperature: runtime.Decimal | null;
   chunkSize: number | null;
+  baseUrl: string | null;
   startTime: Date | null;
   endTime: Date | null;
   status: string | null;
@@ -72,6 +74,7 @@ export type ChatLlmModelCountAggregateOutputType = {
   model: number;
   temperature: number;
   chunkSize: number;
+  baseUrl: number;
   startTime: number;
   endTime: number;
   status: number;
@@ -98,6 +101,7 @@ export type ChatLlmModelMinAggregateInputType = {
   model?: true;
   temperature?: true;
   chunkSize?: true;
+  baseUrl?: true;
   startTime?: true;
   endTime?: true;
   status?: true;
@@ -113,6 +117,7 @@ export type ChatLlmModelMaxAggregateInputType = {
   model?: true;
   temperature?: true;
   chunkSize?: true;
+  baseUrl?: true;
   startTime?: true;
   endTime?: true;
   status?: true;
@@ -128,6 +133,7 @@ export type ChatLlmModelCountAggregateInputType = {
   model?: true;
   temperature?: true;
   chunkSize?: true;
+  baseUrl?: true;
   startTime?: true;
   endTime?: true;
   status?: true;
@@ -238,6 +244,7 @@ export type ChatLlmModelGroupByOutputType = {
   model: string;
   temperature: runtime.Decimal | null;
   chunkSize: number | null;
+  baseUrl: string | null;
   startTime: Date | null;
   endTime: Date | null;
   status: string;
@@ -280,6 +287,7 @@ export type ChatLlmModelWhereInput = {
     | string
     | null;
   chunkSize?: Prisma.IntNullableFilter<"ChatLlmModel"> | number | null;
+  baseUrl?: Prisma.StringNullableFilter<"ChatLlmModel"> | string | null;
   startTime?:
     | Prisma.DateTimeNullableFilter<"ChatLlmModel">
     | Date
@@ -303,6 +311,7 @@ export type ChatLlmModelOrderByWithRelationInput = {
   model?: Prisma.SortOrder;
   temperature?: Prisma.SortOrderInput | Prisma.SortOrder;
   chunkSize?: Prisma.SortOrderInput | Prisma.SortOrder;
+  baseUrl?: Prisma.SortOrderInput | Prisma.SortOrder;
   startTime?: Prisma.SortOrderInput | Prisma.SortOrder;
   endTime?: Prisma.SortOrderInput | Prisma.SortOrder;
   status?: Prisma.SortOrder;
@@ -316,7 +325,6 @@ export type ChatLlmModelWhereUniqueInput = Prisma.AtLeast<
   {
     id?: string;
     lastRequestId?: string;
-    uqConfig?: Prisma.ChatLlmModelUqConfigCompoundUniqueInput;
     AND?: Prisma.ChatLlmModelWhereInput | Prisma.ChatLlmModelWhereInput[];
     OR?: Prisma.ChatLlmModelWhereInput[];
     NOT?: Prisma.ChatLlmModelWhereInput | Prisma.ChatLlmModelWhereInput[];
@@ -330,6 +338,7 @@ export type ChatLlmModelWhereUniqueInput = Prisma.AtLeast<
       | string
       | null;
     chunkSize?: Prisma.IntNullableFilter<"ChatLlmModel"> | number | null;
+    baseUrl?: Prisma.StringNullableFilter<"ChatLlmModel"> | string | null;
     startTime?:
       | Prisma.DateTimeNullableFilter<"ChatLlmModel">
       | Date
@@ -345,7 +354,7 @@ export type ChatLlmModelWhereUniqueInput = Prisma.AtLeast<
     createdAt?: Prisma.DateTimeFilter<"ChatLlmModel"> | Date | string;
     updatedAt?: Prisma.DateTimeFilter<"ChatLlmModel"> | Date | string;
   },
-  "id" | "lastRequestId" | "uqConfig"
+  "id" | "lastRequestId"
 >;
 
 export type ChatLlmModelOrderByWithAggregationInput = {
@@ -354,6 +363,7 @@ export type ChatLlmModelOrderByWithAggregationInput = {
   model?: Prisma.SortOrder;
   temperature?: Prisma.SortOrderInput | Prisma.SortOrder;
   chunkSize?: Prisma.SortOrderInput | Prisma.SortOrder;
+  baseUrl?: Prisma.SortOrderInput | Prisma.SortOrder;
   startTime?: Prisma.SortOrderInput | Prisma.SortOrder;
   endTime?: Prisma.SortOrderInput | Prisma.SortOrder;
   status?: Prisma.SortOrder;
@@ -389,6 +399,10 @@ export type ChatLlmModelScalarWhereWithAggregatesInput = {
   chunkSize?:
     | Prisma.IntNullableWithAggregatesFilter<"ChatLlmModel">
     | number
+    | null;
+  baseUrl?:
+    | Prisma.StringNullableWithAggregatesFilter<"ChatLlmModel">
+    | string
     | null;
   startTime?:
     | Prisma.DateTimeNullableWithAggregatesFilter<"ChatLlmModel">
@@ -430,6 +444,7 @@ export type ChatLlmModelCreateInput = {
     | string
     | null;
   chunkSize?: number | null;
+  baseUrl?: string | null;
   startTime?: Date | string | null;
   endTime?: Date | string | null;
   status?: string;
@@ -450,6 +465,7 @@ export type ChatLlmModelUncheckedCreateInput = {
     | string
     | null;
   chunkSize?: number | null;
+  baseUrl?: string | null;
   startTime?: Date | string | null;
   endTime?: Date | string | null;
   status?: string;
@@ -471,6 +487,7 @@ export type ChatLlmModelUpdateInput = {
     | string
     | null;
   chunkSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
+  baseUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   startTime?:
     | Prisma.NullableDateTimeFieldUpdateOperationsInput
     | Date
@@ -503,6 +520,7 @@ export type ChatLlmModelUncheckedUpdateInput = {
     | string
     | null;
   chunkSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
+  baseUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   startTime?:
     | Prisma.NullableDateTimeFieldUpdateOperationsInput
     | Date
@@ -534,6 +552,7 @@ export type ChatLlmModelCreateManyInput = {
     | string
     | null;
   chunkSize?: number | null;
+  baseUrl?: string | null;
   startTime?: Date | string | null;
   endTime?: Date | string | null;
   status?: string;
@@ -555,6 +574,7 @@ export type ChatLlmModelUpdateManyMutationInput = {
     | string
     | null;
   chunkSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
+  baseUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   startTime?:
     | Prisma.NullableDateTimeFieldUpdateOperationsInput
     | Date
@@ -587,6 +607,7 @@ export type ChatLlmModelUncheckedUpdateManyInput = {
     | string
     | null;
   chunkSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
+  baseUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   startTime?:
     | Prisma.NullableDateTimeFieldUpdateOperationsInput
     | Date
@@ -607,19 +628,13 @@ export type ChatLlmModelUncheckedUpdateManyInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
 
-export type ChatLlmModelUqConfigCompoundUniqueInput = {
-  provider: string;
-  model: string;
-  temperature: runtime.Decimal | runtime.DecimalJsLike | number | string;
-  chunkSize: number;
-};
-
 export type ChatLlmModelCountOrderByAggregateInput = {
   id?: Prisma.SortOrder;
   provider?: Prisma.SortOrder;
   model?: Prisma.SortOrder;
   temperature?: Prisma.SortOrder;
   chunkSize?: Prisma.SortOrder;
+  baseUrl?: Prisma.SortOrder;
   startTime?: Prisma.SortOrder;
   endTime?: Prisma.SortOrder;
   status?: Prisma.SortOrder;
@@ -640,6 +655,7 @@ export type ChatLlmModelMaxOrderByAggregateInput = {
   model?: Prisma.SortOrder;
   temperature?: Prisma.SortOrder;
   chunkSize?: Prisma.SortOrder;
+  baseUrl?: Prisma.SortOrder;
   startTime?: Prisma.SortOrder;
   endTime?: Prisma.SortOrder;
   status?: Prisma.SortOrder;
@@ -655,6 +671,7 @@ export type ChatLlmModelMinOrderByAggregateInput = {
   model?: Prisma.SortOrder;
   temperature?: Prisma.SortOrder;
   chunkSize?: Prisma.SortOrder;
+  baseUrl?: Prisma.SortOrder;
   startTime?: Prisma.SortOrder;
   endTime?: Prisma.SortOrder;
   status?: Prisma.SortOrder;
@@ -687,6 +704,7 @@ export type ChatLlmModelSelect<
     model?: boolean;
     temperature?: boolean;
     chunkSize?: boolean;
+    baseUrl?: boolean;
     startTime?: boolean;
     endTime?: boolean;
     status?: boolean;
@@ -708,6 +726,7 @@ export type ChatLlmModelSelectCreateManyAndReturn<
     model?: boolean;
     temperature?: boolean;
     chunkSize?: boolean;
+    baseUrl?: boolean;
     startTime?: boolean;
     endTime?: boolean;
     status?: boolean;
@@ -729,6 +748,7 @@ export type ChatLlmModelSelectUpdateManyAndReturn<
     model?: boolean;
     temperature?: boolean;
     chunkSize?: boolean;
+    baseUrl?: boolean;
     startTime?: boolean;
     endTime?: boolean;
     status?: boolean;
@@ -746,6 +766,7 @@ export type ChatLlmModelSelectScalar = {
   model?: boolean;
   temperature?: boolean;
   chunkSize?: boolean;
+  baseUrl?: boolean;
   startTime?: boolean;
   endTime?: boolean;
   status?: boolean;
@@ -764,6 +785,7 @@ export type ChatLlmModelOmit<
   | "model"
   | "temperature"
   | "chunkSize"
+  | "baseUrl"
   | "startTime"
   | "endTime"
   | "status"
@@ -787,6 +809,7 @@ export type $ChatLlmModelPayload<
       model: string;
       temperature: runtime.Decimal | null;
       chunkSize: number | null;
+      baseUrl: string | null;
       startTime: Date | null;
       endTime: Date | null;
       status: string;
@@ -1397,6 +1420,7 @@ export interface ChatLlmModelFieldRefs {
   readonly model: Prisma.FieldRef<"ChatLlmModel", "String">;
   readonly temperature: Prisma.FieldRef<"ChatLlmModel", "Decimal">;
   readonly chunkSize: Prisma.FieldRef<"ChatLlmModel", "Int">;
+  readonly baseUrl: Prisma.FieldRef<"ChatLlmModel", "String">;
   readonly startTime: Prisma.FieldRef<"ChatLlmModel", "DateTime">;
   readonly endTime: Prisma.FieldRef<"ChatLlmModel", "DateTime">;
   readonly status: Prisma.FieldRef<"ChatLlmModel", "String">;

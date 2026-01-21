@@ -1,15 +1,10 @@
 // questionTransformer.ts
-import { ChatAnthropic } from '@langchain/anthropic';
-import { ChatOllama } from '@langchain/community/chat_models/ollama';
-import { HuggingFaceInference } from '@langchain/community/llms/hf';
-import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
-import { ChatGroq } from '@langchain/groq';
-import { ChatOpenAI } from '@langchain/openai';
 import Mustache from 'mustache';
 import { addPayloadToTrace, Trace } from '../../trace/trace.module';
 import { CATEGORY, RAG_SEARCH_CONFIG } from '../constants';
 import { DialogManager } from '../dialogManager';
 import { getCategoryByDetectedCategory } from '../getCategoryByDetectedCategory';
+import { LLMFactory } from '../llmFactory';
 import { LLMLogger } from '../llmLogger';
 import { Logger } from '../logger';
 import {
@@ -188,24 +183,14 @@ export class QuestionTransformer {
    */
   static async transformQuestion({
     question,
-    llm,
     history,
-    provider,
     dialogId,
     messageId,
   }: {
     dialogId: string | undefined;
     messageId: string | undefined;
     question: string;
-    llm:
-      | ChatOllama
-      | ChatOpenAI
-      | ChatAnthropic
-      | ChatGoogleGenerativeAI
-      | HuggingFaceInference
-      | ChatGroq;
     history: string[];
-    provider: string;
   }): Promise<CategorizedQuestion> {
     Logger.logInfo('Transforming question', { originalQuestion: question });
 
@@ -213,10 +198,8 @@ export class QuestionTransformer {
     let sourceFilter = null;
 
     const detectCategoryResult = await this.detectCategory({
-      llm,
       text: question,
       history,
-      provider,
       dialogId,
       messageId,
     });
@@ -257,20 +240,16 @@ export class QuestionTransformer {
     ] = await Promise.all([
       this.transformWithLLM({
         question,
-        llm,
         category: detectedCategory,
         history,
         isSelfContained,
-        provider,
         dialogId,
         messageId,
       }),
       this.transformToEmbeddedWithLLM({
         type: 'action-based',
         question,
-        llm,
         category,
-        provider,
         dialogId,
         messageId,
         prompt: Mustache.render(
@@ -339,9 +318,7 @@ export class QuestionTransformer {
       this.transformToEmbeddedWithLLM({
         type: 'entity-based',
         question,
-        llm,
         category,
-        provider,
         dialogId,
         messageId,
         prompt: Mustache.render(
@@ -489,28 +466,18 @@ export class QuestionTransformer {
   @Trace()
   private static async transformWithLLM({
     question,
-    llm,
     category,
     history,
     isSelfContained = true,
-    provider,
     dialogId,
     messageId,
   }: {
     dialogId: string | undefined;
     messageId: string | undefined;
     question: string;
-    llm:
-      | ChatOllama
-      | ChatOpenAI
-      | ChatAnthropic
-      | ChatGoogleGenerativeAI
-      | HuggingFaceInference
-      | ChatGroq;
     category: Category;
     history: string[];
     isSelfContained?: boolean;
-    provider: string;
   }) {
     // Create a prompt to help the LLM understand and rephrase the question
     const prompt = !isSelfContained
@@ -518,14 +485,11 @@ export class QuestionTransformer {
       : createContextualRewritePrompt({ question, category, history });
 
     addPayloadToTrace({
-      prompt,
       isSelfContained,
     });
 
     try {
       const { content: transformed, logId } = await LLMLogger.callWithLogging({
-        provider,
-        llm,
         prompt,
         metadata: {
           operation: 'question_transformation',
@@ -533,16 +497,7 @@ export class QuestionTransformer {
         },
         dialogId,
         messageId,
-        callback: (prompt) =>
-          llm
-            .invoke(prompt)
-            .then(async (result) =>
-              typeof result === 'string' ? result.trim() : result,
-            ),
-      });
-
-      addPayloadToTrace({
-        transformed,
+        callback: (prompt) => LLMFactory.invoke(prompt),
       });
 
       // If the transformation result seems invalid (empty, same as original, or an error), return the original
@@ -570,7 +525,7 @@ export class QuestionTransformer {
       );
       if (
         (error as any).code === 'RATE_LIMIT_EXCEEDED' ||
-        error.message?.includes('403')
+        error.message?.includes('429')
       ) {
         throw error;
       }
@@ -586,9 +541,7 @@ export class QuestionTransformer {
   private static async transformToEmbeddedWithLLM({
     type,
     question,
-    llm,
     category,
-    provider,
     dialogId,
     messageId,
     prompt,
@@ -597,26 +550,15 @@ export class QuestionTransformer {
     dialogId: string | undefined;
     messageId: string | undefined;
     question: string;
-    llm:
-      | ChatOllama
-      | ChatOpenAI
-      | ChatAnthropic
-      | ChatGoogleGenerativeAI
-      | HuggingFaceInference
-      | ChatGroq;
     category: Category;
-    provider: string;
     prompt: string;
   }) {
     try {
       addPayloadToTrace({
-        prompt,
         type,
       });
 
       const { content: transformed, logId } = await LLMLogger.callWithLogging({
-        provider,
-        llm,
         prompt,
         metadata: {
           operation: 'question_embedded_transformation',
@@ -624,16 +566,7 @@ export class QuestionTransformer {
         },
         dialogId,
         messageId,
-        callback: (prompt) =>
-          llm
-            .invoke(prompt)
-            .then(async (result) =>
-              typeof result === 'string' ? result.trim() : result,
-            ),
-      });
-
-      addPayloadToTrace({
-        transformed,
+        callback: (prompt) => LLMFactory.invoke(prompt),
       });
 
       // Возвращаем оригинальный вопрос, если результат пустой или некорректный
@@ -658,7 +591,7 @@ export class QuestionTransformer {
       );
       if (
         (error as any).code === 'RATE_LIMIT_EXCEEDED' ||
-        error.message?.includes('403')
+        error.message?.includes('429')
       ) {
         throw error;
       }
@@ -668,25 +601,15 @@ export class QuestionTransformer {
 
   @Trace()
   private static async detectCategory({
-    llm,
     text,
     history,
-    provider,
     dialogId,
     messageId,
   }: {
     dialogId: string | undefined;
     messageId: string | undefined;
-    llm:
-      | ChatOllama
-      | ChatOpenAI
-      | ChatAnthropic
-      | ChatGoogleGenerativeAI
-      | HuggingFaceInference
-      | ChatGroq;
     text: string;
     history: string[];
-    provider: string;
   }) {
     const prompt = Mustache.render(
       `Ты — классификатор пользовательских запросов.
@@ -754,32 +677,17 @@ export class QuestionTransformer {
     );
 
     try {
-      addPayloadToTrace({
-        prompt,
-      });
-
       const { content: reconstructed, logId } = await LLMLogger.callWithLogging(
         {
-          provider,
-          llm,
           prompt,
           metadata: {
             operation: 'question_type_detection',
           },
           dialogId,
           messageId,
-          callback: (prompt) =>
-            llm
-              .invoke(prompt)
-              .then(async (result) =>
-                typeof result === 'string' ? result.trim() : result,
-              ),
+          callback: (prompt) => LLMFactory.invoke(prompt),
         },
       );
-
-      addPayloadToTrace({
-        reconstructed,
-      });
 
       // If reconstruction fails, return a simple fallback
       if (!reconstructed || reconstructed.includes('[ERROR]')) {
@@ -795,7 +703,7 @@ export class QuestionTransformer {
     } catch (error) {
       if (
         (error as any).code === 'RATE_LIMIT_EXCEEDED' ||
-        error.message?.includes('403')
+        error.message?.includes('429')
       ) {
         throw error;
       }

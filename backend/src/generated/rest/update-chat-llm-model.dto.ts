@@ -43,6 +43,14 @@ export class UpdateChatLlmModelDto {
   chunkSize?: number | null;
   @ApiProperty({
     type: 'string',
+    required: false,
+    nullable: true,
+  })
+  @IsOptional()
+  @IsString()
+  baseUrl?: string | null;
+  @ApiProperty({
+    type: 'string',
     format: 'date-time',
     default: new Date().toISOString(),
     required: false,

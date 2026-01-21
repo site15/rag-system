@@ -1,5 +1,6 @@
 import { PrismaService } from '../../services/prisma.service';
 import { Logger } from '../logger';
+import { DefaultProvidersInitializer } from './defaultProvidersInitializer';
 
 export interface LLMQueryLogEntry {
   request: string;
@@ -7,9 +8,6 @@ export interface LLMQueryLogEntry {
   requestLength: number;
   responseLength: number;
   executionTimeMs: number;
-  provider: string;
-  model: string;
-  temperature?: number;
   success?: boolean;
   errorMessage?: string;
   dialogId: string | undefined;
@@ -23,6 +21,7 @@ export class LLMQueryLogger {
    */
   static async logQuery(entry: LLMQueryLogEntry): Promise<string | null> {
     try {
+      const llmConfig = await DefaultProvidersInitializer.getActiveProvider();
       const chatLlmRequest = await PrismaService.instance.chatLlmRequest.create(
         {
           data: {
@@ -31,13 +30,12 @@ export class LLMQueryLogger {
             requestLength: entry.requestLength,
             responseLength: entry.responseLength,
             executionTimeMs: entry.executionTimeMs,
-            provider: entry.provider,
-            model: entry.model,
-            temperature: entry.temperature,
             isSuccess: entry.success !== undefined ? entry.success : true,
             errorMessage: entry.errorMessage || null,
             dialogId: entry.dialogId?.toString(),
             messageId: entry.messageId?.toString(),
+            model: llmConfig?.model || '',
+            provider: llmConfig?.provider || '',
           },
           select: {
             id: true,
@@ -49,8 +47,6 @@ export class LLMQueryLogger {
 
       Logger.logInfo('LLM query logged successfully', {
         recordId,
-        provider: entry.provider,
-        model: entry.model,
         requestLength: entry.requestLength,
         responseLength: entry.responseLength,
         executionTimeMs: entry.executionTimeMs,
@@ -62,8 +58,6 @@ export class LLMQueryLogger {
         'Failed to log LLM query',
         {
           error: error instanceof Error ? error.message : String(error),
-          provider: entry.provider,
-          model: entry.model,
         },
         (error as Error).stack,
       );

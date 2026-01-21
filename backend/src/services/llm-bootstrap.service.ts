@@ -4,14 +4,12 @@ import {
   OnApplicationBootstrap,
   OnApplicationShutdown,
 } from '@nestjs/common';
-import { catchError, concatMap, Subject } from 'rxjs';
-import { ConfigManager } from '../llm/config';
+import { concatMap, Subject } from 'rxjs';
 import { DialogManager } from '../llm/dialogManager';
 import { RAGApplication } from '../llm/ragApplication';
 import { getTraceStack } from '../trace/trace.module';
 import { EventType } from '../types/event-type';
 import { LlmSendMessageService } from './llm-send-message.service';
-import { error } from 'node:console';
 
 @Injectable()
 export class LlmBootstrapService
@@ -26,35 +24,26 @@ export class LlmBootstrapService
     this.events$
       .pipe(
         concatMap(async (event: EventType) => {
-          await this.llmSendMessageService.processMessageWithRetry({
-            messageId: event.messageId,
-            dialogId: event.dialogId,
-            provider: event.provider,
-            model: event.model,
-            temperature: event.temperature,
-            userId: event.userId,
-            maxRetries: 3,
-          });
+          try {
+            await this.llmSendMessageService.processMessageWithRetry({
+              messageId: event.messageId,
+              dialogId: event.dialogId,
+              userId: event.userId,
+              maxRetries: 3,
+            });
 
-          DialogManager.setMessageTrace(event.messageId, getTraceStack()).catch(
-            (error) => this.logger.error(error, error.stack),
-          );
-        }),
-        catchError((error) => {
-          this.logger.error(error, error.stack);
-          return [];
+            DialogManager.setMessageTrace(
+              event.messageId,
+              getTraceStack(),
+            ).catch((error) => this.logger.error(error, error.stack));
+          } catch (error) {
+            this.logger.error(error, error.stack);
+          }
         }),
       )
       .subscribe();
 
-    await RAGApplication.start({
-      app: ConfigManager.getAppConfig(),
-      providers: {
-        embeddings: ConfigManager.getEmbeddingsConfig(
-          ConfigManager.getAppConfig().embeddingsProvider,
-        ),
-      },
-    });
+    await RAGApplication.start();
   }
 
   async onApplicationShutdown(signal?: string) {

@@ -27,6 +27,11 @@ export class ChatLlmModel {
   chunkSize!: number | null;
   @ApiProperty({
     type: 'string',
+    nullable: true,
+  })
+  baseUrl!: string | null;
+  @ApiProperty({
+    type: 'string',
     format: 'date-time',
     nullable: true,
   })

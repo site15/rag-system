@@ -1,12 +1,9 @@
 // modelExecutionTracker.ts - Service for tracking model execution timing and status
 import { PrismaService } from '../../services/prisma.service';
 import { Logger } from '../logger';
+import { DefaultProvidersInitializer } from './defaultProvidersInitializer';
 
 export interface ModelExecutionOptions {
-  provider: string;
-  model: string;
-  temperature?: number;
-  chunkSize?: number;
   llmQueryLogId?: string | null;
 }
 
@@ -30,24 +27,13 @@ export class ModelExecutionTracker {
    * First checks if record exists, then inserts or updates accordingly
    */
   static async startExecution(options: ModelExecutionOptions): Promise<string> {
+    const provider = await DefaultProvidersInitializer.getActiveProvider();
     try {
-      // First, try to find existing record with same configuration
-      const existingRecord =
-        await PrismaService.instance.chatLlmModel.findFirst({
-          where: {
-            provider: options.provider,
-            model: options.model,
-          },
-          select: {
-            id: true,
-          },
-        });
-
-      if (existingRecord) {
+      if (provider.id) {
         // Record exists, update it
-        const updatedRecord = await PrismaService.instance.chatLlmModel.update({
+        await PrismaService.instance.chatLlmModel.update({
           where: {
-            id: existingRecord.id,
+            id: provider.id,
           },
           data: {
             startTime: new Date(),
@@ -60,14 +46,14 @@ export class ModelExecutionTracker {
           },
         });
 
-        const recordId = updatedRecord.id;
+        const recordId = provider.id;
 
         Logger.logInfo('Updated existing model execution tracking', {
           recordId,
-          provider: options.provider,
-          model: options.model,
-          temperature: options.temperature,
-          chunkSize: options.chunkSize,
+          provider: provider.provider || '',
+          model: provider.model || '',
+          temperature: provider.temperature,
+          chunkSize: provider.chunkSize,
         });
 
         return recordId;
@@ -75,10 +61,9 @@ export class ModelExecutionTracker {
         // Record doesn't exist, insert new one
         const newRecord = await PrismaService.instance.chatLlmModel.create({
           data: {
-            provider: options.provider,
-            model: options.model,
-            temperature: options.temperature,
-            chunkSize: options.chunkSize,
+            ...provider,
+            provider: provider.provider || '',
+            model: provider.model || '',
             lastRequestId: options.llmQueryLogId?.toString(),
             startTime: new Date(),
             status: 'running',
@@ -92,10 +77,10 @@ export class ModelExecutionTracker {
 
         Logger.logInfo('Inserted new model execution tracking', {
           recordId,
-          provider: options.provider,
-          model: options.model,
-          temperature: options.temperature,
-          chunkSize: options.chunkSize,
+          provider: provider.provider,
+          model: provider.model,
+          temperature: provider.temperature,
+          chunkSize: provider.chunkSize,
         });
 
         return recordId;
@@ -103,8 +88,8 @@ export class ModelExecutionTracker {
     } catch (error) {
       Logger.logError('Failed to start model execution tracking', {
         error: error instanceof Error ? error.message : String(error),
-        provider: options.provider,
-        model: options.model,
+        provider: provider.provider,
+        model: provider.model,
       });
       throw error;
     }
@@ -218,7 +203,7 @@ export class ModelExecutionTracker {
     recordId: string,
   ): Promise<ModelExecutionRecord | null> {
     try {
-      const execution = await PrismaService.instance.chatLlmModel.findUnique({
+      const execution = await PrismaService.instance.chatLlmModel.findFirst({
         where: {
           id: recordId,
         },

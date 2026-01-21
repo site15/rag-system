@@ -5,7 +5,9 @@ import { HuggingFaceInference } from '@langchain/community/llms/hf';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { ChatGroq } from '@langchain/groq';
 import { ChatOpenAI } from '@langchain/openai';
+import { HttpException } from '@nestjs/common';
 import { HttpsProxyAgent } from 'https-proxy-agent';
+import { addPayloadToTrace, Trace } from '../trace/trace.module';
 import { ConfigManager } from './config';
 import {
   ERROR_MESSAGES,
@@ -14,6 +16,7 @@ import {
   RATE_LIMIT_CONSTANTS,
 } from './constants';
 import { Logger } from './logger';
+import { DefaultProvidersInitializer } from './services/defaultProvidersInitializer';
 import { ChatConfig } from './types';
 
 export class LLMFactory {
@@ -53,12 +56,12 @@ export class LLMFactory {
       if (proxyUrl) {
         try {
           proxyAgent = new HttpsProxyAgent(proxyUrl);
-          Logger.logInfo('Created proxy agent for URL:', proxyUrl);
+          Logger.logInfo('Created proxy agent');
         } catch (error) {
           if ((error as any).code === RATE_LIMIT_CONSTANTS.ERROR_CODE) {
             throw error;
           }
-          Logger.logError('Failed to create proxy agent:', error);
+          Logger.logError('Failed to create proxy agent');
           // Continue without proxy
         }
       }
@@ -78,6 +81,7 @@ export class LLMFactory {
         openaiOptions.configuration.httpsAgent = proxyAgent;
       }
 
+      Logger.logInfo('Creating ChatOpenAI instance');
       return new ChatOpenAI(openaiOptions);
     } else if (
       chatConfig.provider === PROVIDER_NAMES.Z_AI ||
@@ -98,12 +102,12 @@ export class LLMFactory {
       if (proxyUrl) {
         try {
           proxyAgent = new HttpsProxyAgent(proxyUrl);
-          Logger.logInfo('Created proxy agent for URL:', proxyUrl);
+          Logger.logInfo('Created proxy agent');
         } catch (error) {
           if ((error as any).code === RATE_LIMIT_CONSTANTS.ERROR_CODE) {
             throw error;
           }
-          Logger.logError('Failed to create proxy agent:', error);
+          Logger.logError('Failed to create proxy agent');
           // Continue without proxy
         }
       }
@@ -143,12 +147,12 @@ export class LLMFactory {
       if (proxyUrl) {
         try {
           proxyAgent = new HttpsProxyAgent(proxyUrl);
-          Logger.logInfo('Created proxy agent for URL:', proxyUrl);
+          Logger.logInfo('Created proxy agent');
         } catch (error) {
           if ((error as any).code === RATE_LIMIT_CONSTANTS.ERROR_CODE) {
             throw error;
           }
-          Logger.logError('Failed to create proxy agent:', error);
+          Logger.logError('Failed to create proxy agent');
           // Continue without proxy
         }
       }
@@ -188,12 +192,12 @@ export class LLMFactory {
       if (proxyUrl) {
         try {
           proxyAgent = new HttpsProxyAgent(proxyUrl);
-          Logger.logInfo('Created proxy agent for URL:', proxyUrl);
+          Logger.logInfo('Created proxy agent');
         } catch (error) {
           if ((error as any).code === RATE_LIMIT_CONSTANTS.ERROR_CODE) {
             throw error;
           }
-          Logger.logError('Failed to create proxy agent:', error);
+          Logger.logError('Failed to create proxy agent');
           // Continue without proxy
         }
       }
@@ -209,6 +213,7 @@ export class LLMFactory {
         anthropicOptions.httpAgent = proxyAgent;
       }
 
+      Logger.logInfo('Creating ChatAnthropic instance');
       return new ChatAnthropic(anthropicOptions);
     } else if (chatConfig.provider === PROVIDER_NAMES.GEMINI) {
       // Google Gemini uses Google Generative AI API
@@ -217,6 +222,8 @@ export class LLMFactory {
       }
 
       // Proxy settings are handled through ConfigManager.getProxyConfig().httpsProxy || ConfigManager.getProxyConfig().httpProxy function
+
+      Logger.logInfo('Creating ChatGoogleGenerativeAI instance');
 
       return new ChatGoogleGenerativeAI({
         model,
@@ -243,12 +250,12 @@ export class LLMFactory {
       if (proxyUrl) {
         try {
           proxyAgent = new HttpsProxyAgent(proxyUrl);
-          Logger.logInfo('Created proxy agent for URL:', proxyUrl);
+          Logger.logInfo('Created proxy agent');
         } catch (error) {
           if ((error as any).code === RATE_LIMIT_CONSTANTS.ERROR_CODE) {
             throw error;
           }
-          Logger.logError('Failed to create proxy agent:', error);
+          Logger.logError('Failed to create proxy agent');
           // Continue without proxy
         }
       }
@@ -265,6 +272,7 @@ export class LLMFactory {
         hfOptions.httpAgent = proxyAgent;
       }
 
+      Logger.logInfo('Creating HuggingFaceInference instance');
       return new HuggingFaceInference(hfOptions);
     } else if (
       chatConfig.provider === PROVIDER_NAMES.GROQ ||
@@ -285,12 +293,12 @@ export class LLMFactory {
       if (proxyUrl) {
         try {
           proxyAgent = new HttpsProxyAgent(proxyUrl);
-          Logger.logInfo('Created proxy agent for URL:', proxyUrl);
+          Logger.logInfo('Created proxy agent');
         } catch (error) {
           if ((error as any).code === RATE_LIMIT_CONSTANTS.ERROR_CODE) {
             throw error;
           }
-          Logger.logError('Failed to create proxy agent:', error);
+          Logger.logError('Failed to create proxy agent');
           // Continue without proxy
         }
       }
@@ -352,9 +360,7 @@ export class LLMFactory {
                 delaySeconds: Math.round(delayMs / 1000),
                 limit,
                 used,
-                requested,
                 model,
-                error: errorMessage,
               });
 
               // If delay is more than 1 minute, throw error instead of waiting
@@ -399,6 +405,11 @@ export class LLMFactory {
 
       return wrappedGroq;
     } else if (chatConfig.provider === PROVIDER_NAMES.OLLAMA) {
+      Logger.logInfo('Creating ChatOllama instance', {
+        model: model,
+        temperature: temperature ? +temperature : 1,
+        baseUrl: baseUrl,
+      });
       return new ChatOllama({
         model: model,
         temperature: temperature ? +temperature : 1,
@@ -422,12 +433,12 @@ export class LLMFactory {
       if (proxyUrl) {
         try {
           proxyAgent = new HttpsProxyAgent(proxyUrl);
-          Logger.logInfo('Created proxy agent for URL:', proxyUrl);
+          Logger.logInfo('Created proxy agent');
         } catch (error) {
           if ((error as any).code === RATE_LIMIT_CONSTANTS.ERROR_CODE) {
             throw error;
           }
-          Logger.logError('Failed to create proxy agent:', error);
+          Logger.logError('Failed to create proxy agent');
           // Continue without proxy
         }
       }
@@ -447,8 +458,128 @@ export class LLMFactory {
         openaiOptions.configuration.httpsAgent = proxyAgent;
       }
 
-      Logger.logInfo('Creating ChatOpenAI instance', openaiOptions);
+      Logger.logInfo('Creating ChatOpenAI instance');
       return new ChatOpenAI(openaiOptions);
+    }
+  }
+
+  static getResponseString(result: any) {
+    let response: string;
+    if (typeof result === 'string') {
+      response = result;
+    } else if (typeof result === 'object' && result.content) {
+      // Handle different content types
+      if (typeof result.content === 'string') {
+        response = result.content;
+      } else if (Array.isArray(result.content)) {
+        // For complex content arrays, convert to string
+        response = result.content
+          .map((item: any) => {
+            if (typeof item === 'string') return item;
+            if (item.type === 'text' && item.text) return item.text;
+            return JSON.stringify(item);
+          })
+          .join(' ');
+      } else {
+        response = JSON.stringify(result.content);
+      }
+    } else {
+      response = JSON.stringify(result);
+    }
+
+    response = response.trim();
+    return response;
+  }
+
+  @Trace()
+  static async invoke(prompt: string) {
+    const maxRetries = 3;
+
+    let currentAttempt = 0;
+    let apiKey: string | undefined = undefined;
+    let llmConfig:
+      | {
+          chunkSize: number;
+          temperature: number;
+          model: string;
+          provider: string;
+          baseUrl: string;
+        }
+      | undefined = undefined;
+
+    try {
+      ({ apiKey, ...llmConfig } =
+        await DefaultProvidersInitializer.getActiveProvider());
+
+      if (llmConfig === undefined || apiKey === undefined) {
+        throw new Error(`No active provider found or API key not provided`);
+      }
+    } catch (error) {
+      ({ apiKey, ...llmConfig } =
+        await DefaultProvidersInitializer.getNextActiveProvider());
+    }
+
+    while (currentAttempt < maxRetries) {
+      const llm = LLMFactory.createLLM({ ...llmConfig, apiKey } as any);
+
+      try {
+        Logger.logInfo(
+          `Processing message attempt ${currentAttempt + 1}/${maxRetries}`,
+          {
+            llmConfig: llmConfig,
+            attempt: currentAttempt + 1,
+          },
+        );
+
+        addPayloadToTrace({
+          currentAttempt,
+          maxRetries,
+        });
+
+        const startTime = Date.now();
+        const result = await llm
+          .invoke(prompt)
+          .then(async (result: any) => LLMFactory.getResponseString(result));
+        addPayloadToTrace({
+          prompt,
+          result,
+        });
+        Logger.logInfo('LLM Request Completed', {
+          prompt,
+          result,
+          executionTime: Date.now() - startTime,
+        });
+        return result;
+      } catch (error: any) {
+        currentAttempt++;
+
+        if (currentAttempt > maxRetries) {
+          Logger.logError('Max retry attempts reached, returning error', {
+            maxRetries: maxRetries,
+            currentAttempt,
+          });
+          throw new HttpException(
+            {
+              error: ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+              details: `Failed after ${maxRetries} attempts`,
+              lastError: error.message,
+            },
+            500,
+          );
+        } else {
+          Logger.logError(
+            `Message processing failed on attempt ${currentAttempt}`,
+            {
+              error: error.message,
+              llmConfig: llmConfig,
+              attempt: currentAttempt,
+            },
+          );
+        }
+
+        ({ apiKey, ...llmConfig } =
+          await DefaultProvidersInitializer.getNextActiveProvider());
+      }
     }
   }
 }

@@ -251,6 +251,7 @@ model ChatLlmModel {
   model         String    @db.VarChar(100)
   temperature   Decimal?  @db.Decimal(3, 2)
   chunkSize     Int?
+  baseUrl       String?   @db.VarChar(255)
   startTime     DateTime? @default(now()) @db.Timestamptz(6)
   endTime       DateTime? @db.Timestamptz(6)
   status        String    @default("running") @db.VarChar(20)
@@ -260,7 +261,6 @@ model ChatLlmModel {
   createdAt DateTime @default(now()) @db.Timestamp(6)
   updatedAt DateTime @default(now()) @db.Timestamp(6)
 
-  @@unique(name: "uqConfig", [provider, model, temperature, chunkSize], map: "UK_CHAT_LLM_MODELS__CONFIG")
   @@index([provider], map: "IDX_CHAT_LLM_MODELS__PROVIDER")
   @@index([model], map: "IDX_CHAT_LLM_MODELS__MODEL")
   @@index([status], map: "IDX_CHAT_LLM_MODELS__STATUS")

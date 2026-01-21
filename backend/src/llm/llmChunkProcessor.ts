@@ -1,15 +1,10 @@
 // llmChunkProcessor.ts
-import { ChatAnthropic } from '@langchain/anthropic';
-import { ChatOllama } from '@langchain/community/chat_models/ollama';
-import { HuggingFaceInference } from '@langchain/community/llms/hf';
-import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
-import { ChatGroq } from '@langchain/groq';
-import { ChatOpenAI } from '@langchain/openai';
 import Mustache from 'mustache';
 import { addPayloadToTrace, Trace } from '../trace/trace.module';
 import { CATEGORY_PROMPTS } from './category-prompts';
 import { DialogManager } from './dialogManager';
 import { getCategoryByDetectedCategory } from './getCategoryByDetectedCategory';
+import { LLMFactory } from './llmFactory';
 import { LLMLogger } from './llmLogger';
 import { Logger } from './logger';
 import {
@@ -18,6 +13,7 @@ import {
   createFriendlyNotFoundPrompt,
 } from './prompt';
 import { RAGSearcher } from './ragSearcher';
+import { DefaultProvidersInitializer } from './services/defaultProvidersInitializer';
 import { FailureTracker } from './services/failureTracker';
 import { Category } from './services/questionTransformer';
 import { DocWithMetadataAndId } from './types';
@@ -433,43 +429,28 @@ export class LLMChunkProcessor {
 
   @Trace()
   public static async askLLMChunked({
-    llm,
     dialogId,
     history,
     contextDocs,
     question,
     category,
-    provider,
-    chatChunkSize,
     detectedCategory,
   }: {
-    llm:
-      | ChatOllama
-      | ChatOpenAI
-      | ChatAnthropic
-      | ChatGoogleGenerativeAI
-      | HuggingFaceInference
-      | ChatGroq;
     dialogId: string;
     history: string[];
     contextDocs: DocWithMetadataAndId[];
     question: string;
     category: Category;
-    provider: string;
-    chatChunkSize: number;
     detectedCategory: Category;
   }) {
     const foundLogIds: (string | undefined)[] = [];
     // Process contextDocs in parallel
     const results = await LLMChunkProcessor.processContextDocsInParallel({
-      provider,
-      llm,
       contextDocs,
       question,
       history,
       category,
       dialogId,
-      chatChunkSize,
       detectedCategory,
     });
 
@@ -511,30 +492,18 @@ export class LLMChunkProcessor {
 
   @Trace()
   private static async processContextDocsInParallel({
-    llm,
     contextDocs,
     question,
     history,
     category,
     dialogId,
-    provider,
-    chatChunkSize,
     detectedCategory,
   }: {
-    llm:
-      | ChatOllama
-      | ChatOpenAI
-      | ChatAnthropic
-      | ChatGoogleGenerativeAI
-      | HuggingFaceInference
-      | ChatGroq;
     contextDocs: DocWithMetadataAndId[];
     question: string;
     history: string[];
     category: Category;
     dialogId: string;
-    provider: string;
-    chatChunkSize: number;
     detectedCategory: Category;
   }) {
     Logger.logInfo('Начало обработки запроса с чанками', {
@@ -568,7 +537,6 @@ export class LLMChunkProcessor {
       // Process batch in parallel
       const batchPromises = batch.map(async (doc, batchIndex) => {
         return LLMChunkProcessor.processSingleContextDoc({
-          llm,
           contextDoc: doc,
           question,
           history,
@@ -578,16 +546,19 @@ export class LLMChunkProcessor {
           dialogId,
           contextDocs,
           index: i,
-          provider,
-          chatChunkSize,
           detectedCategory,
         });
       });
 
       try {
-        const firstSuccess = await Promise.race(
+        const firstSuccess = await Promise.any(
           batchPromises.map((p, idx) =>
-            p.then((result) => ({ result, batchIndex: idx, completed: true })),
+            p.then((result) => {
+              if (!result.success) {
+                throw new Error();
+              }
+              return { result, batchIndex: idx, completed: true };
+            }),
           ),
         );
 
@@ -617,27 +588,26 @@ export class LLMChunkProcessor {
             );
           }
 
-          const ret = await LLMChunkProcessor.frendlyFound({
-            category,
-            surroundingChunks,
-            question,
-            llm,
-            provider,
-            dialogId,
-          });
-          const friendlyText = ret.foundText;
-          foundLogIds.push(ret.logId);
-
-          Logger.logInfo('Дружеский ответ LLM', {
-            foundText: friendlyText,
-            chunk: surroundingChunks,
-          });
+          // пока вырубили, так как ранее уже нормальное сформировали
+          // const ret = await LLMChunkProcessor.frendlyFound({
+          //   category,
+          //   surroundingChunks,
+          //   question,
+          //   dialogId,
+          // });
+          // const friendlyText = ret.foundText;
+          // foundLogIds.push(ret.logId);
+          //
+          // Logger.logInfo('Дружеский ответ LLM', {
+          //   foundText: friendlyText,
+          //   chunk: surroundingChunks,
+          // });
 
           // Return a special result indicating that friendly response was already generated
           return [
             {
               success: true,
-              foundText: friendlyText, // Return the friendly response instead of raw found text
+              foundText: firstSuccess.result.foundText, // Return the friendly response instead of raw found text
               foundLogIds: [
                 ...(firstSuccess.result.foundLogIds || []),
                 ...foundLogIds,
@@ -652,7 +622,7 @@ export class LLMChunkProcessor {
       } catch (error) {
         if (
           (error as any).code === 'RATE_LIMIT_EXCEEDED' ||
-          error.message?.includes('403')
+          error.message?.includes('429')
         ) {
           throw error;
         }
@@ -676,7 +646,6 @@ export class LLMChunkProcessor {
 
   @Trace()
   private static async processSingleContextDoc({
-    llm,
     contextDoc,
     question,
     history,
@@ -686,17 +655,8 @@ export class LLMChunkProcessor {
     dialogId,
     contextDocs,
     index,
-    provider,
-    chatChunkSize,
     detectedCategory,
   }: {
-    llm:
-      | ChatOllama
-      | ChatOpenAI
-      | ChatAnthropic
-      | ChatGoogleGenerativeAI
-      | HuggingFaceInference
-      | ChatGroq;
     contextDoc: DocWithMetadataAndId;
     question: string;
     history: string[];
@@ -706,8 +666,6 @@ export class LLMChunkProcessor {
     dialogId: string;
     contextDocs: DocWithMetadataAndId[];
     index: number;
-    provider: string;
-    chatChunkSize: number;
     detectedCategory: Category;
   }): Promise<{
     success: boolean;
@@ -823,27 +781,13 @@ export class LLMChunkProcessor {
             distance: 0,
           },
         ];
-        // PromptLogger.logPrompt({
-        //   dialogId,
-        //   mode,
-        //   prompt: LLMChunkProcessor.generatePrompt({
-        //     chunk: combinedContent,
-        //     history,
-        //     question,
-        //     source: contextDoc.source,
-        //   }),
-        // }).catch((logError) => {
-        //   Logger.logError("Failed to create prompt log", {
-        //     error: (logError as Error).message,
-        //     dialogId,
-        //   });
-        // });
       }
 
+      const provider = await DefaultProvidersInitializer.getActiveProvider();
       Logger.logInfo(
-        `chatChunkSize: "${chatChunkSize}", basePromptLength: "${basePromptLength}"`,
+        `chatChunkSize: "${provider.chunkSize}", basePromptLength: "${basePromptLength}"`,
       );
-      const max = +chatChunkSize - basePromptLength - 100;
+      const max = +provider.chunkSize - basePromptLength - 100;
       const chunks =
         max > 0
           ? RAGSearcher.splitTextIntoChunksWithMeta(processedContent, max)
@@ -882,24 +826,7 @@ export class LLMChunkProcessor {
               error: (error as Error).message,
               dialogId,
             });
-            // Continue with normal pre-filter behavior on error
           }
-
-          // Pre-filter chunk to reduce LLM calls (unless bypassed due to consecutive failures)
-          // if (
-          //   !bypassPreFilter &&
-          //   LLMChunkProcessor.getDocTypeBySource(contextDoc.source) !==
-          //     "portfolio" &&
-          //   LLMChunkProcessor.getDocTypeBySource(contextDoc.source) !==
-          //     "resume" &&
-          //   !LLMChunkProcessor.preFilterChunk(chunk, question, questionType)
-          // ) {
-          //   Logger.logInfo(
-          //     `Чанк ${i + 1}/${totalChunks} отфильтрован по ключевым словам`,
-          //     { contextIndex }
-          //   );
-          //   continue;
-          // }
 
           Logger.logInfo(
             `Обработка чанка ${
@@ -926,8 +853,6 @@ export class LLMChunkProcessor {
           });
 
           const { content: text, logId } = await LLMLogger.callWithLogging({
-            provider,
-            llm,
             prompt: chunkPrompt,
             metadata: {
               contextIndex,
@@ -937,16 +862,7 @@ export class LLMChunkProcessor {
             },
             dialogId,
             messageId: undefined,
-            callback: (prompt) =>
-              llm
-                .invoke(prompt)
-                .then(async (result) =>
-                  typeof result === 'string' ? result.trim() : result,
-                ),
-          });
-
-          addPayloadToTrace({
-            text,
+            callback: (prompt) => LLMFactory.invoke(prompt),
           });
 
           addPayloadToTrace({
@@ -992,23 +908,16 @@ export class LLMChunkProcessor {
             });
 
             const { content, logId } = await LLMLogger.callWithLogging({
-              provider,
-              llm,
               prompt: finalAnswerPrompt,
               messageId: undefined,
               dialogId,
-              callback: (prompt) =>
-                llm
-                  .invoke(prompt)
-                  .then(async (result) =>
-                    typeof result === 'string' ? result.trim() : result,
-                  ),
+              callback: (prompt) => LLMFactory.invoke(prompt),
             });
 
             foundText = content;
 
             addPayloadToTrace({
-              foundText,
+              [`chunk${i}FinalAnswerPromptResult`]: foundText,
             });
 
             foundLogIds.push(logId);
@@ -1021,7 +930,7 @@ export class LLMChunkProcessor {
 
       if (foundText) {
         addPayloadToTrace({
-          foundText,
+          [`chunk${foundChunkIndex}FinalAnswerPromptResult`]: foundText,
         });
         return {
           foundLogIds,
@@ -1043,7 +952,7 @@ export class LLMChunkProcessor {
     } catch (error) {
       if (
         (error as any).code === 'RATE_LIMIT_EXCEEDED' ||
-        error.message?.includes('403')
+        error.message?.includes('429')
       ) {
         throw error;
       }
@@ -1068,21 +977,11 @@ export class LLMChunkProcessor {
     category,
     surroundingChunks,
     question,
-    llm,
-    provider,
     dialogId,
   }: {
     category: Category;
     surroundingChunks: string;
     question: string;
-    llm:
-      | ChatOllama
-      | ChatOpenAI
-      | ChatAnthropic
-      | ChatGoogleGenerativeAI
-      | HuggingFaceInference
-      | ChatGroq;
-    provider: string;
     dialogId?: string;
   }) {
     const prompt = createFriendlyFoundPrompt({
@@ -1091,13 +990,7 @@ export class LLMChunkProcessor {
       question,
     });
 
-    addPayloadToTrace({
-      prompt,
-    });
-
     const { content: foundText, logId } = await LLMLogger.callWithLogging({
-      provider,
-      llm,
       prompt,
       metadata: {
         operation: 'friendly_response',
@@ -1105,16 +998,7 @@ export class LLMChunkProcessor {
       },
       dialogId,
       messageId: undefined,
-      callback: (prompt) =>
-        llm
-          .invoke(prompt)
-          .then(async (result) =>
-            typeof result === 'string' ? result.trim() : result,
-          ),
-    });
-
-    addPayloadToTrace({
-      foundText,
+      callback: (prompt) => LLMFactory.invoke(prompt),
     });
 
     return { foundText, logId };
@@ -1125,34 +1009,16 @@ export class LLMChunkProcessor {
     category,
     chunk,
     question,
-    llm,
-    provider,
     dialogId,
-    detectedCategory,
   }: {
     category: Category;
     chunk?: string;
     question: string;
-    llm:
-      | ChatOllama
-      | ChatOpenAI
-      | ChatAnthropic
-      | ChatGoogleGenerativeAI
-      | HuggingFaceInference
-      | ChatGroq;
-    provider: string;
     dialogId?: string;
-    detectedCategory: Category;
   }) {
     const prompt = createFriendlyNotFoundPrompt({ category, chunk, question });
 
-    addPayloadToTrace({
-      prompt,
-    });
-
     const { content: foundText, logId } = await LLMLogger.callWithLogging({
-      provider,
-      llm,
       prompt,
       metadata: {
         operation: 'friendly_not_found_response',
@@ -1160,16 +1026,7 @@ export class LLMChunkProcessor {
       },
       dialogId,
       messageId: undefined,
-      callback: (prompt) =>
-        llm
-          .invoke(prompt)
-          .then(async (result) =>
-            typeof result === 'string' ? result.trim() : result,
-          ),
-    });
-
-    addPayloadToTrace({
-      foundText,
+      callback: (prompt) => LLMFactory.invoke(prompt),
     });
 
     return { foundText, logId };

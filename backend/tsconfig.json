@@ -20,7 +20,7 @@
     "moduleResolution": "node",
     "importHelpers": true,
     "lib": [
-      "es2020",
+      "es2021",
       "dom"
     ],
     "skipDefaultLibCheck": true,

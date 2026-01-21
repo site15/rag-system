@@ -1,0 +1,2 @@
+-- DropIndex
+DROP INDEX "UK_CHAT_LLM_MODELS__CONFIG";
