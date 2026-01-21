@@ -110,15 +110,7 @@ export const PROVIDER_NAMES = {
   GROQ: 'groq',
   OPENAI: 'openai',
   OLLAMA: 'ollama',
-} as const;
-
-// Provider URLs and Domains
-export const PROVIDER_DOMAINS = {
-  A4F: 'a4f.co',
-  Z_AI: 'z.ai',
-  DEEPSEEK: 'deepseek.com',
-  ANTHROPIC: 'anthropic.com',
-  HUGGINGFACE: 'huggingface.co',
+  LM_STUDIO: 'lm_studio',
 } as const;
 
 // RAG Search Configuration

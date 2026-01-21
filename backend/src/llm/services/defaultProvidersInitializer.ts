@@ -33,7 +33,11 @@ export class DefaultProvidersInitializer {
           model: config.model,
           temperature: config.temperature,
           baseUrl: config.baseUrl,
+
           chunkSize: config.chunkSize,
+          isActive:
+            !!config.apiKey ||
+            ConfigManager.getChatConfig().provider === provider,
         });
       } catch (error) {
         Logger.logError(`Failed to initialize provider ${provider}`, {
@@ -52,12 +56,14 @@ export class DefaultProvidersInitializer {
     temperature,
     chunkSize,
     baseUrl,
+    isActive,
   }: {
     provider: string;
     model: string;
     temperature: number;
     chunkSize: number;
     baseUrl: string;
+    isActive: boolean;
   }): Promise<void> {
     try {
       // First, try to find existing record with same configuration
@@ -72,7 +78,6 @@ export class DefaultProvidersInitializer {
           },
           select: {
             id: true,
-            isActive: true,
           },
         });
 
@@ -87,7 +92,7 @@ export class DefaultProvidersInitializer {
             temperature: temperature,
             chunkSize: chunkSize || null,
             status: status,
-            isActive: false,
+            isActive,
             baseUrl,
           },
         });

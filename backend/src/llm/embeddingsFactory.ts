@@ -5,7 +5,6 @@ import { HttpsProxyAgent } from 'https-proxy-agent';
 import { ConfigManager } from './config';
 import {
   ERROR_MESSAGES,
-  PROVIDER_DOMAINS,
   PROVIDER_NAMES,
   RATE_LIMIT_CONSTANTS,
 } from './constants';
@@ -33,10 +32,7 @@ export class EmbeddingsFactory {
       embeddingsBaseUrl,
     });
 
-    if (
-      config.provider === PROVIDER_NAMES.A4F ||
-      embeddingsBaseUrl.includes(PROVIDER_DOMAINS.A4F)
-    ) {
+    if (config.provider === PROVIDER_NAMES.A4F) {
       // A4F.co uses OpenAI-compatible API for embeddings
       if (!embeddingsApiKey) {
         throw new Error(ERROR_MESSAGES.PROVIDER_ERRORS.EMBEDDINGS_A4F);
@@ -77,10 +73,7 @@ export class EmbeddingsFactory {
       }
 
       return new OpenAIEmbeddings(openaiOptions);
-    } else if (
-      config.provider === PROVIDER_NAMES.Z_AI ||
-      embeddingsBaseUrl.includes(PROVIDER_DOMAINS.Z_AI)
-    ) {
+    } else if (config.provider === PROVIDER_NAMES.Z_AI) {
       // Z.AI uses OpenAI-compatible API for embeddings
       if (!embeddingsApiKey) {
         throw new Error(ERROR_MESSAGES.PROVIDER_ERRORS.EMBEDDINGS_Z_AI);
@@ -121,10 +114,7 @@ export class EmbeddingsFactory {
       }
 
       return new OpenAIEmbeddings(openaiOptions);
-    } else if (
-      config.provider === PROVIDER_NAMES.DEEPSEEK ||
-      embeddingsBaseUrl.includes(PROVIDER_DOMAINS.DEEPSEEK)
-    ) {
+    } else if (config.provider === PROVIDER_NAMES.DEEPSEEK) {
       // DeepSeek uses OpenAI-compatible API for embeddings
       if (!embeddingsApiKey) {
         throw new Error(ERROR_MESSAGES.PROVIDER_ERRORS.EMBEDDINGS_DEEPSEEK);

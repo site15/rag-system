@@ -11,7 +11,6 @@ import { addPayloadToTrace, Trace } from '../trace/trace.module';
 import { ConfigManager } from './config';
 import {
   ERROR_MESSAGES,
-  PROVIDER_DOMAINS,
   PROVIDER_NAMES,
   RATE_LIMIT_CONSTANTS,
 } from './constants';
@@ -37,10 +36,7 @@ export class LLMFactory {
       hasApiKey: !!apiKey,
     });
 
-    if (
-      chatConfig.provider === PROVIDER_NAMES.A4F ||
-      baseUrl?.includes(PROVIDER_DOMAINS.A4F)
-    ) {
+    if (chatConfig.provider === PROVIDER_NAMES.A4F) {
       // A4F.co uses OpenAI-compatible API
       if (!apiKey) {
         throw new Error(ERROR_MESSAGES.PROVIDER_ERRORS.A4F);
@@ -83,10 +79,7 @@ export class LLMFactory {
 
       Logger.logInfo('Creating ChatOpenAI instance');
       return new ChatOpenAI(openaiOptions);
-    } else if (
-      chatConfig.provider === PROVIDER_NAMES.Z_AI ||
-      baseUrl?.includes(PROVIDER_DOMAINS.Z_AI)
-    ) {
+    } else if (chatConfig.provider === PROVIDER_NAMES.Z_AI) {
       // Z.AI uses OpenAI-compatible API
       if (!apiKey) {
         throw new Error(ERROR_MESSAGES.PROVIDER_ERRORS.Z_AI);
@@ -128,10 +121,7 @@ export class LLMFactory {
       }
 
       return new ChatOpenAI(openaiOptions);
-    } else if (
-      chatConfig.provider === PROVIDER_NAMES.DEEPSEEK ||
-      baseUrl?.includes(PROVIDER_DOMAINS.DEEPSEEK)
-    ) {
+    } else if (chatConfig.provider === PROVIDER_NAMES.DEEPSEEK) {
       // DeepSeek uses OpenAI-compatible API
       if (!apiKey) {
         throw new Error(ERROR_MESSAGES.PROVIDER_ERRORS.DEEPSEEK);
@@ -173,10 +163,7 @@ export class LLMFactory {
       }
 
       return new ChatOpenAI(openaiOptions);
-    } else if (
-      chatConfig.provider === PROVIDER_NAMES.ANTHROPIC ||
-      baseUrl?.includes(PROVIDER_DOMAINS.ANTHROPIC)
-    ) {
+    } else if (chatConfig.provider === PROVIDER_NAMES.ANTHROPIC) {
       // Anthropic uses Anthropic API
       if (!apiKey) {
         throw new Error(ERROR_MESSAGES.PROVIDER_ERRORS.ANTHROPIC);
@@ -231,10 +218,7 @@ export class LLMFactory {
         apiKey: apiKey,
         apiVersion: 'v1',
       });
-    } else if (
-      chatConfig.provider === PROVIDER_NAMES.HUGGINGFACE ||
-      (baseUrl && baseUrl.includes(PROVIDER_DOMAINS.HUGGINGFACE))
-    ) {
+    } else if (chatConfig.provider === PROVIDER_NAMES.HUGGINGFACE) {
       // Hugging Face uses Hugging Face Inference API
       if (!apiKey) {
         throw new Error(ERROR_MESSAGES.PROVIDER_ERRORS.HUGGINGFACE);
@@ -274,10 +258,7 @@ export class LLMFactory {
 
       Logger.logInfo('Creating HuggingFaceInference instance');
       return new HuggingFaceInference(hfOptions);
-    } else if (
-      chatConfig.provider === PROVIDER_NAMES.GROQ ||
-      (baseUrl && baseUrl.includes('groq.com'))
-    ) {
+    } else if (chatConfig.provider === PROVIDER_NAMES.GROQ) {
       // Groq uses Groq API
       if (!apiKey) {
         throw new Error(ERROR_MESSAGES.PROVIDER_ERRORS.GROQ);
@@ -418,9 +399,7 @@ export class LLMFactory {
     } else {
       // For other providers like openai or deepseek, use ChatOpenAI
       if (!apiKey) {
-        throw new Error(
-          'CHAT_API_KEY is required for OpenAI and DeepSeek providers',
-        );
+        throw new Error('apiKey is required for OpenAI and DeepSeek providers');
       }
 
       // Determine which proxy URL to use

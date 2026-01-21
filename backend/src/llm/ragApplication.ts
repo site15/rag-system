@@ -1,14 +1,17 @@
 // ragApplication.ts
+import { writeFile } from 'fs/promises';
 import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
 import { TextLoader } from 'langchain/document_loaders/fs/text';
 import Mustache from 'mustache';
 import { resolve } from 'path';
+import { ChatDocumentEmbeddingDumpService } from '../services/chat-document-embedding-dump.service';
 import { PrismaService } from '../services/prisma.service';
 import { EmbeddingsDB } from './embeddingsDB';
 import { EmbeddingsFactory } from './embeddingsFactory';
 import { LLMFactory } from './llmFactory';
 import { Logger } from './logger';
 import { RAGSearcher } from './ragSearcher';
+
 import { DefaultProvidersInitializer } from './services/defaultProvidersInitializer';
 import { TextHelpers } from './textHelpers';
 import { EmbedingMetadata } from './types';
@@ -23,6 +26,13 @@ export class RAGApplication {
       if (process.env.PROCESS_DOCUMENTS === 'true') {
         // Load and process documents
         await RAGApplication.processDocuments();
+      }
+      if (process.env.CREATE_DUMP_DOCUMENTS === 'true') {
+        // Create dump of documents
+        await writeFile(
+          'dump.sql',
+          (await ChatDocumentEmbeddingDumpService.createFullDump()).dumpSql,
+        );
       }
     } catch (e) {
       Logger.logError(

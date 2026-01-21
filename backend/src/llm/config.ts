@@ -1,27 +1,11 @@
 // config.ts - Provider-specific configuration management
 
 import { PROVIDER_NAMES } from './constants';
-import { AppConfig } from './types';
 
 /**
  * Configuration manager for provider-specific environment variables
  */
 export class ConfigManager {
-  /**
-   * Get general application configuration
-   */
-  public static getAppConfig(): AppConfig {
-    if (!process.env.CHAT_PROVIDER) {
-      throw new Error('CHAT_PROVIDER environment variable is missing');
-    }
-    if (!process.env.EMBEDDINGS_PROVIDER) {
-      throw new Error('EMBEDDINGS_PROVIDER environment variable is missing');
-    }
-    return {
-      chatProvider: process.env.CHAT_PROVIDER,
-      embeddingsProvider: process.env.EMBEDDINGS_PROVIDER,
-    };
-  }
   /**
    * Get proxy configuration
    */
@@ -35,13 +19,15 @@ export class ConfigManager {
    * Get default chat configuration for provider
    */
   public static getChatConfig(provider?: string) {
-    provider = provider || ConfigManager.getAppConfig().chatProvider;
+    provider = provider || process.env.CHAT_PROVIDER || '';
     const providerUpper = provider.toUpperCase();
     return {
       provider,
       model: this.getDefaultChatModel(provider),
       temperature: parseFloat(this.getDefaultTemperature(provider)),
-      baseUrl: this.getDefaultBaseUrl(provider),
+      baseUrl:
+        process.env[`${providerUpper}_CHAT_BASE_URL`] ||
+        this.getDefaultBaseUrl(provider),
       apiKey: process.env[`${providerUpper}_CHAT_API_KEY`],
       chunkSize: 8000,
     };
@@ -51,12 +37,14 @@ export class ConfigManager {
    * Get default embeddings configuration for provider
    */
   public static getEmbeddingsConfig(provider?: string) {
-    provider = provider || ConfigManager.getAppConfig().embeddingsProvider;
+    provider = provider || process.env.EMBEDDINGS_PROVIDER || '';
     const providerUpper = provider.toUpperCase();
     return {
       provider: provider,
       model: this.getDefaultEmbeddingsModel(provider),
-      baseUrl: this.getDefaultBaseUrl(provider),
+      baseUrl:
+        process.env[`${providerUpper}_EMBEDDINGS_BASE_URL`] ||
+        this.getDefaultBaseUrl(provider),
       apiKey: process.env[`${providerUpper}_EMBEDDINGS_API_KEY`],
     };
   }
@@ -82,9 +70,10 @@ export class ConfigManager {
         return 'provider-2/mistral-small-3.1-24b-instruct';
       case PROVIDER_NAMES.Z_AI:
         return 'GLM-4.6V-Flash';
-      case PROVIDER_NAMES.OLLAMA:
+      case PROVIDER_NAMES.LM_STUDIO:
+        return 'qwen2.5-7b-instruct';
       default:
-        return 'llama3';
+        return 'mistral';
     }
   }
 
@@ -99,6 +88,8 @@ export class ConfigManager {
         return '1';
       case PROVIDER_NAMES.Z_AI:
         return '1';
+      case PROVIDER_NAMES.LM_STUDIO:
+        return '0.7';
       default:
         return '0.7';
     }
@@ -125,6 +116,8 @@ export class ConfigManager {
         return 'https://api.a4f.co/v1';
       case PROVIDER_NAMES.Z_AI:
         return 'https://api.z.ai/api/paas/v4';
+      case PROVIDER_NAMES.LM_STUDIO:
+        return 'http://localhost:1234/v1';
       case PROVIDER_NAMES.OLLAMA:
       default:
         return 'http://localhost:21434';

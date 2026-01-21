@@ -1,7 +1,6 @@
 // logger.ts
 import * as fs from 'fs';
 import * as path from 'path';
-import { ConfigManager } from './config';
 
 enum LogLevel {
   INFO = 'INFO',
@@ -89,7 +88,6 @@ export class Logger {
     }
 
     // Log to file only if file logging is enabled
-    const appConfig = ConfigManager.getAppConfig();
     if (process.env.ENABLE_FILE_LOGGING === 'true') {
       // Log to file asynchronously (non-blocking) with different format
       let fileLogEntry = `[${time}] [${level}] ${message.trim()}`;
