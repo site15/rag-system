@@ -498,6 +498,7 @@ export type ChatLlmModel = {
   model: string;
   temperature: number | null;
   chunkSize: number | null;
+  baseUrl: string | null;
   startTime: string | null;
   endTime: string | null;
   status: string;
@@ -521,8 +522,9 @@ export type FindManyChatLlmModelResponse = {
 export type CreateChatLlmModelDto = {
   provider: string;
   model: string;
-  temperature?: number | null;
+  temperature?: string | null;
   chunkSize?: number | null;
+  baseUrl?: string | null;
   startTime?: string | null;
   endTime?: string | null;
   lastRequestId?: string | null;
@@ -535,6 +537,7 @@ export type ChatLlmModelDto = {
   model: string;
   temperature: number | null;
   chunkSize: number | null;
+  baseUrl: string | null;
   startTime: string | null;
   endTime: string | null;
   status: string;
@@ -549,6 +552,7 @@ export type UpdateChatLlmModelDto = {
   model?: string;
   temperature?: number | null;
   chunkSize?: number | null;
+  baseUrl?: string | null;
   startTime?: string | null;
   endTime?: string | null;
   lastRequestId?: string | null;
