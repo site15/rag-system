@@ -88,6 +88,9 @@ export type ChatMessage = {
   trace: {
     [key: string]: unknown;
   } | null;
+  constants: {
+    [key: string]: unknown;
+  } | null;
   isProcessing: boolean;
   questionReceivedAt: string | null;
   answerSentAt: string | null;
@@ -368,6 +371,9 @@ export type CreateChatMessageDto = {
   trace?: {
     [key: string]: unknown;
   } | null;
+  constants?: {
+    [key: string]: unknown;
+  } | null;
   questionReceivedAt?: string | null;
   answerSentAt?: string | null;
   deletedAt?: string | null;
@@ -389,6 +395,9 @@ export type ChatMessageDto = {
   trace: {
     [key: string]: unknown;
   } | null;
+  constants: {
+    [key: string]: unknown;
+  } | null;
   isProcessing: boolean;
   questionReceivedAt: string | null;
   answerSentAt: string | null;
@@ -407,6 +416,9 @@ export type UpdateChatMessageDto = {
   model?: string | null;
   temperature?: number | null;
   trace?: {
+    [key: string]: unknown;
+  } | null;
+  constants?: {
     [key: string]: unknown;
   } | null;
   questionReceivedAt?: string | null;
@@ -637,12 +649,18 @@ export type GetMessageTraceResponse = {
   } | null;
 };
 
+export type Constant = {
+  key: string;
+  constant: string;
+};
+
 export type SendMessageFlowArgs = {
   message: string;
   dialogId?: string | null;
   provider?: string | null;
   model?: string | null;
   temperature?: number | null;
+  constants?: Array<Constant> | null;
 };
 
 export type CancelMessageArgs = {

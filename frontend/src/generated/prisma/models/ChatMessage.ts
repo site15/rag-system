@@ -96,6 +96,7 @@ export type ChatMessageCountAggregateOutputType = {
   isGoodResponse: number;
   isBadResponse: number;
   trace: number;
+  constants: number;
   isProcessing: number;
   questionReceivedAt: number;
   answerSentAt: number;
@@ -175,6 +176,7 @@ export type ChatMessageCountAggregateInputType = {
   isGoodResponse?: true;
   isBadResponse?: true;
   trace?: true;
+  constants?: true;
   isProcessing?: true;
   questionReceivedAt?: true;
   answerSentAt?: true;
@@ -293,6 +295,7 @@ export type ChatMessageGroupByOutputType = {
   isGoodResponse: boolean;
   isBadResponse: boolean;
   trace: runtime.JsonValue | null;
+  constants: runtime.JsonValue | null;
   isProcessing: boolean;
   questionReceivedAt: Date | null;
   answerSentAt: Date | null;
@@ -350,6 +353,7 @@ export type ChatMessageWhereInput = {
   isGoodResponse?: Prisma.BoolFilter<"ChatMessage"> | boolean;
   isBadResponse?: Prisma.BoolFilter<"ChatMessage"> | boolean;
   trace?: Prisma.JsonNullableFilter<"ChatMessage">;
+  constants?: Prisma.JsonNullableFilter<"ChatMessage">;
   isProcessing?: Prisma.BoolFilter<"ChatMessage"> | boolean;
   questionReceivedAt?:
     | Prisma.DateTimeNullableFilter<"ChatMessage">
@@ -396,6 +400,7 @@ export type ChatMessageOrderByWithRelationInput = {
   isGoodResponse?: Prisma.SortOrder;
   isBadResponse?: Prisma.SortOrder;
   trace?: Prisma.SortOrderInput | Prisma.SortOrder;
+  constants?: Prisma.SortOrderInput | Prisma.SortOrder;
   isProcessing?: Prisma.SortOrder;
   questionReceivedAt?: Prisma.SortOrderInput | Prisma.SortOrder;
   answerSentAt?: Prisma.SortOrderInput | Prisma.SortOrder;
@@ -440,6 +445,7 @@ export type ChatMessageWhereUniqueInput = Prisma.AtLeast<
     isGoodResponse?: Prisma.BoolFilter<"ChatMessage"> | boolean;
     isBadResponse?: Prisma.BoolFilter<"ChatMessage"> | boolean;
     trace?: Prisma.JsonNullableFilter<"ChatMessage">;
+    constants?: Prisma.JsonNullableFilter<"ChatMessage">;
     isProcessing?: Prisma.BoolFilter<"ChatMessage"> | boolean;
     questionReceivedAt?:
       | Prisma.DateTimeNullableFilter<"ChatMessage">
@@ -488,6 +494,7 @@ export type ChatMessageOrderByWithAggregationInput = {
   isGoodResponse?: Prisma.SortOrder;
   isBadResponse?: Prisma.SortOrder;
   trace?: Prisma.SortOrderInput | Prisma.SortOrder;
+  constants?: Prisma.SortOrderInput | Prisma.SortOrder;
   isProcessing?: Prisma.SortOrder;
   questionReceivedAt?: Prisma.SortOrderInput | Prisma.SortOrder;
   answerSentAt?: Prisma.SortOrderInput | Prisma.SortOrder;
@@ -548,6 +555,7 @@ export type ChatMessageScalarWhereWithAggregatesInput = {
   isGoodResponse?: Prisma.BoolWithAggregatesFilter<"ChatMessage"> | boolean;
   isBadResponse?: Prisma.BoolWithAggregatesFilter<"ChatMessage"> | boolean;
   trace?: Prisma.JsonNullableWithAggregatesFilter<"ChatMessage">;
+  constants?: Prisma.JsonNullableWithAggregatesFilter<"ChatMessage">;
   isProcessing?: Prisma.BoolWithAggregatesFilter<"ChatMessage"> | boolean;
   questionReceivedAt?:
     | Prisma.DateTimeNullableWithAggregatesFilter<"ChatMessage">
@@ -593,6 +601,7 @@ export type ChatMessageCreateInput = {
   isGoodResponse?: boolean;
   isBadResponse?: boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
+  constants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   isProcessing?: boolean;
   questionReceivedAt?: Date | string | null;
   answerSentAt?: Date | string | null;
@@ -626,6 +635,7 @@ export type ChatMessageUncheckedCreateInput = {
   isGoodResponse?: boolean;
   isBadResponse?: boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
+  constants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   isProcessing?: boolean;
   questionReceivedAt?: Date | string | null;
   answerSentAt?: Date | string | null;
@@ -662,6 +672,7 @@ export type ChatMessageUpdateInput = {
   isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
+  constants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   isProcessing?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   questionReceivedAt?:
     | Prisma.NullableDateTimeFieldUpdateOperationsInput
@@ -714,6 +725,7 @@ export type ChatMessageUncheckedUpdateInput = {
   isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
+  constants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   isProcessing?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   questionReceivedAt?:
     | Prisma.NullableDateTimeFieldUpdateOperationsInput
@@ -757,6 +769,7 @@ export type ChatMessageCreateManyInput = {
   isGoodResponse?: boolean;
   isBadResponse?: boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
+  constants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   isProcessing?: boolean;
   questionReceivedAt?: Date | string | null;
   answerSentAt?: Date | string | null;
@@ -791,6 +804,7 @@ export type ChatMessageUpdateManyMutationInput = {
   isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
+  constants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   isProcessing?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   questionReceivedAt?:
     | Prisma.NullableDateTimeFieldUpdateOperationsInput
@@ -839,6 +853,7 @@ export type ChatMessageUncheckedUpdateManyInput = {
   isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
+  constants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   isProcessing?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   questionReceivedAt?:
     | Prisma.NullableDateTimeFieldUpdateOperationsInput
@@ -885,6 +900,7 @@ export type ChatMessageCountOrderByAggregateInput = {
   isGoodResponse?: Prisma.SortOrder;
   isBadResponse?: Prisma.SortOrder;
   trace?: Prisma.SortOrder;
+  constants?: Prisma.SortOrder;
   isProcessing?: Prisma.SortOrder;
   questionReceivedAt?: Prisma.SortOrder;
   answerSentAt?: Prisma.SortOrder;
@@ -1261,6 +1277,7 @@ export type ChatMessageCreateWithoutAuthUserInput = {
   isGoodResponse?: boolean;
   isBadResponse?: boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
+  constants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   isProcessing?: boolean;
   questionReceivedAt?: Date | string | null;
   answerSentAt?: Date | string | null;
@@ -1292,6 +1309,7 @@ export type ChatMessageUncheckedCreateWithoutAuthUserInput = {
   isGoodResponse?: boolean;
   isBadResponse?: boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
+  constants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   isProcessing?: boolean;
   questionReceivedAt?: Date | string | null;
   answerSentAt?: Date | string | null;
@@ -1380,6 +1398,7 @@ export type ChatMessageScalarWhereInput = {
   isGoodResponse?: Prisma.BoolFilter<"ChatMessage"> | boolean;
   isBadResponse?: Prisma.BoolFilter<"ChatMessage"> | boolean;
   trace?: Prisma.JsonNullableFilter<"ChatMessage">;
+  constants?: Prisma.JsonNullableFilter<"ChatMessage">;
   isProcessing?: Prisma.BoolFilter<"ChatMessage"> | boolean;
   questionReceivedAt?:
     | Prisma.DateTimeNullableFilter<"ChatMessage">
@@ -1419,6 +1438,7 @@ export type ChatMessageCreateWithoutDialogInput = {
   isGoodResponse?: boolean;
   isBadResponse?: boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
+  constants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   isProcessing?: boolean;
   questionReceivedAt?: Date | string | null;
   answerSentAt?: Date | string | null;
@@ -1450,6 +1470,7 @@ export type ChatMessageUncheckedCreateWithoutDialogInput = {
   isGoodResponse?: boolean;
   isBadResponse?: boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
+  constants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   isProcessing?: boolean;
   questionReceivedAt?: Date | string | null;
   answerSentAt?: Date | string | null;
@@ -1522,6 +1543,7 @@ export type ChatMessageCreateWithoutChatMessageDocumentEmbeddingInput = {
   isGoodResponse?: boolean;
   isBadResponse?: boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
+  constants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   isProcessing?: boolean;
   questionReceivedAt?: Date | string | null;
   answerSentAt?: Date | string | null;
@@ -1555,6 +1577,7 @@ export type ChatMessageUncheckedCreateWithoutChatMessageDocumentEmbeddingInput =
     isGoodResponse?: boolean;
     isBadResponse?: boolean;
     trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
+    constants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     isProcessing?: boolean;
     questionReceivedAt?: Date | string | null;
     answerSentAt?: Date | string | null;
@@ -1620,6 +1643,7 @@ export type ChatMessageUpdateWithoutChatMessageDocumentEmbeddingInput = {
   isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
+  constants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   isProcessing?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   questionReceivedAt?:
     | Prisma.NullableDateTimeFieldUpdateOperationsInput
@@ -1672,6 +1696,7 @@ export type ChatMessageUncheckedUpdateWithoutChatMessageDocumentEmbeddingInput =
     isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
+    constants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     isProcessing?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     questionReceivedAt?:
       | Prisma.NullableDateTimeFieldUpdateOperationsInput
@@ -1712,6 +1737,7 @@ export type ChatMessageCreateWithoutChatLlmRequestInput = {
   isGoodResponse?: boolean;
   isBadResponse?: boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
+  constants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   isProcessing?: boolean;
   questionReceivedAt?: Date | string | null;
   answerSentAt?: Date | string | null;
@@ -1744,6 +1770,7 @@ export type ChatMessageUncheckedCreateWithoutChatLlmRequestInput = {
   isGoodResponse?: boolean;
   isBadResponse?: boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
+  constants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   isProcessing?: boolean;
   questionReceivedAt?: Date | string | null;
   answerSentAt?: Date | string | null;
@@ -1807,6 +1834,7 @@ export type ChatMessageUpdateWithoutChatLlmRequestInput = {
   isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
+  constants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   isProcessing?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   questionReceivedAt?:
     | Prisma.NullableDateTimeFieldUpdateOperationsInput
@@ -1858,6 +1886,7 @@ export type ChatMessageUncheckedUpdateWithoutChatLlmRequestInput = {
   isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
+  constants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   isProcessing?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   questionReceivedAt?:
     | Prisma.NullableDateTimeFieldUpdateOperationsInput
@@ -1899,6 +1928,7 @@ export type ChatMessageCreateManyAuthUserInput = {
   isGoodResponse?: boolean;
   isBadResponse?: boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
+  constants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   isProcessing?: boolean;
   questionReceivedAt?: Date | string | null;
   answerSentAt?: Date | string | null;
@@ -1933,6 +1963,7 @@ export type ChatMessageUpdateWithoutAuthUserInput = {
   isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
+  constants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   isProcessing?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   questionReceivedAt?:
     | Prisma.NullableDateTimeFieldUpdateOperationsInput
@@ -1983,6 +2014,7 @@ export type ChatMessageUncheckedUpdateWithoutAuthUserInput = {
   isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
+  constants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   isProcessing?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   questionReceivedAt?:
     | Prisma.NullableDateTimeFieldUpdateOperationsInput
@@ -2032,6 +2064,7 @@ export type ChatMessageUncheckedUpdateManyWithoutAuthUserInput = {
   isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
+  constants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   isProcessing?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   questionReceivedAt?:
     | Prisma.NullableDateTimeFieldUpdateOperationsInput
@@ -2072,6 +2105,7 @@ export type ChatMessageCreateManyDialogInput = {
   isGoodResponse?: boolean;
   isBadResponse?: boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
+  constants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   isProcessing?: boolean;
   questionReceivedAt?: Date | string | null;
   answerSentAt?: Date | string | null;
@@ -2106,6 +2140,7 @@ export type ChatMessageUpdateWithoutDialogInput = {
   isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
+  constants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   isProcessing?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   questionReceivedAt?:
     | Prisma.NullableDateTimeFieldUpdateOperationsInput
@@ -2156,6 +2191,7 @@ export type ChatMessageUncheckedUpdateWithoutDialogInput = {
   isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
+  constants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   isProcessing?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   questionReceivedAt?:
     | Prisma.NullableDateTimeFieldUpdateOperationsInput
@@ -2205,6 +2241,7 @@ export type ChatMessageUncheckedUpdateManyWithoutDialogInput = {
   isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
+  constants?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
   isProcessing?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   questionReceivedAt?:
     | Prisma.NullableDateTimeFieldUpdateOperationsInput
@@ -2297,6 +2334,7 @@ export type ChatMessageSelect<
     isGoodResponse?: boolean;
     isBadResponse?: boolean;
     trace?: boolean;
+    constants?: boolean;
     isProcessing?: boolean;
     questionReceivedAt?: boolean;
     answerSentAt?: boolean;
@@ -2334,6 +2372,7 @@ export type ChatMessageSelectCreateManyAndReturn<
     isGoodResponse?: boolean;
     isBadResponse?: boolean;
     trace?: boolean;
+    constants?: boolean;
     isProcessing?: boolean;
     questionReceivedAt?: boolean;
     answerSentAt?: boolean;
@@ -2366,6 +2405,7 @@ export type ChatMessageSelectUpdateManyAndReturn<
     isGoodResponse?: boolean;
     isBadResponse?: boolean;
     trace?: boolean;
+    constants?: boolean;
     isProcessing?: boolean;
     questionReceivedAt?: boolean;
     answerSentAt?: boolean;
@@ -2394,6 +2434,7 @@ export type ChatMessageSelectScalar = {
   isGoodResponse?: boolean;
   isBadResponse?: boolean;
   trace?: boolean;
+  constants?: boolean;
   isProcessing?: boolean;
   questionReceivedAt?: boolean;
   answerSentAt?: boolean;
@@ -2421,6 +2462,7 @@ export type ChatMessageOmit<
   | "isGoodResponse"
   | "isBadResponse"
   | "trace"
+  | "constants"
   | "isProcessing"
   | "questionReceivedAt"
   | "answerSentAt"
@@ -2484,6 +2526,7 @@ export type $ChatMessagePayload<
       isGoodResponse: boolean;
       isBadResponse: boolean;
       trace: runtime.JsonValue | null;
+      constants: runtime.JsonValue | null;
       isProcessing: boolean;
       questionReceivedAt: Date | null;
       answerSentAt: Date | null;
@@ -3154,6 +3197,7 @@ export interface ChatMessageFieldRefs {
   readonly isGoodResponse: Prisma.FieldRef<"ChatMessage", "Boolean">;
   readonly isBadResponse: Prisma.FieldRef<"ChatMessage", "Boolean">;
   readonly trace: Prisma.FieldRef<"ChatMessage", "Json">;
+  readonly constants: Prisma.FieldRef<"ChatMessage", "Json">;
   readonly isProcessing: Prisma.FieldRef<"ChatMessage", "Boolean">;
   readonly questionReceivedAt: Prisma.FieldRef<"ChatMessage", "DateTime">;
   readonly answerSentAt: Prisma.FieldRef<"ChatMessage", "DateTime">;

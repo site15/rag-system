@@ -307,6 +307,7 @@ export type {
   ChatPromptControllerUpdateOneResponses,
   ChatPromptDto,
   ClientOptions,
+  Constant,
   CreateAuthApiKeyDto,
   CreateAuthSessionDto,
   CreateAuthUserDto,
