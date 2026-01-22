@@ -1,5 +1,4 @@
 // ragSearcher.ts
-import Mustache from 'mustache';
 import { PrismaService } from '../services/prisma.service';
 import { addPayloadToTrace, Trace } from '../trace/trace.module';
 import { getConstant, GetConstantKey } from '../utils/get-constant';
@@ -35,13 +34,10 @@ WHERE id IN (${ids.map((id) => `'${id}'`).join(', ')})`,
       const meta = row.metadata?.meta || {};
       return {
         id: row.id,
-        content: Mustache.render(
-          getConstant(GetConstantKey.RagSearcher_metadataSeparator),
-          {
-            content: row.content,
-            graphContent: row.graphContent,
-          },
-        ),
+        content: getConstant(GetConstantKey.RagSearcher_metadataSeparator, {
+          content: row.content,
+          graphContent: row.graphContent,
+        }),
         source: source,
         fromLine: meta.loc?.lines?.from,
         toLine: meta.loc?.lines?.to,

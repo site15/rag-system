@@ -1,11 +1,10 @@
 // dialogManager.ts
-import Mustache from 'mustache';
 import { PrismaService } from '../services/prisma.service';
-import { TraceNode } from '../trace/trace.module';
+import { getTraceStack } from '../trace/trace.module';
+import { getConstant, GetConstantKey } from '../utils/get-constant';
 import { Logger } from './logger';
 import { FailureTracker } from './services/failureTracker';
 import { Category } from './services/questionTransformer';
-import { getConstant, GetConstantKey } from '../utils/get-constant';
 
 export class DialogManager {
   public static async createDialog(userId: string): Promise<string> {
@@ -25,44 +24,16 @@ export class DialogManager {
     return dialog.id;
   }
 
-  public static async setMessageTrace(
-    messageId: string,
-    trace: TraceNode[] | null,
-  ): Promise<void> {
-    Logger.logInfo('Setting message trace', {
-      messageId,
-    });
-
-    await PrismaService.instance.chatDialog.updateMany({
-      where: {
-        ChatMessage: { some: { id: messageId } },
-      },
-      data: {
-        consecutiveFailures: 0,
-        updatedAt: new Date(),
-      },
-    });
-
-    // Mark the chat history entry as successful
-    await PrismaService.instance.chatMessage.update({
-      where: { deletedAt: null, id: messageId },
-      data: {
-        trace: trace as any,
-        updatedAt: new Date(),
-      },
-    });
-
-    Logger.logInfo('Message trace set', { messageId });
-  }
-
   public static async createMessage({
     dialogId,
     userId,
     question,
+    constants,
   }: {
     dialogId: string;
     userId: string;
     question: string;
+    constants: Record<string, string>;
   }) {
     dialogId = await DialogManager.getGetOrCreateDialogId({ dialogId, userId });
 
@@ -73,7 +44,7 @@ export class DialogManager {
         question: question,
         answer: '',
         isProcessing: true,
-        questionReceivedAt: question ? new Date() : null,
+        constants: constants || {},
       },
     });
 
@@ -136,9 +107,9 @@ export class DialogManager {
     transformedQuestion?: string;
     transformedEmbeddingQuery?: string;
     isProcessing?: boolean;
-    llmProvider?: string;
-    llmModel?: string;
-    llmTemperature?: number;
+    llmProvider: string | undefined;
+    llmModel: string | undefined;
+    llmTemperature: number | undefined;
   }) {
     // Insert the chat history record and get the ID
     const chatMessage = await PrismaService.instance.chatMessage.update({
@@ -152,6 +123,7 @@ export class DialogManager {
         transformedEmbeddingQuery: transformedEmbeddingQuery,
         isProcessing,
         answerSentAt: answer ? new Date() : null,
+        trace: getTraceStack() as any,
       },
       select: {
         id: true,
@@ -271,13 +243,10 @@ export class DialogManager {
     });
 
     const history = messages.reverse().map((x) =>
-      Mustache.render(
-        getConstant(GetConstantKey.DialogManager_historyTemplate),
-        {
-          question: x.question,
-          answer: x.answer,
-        },
-      ),
+      getConstant(GetConstantKey.DialogManager_historyTemplate, {
+        question: x.question,
+        answer: x.answer,
+      }),
     );
 
     Logger.logInfo('История диалога получена', { count: history.length });

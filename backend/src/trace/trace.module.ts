@@ -38,6 +38,7 @@ export interface TraceNode {
 export interface TraceStore {
   stack: TraceNode[];
   root?: TraceNode;
+  constants?: Record<string, string>;
 }
 
 export interface TraceStorage {

@@ -1,5 +1,9 @@
-import { readFileSync } from 'fs';
 import { resolve } from 'path';
+import { getTraceStorage } from '../trace/trace.module';
+import { readFile } from 'fs/promises';
+import Mustache from 'mustache';
+
+export const globalConstants: Record<string, string> = {} as const;
 
 export enum GetConstantKey {
   QuestionTransformer_transformQuestion_1 = 'QuestionTransformer_transformQuestion_1',
@@ -84,8 +88,37 @@ export enum GetConstantKey {
   RagSearcher_metadataSeparator = 'RagSearcher_metadataSeparator',
 }
 
-export const getConstant = (key: GetConstantKey) => {
-  const path = resolve(process.cwd(), '..', 'constants', `${key}.txt`);
-  console.log(path);
-  return readFileSync(path, 'utf-8');
+export const loadConstantsFromFiles = async () => {
+  for (const key of Object.keys(GetConstantKey)) {
+    globalConstants[key] = await readFile(
+      resolve(process.cwd(), '..', 'constants', `${key}.txt`),
+      'utf-8',
+    );
+  }
+};
+
+export const getConstants = () => {
+  const store = getTraceStorage().getStore();
+
+  if (!store) {
+    return { ...globalConstants };
+  }
+
+  if (!store.constants) {
+    store.constants = { ...globalConstants };
+  }
+
+  return store.constants;
+};
+
+export const patchConstants = (constants: Record<string, string>) => {
+  Object.assign(getConstants(), constants);
+};
+
+export const getConstant = (key: GetConstantKey, context?: any) => {
+  const content = getConstants()[key];
+  if (!context) {
+    return content;
+  }
+  return Mustache.render(content, context);
 };

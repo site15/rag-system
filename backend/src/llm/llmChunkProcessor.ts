@@ -317,8 +317,8 @@ export class LLMChunkProcessor {
         const author = authorMatch ? authorMatch[1].trim() : '';
 
         if (semantic || author) {
-          processedContent = Mustache.render(
-            getConstant(GetConstantKey.LlmChunkProcessor_semanticTemplate),
+          processedContent = getConstant(
+            GetConstantKey.LlmChunkProcessor_semanticTemplate,
             {
               source: contextDoc.source,
               fromLine: contextDoc.fromLine,
@@ -328,8 +328,8 @@ export class LLMChunkProcessor {
             },
           );
         } else {
-          processedContent = Mustache.render(
-            getConstant(GetConstantKey.LlmChunkProcessor_simpleTemplate),
+          processedContent = getConstant(
+            GetConstantKey.LlmChunkProcessor_simpleTemplate,
             {
               source: contextDoc.source,
               fromLine: contextDoc.fromLine,
@@ -339,8 +339,8 @@ export class LLMChunkProcessor {
           );
         }
       } else {
-        processedContent = Mustache.render(
-          getConstant(GetConstantKey.LlmChunkProcessor_simpleTemplate),
+        processedContent = getConstant(
+          GetConstantKey.LlmChunkProcessor_simpleTemplate,
           {
             source: contextDoc.source,
             fromLine: contextDoc.fromLine,
@@ -684,10 +684,10 @@ export class LLMChunkProcessor {
 
     const prompt = getCategoryPrompt(detectedCategory);
     if (prompt) {
-      return Mustache.render(prompt, templateData);
+      return getCategoryPrompt(detectedCategory, templateData);
     }
 
-    return Mustache.render(getCategoryPrompt(Category.telegram), templateData);
+    return getCategoryPrompt(Category.telegram, templateData);
   }
 
   static getDocTypeBySource(source: string) {

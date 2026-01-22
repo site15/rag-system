@@ -12,16 +12,24 @@ import { LLMFactory } from './llmFactory';
 import { Logger } from './logger';
 import { RAGSearcher } from './ragSearcher';
 
+import {
+  getConstant,
+  GetConstantKey,
+  loadConstantsFromFiles,
+} from '../utils/get-constant';
 import { DefaultProvidersInitializer } from './services/defaultProvidersInitializer';
 import { TextHelpers } from './textHelpers';
 import { EmbedingMetadata } from './types';
-import { getConstant, GetConstantKey } from '../utils/get-constant';
 
 export class RAGApplication {
   public static async start() {
     Logger.logInfo('Запуск ingestion и RAG');
 
     try {
+      // Load constants from files
+      await loadConstantsFromFiles();
+
+      // Initialize default providers
       await DefaultProvidersInitializer.initializeDefaultProviders();
 
       if (process.env.PROCESS_DOCUMENTS === 'true') {
@@ -280,8 +288,8 @@ VALUES (${trimmedContent}, ${vectorValue}::vector, ${metadata || '{}'}, ${hash})
           }
 
           // Create the prompt with the document content
-          const prompt = Mustache.render(
-            await getConstant(GetConstantKey.Prompt_documentAnalysisTemplate),
+          const prompt = getConstant(
+            GetConstantKey.Prompt_documentAnalysisTemplate,
             { content: doc.content },
           );
 

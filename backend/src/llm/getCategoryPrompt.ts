@@ -1,7 +1,7 @@
 import { Category } from './services/questionTransformer';
 import { getConstant, GetConstantKey } from '../utils/get-constant';
 
-export function getCategoryPrompt(category: Category): string {
+export function getCategoryPrompt(category: Category, context?: any): string {
   // Map category to constant key
   const categoryKeyMap: Record<Category, GetConstantKey> = {
     [Category.telegram]: GetConstantKey.CategoryPrompt_telegram,
@@ -35,10 +35,10 @@ export function getCategoryPrompt(category: Category): string {
 
   // Load template synchronously
   try {
-    return getConstant(categoryKeyMap[category]);
+    return getConstant(categoryKeyMap[category], context);
   } catch (error) {
     // console.error(`Failed to load template for category ${category}:`, error);
     // Fallback to telegram template
-    return getConstant(GetConstantKey.CategoryPrompt_telegram);
+    return getConstant(GetConstantKey.CategoryPrompt_telegram, context);
   }
 }

@@ -175,6 +175,7 @@ export const ChatMessageScalarFieldEnum = {
   isGoodResponse: 'isGoodResponse',
   isBadResponse: 'isBadResponse',
   trace: 'trace',
+  constants: 'constants',
   isProcessing: 'isProcessing',
   questionReceivedAt: 'questionReceivedAt',
   answerSentAt: 'answerSentAt',

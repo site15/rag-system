@@ -1,5 +1,4 @@
 // questionTransformer.ts
-import Mustache from 'mustache';
 import { addPayloadToTrace, Trace } from '../../trace/trace.module';
 import { getConstant, GetConstantKey } from '../../utils/get-constant';
 import { RAG_SEARCH_CONFIG } from '../constants';
@@ -250,8 +249,8 @@ export class QuestionTransformer {
           category,
           dialogId,
           messageId,
-          prompt: Mustache.render(
-            getConstant(GetConstantKey.QuestionTransformer_transformQuestion_1),
+          prompt: getConstant(
+            GetConstantKey.QuestionTransformer_transformQuestion_1,
             {
               history: removeCodeWrappers(TextHelpers.concat(history)),
               question: question,
@@ -278,8 +277,8 @@ export class QuestionTransformer {
         transformedEmbeddedActionBased.logId,
         detectCategoryResult.logId,
       ],
-      transformedEmbedded: Mustache.render(
-        getConstant(GetConstantKey.QuestionTransformer_transformQuestion_2),
+      transformedEmbedded: getConstant(
+        GetConstantKey.QuestionTransformer_transformQuestion_2,
         transformedEmbeddedActionBased.result,
       ),
       category,
@@ -496,8 +495,8 @@ export class QuestionTransformer {
     text: string;
     history: string[];
   }) {
-    const prompt = Mustache.render(
-      getConstant(GetConstantKey.QuestionTransformer_transformQuestion_3),
+    const prompt = getConstant(
+      GetConstantKey.QuestionTransformer_transformQuestion_3,
       {
         categoryList: TextHelpers.concat(
           Object.keys(Category)

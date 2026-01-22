@@ -76,6 +76,11 @@ export class ChatMessage {
   })
   trace!: Prisma.JsonValue | null;
   @ApiProperty({
+    type: () => Object,
+    nullable: true,
+  })
+  constants!: Prisma.JsonValue | null;
+  @ApiProperty({
     type: 'boolean',
   })
   isProcessing!: boolean;

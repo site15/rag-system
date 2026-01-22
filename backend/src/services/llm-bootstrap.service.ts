@@ -5,11 +5,12 @@ import {
   OnApplicationShutdown,
 } from '@nestjs/common';
 import { concatMap, Subject } from 'rxjs';
-import { DialogManager } from '../llm/dialogManager';
 import { RAGApplication } from '../llm/ragApplication';
-import { getTraceStack } from '../trace/trace.module';
+import { getTraceStorage, TraceStore } from '../trace/trace.module';
 import { EventType } from '../types/event-type';
+import { globalConstants } from '../utils/get-constant';
 import { LlmSendMessageService } from './llm-send-message.service';
+import { PrismaService } from './prisma.service';
 
 @Injectable()
 export class LlmBootstrapService
@@ -18,27 +19,40 @@ export class LlmBootstrapService
   private readonly logger = new Logger(LlmBootstrapService.name);
   private readonly events$ = new Subject<EventType>();
 
-  constructor(private readonly llmSendMessageService: LlmSendMessageService) {}
+  constructor(
+    private readonly llmSendMessageService: LlmSendMessageService,
+    private readonly prismaService: PrismaService,
+  ) {}
 
   async onApplicationBootstrap() {
     this.events$
       .pipe(
         concatMap(async (event: EventType) => {
-          try {
-            await this.llmSendMessageService.processMessageWithRetry({
-              messageId: event.messageId,
-              dialogId: event.dialogId,
-              userId: event.userId,
-              maxRetries: 3,
-            });
+          const message = await this.prismaService.chatMessage.findFirst({
+            select: { constants: true },
+            where: { id: event.messageId },
+          });
+          const storage = getTraceStorage();
+          const store: TraceStore = storage.getStore() || { stack: [] };
+          store.constants = {
+            ...globalConstants,
+            ...((message?.constants as any) || {}),
+          };
 
-            DialogManager.setMessageTrace(
-              event.messageId,
-              getTraceStack(),
-            ).catch((error) => this.logger.error(error, error.stack));
-          } catch (error) {
-            this.logger.error(error, error.stack);
-          }
+          storage.run(store, () => {
+            try {
+              this.llmSendMessageService
+                .processMessageWithRetry({
+                  messageId: event.messageId,
+                  dialogId: event.dialogId,
+                  userId: event.userId,
+                  maxRetries: 3,
+                })
+                .catch((error) => this.logger.error(error, error.stack));
+            } catch (error) {
+              this.logger.error(error, error.stack);
+            }
+          });
         }),
       )
       .subscribe();

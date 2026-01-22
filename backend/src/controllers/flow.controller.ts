@@ -22,6 +22,19 @@ import { AppRequest } from '../types/request';
 import { StatusResponse } from '../types/status-response';
 
 ///////////
+
+export class Constant {
+  @ApiProperty({ type: 'string', required: true })
+  @IsDefined()
+  @IsString()
+  key!: string;
+
+  @ApiProperty({ type: 'string', required: true })
+  @IsDefined()
+  @IsString()
+  constant!: string;
+}
+
 export class SendMessageFlowArgs {
   @ApiProperty({ type: 'string', required: true })
   @IsDefined()
@@ -47,6 +60,15 @@ export class SendMessageFlowArgs {
   @IsNumber()
   @Type(() => Number)
   temperature?: number;
+
+  @ApiPropertyOptional({
+    type: () => [Constant],
+    required: false,
+    nullable: true,
+  })
+  @IsOptional()
+  @Type(() => Constant)
+  constants?: Constant[];
 }
 
 ///////////
@@ -214,6 +236,9 @@ export class FlowController {
     const result = await this.llmSendMessageService.createMessage({
       message: args.message,
       dialogId: args.dialogId,
+      constants: args.constants
+        ? Object.fromEntries(args.constants.map((c) => [c.key, c.constant]))
+        : {},
       userId: req.userId,
     });
 

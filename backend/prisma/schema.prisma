@@ -171,6 +171,7 @@ model ChatMessage {
   isGoodResponse            Boolean  @default(false)
   isBadResponse             Boolean  @default(false)
   trace                     Json?
+  constants                 Json?
 
   isProcessing       Boolean   @default(false)
   questionReceivedAt DateTime? @db.Timestamp(6)

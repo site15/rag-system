@@ -3,7 +3,6 @@
  * Contains all prompt strings used for LLM calls with descriptions
  */
 
-import Mustache from 'mustache';
 import { getConstant, GetConstantKey } from '../utils/get-constant';
 import { getCategoryPrompt } from './getCategoryPrompt';
 import { getShortCategoryDescription } from './getShortCategoryDescription';
@@ -27,15 +26,12 @@ export function createFriendlyFoundPrompt({
   chunk?: string;
   question: string;
 }): string {
-  return Mustache.render(
-    getConstant(GetConstantKey.Prompt_friendlyFoundTemplate),
-    {
-      isTelegram: category === 'telegram',
-      hasContext: !!chunk,
-      context: removeCodeWrappers(chunk),
-      question: question,
-    },
-  );
+  return getConstant(GetConstantKey.Prompt_friendlyFoundTemplate, {
+    isTelegram: category === 'telegram',
+    hasContext: !!chunk,
+    context: removeCodeWrappers(chunk),
+    question: question,
+  });
 }
 
 /**
@@ -54,15 +50,12 @@ export function createFriendlyNotFoundPrompt({
   chunk?: string;
   question: string;
 }): string {
-  return Mustache.render(
-    getConstant(GetConstantKey.Prompt_friendlyNotFoundTemplate),
-    {
-      isTelegram: category === 'telegram',
-      hasContext: !!chunk,
-      context: removeCodeWrappers(chunk),
-      question: question,
-    },
-  );
+  return getConstant(GetConstantKey.Prompt_friendlyNotFoundTemplate, {
+    isTelegram: category === 'telegram',
+    hasContext: !!chunk,
+    context: removeCodeWrappers(chunk),
+    question: question,
+  });
 }
 
 /**
@@ -82,7 +75,7 @@ export function createTelegramAnalysisPrompt({
   history: string[];
   question: string;
 }): string {
-  return Mustache.render(getCategoryPrompt(Category.telegram), {
+  return getCategoryPrompt(Category.telegram, {
     history: removeCodeWrappers(TextHelpers.concat(history, 'нет')),
     context: removeCodeWrappers(chunk || ''),
     question: question,
@@ -107,7 +100,7 @@ export function createArticleAnalysisPrompt({
   history: string[];
   question: string;
 }): string {
-  return Mustache.render(getCategoryPrompt(Category.articles), {
+  return getCategoryPrompt(Category.articles, {
     context: removeCodeWrappers(chunk || ''),
     question: question,
     isFollowUp: history?.[0],
@@ -131,7 +124,7 @@ export function createPortfolioAnalysisPrompt({
   history: string[];
   question: string;
 }): string {
-  return Mustache.render(getCategoryPrompt(Category.portfolio), {
+  return getCategoryPrompt(Category.portfolio, {
     history: removeCodeWrappers(TextHelpers.concat(history, 'нет')),
     context: removeCodeWrappers(chunk || ''),
     question: question,
@@ -156,7 +149,7 @@ export function createResumeAnalysisPrompt({
   history: string[];
   question: string;
 }): string {
-  return Mustache.render(getCategoryPrompt(Category.resume), {
+  return getCategoryPrompt(Category.resume, {
     history: removeCodeWrappers(TextHelpers.concat(history, 'нет')),
     context: removeCodeWrappers(chunk || ''),
     question: question,
@@ -180,7 +173,7 @@ export function createGenericAnalysisPrompt({
   history: string[];
   question: string;
 }): string {
-  return Mustache.render(getCategoryPrompt(Category.none), {
+  return getCategoryPrompt(Category.none, {
     history: removeCodeWrappers(TextHelpers.concat(history, 'нет')),
     context: removeCodeWrappers(chunk || ''),
     question: question,
@@ -211,22 +204,18 @@ export function createContextualRewritePrompt({
   const isFollowUp = history?.[0];
 
   const historyContext = isFollowUp
-    ? Mustache.render(
-        getConstant(GetConstantKey.Prompt_contextualRewriteHistoryTemplate),
-        { history: removeCodeWrappers(TextHelpers.concat(history)) },
-      )
+    ? getConstant(GetConstantKey.Prompt_contextualRewriteHistoryTemplate, {
+        history: removeCodeWrappers(TextHelpers.concat(history)),
+      })
     : '';
 
-  return Mustache.render(
-    getConstant(GetConstantKey.Prompt_contextualRewriteTemplate),
-    {
-      hasCategory: hasCategory,
-      categoryName: categoryName,
-      historyContext: historyContext,
-      isFollowUp,
-      question: question,
-    },
-  );
+  return getConstant(GetConstantKey.Prompt_contextualRewriteTemplate, {
+    hasCategory: hasCategory,
+    categoryName: categoryName,
+    historyContext: historyContext,
+    isFollowUp,
+    question: question,
+  });
 }
 
 /**
@@ -250,22 +239,17 @@ export function createMinimalTransformationPrompt({
 
   const historyContext =
     history && history.length > 0
-      ? Mustache.render(
-          getConstant(
-            GetConstantKey.Prompt_minimalTransformationHistoryTemplate,
-          ),
+      ? getConstant(
+          GetConstantKey.Prompt_minimalTransformationHistoryTemplate,
           { history: removeCodeWrappers(TextHelpers.concat(history)) },
         )
       : '';
 
-  return Mustache.render(
-    getConstant(GetConstantKey.Prompt_minimalTransformationTemplate),
-    {
-      hasCategory: hasCategory,
-      historyContext: historyContext,
-      question: question,
-    },
-  );
+  return getConstant(GetConstantKey.Prompt_minimalTransformationTemplate, {
+    hasCategory: hasCategory,
+    historyContext: historyContext,
+    question: question,
+  });
 }
 
 /**
@@ -275,10 +259,9 @@ export function createMinimalTransformationPrompt({
  * @returns Formatted prompt string for dialog summarization
  */
 export function createDialogSummaryPrompt(history: string[]): string {
-  return Mustache.render(
-    getConstant(GetConstantKey.Prompt_dialogSummaryTemplate),
-    { history: removeCodeWrappers(history.join('\n\n')) },
-  );
+  return getConstant(GetConstantKey.Prompt_dialogSummaryTemplate, {
+    history: removeCodeWrappers(history.join('\n\n')),
+  });
 }
 
 export function createFinalAnswerPrompt({
@@ -294,14 +277,11 @@ export function createFinalAnswerPrompt({
   category: Category;
   history: string;
 }): string {
-  return Mustache.render(
-    getConstant(GetConstantKey.Prompt_finalAnswerTemplate),
-    {
-      isTelegram: category === 'telegram',
-      question: question,
-      context: removeCodeWrappers(context),
-      history: removeCodeWrappers(history),
-      fact: removeCodeWrappers(fact),
-    },
-  );
+  return getConstant(GetConstantKey.Prompt_finalAnswerTemplate, {
+    isTelegram: category === 'telegram',
+    question: question,
+    context: removeCodeWrappers(context),
+    history: removeCodeWrappers(history),
+    fact: removeCodeWrappers(fact),
+  });
 }

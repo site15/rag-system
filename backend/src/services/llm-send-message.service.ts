@@ -40,10 +40,12 @@ export class LlmSendMessageService {
     message,
     dialogId,
     userId,
+    constants,
   }: {
     message: string;
     dialogId?: string;
     userId: string;
+    constants: Record<string, string>;
   }) {
     dialogId = await this.prepareDialog({
       dialogId,
@@ -68,6 +70,7 @@ export class LlmSendMessageService {
       dialogId,
       userId,
       question: message,
+      constants,
     });
   }
 
@@ -290,6 +293,8 @@ export class LlmSendMessageService {
       // Extract document IDs from the contextDocs array
       const selectedDocumentIds = contextDocs.map((doc) => doc.id);
 
+      const llmConfig = await DefaultProvidersInitializer.getActiveProvider();
+
       await DialogManager.updateMessage({
         messageId,
         answer,
@@ -300,6 +305,9 @@ export class LlmSendMessageService {
         transformedQuestion: categorizedQuestion.transformedQuestion,
         transformedEmbeddingQuery: categorizedQuestion.transformedEmbedded,
         isProcessing: false,
+        llmModel: llmConfig.model,
+        llmProvider: llmConfig.provider,
+        llmTemperature: llmConfig.temperature,
       });
 
       LLMQueryLogger.updateQueryReferences(
