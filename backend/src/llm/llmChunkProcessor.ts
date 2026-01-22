@@ -1,9 +1,10 @@
 // llmChunkProcessor.ts
 import Mustache from 'mustache';
 import { addPayloadToTrace, Trace } from '../trace/trace.module';
-import { CATEGORY_PROMPTS } from './category-prompts';
+import { getConstant, GetConstantKey } from '../utils/get-constant';
 import { DialogManager } from './dialogManager';
 import { getCategoryByDetectedCategory } from './getCategoryByDetectedCategory';
+import { getCategoryPrompt } from './getCategoryPrompt';
 import { LLMFactory } from './llmFactory';
 import { LLMLogger } from './llmLogger';
 import { Logger } from './logger';
@@ -16,408 +17,32 @@ import { RAGSearcher } from './ragSearcher';
 import { DefaultProvidersInitializer } from './services/defaultProvidersInitializer';
 import { FailureTracker } from './services/failureTracker';
 import { Category } from './services/questionTransformer';
+import { TextHelpers } from './textHelpers';
 import { DocWithMetadataAndId } from './types';
 import { removeCodeWrappers } from './utils';
 
-// Question types for classification
-enum QuestionType {
-  FACT = 'FACT',
-  INSTRUCTION = 'INSTRUCTION',
-  COMPARISON = 'COMPARISON',
-  OPINION = 'OPINION',
-  OTHER = 'OTHER',
-}
-
-const AUTHOR_MESSAGE_ANSWER_SOURCE = '### Author Message (Answer Source)';
-const THIS_SECTION_MUST_BE_USED_TO_GENERATE_THE_FINAL_ANSWER =
-  'This section MUST be used to generate the final answer.';
+// Constants are now loaded externally via getConstant()
 export class LLMChunkProcessor {
-  private static classifyQuestion(question: string): QuestionType {
-    const lowerQuestion = question.toLowerCase().trim();
-
-    // Opinion keywords
-    const opinionKeywords = [
-      'как ты относишься',
-      'что думаешь',
-      'твое мнение',
-      'как оцениваешь',
-      'как тебе',
-      'нравится ли',
-      'поддерживаешь ли',
-    ];
-
-    // Instruction keywords
-    const instructionKeywords = [
-      'с чего начать',
-      'как начать',
-      'как действовать',
-      'что делать',
-      'как',
-      'каким образом',
-      'как правильно',
-      'что нужно',
-      'порядок',
-      'алгоритм',
-      'инструкция',
-      'руководство',
-    ];
-
-    // Comparison keywords
-    const comparisonKeywords = [
-      'чем отличается',
-      'что лучше',
-      'что выбрать',
-      'сравнить',
-      'сравнение',
-      'разница',
-      'какой',
-      'какая',
-      'какое',
-      'vs',
-      'или',
-      'против',
-      'вместо',
-      'между',
-      'по сравнению с',
-      'какой лучше',
-      'что использовать',
-      'что предпочтительнее',
-      'какой выбрать',
-    ];
-
-    // Fact keywords
-    const factKeywords = [
-      'кто',
-      'что',
-      'где',
-      'когда',
-      'какой',
-      'какая',
-      'какое',
-      'какого',
-      'какие',
-      'каких',
-      'какую',
-      'какую информацию',
-      'какой',
-      'как',
-      'каким',
-      'какая',
-      'какое',
-      'какие',
-    ];
-
-    // Check for opinion first
-    if (opinionKeywords.some((keyword) => lowerQuestion.includes(keyword))) {
-      return QuestionType.OPINION;
-    }
-
-    // Check for comparison
-    if (comparisonKeywords.some((keyword) => lowerQuestion.includes(keyword))) {
-      return QuestionType.COMPARISON;
-    }
-
-    // Check for instruction
-    if (
-      instructionKeywords.some((keyword) => lowerQuestion.includes(keyword))
-    ) {
-      return QuestionType.INSTRUCTION;
-    }
-
-    // Check for fact
-    if (factKeywords.some((keyword) => lowerQuestion.startsWith(keyword))) {
-      return QuestionType.FACT;
-    }
-
-    return QuestionType.OTHER;
-  }
-
-  private static preFilterChunk(
-    chunk: string,
-    question: string,
-    questionType: QuestionType,
-  ): boolean {
-    // Extract keywords from question for matching
-    const questionWords = question
-      .toLowerCase()
-      .replace(/[.,!?;:()\[\]{}]/g, ' ')
-      .split(/\s+/)
-      .filter((word) => word.length > 2); // Only consider words longer than 2 characters
-
-    const chunkLower = chunk.toLowerCase();
-
-    // Check if any significant question keywords exist in the chunk
-    const hasKeywords = questionWords.some(
-      (word) =>
-        chunkLower.includes(word) &&
-        ![
-          'как',
-          'что',
-          'где',
-          'когда',
-          'кто',
-          'почему',
-          'зачем',
-          'какой',
-        ].includes(word), // Exclude common question words
-    );
-
-    // For opinion questions, only pass chunk if the entity from question exists in the chunk
-    if (questionType === QuestionType.OPINION) {
-      // Extract entity from question (the main topic being asked about)
-      // For questions like "как ты относишься к DDD?" we need to find the entity after "к"
-      const entityMatch = question.match(/к\s+(\w+)/i);
-      const entity = entityMatch ? entityMatch[1].toLowerCase() : null;
-
-      if (entity) {
-        // For opinion questions, the entity must be present in the chunk
-        return chunkLower.includes(entity.toLowerCase());
-      } else {
-        // If no clear entity found, fall back to keyword matching
-        return hasKeywords;
-      }
-    }
-
-    // For instruction questions, check for instruction-related content
-    if (questionType === QuestionType.INSTRUCTION) {
-      const instructionTriggers = [
-        'начать',
-        'первый шаг',
-        'рекомендуется',
-        'следует',
-        'нужно',
-        'алгоритм',
-        'инструкция',
-        'порядок',
-        'руководство',
-        'способ',
-        'метод',
-        'подход',
-        'как действовать',
-        'что делать',
-      ];
-      const hasInstructionContent = instructionTriggers.some((trigger) =>
-        chunkLower.includes(trigger),
-      );
-      return hasKeywords || hasInstructionContent;
-    }
-
-    // For comparison questions, check for comparison-related content
-    if (questionType === QuestionType.COMPARISON) {
-      const comparisonTriggers = [
-        'сравнение',
-        'чем отличается',
-        'в отличие от',
-        'в то время как',
-        'лучше чем',
-        'хуже чем',
-        'преимущества',
-        'недостатки',
-        'плюсы и минусы',
-        'разница между',
-        'против',
-        'vs',
-        'какой выбрать',
-        'что выбрать',
-        'рекомендация',
-        'совет',
-      ];
-      const hasComparisonContent = comparisonTriggers.some((trigger) =>
-        chunkLower.includes(trigger),
-      );
-      return hasKeywords || hasComparisonContent;
-    }
-
-    return hasKeywords;
-  }
-
-  private static validateFoundResult(
-    foundText: string,
-    chunk: string,
-    question: string,
-    questionType: QuestionType,
-  ): boolean {
-    if (!foundText.startsWith('[FOUND]')) {
-      return false;
-    }
-
-    const actualText = foundText.replace(/^\[FOUND]\s*/, '');
-
-    // Hard filter: reject any meta-answers that describe absence of information
-    const metaAnswerTriggers = [
-      'не упоминается',
-      'нет информации',
-      'в контексте нет',
-      'отсутствует',
-      'не найдено',
-      'нет упоминания',
-      'не говорится',
-      'не сказано',
-      'ничего не говорится',
-      'ничего не сказано',
-      'нет ничего',
-      'ничего нет',
-    ];
-
-    const actualTextLower = actualText.toLowerCase();
-    if (
-      metaAnswerTriggers.some((trigger) => actualTextLower.includes(trigger))
-    ) {
-      Logger.logInfo(
-        'Отброшен ложный [FOUND] - мета-ответ описывает отсутствие информации',
-        {
-          question,
-          foundText: actualText,
-        },
-      );
-      return false;
-    }
-
-    // For opinion questions, check if the chunk contains explicit author position markers
-    if (questionType === QuestionType.OPINION) {
-      const opinionTriggers = [
-        'я считаю',
-        'я придерживаюсь',
-        'я использую',
-        'я не использую',
-        'мне нравится',
-        'мне не нравится',
-        'я сторонник',
-        'я против',
-        'на моей практике',
-        'по моему опыту',
-        'мое мнение',
-        'мое отношение',
-        'я думаю',
-        'я полагаю',
-        'я верю',
-        'я предпочитаю',
-        'мой выбор',
-        'моя позиция',
-        'мой взгляд',
-        'мое убеждение',
-      ];
-
-      const chunkLower = chunk.toLowerCase();
-      const hasOpinionContent = opinionTriggers.some((trigger) =>
-        chunkLower.includes(trigger),
-      );
-
-      if (!hasOpinionContent) {
-        Logger.logInfo(
-          'Отброшен ложный [FOUND] для опроса мнения - нет явной авторской позиции',
-          {
-            question,
-            chunk: chunk.substring(0, 200),
-            foundText: actualText,
-          },
-        );
-        return false;
-      }
-    }
-
-    // For instruction questions, check if the chunk contains actual instruction content
-    if (questionType === QuestionType.INSTRUCTION) {
-      const instructionTriggers = [
-        'начать стоит',
-        'первым шагом',
-        'рекомендуется',
-        'следует',
-        'нужно',
-        'алгоритм',
-        'инструкция',
-        'порядок',
-        'руководство',
-        'способ',
-        'метод',
-        'подход',
-        'как действовать',
-        'что делать',
-      ];
-
-      const chunkLower = chunk.toLowerCase();
-      const hasInstructionTrigger = instructionTriggers.some((trigger) =>
-        chunkLower.includes(trigger),
-      );
-
-      if (!hasInstructionTrigger) {
-        Logger.logInfo('Отброшен ложный [FOUND] для инструктивного вопроса', {
-          question,
-          chunk: chunk.substring(0, 200),
-          foundText: actualText,
-        });
-        return false;
-      }
-    }
-
-    // Check if the found text is not just a question or example
-    if (
-      actualText.trim().endsWith('?') ||
-      actualText.trim().startsWith('например')
-    ) {
-      Logger.logInfo(
-        'Отброшен ложный [FOUND] - текст является вопросом или примером',
-        {
-          question,
-          foundText: actualText,
-        },
-      );
-      return false;
-    }
-
-    // For comparison questions, check if the chunk contains explicit comparison content
-    if (questionType === QuestionType.COMPARISON) {
-      const comparisonTriggers = [
-        'сравнение',
-        'чем отличается',
-        'в отличие от',
-        'в то время как',
-        'лучше чем',
-        'хуже чем',
-        'преимущества',
-        'недостатки',
-        'плюсы и минусы',
-        'разница между',
-        'против',
-        'vs',
-        'какой выбрать',
-        'что выбрать',
-        'рекомендация',
-        'совет',
-      ];
-
-      const chunkLower = chunk.toLowerCase();
-      const hasComparisonContent = comparisonTriggers.some((trigger) =>
-        chunkLower.includes(trigger),
-      );
-
-      if (!hasComparisonContent) {
-        Logger.logInfo(
-          'Отброшен ложный [FOUND] для сравнительного вопроса - нет явного содержания сравнения',
-          {
-            question,
-            chunk: chunk.substring(0, 200),
-            foundText: actualText,
-          },
-        );
-        return false;
-      }
-    }
-
-    return true;
-  }
-
   private static isAuthorMessageContent(chunk: string): boolean {
     // Check if the chunk contains Author Message content
-    return chunk.includes(AUTHOR_MESSAGE_ANSWER_SOURCE);
+    return chunk.includes(
+      getConstant(GetConstantKey.LlmChunkProcessor_authorMessageHeader),
+    );
   }
 
   private static extractAuthorMessageContent(chunk: string): string {
-    if (chunk.includes(AUTHOR_MESSAGE_ANSWER_SOURCE)) {
+    const authorMessageHeader = getConstant(
+      GetConstantKey.LlmChunkProcessor_authorMessageHeader,
+    );
+    const finalAnswerInstruction = getConstant(
+      GetConstantKey.LlmChunkProcessor_finalAnswerInstruction,
+    );
+
+    if (chunk.includes(authorMessageHeader)) {
       try {
         const authorMatch = chunk
-          .replace(THIS_SECTION_MUST_BE_USED_TO_GENERATE_THE_FINAL_ANSWER, '')
-          .split(AUTHOR_MESSAGE_ANSWER_SOURCE)[1]
+          .replace(finalAnswerInstruction, '')
+          .split(authorMessageHeader)[1]
           .split('\n--\n')[0];
         return authorMatch.trim();
       } catch (error) {
@@ -513,9 +138,9 @@ export class LLMChunkProcessor {
       question,
     });
 
-    // Classify the question to determine processing strategy
-    const { maxParallelThreads, questionType } =
-      LLMChunkProcessor.getProcessContextDocsInParallelOptions(question);
+    const maxParallelThreads =
+      parseInt(process.env.PARALLEL_THREADS || '1', 10) || 1;
+    Logger.logInfo('Количество параллельных потоков', { maxParallelThreads });
 
     const foundLogIds: (string | undefined)[] = [];
     // Process each context doc in parallel, up to maxParallelThreads at a time
@@ -541,7 +166,6 @@ export class LLMChunkProcessor {
           question,
           history,
           category,
-          questionType,
           contextIndex: i + batchIndex,
           dialogId,
           contextDocs,
@@ -633,24 +257,12 @@ export class LLMChunkProcessor {
     return results;
   }
 
-  private static getProcessContextDocsInParallelOptions(question: string) {
-    const questionType = LLMChunkProcessor.classifyQuestion(question);
-    Logger.logInfo('Классификация вопроса', { questionType, question });
-
-    // Get the number of parallel threads from parameters, default to 1
-    const maxParallelThreads =
-      parseInt(process.env.PARALLEL_THREADS || '1', 10) || 1;
-    Logger.logInfo('Количество параллельных потоков', { maxParallelThreads });
-    return { maxParallelThreads, questionType };
-  }
-
   @Trace()
   private static async processSingleContextDoc({
     contextDoc,
     question,
     history,
     category,
-    questionType,
     contextIndex,
     dialogId,
     contextDocs,
@@ -661,7 +273,6 @@ export class LLMChunkProcessor {
     question: string;
     history: string[];
     category: Category;
-    questionType: QuestionType;
     contextIndex: number;
     dialogId: string;
     contextDocs: DocWithMetadataAndId[];
@@ -692,51 +303,51 @@ export class LLMChunkProcessor {
       let processedContent = '';
       if (category === 'telegram') {
         const semanticMatch = contextDoc.content.match(
-          /### Semantic Search Content([\s\S]*?)### Author Message/,
+          new RegExp(
+            getConstant(GetConstantKey.LlmChunkProcessor_semanticSearchRegex),
+          ),
         );
         const authorMatch = contextDoc.content.match(
-          /### Author Message \(Answer Source\)([\s\S]*)$/,
+          new RegExp(
+            getConstant(GetConstantKey.LlmChunkProcessor_authorMessageRegex),
+          ),
         );
 
         const semantic = semanticMatch ? semanticMatch[1].trim() : '';
         const author = authorMatch ? authorMatch[1].trim() : '';
 
         if (semantic || author) {
-          const template = `
-[{{source}}:{{fromLine}}-{{toLine}}]
-### Semantic Search Content
-{{semantic}}
-### Author Message (Answer Source)
-{{author}}`;
-
-          processedContent = Mustache.render(template, {
-            source: contextDoc.source,
-            fromLine: contextDoc.fromLine,
-            toLine: contextDoc.toLine,
-            semantic: semantic,
-            author: author,
-          });
+          processedContent = Mustache.render(
+            getConstant(GetConstantKey.LlmChunkProcessor_semanticTemplate),
+            {
+              source: contextDoc.source,
+              fromLine: contextDoc.fromLine,
+              toLine: contextDoc.toLine,
+              semantic: semantic,
+              author: author,
+            },
+          );
         } else {
-          const template = `[{{source}}:{{fromLine}}-{{toLine}}]
-{{content}}`;
-
-          processedContent = Mustache.render(template, {
+          processedContent = Mustache.render(
+            getConstant(GetConstantKey.LlmChunkProcessor_simpleTemplate),
+            {
+              source: contextDoc.source,
+              fromLine: contextDoc.fromLine,
+              toLine: contextDoc.toLine,
+              content: contextDoc.content,
+            },
+          );
+        }
+      } else {
+        processedContent = Mustache.render(
+          getConstant(GetConstantKey.LlmChunkProcessor_simpleTemplate),
+          {
             source: contextDoc.source,
             fromLine: contextDoc.fromLine,
             toLine: contextDoc.toLine,
             content: contextDoc.content,
-          });
-        }
-      } else {
-        const template = `[{{source}}:{{fromLine}}-{{toLine}}]
-{{content}}`;
-
-        processedContent = Mustache.render(template, {
-          source: contextDoc.source,
-          fromLine: contextDoc.fromLine,
-          toLine: contextDoc.toLine,
-          content: contextDoc.content,
-        });
+          },
+        );
       }
 
       // --- Разбиваем на чанки ---
@@ -757,20 +368,21 @@ export class LLMChunkProcessor {
       });
 
       if (index === 0) {
-        const combinedContent = contextDocs
-          .map((doc) => {
-            const template = `[id: {{id}}, source: {{source}}, fromLine: {{fromLine}}, toLine: {{toLine}}, distance: {{distance}}]
-{{content}}`;
-            return Mustache.render(template, {
-              id: doc.id,
-              source: doc.source,
-              fromLine: doc.fromLine,
-              toLine: doc.toLine,
-              distance: doc.distance,
-              content: doc.content,
-            });
-          })
-          .join('\n');
+        const combinedContent = TextHelpers.concat(
+          contextDocs.map((doc) => {
+            return Mustache.render(
+              '[id: {{id}}, source: {{source}}, fromLine: {{fromLine}}, toLine: {{toLine}}, distance: {{distance}}]\n{{content}}',
+              {
+                id: doc.id,
+                source: doc.source,
+                fromLine: doc.fromLine,
+                toLine: doc.toLine,
+                distance: doc.distance,
+                content: doc.content,
+              },
+            );
+          }),
+        );
         contextDocs = [
           {
             id: 'empty',
@@ -900,7 +512,7 @@ export class LLMChunkProcessor {
               context: removeCodeWrappers(chunk.content),
               fact: foundText,
               category,
-              history: removeCodeWrappers(history.join('\n')),
+              history: removeCodeWrappers(TextHelpers.concat(history)),
             });
 
             addPayloadToTrace({
@@ -1063,28 +675,19 @@ export class LLMChunkProcessor {
       }
     }
 
-    const customRules = history.length
-      ? `Если вопрос является follow-up (уточнение, продолжение) и conversation history содержит опыт в первом лице, 
-ориентируйся ТОЛЬКО на этот опыт, а контекст документа используй только для уточнения фактов, связанных с этим опытом. 
-Не берите информацию из контекста, если она относится к другому проекту, не упомянутому в истории.
-
-Если объект или технология упомянуты в истории, а контекст документа содержит другой объект/технологию, 
-игнорируй несвязанный контекст и отвечай только исходя из истории.`
-      : '';
-
     const templateData = {
-      history: removeCodeWrappers(history.length ? history.join('\n') : 'нет'),
+      history: removeCodeWrappers(TextHelpers.concat(history, 'нет')),
       context: removeCodeWrappers(chunk || ''),
       question: question,
-      customRules: customRules,
       isFollowUp: history?.[0],
     };
 
-    if (CATEGORY_PROMPTS[detectedCategory]) {
-      return Mustache.render(CATEGORY_PROMPTS[detectedCategory], templateData);
+    const prompt = getCategoryPrompt(detectedCategory);
+    if (prompt) {
+      return Mustache.render(prompt, templateData);
     }
 
-    return Mustache.render(CATEGORY_PROMPTS.telegram, templateData);
+    return Mustache.render(getCategoryPrompt(Category.telegram), templateData);
   }
 
   static getDocTypeBySource(source: string) {

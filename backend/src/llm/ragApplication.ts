@@ -15,6 +15,7 @@ import { RAGSearcher } from './ragSearcher';
 import { DefaultProvidersInitializer } from './services/defaultProvidersInitializer';
 import { TextHelpers } from './textHelpers';
 import { EmbedingMetadata } from './types';
+import { getConstant, GetConstantKey } from '../utils/get-constant';
 
 export class RAGApplication {
   public static async start() {
@@ -115,7 +116,12 @@ export class RAGApplication {
             const normalized = TextHelpers.normalizeTextMy(chunk.content);
             if (
               !normalized ||
-              (isTelegramDoc && !chunk.content.includes('My telegram message'))
+              (isTelegramDoc &&
+                !chunk.content.includes(
+                  getConstant(
+                    GetConstantKey.RagApplication_telegramMessageIdentifier,
+                  ),
+                ))
             ) {
               Logger.logInfo('Пропуск пустого чанка', {
                 metadata,
@@ -275,87 +281,7 @@ VALUES (${trimmedContent}, ${vectorValue}::vector, ${metadata || '{}'}, ${hash})
 
           // Create the prompt with the document content
           const prompt = Mustache.render(
-            `You are an expert system for semantic metadata extraction and document classification.
-
-Your task is to analyze the provided text and return a SINGLE valid JSON object
-that represents the document metadata and the required response classification.
-
-STRICT OUTPUT RULES:
-- Output ONLY valid JSON
-- Do NOT include markdown, explanations, comments, or extra text
-- If the output is not valid JSON, the response is invalid
-- Field names must be in lowerCamelCase
-- Do NOT include fields that are not relevant
-- Always include all mandatory base fields
-- Optional fields must be included ONLY if clearly applicable
-- If the input text is NOT a direct user request, set classification to "none"
-
-LANGUAGE RULE:
-- All textual values in the JSON MUST be in RUSSIAN
-- EXCEPTIONS (do NOT translate):
-  - proper names
-  - company names
-  - technologies, tools, frameworks, programming languages
-  - widely accepted technical terms
-
-MANDATORY BASE FIELDS (always include):
-- title: short descriptive title (2–7 words)
-- summary: concise summary (1–3 sentences)
-- documentType: one of ["note","instruction","article","code","log","resume","cv","spec","unknown"]
-- language: "ru", "en", or "other"
-- classification: string (see rules below)
-
-OPTIONAL FIELDS (include only if relevant):
-- topics
-- entities
-- technologies
-- infrastructure
-- problems
-- solutions
-- limitations
-- steps
-- tags
-- publishedAt
-- source
-- importance
-
-CLASSIFICATION RULES:
-- Classification refers to the type of a CORRECT RESPONSE to this message,
-  NOT the type of the document itself.
-- Return ONE classification label.
-- If multiple labels apply, choose the HIGHEST priority.
-
-PRIORITY ORDER (high → low):
-spam, job, freelance, consulting, pricing, partnership, investment, hiring,
-interview, speaking, media, support, review, decision, technology, product,
-access, resume, portfolio, articles, life, intro, followup, gratitude,
-clarification, none
-
-CLASSIFICATION DEFINITIONS (key ones):
-- technology: mentions of technical concepts WITHOUT asking for help or decisions
-- articles: requests for explanations, guides, tutorials, or how-to content
-- support: requests for help with a specific technical problem
-- review: requests to review code, architecture, or documents
-- decision: requests to choose between options
-- none: not a user request (articles, docs, logs, metadata, etc.)
-
-ADDITIONAL RULES:
-- Do NOT invent information
-- Prefer semantic meaning over exact wording
-- Omit fields if information is missing or unclear
-- If no optional fields apply, return ONLY mandatory base fields
-
-OUTPUT FORMAT:
-{
-  "title": "...",
-  "summary": "...",
-  "documentType": "...",
-  "language": "...",
-  "classification": "...",
-  "...": "other relevant fields"
-}
-
-TEXT TO ANALYZE: {{content}}`,
+            await getConstant(GetConstantKey.Prompt_documentAnalysisTemplate),
             { content: doc.content },
           );
 
@@ -369,7 +295,7 @@ TEXT TO ANALYZE: {{content}}`,
             Logger.logError('Invalid JSON in response', {
               response,
             });
-            response = Mustache.render(`ERROR: {{response}}`, { response });
+            response = Mustache.render('ERROR: {{response}}', { response });
           }
 
           // Generate embedding for the graph content (JSON string)

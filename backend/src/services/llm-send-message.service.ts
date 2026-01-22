@@ -278,7 +278,7 @@ export class LlmSendMessageService {
 
         const noAnswerResponse = await LLMChunkProcessor.frendlyNotFound({
           category: Category.none,
-          chunk: history.join('\n') || '', // Use dialog summary as chunk, or empty if none
+          chunk: TextHelpers.concat(history), // Use dialog summary as chunk, or empty if none
           question: message,
         });
 

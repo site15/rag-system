@@ -1,0 +1,5 @@
+[{{source}}:{{fromLine}}-{{toLine}}]
+### Semantic Search Content
+{{semantic}}
+### Author Message (Answer Source)
+{{author}}

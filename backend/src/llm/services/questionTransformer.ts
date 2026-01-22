@@ -1,9 +1,11 @@
 // questionTransformer.ts
 import Mustache from 'mustache';
 import { addPayloadToTrace, Trace } from '../../trace/trace.module';
-import { CATEGORY, RAG_SEARCH_CONFIG } from '../constants';
+import { getConstant, GetConstantKey } from '../../utils/get-constant';
+import { RAG_SEARCH_CONFIG } from '../constants';
 import { DialogManager } from '../dialogManager';
 import { getCategoryByDetectedCategory } from '../getCategoryByDetectedCategory';
+import { getShortCategoryDescription } from '../getShortCategoryDescription';
 import { LLMFactory } from '../llmFactory';
 import { LLMLogger } from '../llmLogger';
 import { Logger } from '../logger';
@@ -11,6 +13,7 @@ import {
   createContextualRewritePrompt,
   createMinimalTransformationPrompt,
 } from '../prompt';
+import { TextHelpers } from '../textHelpers';
 import { removeCodeWrappers } from '../utils';
 
 export enum Category {
@@ -248,96 +251,9 @@ export class QuestionTransformer {
           dialogId,
           messageId,
           prompt: Mustache.render(
-            `Ты — переписчик пользовательских запросов для semantic search.
-Ты работаешь в ДВУХ РЕЖИМАХ ОДНОВРЕМЕННО: entity-based и action-based.
-
-Твоя задача — на основе контекста диалога и входного вопроса:
-1. Извлечь ИМЯ СУЩНОСТИ (entity-based)
-2. Сформировать ПОИСКОВЫЙ ЗАПРОС ОБ ОПЫТЕ ИСПОЛЬЗОВАНИЯ (action-based)
-
-Ты НИКОГДА не отвечаешь на вопрос пользователя.
-Ты ТОЛЬКО готовишь поисковые якоря.
-
-────────────────────
-ENTITY-BASED ПРАВИЛА:
-────────────────────
-1. Результат — ТОЛЬКО имена сущностей (существительные, термины, технологии)
-2. НИКОГДА не добавляй:
-   - годы
-   - даты
-   - числа
-   - версии
-   - места
-   - временные периоды
-3. Не используй:
-   - глаголы
-   - предлоги
-   - местоимения
-4. Для вопросов:
-   - "когда?"
-   - "в каком году?"
-   - "где?"
-   - "какой?"
-   результат ВСЕГДА — ТОЛЬКО имя сущности
-
-Пример:
-Контекст: "Использовал NestJS"
-Вопрос: "в каком году?"
-entity-based → "nestjs"
-
-────────────────────
-ACTION-BASED ПРАВИЛА:
-────────────────────
-1. Результат — "ДЕЙСТВИЕ + СУЩНОСТЬ"
-2. Разрешённые действия (ТОЛЬКО ОНИ):
-   - использование
-   - применение
-   - опыт
-   - пример
-   - реализация
-3. НИКОГДА не добавляй:
-   - годы
-   - даты
-   - числа
-   - места
-   - временные периоды
-4. Не отвечай на вопрос — ищи ДОКУМЕНТЫ ОБ ОПЫТЕ
-
-Правила сопоставления вопросов:
-- "когда?" / "в каком году?" → "использование [сущность]" или "опыт [сущность]"
-- "где?" → "применение [сущность]"
-- "какой?" → "опыт [сущность]"
-
-Пример:
-Контекст: "Использовал NestJS"
-Вопрос: "в каком году?"
-action-based → "опыт nestjs"
-
-────────────────────
-ФОРМАТ ВЫХОДА (СТРОГО):
-────────────────────
-- Всегда возвращай JSON
-- Всегда два поля
-- Строчными буквами
-- Без пояснений
-- Без лишних символов
-
-Формат:
-{
-  "actionBased": "<сущность>",
-  "entityBased": "<действие + сущность>"
-}
-
-────────────────────
-Контекст диалога:
-{{history}}
-
-Вопрос пользователя:
-{{question}}
-
-Результат:`,
+            getConstant(GetConstantKey.QuestionTransformer_transformQuestion_1),
             {
-              history: removeCodeWrappers((history || []).join('\n')),
+              history: removeCodeWrappers(TextHelpers.concat(history)),
               question: question,
             },
           ),
@@ -363,7 +279,7 @@ action-based → "опыт nestjs"
         detectCategoryResult.logId,
       ],
       transformedEmbedded: Mustache.render(
-        `{{actionBased}}, {{entityBased}}`,
+        getConstant(GetConstantKey.QuestionTransformer_transformQuestion_2),
         transformedEmbeddedActionBased.result,
       ),
       category,
@@ -581,66 +497,17 @@ action-based → "опыт nestjs"
     history: string[];
   }) {
     const prompt = Mustache.render(
-      `Ты — классификатор пользовательских запросов.
-
-Определи, **к какому типу данных относится корректный ответ на этот текст**, а не тип самого текста.
-
-Если запрос подходит под несколько типов, **выбирай тип с более высоким приоритетом**.
-Правило: если текст является **вопросом**, он **не может** быть job, freelance, partnership или investment без явного предложения или оффера.
-Правило: вопросы про деньги, зарплату, компенсацию или рейты → pricing, если нет оффера или описания вакансии.
-
-Приоритеты (от высокого к низкому):
-1. spam
-2. job
-3. freelance
-4. consulting
-5. pricing
-6. partnership
-7. investment
-8. hiring
-9. interview
-10. speaking
-11. media
-12. support
-13. review
-14. decision
-15. technology
-16. product
-17. access
-18. resume
-19. portfolio
-20. articles
-21. life
-22. intro
-23. followup
-24. gratitude
-25. clarification
-26. none
-
-Типы:
-{{categoryList}}
-
-Очень важно:
-- выводи строго одно слово из списка типов;
-- не добавляй пояснений;
-- если текст является коротким уточнением (например: "почему?", "как?", "в смысле?", "что именно?")и не содержит названий технологий, продуктов или предметных сущностей, и имеет смысл ТОЛЬКО в контексте предыдущего ответа — выбирай clarification;
-- используй только нижний регистр;
-
-Вход:
-ИСТОРИЯ ПЕРЕПИСКИ (для понимания намерения):
-\`\`\`
-{{history}}
-\`\`\` 
-
-Текст для классификации:
-{{text}}
-
-Вывод:`,
+      getConstant(GetConstantKey.QuestionTransformer_transformQuestion_3),
       {
-        categoryList: Object.entries(CATEGORY)
-          .map(([key, value]) => `- ${key} — ${value}`)
-          .join('\n'),
-        history: removeCodeWrappers((history || []).join('\n')),
+        categoryList: TextHelpers.concat(
+          Object.keys(Category)
+            .filter((key) => key != Category.telegram)
+            .map(
+              (key) =>
+                `- ${key} — ${getShortCategoryDescription(key as Category)}`,
+            ),
+        ),
+        history: removeCodeWrappers(TextHelpers.concat(history)),
         text: text,
       },
     );

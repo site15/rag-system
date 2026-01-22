@@ -17,17 +17,11 @@ export class TextHelpers {
     return str.replace(/—{3,}/g, '—');
   }
 
-  public static prepareTextForEmbedding(text: string): string {
-    return text
-      .toLowerCase()
-      .replace(/<[^>]*>/g, ' ')
-      .replace(/\t+/g, ' ')
-      .replace(/\s+/g, ' ')
-      .replace(/[^\w\s.,!?-]/g, '')
-      .trim();
-  }
-
   public static hashContent(text: string): string {
     return crypto.createHash('sha256').update(text, 'utf8').digest('hex');
+  }
+
+  public static concat(str: string[], emptyText: string = '') {
+    return str.length > 0 ? str.join('\n') : emptyText;
   }
 }

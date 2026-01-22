@@ -1,23 +1,6 @@
-import { ChatAnthropic } from '@langchain/anthropic';
-import { ChatOllama } from '@langchain/community/chat_models/ollama';
-import { HuggingFaceInference } from '@langchain/community/llms/hf';
-import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
-import { ChatGroq } from '@langchain/groq';
-import { ChatOpenAI } from '@langchain/openai';
 import { Worker } from 'worker_threads';
 import { DialogSummary } from '../dialogSummary';
 import { Logger } from '../logger';
-
-interface SummarizationTask {
-  dialogId: string;
-  llmConfig: {
-    provider: string;
-    model: string;
-    temperature: number;
-    baseUrl: string;
-    apiKey?: string;
-  };
-}
 
 export class SummarizationService {
   private static activeWorkers = new Map<string, Worker>();
@@ -31,19 +14,9 @@ export class SummarizationService {
 
   public static async queueSummarization({
     dialogId,
-    llm,
-    provider,
     messageId,
   }: {
     dialogId: string;
-    llm:
-      | ChatOllama
-      | ChatOpenAI
-      | ChatAnthropic
-      | ChatGoogleGenerativeAI
-      | HuggingFaceInference
-      | ChatGroq;
-    provider: string;
     messageId: string;
   }) {
     // Don't queue if already active

@@ -5,6 +5,7 @@ import { TraceNode } from '../trace/trace.module';
 import { Logger } from './logger';
 import { FailureTracker } from './services/failureTracker';
 import { Category } from './services/questionTransformer';
+import { getConstant, GetConstantKey } from '../utils/get-constant';
 
 export class DialogManager {
   public static async createDialog(userId: string): Promise<string> {
@@ -270,10 +271,13 @@ export class DialogManager {
     });
 
     const history = messages.reverse().map((x) =>
-      Mustache.render(`Пользователь: {{question}}\nАссистент: {{answer}}`, {
-        question: x.question,
-        answer: x.answer,
-      }),
+      Mustache.render(
+        getConstant(GetConstantKey.DialogManager_historyTemplate),
+        {
+          question: x.question,
+          answer: x.answer,
+        },
+      ),
     );
 
     Logger.logInfo('История диалога получена', { count: history.length });

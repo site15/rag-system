@@ -6,6 +6,7 @@ import {
   ModelExecutionOptions,
   ModelExecutionTracker,
 } from './services/modelExecutionTracker';
+import { getConstant, GetConstantKey } from '../utils/get-constant';
 
 export interface LLMLogEntry {
   id: string;
@@ -127,7 +128,7 @@ export class LLMLogger {
       // Also log failure to database
       const logId = await this.logToDatabase({
         prompt,
-        response: Mustache.render(`ERROR: {{errorMessage}}`, {
+        response: Mustache.render('ERROR: {{errorMessage}}', {
           errorMessage: (error as Error).message,
         }),
         startTime,
