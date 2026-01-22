@@ -169,12 +169,14 @@ export class FlowController {
     @Query() args: DialogFlowArgs,
   ): Promise<DialogFlowResponse> {
     const { skip, take, curPage, perPage } = getFirstSkipFromCurPerPage(args);
-    const response = await this.llmDialogService.getDialogMessages({
-      dialogId: args.dialogId,
-      take,
-      skip,
-      userId: req.userId,
-    });
+    const response = !args.dialogId
+      ? { messages: [], totalCount: 0 }
+      : await this.llmDialogService.getDialogMessages({
+          dialogId: args.dialogId,
+          take,
+          skip,
+          userId: req.userId,
+        });
     return {
       items: (response.messages || []).map((m) => ({
         id: m.id,

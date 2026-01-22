@@ -19,7 +19,7 @@ export class ConfigManager {
    * Get default chat configuration for provider
    */
   public static getChatConfig(provider?: string) {
-    provider = provider || process.env.CHAT_PROVIDER || '';
+    provider = provider || process.env.CHAT_PROVIDER?.split(',')?.[0] || '';
     const providerUpper = provider.toUpperCase();
     return {
       provider,

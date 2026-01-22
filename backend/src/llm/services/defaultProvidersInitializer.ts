@@ -37,7 +37,7 @@ export class DefaultProvidersInitializer {
           chunkSize: config.chunkSize,
           isActive:
             !!config.apiKey ||
-            ConfigManager.getChatConfig().provider === provider,
+            !!process.env.CHAT_PROVIDER?.split(',')?.includes(provider),
         });
       } catch (error) {
         Logger.logError(`Failed to initialize provider ${provider}`, {
