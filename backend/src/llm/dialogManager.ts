@@ -45,6 +45,7 @@ export class DialogManager {
         answer: '',
         isProcessing: true,
         constants: constants || {},
+        questionReceivedAt: new Date(),
       },
     });
 
@@ -122,7 +123,7 @@ export class DialogManager {
         transformedQuestion: transformedQuestion,
         transformedEmbeddingQuery: transformedEmbeddingQuery,
         isProcessing,
-        answerSentAt: answer ? new Date() : null,
+        answerSentAt: new Date(),
         trace: getTraceStack() as any,
       },
       select: {
