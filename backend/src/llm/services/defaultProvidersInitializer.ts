@@ -161,7 +161,7 @@ export class DefaultProvidersInitializer {
 
       return {
         ...ConfigManager.getChatConfig(),
-        ...(provider?.provider ? { provider: provider.provider } : {}),
+        ...(provider?.provider ? { provider: provider?.provider } : {}),
         ...(provider?.model ? { model: provider.model } : {}),
         ...(provider?.temperature ? { temperature: provider.temperature } : {}),
         ...(provider?.chunkSize ? { chunkSize: provider.chunkSize } : {}),
@@ -186,7 +186,7 @@ export class DefaultProvidersInitializer {
 
       Logger.logInfo('provider', provider);
       return {
-        ...ConfigManager.getChatConfig(provider.provider),
+        ...ConfigManager.getChatConfig(provider?.provider),
         ...(provider?.provider ? { provider: provider.provider } : {}),
         ...(provider?.model ? { model: provider.model } : {}),
         ...(provider?.temperature ? { temperature: provider.temperature } : {}),
