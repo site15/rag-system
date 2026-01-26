@@ -61,7 +61,9 @@ export class ModelExecutionTracker {
         // Record doesn't exist, insert new one
         const newRecord = await PrismaService.instance.chatLlmModel.create({
           data: {
-            ...provider,
+            baseUrl: provider.baseUrl || '',
+            temperature: provider.temperature,
+            chunkSize: provider.chunkSize,
             provider: provider.provider || '',
             model: provider.model || '',
             lastRequestId: options.llmQueryLogId?.toString(),

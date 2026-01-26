@@ -296,6 +296,10 @@ VALUES (${trimmedContent}, ${vectorValue}::vector, ${metadata || '{}'}, ${hash})
           // Call LLM
           let response = await LLMFactory.invoke(prompt);
 
+          if (!response) {
+            throw new Error('LLM did not return a response');
+          }
+
           // Validate JSON structure
           try {
             JSON.parse(response);

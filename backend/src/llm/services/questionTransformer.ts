@@ -193,7 +193,7 @@ export class QuestionTransformer {
     messageId: string | undefined;
     question: string;
     history: string[];
-  }): Promise<CategorizedQuestion> {
+  }): Promise<CategorizedQuestion | undefined> {
     Logger.logInfo('Transforming question', { originalQuestion: question });
 
     // If we can determine a category from the question itself, apply appropriate filter
@@ -267,7 +267,13 @@ export class QuestionTransformer {
       detectedCategory,
       sourceFilter,
     });
-
+    if (
+      !transformedQuestion.question ||
+      !transformedEmbeddedActionBased.result?.actionBased ||
+      !transformedEmbeddedActionBased.result?.actionBased
+    ) {
+      return undefined;
+    }
     return {
       detectedCategory,
       originalQuestion: question,
@@ -364,16 +370,12 @@ export class QuestionTransformer {
       });
 
       // If the transformation result seems invalid (empty, same as original, or an error), return the original
-      if (
-        !transformed ||
-        transformed === question ||
-        transformed.includes('[ERROR]')
-      ) {
+      if (!transformed || transformed.includes('[ERROR]')) {
         Logger.logInfo('LLM transformation failed, using original question', {
           original: question,
           transformed: transformed,
         });
-        return { question, logId };
+        return { question: undefined, logId };
       }
 
       return { question: transformed, logId };
@@ -393,7 +395,7 @@ export class QuestionTransformer {
         throw error;
       }
       // Return original question if transformation fails
-      return { question, logId: undefined };
+      return { question: undefined, logId: undefined };
     }
   }
 
@@ -413,7 +415,13 @@ export class QuestionTransformer {
     question: string;
     category: Category;
     prompt: string;
-  }) {
+  }): Promise<{
+    result: {
+      actionBased?: string;
+      entityBased?: string;
+    };
+    logId?: string;
+  }> {
     try {
       const { content: transformed, logId } = await LLMLogger.callWithLogging({
         prompt,
@@ -427,19 +435,15 @@ export class QuestionTransformer {
       });
 
       // Возвращаем оригинальный вопрос, если результат пустой или некорректный
-      if (
-        !transformed ||
-        transformed === question ||
-        transformed.includes('[ERROR]')
-      ) {
+      if (!transformed || transformed.includes('[ERROR]')) {
         Logger.logInfo('LLM transformation failed, using original question', {
           original: question,
           transformed,
         });
         return {
           result: {
-            actionBased: question,
-            entityBased: question,
+            actionBased: undefined,
+            entityBased: undefined,
           },
           logId,
         };
@@ -455,8 +459,8 @@ export class QuestionTransformer {
       } catch (error) {
         return {
           result: {
-            actionBased: question,
-            entityBased: question,
+            actionBased: undefined,
+            entityBased: undefined,
           },
           logId,
         };
@@ -475,8 +479,8 @@ export class QuestionTransformer {
       }
       return {
         result: {
-          actionBased: question,
-          entityBased: question,
+          actionBased: undefined,
+          entityBased: undefined,
         },
         logId: undefined,
       };

@@ -295,96 +295,7 @@ export class LLMFactory {
         groqOptions.httpAgent = proxyAgent;
       }
 
-      // Create Groq LLM with rate limiting wrapper
-      const baseGroq = new ChatGroq(groqOptions);
-
-      // Wrap the invoke method to handle rate limiting
-      const wrappedGroq = Object.create(baseGroq);
-
-      wrappedGroq.invoke = async function (prompt: string) {
-        try {
-          return await baseGroq.invoke(prompt);
-        } catch (error) {
-          const errorMessage = (error as Error).message;
-
-          // Check if this is a Groq rate limit error
-          if (
-            errorMessage.includes('rate_limit_exceeded') &&
-            (errorMessage.includes('Please try again in') ||
-              errorMessage.includes('Request too large'))
-          ) {
-            // Parse delay time from error message
-            const delayMatch =
-              errorMessage.match(/Please try again in ([0-9]+m)?([0-9.]+s)/i) ||
-              0;
-            // Parse rate limit information
-            const limitMatch = errorMessage.match(/Limit ([0-9]+)/);
-            const usedMatch = errorMessage.match(/Used ([0-9]+)/);
-            const requestedMatch = errorMessage.match(/Requested ([0-9]+)/);
-            const modelMatch = errorMessage.match(/model `([^`]+)`/);
-
-            if (delayMatch) {
-              const minutes = delayMatch[1] ? parseInt(delayMatch[1]) : 0;
-              const seconds = parseFloat(delayMatch[2]);
-              const delayMs = (minutes * 60 + seconds) * 1000;
-
-              // Extract rate limit information
-              const limit = limitMatch ? parseInt(limitMatch[1]) : null;
-              const used = usedMatch ? parseInt(usedMatch[1]) : null;
-              const requested = requestedMatch
-                ? parseInt(requestedMatch[1])
-                : null;
-              const model = modelMatch ? modelMatch[1] : '';
-
-              Logger.logInfo('Groq rate limit detected', {
-                delayMs,
-                delaySeconds: Math.round(delayMs / 1000),
-                limit,
-                used,
-                model,
-              });
-
-              // If delay is more than 1 minute, throw error instead of waiting
-              if (delayMs > 30000 || delayMs === 0) {
-                const error =
-                  delayMs > 0
-                    ? new Error(
-                        `Rate limit reached for model '${model}'. Limit: ${limit}, Used: ${used}, Requested: ${requested}. Please try again in ${
-                          delayMatch[1] || ''
-                        }${delayMatch[2]}.`,
-                      )
-                    : new Error(
-                        `Rate limit reached for model '${model}'. Limit: ${limit}, Used: ${used}, Requested: ${requested}.`,
-                      );
-
-                (error as any).code = 'RATE_LIMIT_EXCEEDED';
-                (error as any).delaySeconds = Math.round(delayMs / 1000);
-                (error as any).limit = limit;
-                (error as any).used = used;
-                (error as any).requested = requested;
-                (error as any).model = model;
-                (error as any).provider = 'groq';
-                throw error;
-              }
-
-              // Wait for the specified delay (less than 1 minute)
-              await new Promise((resolve) => setTimeout(resolve, delayMs));
-
-              Logger.logInfo('Retrying Groq call after rate limit delay', {
-                waitedMs: delayMs,
-              });
-
-              // Retry the call
-              return await baseGroq.invoke(prompt);
-            }
-          }
-
-          // Re-throw if not a rate limit error or parsing failed
-          throw error;
-        }
-      };
-
-      return wrappedGroq;
+      return new ChatGroq(groqOptions);
     } else if (chatConfig.provider === PROVIDER_NAMES.OLLAMA) {
       Logger.logInfo('Creating ChatOllama instance', {
         model: model,
@@ -445,18 +356,6 @@ export class LLMFactory {
   static getResponseString(result: any) {
     let response: string;
 
-    try {
-      result = JSON.parse(result);
-    } catch (error) {
-      //
-    }
-
-    try {
-      result = result.kwargs;
-    } catch (error) {
-      //
-    }
-
     if (typeof result === 'string') {
       response = result;
     } else if (typeof result === 'object' && result.content) {
@@ -480,6 +379,11 @@ export class LLMFactory {
     }
 
     response = response?.trim();
+
+    if (!response) {
+      response = '';
+    }
+
     return response;
   }
 
@@ -529,13 +433,16 @@ export class LLMFactory {
         });
 
         const startTime = Date.now();
-        const result = await llm
-          .invoke(prompt)
-          .then(async (result: any) => LLMFactory.getResponseString(result));
-        addPayloadToTrace({
-          prompt,
-          result,
-        });
+        const rawResult = await llm.invoke(prompt);
+
+        const result = LLMFactory.getResponseString(rawResult);
+        if (!result) {
+          Logger.logInfo('LLM did not return a response', {
+            rawResult,
+            result,
+          });
+        }
+        addPayloadToTrace({ rawResult, prompt, result });
         Logger.logInfo('LLM Request Completed', {
           prompt,
           result,
@@ -573,5 +480,6 @@ export class LLMFactory {
           await DefaultProvidersInitializer.getNextActiveProvider());
       }
     }
+    return '';
   }
 }

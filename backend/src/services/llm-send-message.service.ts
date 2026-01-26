@@ -4,6 +4,7 @@
 import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
 import { isUUID } from 'class-validator';
 import {
+  BOT_FALLBACK_MESSAGES,
   createDocumentInfo,
   createSourceReference,
   ERROR_MESSAGES,
@@ -154,6 +155,12 @@ export class LlmSendMessageService {
     throw new HttpException({ error: 'Unexpected error in retry logic' }, 500);
   }
 
+  getRandomFallbackMessage() {
+    return BOT_FALLBACK_MESSAGES[
+      Math.floor(Math.random() * BOT_FALLBACK_MESSAGES.length)
+    ];
+  }
+
   @Trace()
   async processMessage({
     dialogId,
@@ -197,6 +204,32 @@ export class LlmSendMessageService {
         question: message,
         history,
       });
+
+      if (!categorizedQuestion) {
+        const answer = this.getRandomFallbackMessage();
+        const llmConfig = await DefaultProvidersInitializer.getActiveProvider();
+
+        await DialogManager.updateMessage({
+          messageId,
+          answer,
+          selectedDocumentIds: [],
+
+          isSuccess: false,
+          isProcessing: false,
+          llmModel: llmConfig.model,
+          llmProvider: llmConfig.provider,
+          llmTemperature: llmConfig.temperature,
+        });
+
+        return {
+          //  success: true,
+          dialogId,
+          response: answer || 'No response generated',
+          sources: [],
+          messageId,
+        };
+      }
+
       const processedQuestion = categorizedQuestion.transformedQuestion;
 
       addPayloadToTrace({
