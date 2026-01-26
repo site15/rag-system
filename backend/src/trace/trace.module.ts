@@ -49,11 +49,11 @@ export interface TraceStorage {
 export function getTraceStack() {
   const func = (trace: TraceNode[]): TraceNode[] => {
     for (let index = 0; index < trace.length; index++) {
-      if (trace[index].children?.length) {
-        trace[index].children = [...func(trace[index].children)];
+      if (trace[index]?.children?.length) {
+        trace[index].children = [...func(trace[index]?.children)];
       }
     }
-    return [...trace.filter((t) => t.payload || t.children?.length)];
+    return [...trace.filter((t) => t.payload || t?.children?.length)];
   };
   const result = func(getTraceStorage()?.getStore()?.stack || []);
   return result.length ? result : null;

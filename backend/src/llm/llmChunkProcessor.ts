@@ -488,7 +488,7 @@ export class LLMChunkProcessor {
             { text },
           );
 
-          if (text.startsWith('[FOUND]')) {
+          if (text?.startsWith('[FOUND]')) {
             // For telegram mode, ensure the result comes from Author Message
             if (
               category === 'telegram' &&
@@ -504,7 +504,7 @@ export class LLMChunkProcessor {
               continue; // Skip this result, continue looking
             }
 
-            foundText = text.replace(/^\[FOUND]\s*/, '');
+            foundText = text?.replace(/^\[FOUND]\s*/, '');
             foundChunkIndex = i;
 
             const finalAnswerPrompt = createFinalAnswerPrompt({
