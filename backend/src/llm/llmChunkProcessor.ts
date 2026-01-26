@@ -663,15 +663,32 @@ export class LLMChunkProcessor {
       detectedCategory === Category.clarification ||
       detectedCategory === Category.followup
     ) {
-      const lastHistoryItem = (
-        await DialogManager.getDialogRawHistory(dialogId, 5)
-      ).filter((r) => r.answer);
+      const lastHistory = await DialogManager.getDialogRawHistory(dialogId, 5);
+      const lastHistoryItem = lastHistory.filter((r) => r.answer);
       Logger.logInfo('Last history item', lastHistoryItem);
 
       if (lastHistoryItem?.length) {
         detectedCategory = getCategoryByDetectedCategory(
           lastHistoryItem[0].detected_category,
         );
+      }
+
+      if (
+        lastHistory.filter(
+          (r) =>
+            r.answer &&
+            (r.detected_category === Category.clarification ||
+              r.detected_category === Category.followup),
+        ).length > 3
+      ) {
+        const summary = await DialogManager.getDialogSummary(dialogId);
+        if (summary) {
+          history = [summary];
+        }
+        /**
+         * Если слишком много уточнений, то меняем категорию на resume
+         */
+        detectedCategory = Category.resume;
       }
     }
 
