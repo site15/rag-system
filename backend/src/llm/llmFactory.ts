@@ -494,6 +494,13 @@ export class LLMFactory {
         });
 
         const result = LLMFactory.getResponseString(rawResult);
+
+        // groq иногда начинает слать все время в ответ "safe",
+        // когда ловим такое то считаем что запрос был плохой и запускаем процедуру смены провайдера ллм
+        if (result === 'safe') {
+          throw new Error('Safe content detected');
+        }
+
         if (!result) {
           Logger.logInfo('LLM did not return a response', {
             rawResult,
