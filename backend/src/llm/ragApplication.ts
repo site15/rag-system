@@ -116,7 +116,7 @@ export class RAGApplication {
               .join('')
               .split(`\n\n\n`)
               .join('')
-              .trim();
+              ?.trim();
             const metadata: EmbedingMetadata = {
               ...(doc.metadata || {}),
               meta: { ...chunk.meta, chunkIndex },

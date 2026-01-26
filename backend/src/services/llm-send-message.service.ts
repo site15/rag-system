@@ -258,7 +258,7 @@ export class LlmSendMessageService {
 
       let answer = llmResult.response;
       let isSuccess =
-        answer !== null && answer !== undefined && answer.trim() !== '';
+        answer !== null && answer !== undefined && answer?.trim() !== '';
 
       addPayloadToTrace({
         isSuccess,

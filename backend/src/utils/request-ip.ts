@@ -98,7 +98,7 @@ function getClientIpFromXForwardedFor(value: string): string | null {
   // source: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For
   // Azure Web App's also adds a port for some reason, so we'll only use the first part (the IP)
   const forwardedIps = value.split(',').map((e: string) => {
-    const ip = e.trim();
+    const ip = e?.trim();
     if (ip.includes(':')) {
       const splitted = ip.split(':');
       // make sure we only use this if it's ipv4 (ip:port)

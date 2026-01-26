@@ -44,9 +44,9 @@ export class LLMChunkProcessor {
           .replace(finalAnswerInstruction, '')
           .split(authorMessageHeader)[1]
           .split('\n--\n')[0];
-        return authorMatch.trim();
+        return authorMatch?.trim();
       } catch (error) {
-        return chunk.trim();
+        return chunk?.trim();
       }
     }
     return chunk.trim();
@@ -313,8 +313,8 @@ export class LLMChunkProcessor {
           ),
         );
 
-        const semantic = semanticMatch ? semanticMatch[1].trim() : '';
-        const author = authorMatch ? authorMatch[1].trim() : '';
+        const semantic = semanticMatch ? semanticMatch[1]?.trim() : '';
+        const author = authorMatch ? authorMatch[1]?.trim() : '';
 
         if (semantic || author) {
           processedContent = getConstant(

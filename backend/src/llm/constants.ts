@@ -215,5 +215,5 @@ export function formatRateLimitErrorMessage({
 export function isSuccessfulResponse(
   response: string | null | undefined,
 ): boolean {
-  return response !== null && response !== undefined && response.trim() !== '';
+  return response !== null && response !== undefined && response?.trim() !== '';
 }

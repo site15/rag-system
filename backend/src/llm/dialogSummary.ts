@@ -60,7 +60,7 @@ export class DialogSummary {
       data: {
         summary:
           typeof content === 'string'
-            ? content.trim()
+            ? content?.trim()
             : JSON.stringify(content),
         updatedAt: new Date(),
       },

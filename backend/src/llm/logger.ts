@@ -90,7 +90,7 @@ export class Logger {
     // Log to file only if file logging is enabled
     if (process.env.ENABLE_FILE_LOGGING === 'true') {
       // Log to file asynchronously (non-blocking) with different format
-      let fileLogEntry = `[${time}] [${level}] ${message.trim()}`;
+      let fileLogEntry = `[${time}] [${level}] ${message?.trim()}`;
       if (meta) {
         if (typeof meta === 'object') {
           for (const [key, value] of Object.entries(meta)) {

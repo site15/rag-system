@@ -145,7 +145,7 @@ export class QuestionTransformer {
     question: string,
     history?: string[],
   ): boolean {
-    const trimmedQuestion = question.trim().toLowerCase();
+    const trimmedQuestion = question?.trim().toLowerCase();
 
     // If there's no history, question is self-contained by definition
     if (!history || history.length === 0) {

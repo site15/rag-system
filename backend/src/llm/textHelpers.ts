@@ -10,9 +10,9 @@ export class TextHelpers {
       .split(`\n\n\n`)
       .join('')
       .split(`\n`)
-      .map((s) => s.replace(/\s+/g, ' ').trim())
+      .map((s) => s.replace(/\s+/g, ' ')?.trim())
       .join('\n')
-      .trim();
+      ?.trim();
     // special case in my data
     return str.replace(/—{3,}/g, '—');
   }

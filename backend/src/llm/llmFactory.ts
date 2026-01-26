@@ -479,7 +479,7 @@ export class LLMFactory {
       response = JSON.stringify(result);
     }
 
-    response = response.trim();
+    response = response?.trim();
     return response;
   }
 
