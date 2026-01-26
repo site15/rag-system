@@ -444,6 +444,19 @@ export class LLMFactory {
 
   static getResponseString(result: any) {
     let response: string;
+
+    try {
+      result = JSON.parse(result);
+    } catch (error) {
+      //
+    }
+
+    try {
+      result = result.kwargs;
+    } catch (error) {
+      //
+    }
+
     if (typeof result === 'string') {
       response = result;
     } else if (typeof result === 'object' && result.content) {
