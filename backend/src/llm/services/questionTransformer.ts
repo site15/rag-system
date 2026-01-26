@@ -451,8 +451,16 @@ export class QuestionTransformer {
         callback: (prompt) => LLMFactory.invoke(prompt),
       });
 
+      Logger.logInfo('LLM transformation successful', {
+        original: question,
+        transformed,
+      });
+
       // Возвращаем оригинальный вопрос, если результат пустой или некорректный
-      if (!transformed || transformed.includes('[ERROR]')) {
+      if (
+        !transformed ||
+        (typeof transformed === 'string' && transformed?.includes('[ERROR]'))
+      ) {
         Logger.logInfo('LLM transformation failed, using original question', {
           original: question,
           transformed,
@@ -468,9 +476,12 @@ export class QuestionTransformer {
 
       try {
         return {
-          result: JSON.parse(
-            transformed.replace('```json', '').replace('```', ''),
-          ),
+          result:
+            typeof transformed === 'string'
+              ? JSON.parse(
+                  transformed.replace('```json', '').replace('```', ''),
+                )
+              : transformed,
           logId,
         };
       } catch (error) {

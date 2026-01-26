@@ -22,13 +22,18 @@ export class LLMQueryLogger {
   static async logQuery(entry: LLMQueryLogEntry): Promise<string | null> {
     try {
       const llmConfig = await DefaultProvidersInitializer.getActiveProvider();
+      const response = entry.response
+        ? typeof entry.response === 'string'
+          ? entry.response
+          : JSON.stringify(entry.response)
+        : '';
       const chatLlmRequest = await PrismaService.instance.chatLlmRequest.create(
         {
           data: {
             request: entry.request,
-            response: entry.response || '',
+            response,
             requestLength: entry.requestLength,
-            responseLength: entry.responseLength || 0,
+            responseLength: response.length,
             executionTimeMs: entry.executionTimeMs,
             isSuccess: entry.success !== undefined ? entry.success : true,
             errorMessage: entry.errorMessage || null,

@@ -6,7 +6,6 @@ import {
   ModelExecutionOptions,
   ModelExecutionTracker,
 } from './services/modelExecutionTracker';
-import { getConstant, GetConstantKey } from '../utils/get-constant';
 
 export interface LLMLogEntry {
   id: string;
@@ -84,35 +83,9 @@ export class LLMLogger {
           messageId,
         })) || undefined;
 
-      // Mark execution as successful
-      if (executionTrackingId) {
-        await ModelExecutionTracker.completeExecution(
-          executionTrackingId,
-          logId,
-        );
-      }
-
       return { logId, content: response };
     } catch (error) {
       const executionTime = Date.now() - startTime;
-
-      // Handle timeout specifically
-      let isTimeout = false;
-      if (error instanceof Error && error.message.includes('timed out')) {
-        isTimeout = true;
-        // Mark execution as timeout
-        if (executionTrackingId) {
-          await ModelExecutionTracker.timeoutExecution(executionTrackingId);
-        }
-      } else {
-        // Mark execution as failed for other errors
-        if (executionTrackingId) {
-          await ModelExecutionTracker.failExecution(
-            executionTrackingId,
-            error instanceof Error ? error.message : String(error),
-          );
-        }
-      }
 
       Logger.logError(
         'LLM Request Failed',

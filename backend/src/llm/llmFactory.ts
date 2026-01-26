@@ -15,6 +15,7 @@ import {
 } from './constants';
 import { Logger } from './logger';
 import { DefaultProvidersInitializer } from './services/defaultProvidersInitializer';
+import { ModelExecutionTracker } from './services/modelExecutionTracker';
 import { ChatConfig } from './types';
 
 export class LLMFactory {
@@ -383,6 +384,30 @@ export class LLMFactory {
       response = '';
     }
 
+    try {
+      Logger.logInfo('Trying to parse response as JSON 1', { response });
+      response = JSON.parse(response as any);
+    } catch (error) {
+      // Logger.logError('Failed to parse response as JSON', { response, error });
+      // Ignore JSON parse error
+    }
+
+    try {
+      Logger.logInfo('Trying to parse response as JSON 2', { response });
+      response = JSON.parse((response as any).content);
+    } catch (error) {
+      // Logger.logError('Failed to parse response as JSON', { response, error });
+      // Ignore JSON parse error
+    }
+
+    try {
+      Logger.logInfo('Trying to parse response as JSON 3', { response });
+      response = JSON.parse(response).content;
+    } catch (error) {
+      // Logger.logError('Failed to parse response as JSON', { response, error });
+      // Ignore JSON parse error
+    }
+
     return response;
   }
 
@@ -400,7 +425,7 @@ export class LLMFactory {
     const setTimeoutRef = setTimeout(() => controller.abort(), timeout);
     try {
       const pingResult = await ping(controller);
-      Logger.logInfo(`${label} OK`, { ping: pingResult });
+      Logger.logInfo(`${label} OK`, { [label]: pingResult });
       return pingResult;
     } catch (error) {
       Logger.logError(`${label} failed`, error);
@@ -421,10 +446,11 @@ export class LLMFactory {
       maxRetries: number;
     }) => Promise<void>,
   ) {
-    return LLMFactory.pingWrapper({
+    const rawResult = LLMFactory.pingWrapper({
       ping: async (controller: AbortController) =>
         LLMFactory.invoke('ping', attemptsCallbacks, controller),
     });
+    return LLMFactory.getResponseString(rawResult);
   }
 
   @Trace()
@@ -447,6 +473,7 @@ export class LLMFactory {
     let apiKey: string | undefined = undefined;
     let llmConfig:
       | {
+          id?: string;
           chunkSize?: number;
           temperature?: number;
           model?: string;
@@ -464,9 +491,8 @@ export class LLMFactory {
     }
 
     while (currentAttempt < maxRetries) {
-      const llm = LLMFactory.createLLM({ ...llmConfig, apiKey } as any);
-
       try {
+        const llm = LLMFactory.createLLM({ ...llmConfig, apiKey } as any);
         Logger.logInfo(
           `Processing message attempt ${currentAttempt + 1}/${maxRetries}`,
           {
@@ -513,8 +539,28 @@ export class LLMFactory {
           result,
           executionTime: Date.now() - startTime,
         });
+        // Mark execution as successful
+        if (llmConfig?.id) {
+          await ModelExecutionTracker.completeExecution(llmConfig?.id);
+        }
+
         return result;
       } catch (error: any) {
+        Logger.logError(
+          `Message processing failed on attempt ${currentAttempt}`,
+          {
+            error: error.message,
+            llmConfig: llmConfig,
+            attempt: currentAttempt,
+          },
+        );
+        // Mark execution as failed for other errors
+        if (llmConfig?.id) {
+          await ModelExecutionTracker.failExecution(
+            llmConfig?.id,
+            error instanceof Error ? error.message : String(error),
+          );
+        }
         currentAttempt++;
 
         if (currentAttempt > maxRetries) {

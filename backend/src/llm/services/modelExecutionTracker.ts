@@ -112,7 +112,9 @@ export class ModelExecutionTracker {
         data: {
           endTime: new Date(),
           status: 'success',
-          lastRequestId: llmQueryLogId?.toString(),
+          ...(llmQueryLogId
+            ? { lastRequestId: llmQueryLogId?.toString() }
+            : {}),
           updatedAt: new Date(),
         },
       });

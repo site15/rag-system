@@ -133,16 +133,24 @@ export class DefaultProvidersInitializer {
           ],
         });
 
-      return activeProviders.map((row) => ({
-        provider: row.provider,
-        model: row.model,
-        temperature: row.temperature
-          ? parseFloat(row.temperature.toString())
-          : 1,
-        baseUrl: row.baseUrl,
-        chunkSize: row.chunkSize,
-        id: row.id,
-      }));
+      return activeProviders
+        .filter(
+          (row) =>
+            row.status !== 'failure' ||
+            (row.status === 'failure' &&
+              row.endTime &&
+              +new Date() - +row.endTime > 5 * 60 * 1000),
+        )
+        .map((row) => ({
+          provider: row.provider,
+          model: row.model,
+          temperature: row.temperature
+            ? parseFloat(row.temperature.toString())
+            : 1,
+          baseUrl: row.baseUrl,
+          chunkSize: row.chunkSize,
+          id: row.id,
+        }));
     } catch (error) {
       Logger.logError('Failed to get sorted active providers', {
         error: error instanceof Error ? error.message : String(error),
