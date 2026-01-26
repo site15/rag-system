@@ -26,9 +26,9 @@ export class LLMQueryLogger {
         {
           data: {
             request: entry.request,
-            response: entry.response,
+            response: entry.response || '',
             requestLength: entry.requestLength,
-            responseLength: entry.responseLength,
+            responseLength: entry.responseLength || 0,
             executionTimeMs: entry.executionTimeMs,
             isSuccess: entry.success !== undefined ? entry.success : true,
             errorMessage: entry.errorMessage || null,
@@ -48,7 +48,7 @@ export class LLMQueryLogger {
       Logger.logInfo('LLM query logged successfully', {
         recordId,
         requestLength: entry.requestLength,
-        responseLength: entry.responseLength,
+        responseLength: entry.responseLength || 0,
         executionTimeMs: entry.executionTimeMs,
       });
 
