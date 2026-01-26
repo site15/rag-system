@@ -4,7 +4,7 @@ import {
   OnApplicationBootstrap,
   OnApplicationShutdown,
 } from '@nestjs/common';
-import { concatMap, Subject } from 'rxjs';
+import { concatMap, from, map, merge, of, Subject } from 'rxjs';
 import { RAGApplication } from '../llm/ragApplication';
 import { getTraceStorage, TraceStore } from '../trace/trace.module';
 import { EventType } from '../types/event-type';
@@ -25,9 +25,32 @@ export class LlmBootstrapService
   ) {}
 
   async onApplicationBootstrap() {
-    this.events$
+    await RAGApplication.start();
+
+    const dbEvents = await this.prismaService.chatMessage
+      .findMany({
+        where: {
+          isProcessing: true,
+        },
+      })
+      .then((messages) =>
+        messages.map(
+          (message) =>
+            ({
+              messageId: message.id,
+              dialogId: message.dialogId || '',
+              userId: message.userId,
+              model: message.model || '',
+              provider: message.provider || '',
+              temperature: +(message.temperature || 0),
+            }) satisfies EventType,
+        ),
+      );
+
+    merge(dbEvents.length ? from(dbEvents) : of(null), this.events$)
       .pipe(
-        concatMap(async (event: EventType) => {
+        concatMap(async (event: EventType | null) => {
+          if (!event) return;
           const message = await this.prismaService.chatMessage.findFirst({
             select: { constants: true },
             where: { id: event.messageId },
@@ -39,25 +62,25 @@ export class LlmBootstrapService
             ...((message?.constants as any) || {}),
           };
 
-          storage.run(store, () => {
+          await storage.run(store, async () => {
             try {
-              this.llmSendMessageService
-                .processMessageWithRetry({
+              try {
+                return await this.llmSendMessageService.processMessage({
                   messageId: event.messageId,
                   dialogId: event.dialogId,
                   userId: event.userId,
-                  maxRetries: 3,
-                })
-                .catch((error) => this.logger.error(error, error.stack));
+                });
+              } catch (error) {
+                return this.logger.error(error, error.stack);
+              }
             } catch (error) {
               this.logger.error(error, error.stack);
+              return Promise.resolve();
             }
           });
         }),
       )
       .subscribe();
-
-    await RAGApplication.start();
   }
 
   async onApplicationShutdown(signal?: string) {

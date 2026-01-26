@@ -3,6 +3,7 @@
 
 import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
 import { isUUID } from 'class-validator';
+import Mustache from 'mustache';
 import {
   BOT_FALLBACK_MESSAGES,
   createDocumentInfo,
@@ -28,6 +29,7 @@ import { SummarizationService } from '../llm/services/summarizationService';
 import { TextHelpers } from '../llm/textHelpers';
 import { DocWithMetadataAndId } from '../llm/types';
 import { addPayloadToTrace, Trace } from '../trace/trace.module';
+import { LLMFactory } from '../llm/llmFactory';
 
 type ProcessMessageResponse = {
   dialogId: string;
@@ -75,86 +77,6 @@ export class LlmSendMessageService {
     });
   }
 
-  @Trace()
-  async processMessageWithRetry({
-    messageId,
-    dialogId,
-    userId,
-    maxRetries,
-  }: {
-    messageId: string;
-    dialogId: string;
-    userId: string;
-    maxRetries: number;
-  }): Promise<ProcessMessageResponse> {
-    const { history } = await DialogManager.getDialogHistory({
-      dialogId,
-    });
-
-    let llmConfig = await DefaultProvidersInitializer.getActiveProvider();
-
-    let currentAttempt = 0;
-
-    while (currentAttempt < maxRetries) {
-      try {
-        Logger.logInfo(
-          `Processing message attempt ${currentAttempt + 1}/${maxRetries}`,
-          {
-            llmConfig: llmConfig,
-            attempt: currentAttempt + 1,
-          },
-        );
-
-        addPayloadToTrace({
-          currentAttempt,
-          maxRetries,
-          llmConfig: llmConfig,
-        });
-
-        return await this.processMessage({
-          userId,
-          dialogId,
-          messageId,
-          history,
-        });
-      } catch (error: any) {
-        currentAttempt++;
-
-        if (error.message.includes('429')) {
-          throw error;
-        }
-
-        Logger.logError(
-          `Message processing failed on attempt ${currentAttempt}`,
-          {
-            error: error.message,
-            llmConfig: llmConfig,
-            attempt: currentAttempt,
-          },
-        );
-
-        if (currentAttempt >= maxRetries) {
-          Logger.logError('Max retry attempts reached, returning error', {
-            maxRetries: maxRetries,
-            currentAttempt,
-          });
-          throw new HttpException(
-            {
-              error: ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
-              details: `Failed after ${maxRetries} attempts`,
-              lastError: error.message,
-            },
-            500,
-          );
-        }
-
-        llmConfig = await DefaultProvidersInitializer.getNextActiveProvider();
-      }
-    }
-
-    throw new HttpException({ error: 'Unexpected error in retry logic' }, 500);
-  }
-
   getRandomFallbackMessage() {
     return BOT_FALLBACK_MESSAGES[
       Math.floor(Math.random() * BOT_FALLBACK_MESSAGES.length)
@@ -166,12 +88,10 @@ export class LlmSendMessageService {
     dialogId,
     messageId,
     userId,
-    history,
   }: {
     dialogId: string;
     messageId: string;
     userId: string;
-    history: string[];
   }): Promise<{
     messageId: string;
     dialogId: string;
@@ -185,8 +105,45 @@ export class LlmSendMessageService {
       type: string | undefined;
     }[];
   }> {
+    const { history } = await DialogManager.getDialogHistory({
+      dialogId,
+    });
     const message = (await DialogManager.getMessage(messageId))?.question || '';
     const foundLogIds: (string | undefined)[] = [];
+
+    const attemptsCallbacks = async (options: {
+      chunkSize?: number;
+      temperature?: number;
+      model?: string;
+      provider?: string;
+      baseUrl?: string;
+      currentAttempt: number;
+      maxRetries: number;
+    }) => {
+      const maxRetriesGreaterThanCurrentAttempt =
+        options.maxRetries >= options.currentAttempt;
+      await DialogManager.updateMessage({
+        messageId,
+        answer: maxRetriesGreaterThanCurrentAttempt
+          ? Mustache.render(
+              `Переключаемся на {{provider}}/{{model}}… ({{attempt}}/{{max}})`,
+              {
+                provider: options.provider,
+                model: options.model,
+                attempt: options.currentAttempt,
+                max: options.maxRetries,
+              },
+            )
+          : this.getRandomFallbackMessage(),
+        llmModel: options.model,
+        llmProvider: options.provider,
+        llmTemperature: options.temperature,
+        isSuccess: maxRetriesGreaterThanCurrentAttempt ? undefined : false,
+        isProcessing: maxRetriesGreaterThanCurrentAttempt ? undefined : false,
+      });
+    };
+
+    await LLMFactory.ping(attemptsCallbacks);
 
     let contextDocs: DocWithMetadataAndId[] = [];
     try {
@@ -213,7 +170,6 @@ export class LlmSendMessageService {
           messageId,
           answer,
           selectedDocumentIds: [],
-
           isSuccess: false,
           isProcessing: false,
           llmModel: llmConfig.model,
@@ -287,6 +243,7 @@ export class LlmSendMessageService {
         question: processedQuestion,
         category: categorizedQuestion.category,
         detectedCategory: categorizedQuestion.detectedCategory,
+        attemptsCallbacks,
       });
 
       let answer = llmResult.response;

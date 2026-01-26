@@ -60,6 +60,7 @@ export class LLMChunkProcessor {
     question,
     category,
     detectedCategory,
+    attemptsCallbacks,
   }: {
     dialogId: string;
     history: string[];
@@ -67,6 +68,15 @@ export class LLMChunkProcessor {
     question: string;
     category: Category;
     detectedCategory: Category;
+    attemptsCallbacks?: (options: {
+      chunkSize?: number;
+      temperature?: number;
+      model?: string;
+      provider?: string;
+      baseUrl?: string;
+      currentAttempt: number;
+      maxRetries: number;
+    }) => Promise<any>;
   }) {
     const foundLogIds: (string | undefined)[] = [];
     // Process contextDocs in parallel
@@ -77,6 +87,7 @@ export class LLMChunkProcessor {
       category,
       dialogId,
       detectedCategory,
+      attemptsCallbacks,
     });
 
     // Find the first successful result
@@ -123,6 +134,7 @@ export class LLMChunkProcessor {
     category,
     dialogId,
     detectedCategory,
+    attemptsCallbacks,
   }: {
     contextDocs: DocWithMetadataAndId[];
     question: string;
@@ -130,6 +142,15 @@ export class LLMChunkProcessor {
     category: Category;
     dialogId: string;
     detectedCategory: Category;
+    attemptsCallbacks?: (options: {
+      chunkSize?: number;
+      temperature?: number;
+      model?: string;
+      provider?: string;
+      baseUrl?: string;
+      currentAttempt: number;
+      maxRetries: number;
+    }) => Promise<any>;
   }) {
     Logger.logInfo('Начало обработки запроса с чанками', {
       dialogId,
@@ -171,6 +192,7 @@ export class LLMChunkProcessor {
           contextDocs,
           index: i,
           detectedCategory,
+          attemptsCallbacks,
         });
       });
 
@@ -268,6 +290,7 @@ export class LLMChunkProcessor {
     contextDocs,
     index,
     detectedCategory,
+    attemptsCallbacks,
   }: {
     contextDoc: DocWithMetadataAndId;
     question: string;
@@ -278,6 +301,15 @@ export class LLMChunkProcessor {
     contextDocs: DocWithMetadataAndId[];
     index: number;
     detectedCategory: Category;
+    attemptsCallbacks?: (options: {
+      chunkSize?: number;
+      temperature?: number;
+      model?: string;
+      provider?: string;
+      baseUrl?: string;
+      currentAttempt: number;
+      maxRetries: number;
+    }) => Promise<any>;
   }): Promise<{
     success: boolean;
     foundText?: string;
@@ -399,6 +431,9 @@ export class LLMChunkProcessor {
       Logger.logInfo(
         `chatChunkSize: "${provider.chunkSize}", basePromptLength: "${basePromptLength}"`,
       );
+      if (!provider.chunkSize) {
+        throw new Error('No chunk size found, using default value');
+      }
       const max = +provider.chunkSize - basePromptLength - 100;
       const chunks =
         max > 0
@@ -474,7 +509,7 @@ export class LLMChunkProcessor {
             },
             dialogId,
             messageId: undefined,
-            callback: (prompt) => LLMFactory.invoke(prompt),
+            callback: (prompt) => LLMFactory.invoke(prompt, attemptsCallbacks),
           });
 
           addPayloadToTrace({
@@ -523,7 +558,8 @@ export class LLMChunkProcessor {
               prompt: finalAnswerPrompt,
               messageId: undefined,
               dialogId,
-              callback: (prompt) => LLMFactory.invoke(prompt),
+              callback: (prompt) =>
+                LLMFactory.invoke(prompt, attemptsCallbacks),
             });
 
             foundText = content;

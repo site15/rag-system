@@ -5,7 +5,6 @@ import { HuggingFaceInference } from '@langchain/community/llms/hf';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { ChatGroq } from '@langchain/groq';
 import { ChatOpenAI } from '@langchain/openai';
-import { HttpException } from '@nestjs/common';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { addPayloadToTrace, Trace } from '../trace/trace.module';
 import { ConfigManager } from './config';
@@ -387,30 +386,79 @@ export class LLMFactory {
     return response;
   }
 
+  static async pingWrapper({
+    ping,
+    timeout = 10000,
+    label = 'Ping',
+  }: {
+    ping: (controller: AbortController) => Promise<any>;
+    timeout?: number;
+    label?: string;
+  }) {
+    Logger.logInfo(`${label} started`);
+    const controller = new AbortController();
+    const setTimeoutRef = setTimeout(() => controller.abort(), timeout);
+    try {
+      const pingResult = await ping(controller);
+      Logger.logInfo(`${label} OK`, { ping: pingResult });
+      return pingResult;
+    } catch (error) {
+      Logger.logError(`${label} failed`, error);
+      throw error;
+    } finally {
+      clearTimeout(setTimeoutRef);
+    }
+  }
+
+  static async ping(
+    attemptsCallbacks?: (options: {
+      chunkSize?: number;
+      temperature?: number;
+      model?: string;
+      provider?: string;
+      baseUrl?: string;
+      currentAttempt: number;
+      maxRetries: number;
+    }) => Promise<void>,
+  ) {
+    return LLMFactory.pingWrapper({
+      ping: async (controller: AbortController) =>
+        LLMFactory.invoke('ping', attemptsCallbacks, controller),
+    });
+  }
+
   @Trace()
-  static async invoke(prompt: string) {
+  static async invoke(
+    prompt: string,
+    attemptsCallbacks?: (options: {
+      chunkSize?: number;
+      temperature?: number;
+      model?: string;
+      provider?: string;
+      baseUrl?: string;
+      currentAttempt: number;
+      maxRetries: number;
+    }) => Promise<any>,
+    abortController?: AbortController,
+  ) {
     const maxRetries = 3;
 
     let currentAttempt = 0;
     let apiKey: string | undefined = undefined;
     let llmConfig:
       | {
-          chunkSize: number;
-          temperature: number;
-          model: string;
-          provider: string;
-          baseUrl: string;
+          chunkSize?: number;
+          temperature?: number;
+          model?: string;
+          provider?: string;
+          baseUrl?: string;
         }
       | undefined = undefined;
 
-    try {
-      ({ apiKey, ...llmConfig } =
-        await DefaultProvidersInitializer.getActiveProvider());
+    ({ apiKey, ...llmConfig } =
+      await DefaultProvidersInitializer.getActiveProvider(true));
 
-      if (llmConfig === undefined || apiKey === undefined) {
-        throw new Error(`No active provider found or API key not provided`);
-      }
-    } catch (error) {
+    if (!llmConfig?.provider || (llmConfig?.provider && !apiKey)) {
       ({ apiKey, ...llmConfig } =
         await DefaultProvidersInitializer.getNextActiveProvider());
     }
@@ -433,7 +481,17 @@ export class LLMFactory {
         });
 
         const startTime = Date.now();
-        const rawResult = await llm.invoke(prompt);
+        const rawResult = await LLMFactory.pingWrapper({
+          ping: async (controller: AbortController) =>
+            llm.invoke(
+              prompt,
+              abortController
+                ? { signal: controller.signal || abortController?.signal }
+                : undefined,
+            ),
+          label: 'Invoke',
+          timeout: 40_000,
+        });
 
         const result = LLMFactory.getResponseString(rawResult);
         if (!result) {
@@ -457,14 +515,14 @@ export class LLMFactory {
             maxRetries: maxRetries,
             currentAttempt,
           });
-          throw new HttpException(
-            {
-              error: ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
-              details: `Failed after ${maxRetries} attempts`,
-              lastError: error.message,
-            },
-            500,
-          );
+          if (attemptsCallbacks) {
+            await attemptsCallbacks({
+              ...llmConfig,
+              currentAttempt,
+              maxRetries,
+            });
+          }
+          throw error;
         } else {
           Logger.logError(
             `Message processing failed on attempt ${currentAttempt}`,
@@ -477,7 +535,14 @@ export class LLMFactory {
         }
 
         ({ apiKey, ...llmConfig } =
-          await DefaultProvidersInitializer.getNextActiveProvider());
+          await DefaultProvidersInitializer.getNextActiveProvider(true));
+        if (attemptsCallbacks) {
+          await attemptsCallbacks({
+            ...llmConfig,
+            currentAttempt,
+            maxRetries,
+          });
+        }
       }
     }
     return '';

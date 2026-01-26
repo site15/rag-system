@@ -151,7 +151,7 @@ export class DefaultProvidersInitializer {
     }
   }
 
-  static async getNextActiveProvider() {
+  static async getNextActiveProvider(skipDefault = false) {
     try {
       const activeProviders = await this.getSortedActiveProviders();
 
@@ -160,7 +160,7 @@ export class DefaultProvidersInitializer {
       const provider = activeProviders?.[1] || null;
 
       return {
-        ...ConfigManager.getChatConfig(),
+        ...(!skipDefault ? ConfigManager.getChatConfig() : {}),
         ...(provider?.provider ? { provider: provider?.provider } : {}),
         ...(provider?.model ? { model: provider.model } : {}),
         ...(provider?.temperature ? { temperature: provider.temperature } : {}),
@@ -176,7 +176,7 @@ export class DefaultProvidersInitializer {
     }
   }
 
-  static async getActiveProvider() {
+  static async getActiveProvider(skipDefault = false) {
     try {
       const activeProviders = await this.getSortedActiveProviders();
 
@@ -186,7 +186,9 @@ export class DefaultProvidersInitializer {
 
       Logger.logInfo('provider', provider);
       return {
-        ...ConfigManager.getChatConfig(provider?.provider),
+        ...(!skipDefault
+          ? ConfigManager.getChatConfig(provider?.provider)
+          : {}),
         ...(provider?.provider ? { provider: provider.provider } : {}),
         ...(provider?.model ? { model: provider.model } : {}),
         ...(provider?.temperature ? { temperature: provider.temperature } : {}),

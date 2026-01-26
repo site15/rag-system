@@ -247,7 +247,6 @@ export class FlowController {
       messageId: result.id,
       dialogId: result.dialogId!,
       userId: req.userId,
-      maxRetries: 3,
       provider: args.provider,
       model: args.model,
       temperature: args.temperature,

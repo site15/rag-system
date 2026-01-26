@@ -103,7 +103,7 @@ export class DialogManager {
     answer: string;
     selectedDocumentIds?: string[];
     answerDocumentId?: string;
-    isSuccess: boolean;
+    isSuccess: boolean | undefined;
     detectedCategory?: string;
     transformedQuestion?: string;
     transformedEmbeddingQuery?: string;
@@ -135,9 +135,10 @@ export class DialogManager {
 
     if (chatMessage.dialogId) {
       // Track success/failure
-      if (isSuccess) {
+      if (isSuccess === true) {
         await FailureTracker.recordSuccess(chatMessage.dialogId, messageId);
-      } else {
+      }
+      if (isSuccess === false) {
         await FailureTracker.recordFailure(chatMessage.dialogId, messageId);
       }
     }
