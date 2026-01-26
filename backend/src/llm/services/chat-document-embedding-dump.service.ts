@@ -30,7 +30,7 @@ export class ChatDocumentEmbeddingDumpService {
           },
         });
 
-      const recordCount = records.length;
+      const recordCount = records?.length;
 
       if (recordCount === 0) {
         return {

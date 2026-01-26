@@ -30,14 +30,14 @@ class AsyncFileWriter {
 
   // Process the queue asynchronously
   private static async processQueue() {
-    if (this.isWriting || this.logQueue.length === 0) {
+    if (this.isWriting || this.logQueue?.length === 0) {
       return;
     }
 
     this.isWriting = true;
     this.ensureLogDirectory();
 
-    while (this.logQueue.length > 0) {
+    while (this.logQueue?.length > 0) {
       const logEntry = this.logQueue.shift();
       if (logEntry) {
         try {

@@ -276,7 +276,11 @@ export class LlmSendMessageService {
       /**
        * NOT FOUND
        */
-      if (!answer) {
+      if (
+        !answer ||
+        answer.trim() === 'undefined' ||
+        answer.trim() === 'null'
+      ) {
         // No answer found in both global and telegram modes
 
         const noAnswerResponse = await LLMChunkProcessor.frendlyNotFound({

@@ -16,7 +16,7 @@ export class RAGSearcher {
       ids,
     });
 
-    if (!ids.length) {
+    if (!ids?.length) {
       return [];
     }
 
@@ -45,7 +45,7 @@ WHERE id IN (${ids.map((id) => `'${id}'`).join(', ')})`,
       };
     });
 
-    Logger.logInfo('Поиск завершен', { found: results.length });
+    Logger.logInfo('Поиск завершен', { found: results?.length });
     return results;
   }
 
@@ -67,7 +67,7 @@ WHERE id IN (${ids.map((id) => `'${id}'`).join(', ')})`,
       queryEmbeddingText,
     });
 
-    const queryEmbeddingLength = queryEmbedding.length;
+    const queryEmbeddingLength = queryEmbedding?.length;
     Logger.logInfo('Выполнение поиска по эмбеддингам', {
       limit,
       queryEmbeddingLength,
@@ -110,7 +110,7 @@ WHERE id IN (${ids.map((id) => `'${id}'`).join(', ')})`,
       };
     });
 
-    Logger.logInfo('Поиск завершен', { found: results.length });
+    Logger.logInfo('Поиск завершен', { found: results?.length });
     return results;
   }
 
@@ -128,8 +128,8 @@ WHERE id IN (${ids.map((id) => `'${id}'`).join(', ')})`,
     }> = [];
     let start = 0;
     let currentOffset = offset;
-    while (start < text.length) {
-      const end = Math.min(start + maxLength, text.length);
+    while (start < text?.length) {
+      const end = Math.min(start + maxLength, text?.length);
       const chunkContent = text.slice(start, end);
       chunks.push({
         content: chunkContent,
@@ -162,7 +162,7 @@ WHERE id IN (${ids.map((id) => `'${id}'`).join(', ')})`,
       maxLength,
       offset,
     );
-    if (firstDelimiterChunks.length > 1) {
+    if (firstDelimiterChunks?.length > 1) {
       return firstDelimiterChunks;
     }
 
@@ -173,7 +173,7 @@ WHERE id IN (${ids.map((id) => `'${id}'`).join(', ')})`,
       maxLength,
       offset,
     );
-    if (secondDelimiterChunks.length > 1) {
+    if (secondDelimiterChunks?.length > 1) {
       return secondDelimiterChunks;
     }
 
@@ -200,12 +200,12 @@ WHERE id IN (${ids.map((id) => `'${id}'`).join(', ')})`,
     let currentStartOffset = offset;
     let currentPosition = offset;
 
-    for (let i = 0; i < parts.length; i++) {
+    for (let i = 0; i < parts?.length; i++) {
       const token = (i === 0 ? '' : delimiter) + parts[i];
-      const tokenLength = token.length;
+      const tokenLength = token?.length;
 
       // If current is empty, just put the token
-      if (current.length === 0) {
+      if (current?.length === 0) {
         current = token;
         currentStartOffset = currentPosition;
         currentPosition += tokenLength;
@@ -213,7 +213,7 @@ WHERE id IN (${ids.map((id) => `'${id}'`).join(', ')})`,
       }
 
       // If adding exceeds limit, close current chunk
-      if (current.length + token.length > maxLength) {
+      if (current?.length + token?.length > maxLength) {
         chunks.push({
           content: current,
           meta: {
@@ -237,7 +237,7 @@ WHERE id IN (${ids.map((id) => `'${id}'`).join(', ')})`,
     }
 
     // Add remaining content
-    if (current.length > 0) {
+    if (current?.length > 0) {
       chunks.push({
         content: current,
         meta: {
@@ -292,7 +292,7 @@ WHERE id IN (${ids.map((id) => `'${id}'`).join(', ')})`,
             loc: {
               lines: {
                 from: offset,
-                to: offset + text.length,
+                to: offset + text?.length,
               },
             },
           },
@@ -301,7 +301,7 @@ WHERE id IN (${ids.map((id) => `'${id}'`).join(', ')})`,
     }
     if (showLog) {
       Logger.logInfo('Разделение текста на чанки', {
-        textLength: text.length,
+        textLength: text?.length,
         maxLength: chunkSize,
       });
     }
@@ -316,12 +316,12 @@ WHERE id IN (${ids.map((id) => `'${id}'`).join(', ')})`,
 
     let currentPosition = offset; // Track current position in original text
 
-    for (let i = 0; i < parts.length; i++) {
+    for (let i = 0; i < parts?.length; i++) {
       const token = (i === 0 ? '' : delimiter) + parts[i];
-      const tokenLength = token.length;
+      const tokenLength = token?.length;
 
       // если текущий пуст — просто кладём
-      if (current.length === 0) {
+      if (current?.length === 0) {
         current = token;
         currentStartOffset = currentPosition;
         currentPosition += tokenLength;
@@ -329,7 +329,7 @@ WHERE id IN (${ids.map((id) => `'${id}'`).join(', ')})`,
       }
 
       // если добавление превышает лимит — закрываем текущий
-      if (current.length + token.length > chunkSize) {
+      if (current?.length + token?.length > chunkSize) {
         chunks.push({
           content: current,
           meta: {
@@ -352,7 +352,7 @@ WHERE id IN (${ids.map((id) => `'${id}'`).join(', ')})`,
       currentPosition += tokenLength;
     }
 
-    if (current.length > 0) {
+    if (current?.length > 0) {
       chunks.push({
         content: current,
         meta: {
@@ -368,7 +368,7 @@ WHERE id IN (${ids.map((id) => `'${id}'`).join(', ')})`,
 
     const fixChunks = chunks
       .map((chunkObj) =>
-        chunkObj.content.length > chunkSize
+        chunkObj.content?.length > chunkSize
           ? RAGSearcher.splitTextIntoChunksWithMeta(
               chunkObj.content,
               chunkSize,
@@ -378,7 +378,7 @@ WHERE id IN (${ids.map((id) => `'${id}'`).join(', ')})`,
               chunkObj.meta.loc.lines.from, // Pass the original offset
             )
               .map((subChunkObj) =>
-                subChunkObj.content.length > chunkSize
+                subChunkObj.content?.length > chunkSize
                   ? RAGSearcher.splitTextWithHierarchicalDelimiters(
                       subChunkObj.content,
                       chunkSize,
@@ -393,8 +393,8 @@ WHERE id IN (${ids.map((id) => `'${id}'`).join(', ')})`,
 
     if (showLog) {
       Logger.logInfo('Разделение завершено', {
-        chunkCount: chunks.length,
-        fixChunksCount: fixChunks.length,
+        chunkCount: chunks?.length,
+        fixChunksCount: fixChunks?.length,
       });
     }
     return fixChunks;

@@ -83,7 +83,7 @@ export class RAGApplication {
       true,
     );
     const docs = await loader.load();
-    Logger.logInfo('Документы загружены', { documentCount: docs.length });
+    Logger.logInfo('Документы загружены', { documentCount: docs?.length });
 
     return docs;
   }
@@ -103,7 +103,7 @@ export class RAGApplication {
         1600,
       ); // await splitter.splitDocuments([doc]);
 
-      for (let chunkIndex = 0; chunkIndex < chunks.length; chunkIndex++) {
+      for (let chunkIndex = 0; chunkIndex < chunks?.length; chunkIndex++) {
         let retryCount = 0;
         const maxRetries = 1;
 
@@ -142,7 +142,7 @@ export class RAGApplication {
               Logger.logInfo('Пропуск чанка по хешу', {
                 hash: hash.substring(0, 8),
                 skippedChunks,
-                normalizedLength: normalized.length,
+                normalizedLength: normalized?.length,
                 normalized,
               });
               break; // Exit the retry loop for this chunk
@@ -150,44 +150,44 @@ export class RAGApplication {
             if (await EmbeddingsDB.chunkExists(hash, doc.metadata.source)) {
               Logger.logInfo('Чанк уже существует, пропуск', {
                 hash: hash.substring(0, 8),
-                normalizedLength: normalized.length,
+                normalizedLength: normalized?.length,
               });
               break; // Exit the retry loop for this chunk
             }
             Logger.logInfo('Создание эмбеддинга для чанка', {
               source: metadata.source,
               hash: hash.substring(0, 8),
-              normalizedLength: normalized.length,
+              normalizedLength: normalized?.length,
             });
 
             const vector = await EmbeddingsFactory.embedQuery(normalized);
             const vectorValue = `[${vector.join(',')}]`;
 
-            if (vector.length === 384) {
+            if (vector?.length === 384) {
               await PrismaService.instance.$executeRaw`
 INSERT INTO "ChatDocumentEmbedding"
 (content, embedding384, metadata, "contentHash")
 VALUES (${trimmedContent}, ${vectorValue}::vector, ${metadata || '{}'}, ${hash})
 `;
-            } else if (vector.length === 768) {
+            } else if (vector?.length === 768) {
               await PrismaService.instance.$executeRaw`
 INSERT INTO "ChatDocumentEmbedding"
 (content, embedding768, metadata, "contentHash")
 VALUES (${trimmedContent}, ${vectorValue}::vector, ${metadata || '{}'}, ${hash})
 `;
-            } else if (vector.length === 1024) {
+            } else if (vector?.length === 1024) {
               await PrismaService.instance.$executeRaw`
 INSERT INTO "ChatDocumentEmbedding"
 (content, embedding1024, metadata, "contentHash")
 VALUES (${trimmedContent}, ${vectorValue}::vector, ${metadata || '{}'}, ${hash})
 `;
-            } else if (vector.length === 1536) {
+            } else if (vector?.length === 1536) {
               await PrismaService.instance.$executeRaw`
 INSERT INTO "ChatDocumentEmbedding"
 (content, embedding1536, metadata, "contentHash")
 VALUES (${trimmedContent}, ${vectorValue}::vector, ${metadata || '{}'}, ${hash})
 `;
-            } else if (vector.length === 3072) {
+            } else if (vector?.length === 3072) {
               await PrismaService.instance.$executeRaw`
 INSERT INTO "ChatDocumentEmbedding"
 (content, embedding3072, metadata, "contentHash")
@@ -263,7 +263,7 @@ VALUES (${trimmedContent}, ${vectorValue}::vector, ${metadata || '{}'}, ${hash})
         });
 
       Logger.logInfo('Найдено документов для обработки', {
-        count: documents.length,
+        count: documents?.length,
       });
 
       let processedCount = 0;
@@ -273,7 +273,7 @@ VALUES (${trimmedContent}, ${vectorValue}::vector, ${metadata || '{}'}, ${hash})
         try {
           Logger.logInfo('Обработка документа', {
             id: doc.id,
-            contentLength: doc.content.length,
+            contentLength: doc.content?.length,
           });
           let graphContent: string | undefined;
           try {
@@ -311,31 +311,31 @@ VALUES (${trimmedContent}, ${vectorValue}::vector, ${metadata || '{}'}, ${hash})
           const graphVectorValue = `[${graphVector.join(',')}]`;
 
           // Use raw SQL for vector operations since Prisma doesn't support vectors natively
-          if (graphVector.length === 384) {
+          if (graphVector?.length === 384) {
             await PrismaService.instance.$executeRaw`
               UPDATE "ChatDocumentEmbedding" 
               SET "graphContent" = ${response}, "graphEmbedding384" = ${graphVectorValue}::vector 
               WHERE id = ${doc.id}
             `;
-          } else if (graphVector.length === 768) {
+          } else if (graphVector?.length === 768) {
             await PrismaService.instance.$executeRaw`
               UPDATE "ChatDocumentEmbedding" 
               SET "graphContent" = ${response}, "graphEmbedding768" = ${graphVectorValue}::vector 
               WHERE id = ${doc.id}
             `;
-          } else if (graphVector.length === 1024) {
+          } else if (graphVector?.length === 1024) {
             await PrismaService.instance.$executeRaw`
               UPDATE "ChatDocumentEmbedding" 
               SET "graphContent" = ${response}, "graphEmbedding1024" = ${graphVectorValue}::vector 
               WHERE id = ${doc.id}
             `;
-          } else if (graphVector.length === 1536) {
+          } else if (graphVector?.length === 1536) {
             await PrismaService.instance.$executeRaw`
               UPDATE "ChatDocumentEmbedding" 
               SET "graphContent" = ${response}, "graphEmbedding1536" = ${graphVectorValue}::vector 
               WHERE id = ${doc.id}
             `;
-          } else if (graphVector.length === 3072) {
+          } else if (graphVector?.length === 3072) {
             await PrismaService.instance.$executeRaw`
               UPDATE "ChatDocumentEmbedding" 
               SET "graphContent" = ${response}, "graphEmbedding3072" = ${graphVectorValue}::vector 
@@ -347,7 +347,7 @@ VALUES (${trimmedContent}, ${vectorValue}::vector, ${metadata || '{}'}, ${hash})
           Logger.logInfo('Документ успешно обработан', {
             id: doc.id,
             processedCount,
-            total: documents.length,
+            total: documents?.length,
           });
 
           // Add small delay to avoid rate limiting
@@ -364,18 +364,18 @@ VALUES (${trimmedContent}, ${vectorValue}::vector, ${metadata || '{}'}, ${hash})
 
       Logger.logInfo('Завершена обработка документов', {
         totalProcessed: processedCount,
-        totalDocuments: documents.length,
-        errorsCount: errors.length,
+        totalDocuments: documents?.length,
+        errorsCount: errors?.length,
       });
 
-      if (errors.length > 0) {
+      if (errors?.length > 0) {
         Logger.logError('Ошибки при обработке документов', { errors });
       }
 
       return {
         success: true,
         processedCount,
-        totalCount: documents.length,
+        totalCount: documents?.length,
         errors,
       };
     } catch (error) {

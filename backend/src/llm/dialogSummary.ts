@@ -37,7 +37,7 @@ export class DialogSummary {
     const prompt = createDialogSummaryPrompt(history);
     Logger.logInfo('Отправка запроса на суммаризацию', {
       dialogId,
-      promptLength: prompt.length,
+      promptLength: prompt?.length,
     });
 
     const { content, logId } = await LLMLogger.callWithLogging({
@@ -50,7 +50,7 @@ export class DialogSummary {
 
     Logger.logInfo('Получен ответ от LLM для суммаризации', {
       dialogId,
-      // responseLength: typeof r.content === "string" ? r.content.length : JSON.stringify(r.content).length,
+      // responseLength: typeof r.content === "string" ? r.content?.length : JSON.stringify(r.content)?.length,
     });
 
     await PrismaService.instance.chatDialog.update({

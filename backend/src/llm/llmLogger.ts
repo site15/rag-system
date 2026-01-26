@@ -50,7 +50,7 @@ export class LLMLogger {
 
     try {
       Logger.logInfo('LLM Request Initiated', {
-        promptLength: prompt.length,
+        promptLength: prompt?.length,
         metadata,
       });
 
@@ -117,7 +117,7 @@ export class LLMLogger {
       Logger.logError(
         'LLM Request Failed',
         {
-          promptLength: prompt.length,
+          promptLength: prompt?.length,
           executionTime,
           error: (error as Error).message,
           metadata,
@@ -177,8 +177,8 @@ export class LLMLogger {
       const logId = await LLMQueryLogger.logQuery({
         request: prompt,
         response: response,
-        requestLength: prompt.length,
-        responseLength: response.length,
+        requestLength: prompt?.length,
+        responseLength: response?.length,
         executionTimeMs: executionTimeMs,
         success: success,
         errorMessage: errorMessage,
@@ -191,7 +191,7 @@ export class LLMLogger {
       // Don't let database logging errors break the main flow
       Logger.logError('Failed to log LLM query to database', {
         error: (dbError as Error).message,
-        promptLength: prompt.length,
+        promptLength: prompt?.length,
       });
       return null;
     }

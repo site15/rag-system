@@ -133,8 +133,8 @@ export class LLMChunkProcessor {
   }) {
     Logger.logInfo('Начало обработки запроса с чанками', {
       dialogId,
-      contextDocsCount: contextDocs.length,
-      historyLength: history.length,
+      contextDocsCount: contextDocs?.length,
+      historyLength: history?.length,
       question,
     });
 
@@ -156,7 +156,7 @@ export class LLMChunkProcessor {
 
     // Process in batches using a proper worker pool
     // todo: maxParallelThreads not work correct
-    for (let i = 0; i < contextDocs.length; i += maxParallelThreads) {
+    for (let i = 0; i < contextDocs?.length; i += maxParallelThreads) {
       const batch = contextDocs.slice(i, i + maxParallelThreads);
 
       // Process batch in parallel
@@ -359,10 +359,10 @@ export class LLMChunkProcessor {
         dialogId,
       });
 
-      const basePromptLength = basePrompt.length;
+      const basePromptLength = basePrompt?.length;
 
       addPayloadToTrace({
-        contextDocsCount: contextDocs.length,
+        contextDocsCount: contextDocs?.length,
         basePromptLength,
         basePrompt,
       });
@@ -404,11 +404,11 @@ export class LLMChunkProcessor {
         max > 0
           ? RAGSearcher.splitTextIntoChunksWithMeta(processedContent, max)
           : [];
-      const totalChunks = chunks.length;
+      const totalChunks = chunks?.length;
 
       Logger.logInfo(`Обработка чанков для контекста ${contextIndex}`, {
         totalChunks: totalChunks,
-        processedContentLength: processedContent.length,
+        processedContentLength: processedContent?.length,
       });
 
       addPayloadToTrace({ totalChunks });
@@ -446,7 +446,7 @@ export class LLMChunkProcessor {
             }/${totalChunks} для контекста ${contextIndex}`,
             {
               totalChunks: totalChunks,
-              chunkLength: chunk.content.length,
+              chunkLength: chunk.content?.length,
             },
           );
 
@@ -461,7 +461,7 @@ export class LLMChunkProcessor {
 
           addPayloadToTrace({
             [`chunk${i}Prompt`]: chunkPrompt,
-            [`chunk${i}PromptLength`]: chunkPrompt.length,
+            [`chunk${i}PromptLength`]: chunkPrompt?.length,
           });
 
           const { content: text, logId } = await LLMLogger.callWithLogging({
@@ -668,7 +668,7 @@ export class LLMChunkProcessor {
       ).filter((r) => r.answer);
       Logger.logInfo('Last history item', lastHistoryItem);
 
-      if (lastHistoryItem.length) {
+      if (lastHistoryItem?.length) {
         detectedCategory = getCategoryByDetectedCategory(
           lastHistoryItem[0].detected_category,
         );

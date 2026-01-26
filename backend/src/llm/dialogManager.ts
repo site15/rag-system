@@ -143,7 +143,7 @@ export class DialogManager {
     }
 
     // Save associations between chat history and embedding documents
-    if (selectedDocumentIds && selectedDocumentIds.length > 0) {
+    if (selectedDocumentIds && selectedDocumentIds?.length > 0) {
       const documentAssociations = [];
       for (const docId of selectedDocumentIds) {
         documentAssociations.push(
@@ -161,7 +161,7 @@ export class DialogManager {
       await Promise.all(documentAssociations);
       Logger.logInfo('Связи с документами сохранены', {
         messageId,
-        documentCount: selectedDocumentIds.length,
+        documentCount: selectedDocumentIds?.length,
         answerDocumentId,
       });
     }
@@ -203,7 +203,7 @@ export class DialogManager {
       detected_category: msg.category as Category,
     }));
 
-    Logger.logInfo('История диалога получена', { count: result.length });
+    Logger.logInfo('История диалога получена', { count: result?.length });
     return result;
   }
 
@@ -250,7 +250,7 @@ export class DialogManager {
       }),
     );
 
-    Logger.logInfo('История диалога получена', { count: history.length });
+    Logger.logInfo('История диалога получена', { count: history?.length });
     return { history, messages };
   }
 
@@ -288,7 +288,7 @@ export class DialogManager {
     Logger.logInfo('Суммаризация диалога получена', {
       dialogId,
       hasSummary: !!summary,
-      summaryLength: summary ? summary.length : 0,
+      summaryLength: summary ? summary?.length : 0,
     });
 
     return summary;

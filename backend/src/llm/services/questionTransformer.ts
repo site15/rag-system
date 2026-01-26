@@ -148,7 +148,7 @@ export class QuestionTransformer {
     const trimmedQuestion = question?.trim().toLowerCase();
 
     // If there's no history, question is self-contained by definition
-    if (!history || history.length === 0) {
+    if (!history || history?.length === 0) {
       return true;
     }
 
@@ -218,7 +218,7 @@ export class QuestionTransformer {
       ).filter((r) => r.answer);
       Logger.logInfo('Last history item', lastHistoryItem);
 
-      if (lastHistoryItem.length) {
+      if (lastHistoryItem?.length) {
         detectedCategory = getCategoryByDetectedCategory(
           lastHistoryItem[0].detected_category,
         );

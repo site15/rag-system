@@ -238,7 +238,7 @@ export function createMinimalTransformationPrompt({
   const hasCategory = !!category;
 
   const historyContext =
-    history && history.length > 0
+    history && history?.length > 0
       ? getConstant(
           GetConstantKey.Prompt_minimalTransformationHistoryTemplate,
           { history: removeCodeWrappers(TextHelpers.concat(history)) },

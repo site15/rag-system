@@ -36,7 +36,7 @@ export class SummarizationService {
 
   private static processQueue(messageId: string) {
     // Process one task at a time from the queue
-    if (this.pendingTasks.length > 0 && this.activeSummarizations.size < 5) {
+    if (this.pendingTasks?.length > 0 && this.activeSummarizations.size < 5) {
       // Limit concurrent summarizations
       const task = this.pendingTasks.shift();
 

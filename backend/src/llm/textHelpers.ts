@@ -22,6 +22,6 @@ export class TextHelpers {
   }
 
   public static concat(str: string[], emptyText: string = '') {
-    return str.length > 0 ? str.join('\n') : emptyText;
+    return str?.length > 0 ? str.join('\n') : emptyText;
   }
 }

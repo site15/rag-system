@@ -134,7 +134,7 @@ export class LLMQueryLogger {
     messageId: string | undefined,
   ): Promise<boolean> {
     try {
-      if (recordIds.length === 0) {
+      if (recordIds?.length === 0) {
         Logger.logInfo('No record IDs provided for update', {});
         return true;
       }
