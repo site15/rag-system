@@ -151,7 +151,7 @@ export class DefaultProvidersInitializer {
     }
   }
 
-  static async getNextActiveProvider(skipDefault = false) {
+  static async getNextActiveProvider() {
     try {
       const activeProviders = await this.getSortedActiveProviders();
 
@@ -160,7 +160,7 @@ export class DefaultProvidersInitializer {
       const provider = activeProviders?.[1] || null;
 
       return {
-        ...(!skipDefault ? ConfigManager.getChatConfig() : {}),
+        ...ConfigManager.getChatConfig(provider?.provider),
         ...(provider?.provider ? { provider: provider?.provider } : {}),
         ...(provider?.model ? { model: provider.model } : {}),
         ...(provider?.temperature ? { temperature: provider.temperature } : {}),

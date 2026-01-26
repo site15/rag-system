@@ -535,7 +535,7 @@ export class LLMFactory {
         }
 
         ({ apiKey, ...llmConfig } =
-          await DefaultProvidersInitializer.getNextActiveProvider(true));
+          await DefaultProvidersInitializer.getNextActiveProvider());
         if (attemptsCallbacks) {
           await attemptsCallbacks({
             ...llmConfig,
