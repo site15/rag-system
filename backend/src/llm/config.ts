@@ -55,7 +55,7 @@ export class ConfigManager {
   private static getDefaultChatModel(provider: string): string {
     switch (provider) {
       case PROVIDER_NAMES.GROQ:
-        return 'llama3-70b-8192';
+        return 'llama-3.1-8b-instant';
       case PROVIDER_NAMES.OPENAI:
         return 'gpt-4o';
       case PROVIDER_NAMES.ANTHROPIC:
