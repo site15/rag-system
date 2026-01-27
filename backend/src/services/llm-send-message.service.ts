@@ -29,7 +29,7 @@ import { SummarizationService } from '../llm/services/summarizationService';
 import { TextHelpers } from '../llm/textHelpers';
 import { DocWithMetadataAndId } from '../llm/types';
 import { addPayloadToTrace, Trace } from '../trace/trace.module';
-import { LLMFactory } from '../llm/llmFactory';
+import { AttemptsCallbacksOptions, LLMFactory } from '../llm/llmFactory';
 
 type ProcessMessageResponse = {
   dialogId: string;
@@ -111,30 +111,26 @@ export class LlmSendMessageService {
     const message = (await DialogManager.getMessage(messageId))?.question || '';
     const foundLogIds: (string | undefined)[] = [];
 
-    const attemptsCallbacks = async (options: {
-      chunkSize?: number;
-      temperature?: number;
-      model?: string;
-      provider?: string;
-      baseUrl?: string;
-      currentAttempt: number;
-      maxRetries: number;
-    }) => {
+    const attemptsCallbacks = async (options: AttemptsCallbacksOptions) => {
       const maxRetriesGreaterThanCurrentAttempt =
+        options.maxRetries !== undefined &&
+        options.currentAttempt !== undefined &&
         options.maxRetries >= options.currentAttempt;
       await DialogManager.updateMessage({
         messageId,
-        answer: maxRetriesGreaterThanCurrentAttempt
-          ? Mustache.render(
-              `Переключаемся на {{provider}}/{{model}}… ({{attempt}}/{{max}})`,
-              {
-                provider: options.provider,
-                model: options.model,
-                attempt: options.currentAttempt,
-                max: options.maxRetries,
-              },
-            )
-          : this.getRandomFallbackMessage(),
+        answer:
+          options.message ||
+          (maxRetriesGreaterThanCurrentAttempt
+            ? Mustache.render(
+                `Переключаемся на {{provider}}/{{model}}… ({{attempt}}/{{max}})`,
+                {
+                  provider: options.provider,
+                  model: options.model,
+                  attempt: options.currentAttempt,
+                  max: options.maxRetries,
+                },
+              )
+            : this.getRandomFallbackMessage()),
         llmModel: options.model,
         llmProvider: options.provider,
         llmTemperature: options.temperature,
@@ -149,9 +145,18 @@ export class LlmSendMessageService {
     try {
       addPayloadToTrace({ dialogId, userId, history });
 
+      let llmConfig = await DefaultProvidersInitializer.getActiveProvider();
+
       Logger.logInfo('Создание эмбеддинга для вопроса', {
         messageLength: message.length,
         message,
+      });
+
+      await attemptsCallbacks({
+        message: 'Трансформация вопроса...',
+        model: llmConfig.model,
+        provider: llmConfig.provider,
+        temperature: llmConfig.temperature,
       });
 
       // Transform the question using the QuestionTransformer to categorize and optimize it
@@ -164,7 +169,6 @@ export class LlmSendMessageService {
 
       if (!categorizedQuestion) {
         const answer = this.getRandomFallbackMessage();
-        const llmConfig = await DefaultProvidersInitializer.getActiveProvider();
 
         await DialogManager.updateMessage({
           messageId,
@@ -236,6 +240,13 @@ export class LlmSendMessageService {
         historyLength: history.length,
       });
 
+      await attemptsCallbacks({
+        message: 'Поиска ответа...',
+        model: llmConfig.model,
+        provider: llmConfig.provider,
+        temperature: llmConfig.temperature,
+      });
+
       const llmResult = await LLMChunkProcessor.askLLMChunked({
         dialogId,
         history,
@@ -258,6 +269,13 @@ export class LlmSendMessageService {
       const documentInfo = contextDocs
         .map((doc, index) => createDocumentInfo({ doc, index }))
         .reduce((acc, curr) => ({ ...acc, ...curr }), {});
+
+      await attemptsCallbacks({
+        message: 'Ответ получен...',
+        model: llmConfig.model,
+        provider: llmConfig.provider,
+        temperature: llmConfig.temperature,
+      });
 
       Logger.logInfo('[GLOBAL] Получен ответ от LLM', {
         documentCount: contextDocs.length,
@@ -287,7 +305,7 @@ export class LlmSendMessageService {
       // Extract document IDs from the contextDocs array
       const selectedDocumentIds = contextDocs.map((doc) => doc.id);
 
-      const llmConfig = await DefaultProvidersInitializer.getActiveProvider();
+      llmConfig = await DefaultProvidersInitializer.getActiveProvider();
 
       await DialogManager.updateMessage({
         messageId,

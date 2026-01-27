@@ -5,7 +5,7 @@ import { getConstant, GetConstantKey } from '../utils/get-constant';
 import { DialogManager } from './dialogManager';
 import { getCategoryByDetectedCategory } from './getCategoryByDetectedCategory';
 import { getCategoryPrompt } from './getCategoryPrompt';
-import { LLMFactory } from './llmFactory';
+import { AttemptsCallbacksOptions, LLMFactory } from './llmFactory';
 import { LLMLogger } from './llmLogger';
 import { Logger } from './logger';
 import {
@@ -68,15 +68,7 @@ export class LLMChunkProcessor {
     question: string;
     category: Category;
     detectedCategory: Category;
-    attemptsCallbacks?: (options: {
-      chunkSize?: number;
-      temperature?: number;
-      model?: string;
-      provider?: string;
-      baseUrl?: string;
-      currentAttempt: number;
-      maxRetries: number;
-    }) => Promise<any>;
+    attemptsCallbacks?: (options: AttemptsCallbacksOptions) => Promise<any>;
   }) {
     const foundLogIds: (string | undefined)[] = [];
     // Process contextDocs in parallel
@@ -142,15 +134,7 @@ export class LLMChunkProcessor {
     category: Category;
     dialogId: string;
     detectedCategory: Category;
-    attemptsCallbacks?: (options: {
-      chunkSize?: number;
-      temperature?: number;
-      model?: string;
-      provider?: string;
-      baseUrl?: string;
-      currentAttempt: number;
-      maxRetries: number;
-    }) => Promise<any>;
+    attemptsCallbacks?: (options: AttemptsCallbacksOptions) => Promise<any>;
   }) {
     Logger.logInfo('Начало обработки запроса с чанками', {
       dialogId,
@@ -187,7 +171,7 @@ export class LLMChunkProcessor {
           question,
           history,
           category,
-          contextIndex: i + batchIndex,
+          contextDocIndex: i + batchIndex,
           dialogId,
           contextDocs,
           index: i,
@@ -285,7 +269,7 @@ export class LLMChunkProcessor {
     question,
     history,
     category,
-    contextIndex,
+    contextDocIndex,
     dialogId,
     contextDocs,
     index,
@@ -296,20 +280,12 @@ export class LLMChunkProcessor {
     question: string;
     history: string[];
     category: Category;
-    contextIndex: number;
+    contextDocIndex: number;
     dialogId: string;
     contextDocs: DocWithMetadataAndId[];
     index: number;
     detectedCategory: Category;
-    attemptsCallbacks?: (options: {
-      chunkSize?: number;
-      temperature?: number;
-      model?: string;
-      provider?: string;
-      baseUrl?: string;
-      currentAttempt: number;
-      maxRetries: number;
-    }) => Promise<any>;
+    attemptsCallbacks?: (options: AttemptsCallbacksOptions) => Promise<any>;
   }): Promise<{
     success: boolean;
     foundText?: string;
@@ -441,7 +417,7 @@ export class LLMChunkProcessor {
           : [];
       const totalChunks = chunks?.length;
 
-      Logger.logInfo(`Обработка чанков для контекста ${contextIndex}`, {
+      Logger.logInfo(`Обработка чанков для контекста ${contextDocIndex}`, {
         totalChunks: totalChunks,
         processedContentLength: processedContent?.length,
       });
@@ -453,6 +429,14 @@ export class LLMChunkProcessor {
 
       for (let i = 0; i < totalChunks; i++) {
         if (foundChunkIndex === -1) {
+          if (attemptsCallbacks) {
+            await attemptsCallbacks({
+              message: `Обработка чанка ${
+                i + 1
+              }/${totalChunks} для документа ${contextDocIndex}/${contextDocs.length}...`,
+            });
+          }
+
           const chunk = chunks[i];
 
           // Check consecutive failures to determine if we should bypass pre-filter
@@ -465,7 +449,11 @@ export class LLMChunkProcessor {
             if (bypassPreFilter) {
               Logger.logInfo(
                 `Bypassing pre-filter due to ${consecutiveFailures} consecutive failures`,
-                { dialogId, consecutiveFailures, contextIndex },
+                {
+                  dialogId,
+                  consecutiveFailures,
+                  contextIndex: contextDocIndex,
+                },
               );
             }
           } catch (error) {
@@ -478,7 +466,7 @@ export class LLMChunkProcessor {
           Logger.logInfo(
             `Обработка чанка ${
               i + 1
-            }/${totalChunks} для контекста ${contextIndex}`,
+            }/${totalChunks} для контекста ${contextDocIndex}`,
             {
               totalChunks: totalChunks,
               chunkLength: chunk.content?.length,
@@ -502,7 +490,7 @@ export class LLMChunkProcessor {
           const { content: text, logId } = await LLMLogger.callWithLogging({
             prompt: chunkPrompt,
             metadata: {
-              contextIndex,
+              contextIndex: contextDocIndex,
               chunkIndex: i,
               operation: 'chunk_processing',
               dialogId,
@@ -519,7 +507,7 @@ export class LLMChunkProcessor {
           foundLogIds.push(logId);
 
           Logger.logInfo(
-            `Ответ LLM для чанка ${i + 1} контекста ${contextIndex}`,
+            `Ответ LLM для чанка ${i + 1} контекста ${contextDocIndex}`,
             { text },
           );
 
@@ -532,7 +520,7 @@ export class LLMChunkProcessor {
               Logger.logInfo(
                 'Отброшен [FOUND] из Semantic Search Content, разрешены только Author Message',
                 {
-                  contextIndex,
+                  contextIndex: contextDocIndex,
                   chunkIndex: i,
                 },
               );
@@ -586,7 +574,7 @@ export class LLMChunkProcessor {
           foundText,
           foundChunkIndex,
           chunks,
-          contextIndex,
+          contextIndex: contextDocIndex,
           documentId: contextDoc.id, // Include the document ID for tracking
         };
       }
@@ -594,7 +582,7 @@ export class LLMChunkProcessor {
       return {
         foundLogIds,
         success: false,
-        contextIndex,
+        contextIndex: contextDocIndex,
         documentId: contextDoc.id, // Include the document ID for tracking
       };
     } catch (error) {
@@ -604,7 +592,7 @@ export class LLMChunkProcessor {
       ) {
         throw error;
       }
-      Logger.logError(`Ошибка при обработке контекста ${contextIndex}`, {
+      Logger.logError(`Ошибка при обработке контекста ${contextDocIndex}`, {
         error: (error as Error).message,
       });
       Logger.logInfo('foundLogId', foundLogIds);
@@ -614,7 +602,7 @@ export class LLMChunkProcessor {
         foundText: undefined,
         foundChunkIndex: undefined,
         chunks: undefined,
-        contextIndex,
+        contextIndex: contextDocIndex,
         documentId: contextDoc.id,
       };
     }

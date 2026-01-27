@@ -18,6 +18,17 @@ import { DefaultProvidersInitializer } from './services/defaultProvidersInitiali
 import { ModelExecutionTracker } from './services/modelExecutionTracker';
 import { ChatConfig } from './types';
 
+export type AttemptsCallbacksOptions = {
+  message?: string;
+  chunkSize?: number;
+  temperature?: number;
+  model?: string;
+  provider?: string;
+  baseUrl?: string;
+  currentAttempt?: number;
+  maxRetries?: number;
+};
+
 export class LLMFactory {
   public static createLLM(chatConfig: ChatConfig) {
     const model = chatConfig.model;
@@ -436,15 +447,7 @@ export class LLMFactory {
   }
 
   static async ping(
-    attemptsCallbacks?: (options: {
-      chunkSize?: number;
-      temperature?: number;
-      model?: string;
-      provider?: string;
-      baseUrl?: string;
-      currentAttempt: number;
-      maxRetries: number;
-    }) => Promise<void>,
+    attemptsCallbacks?: (options: AttemptsCallbacksOptions) => Promise<void>,
   ) {
     const rawResult = LLMFactory.pingWrapper({
       ping: async (controller: AbortController) =>
@@ -456,15 +459,7 @@ export class LLMFactory {
   @Trace()
   static async invoke(
     prompt: string,
-    attemptsCallbacks?: (options: {
-      chunkSize?: number;
-      temperature?: number;
-      model?: string;
-      provider?: string;
-      baseUrl?: string;
-      currentAttempt: number;
-      maxRetries: number;
-    }) => Promise<any>,
+    attemptsCallbacks?: (options: AttemptsCallbacksOptions) => Promise<any>,
     abortController?: AbortController,
   ) {
     const maxRetries = 3;
@@ -493,6 +488,13 @@ export class LLMFactory {
     while (currentAttempt < maxRetries) {
       try {
         const llm = LLMFactory.createLLM({ ...llmConfig, apiKey } as any);
+
+        if (attemptsCallbacks) {
+          await attemptsCallbacks({
+            message: `Обработка промпта (попытка: ${currentAttempt + 1}/${maxRetries})...`,
+          });
+        }
+
         Logger.logInfo(
           `Processing message attempt ${currentAttempt + 1}/${maxRetries}`,
           {
@@ -534,6 +536,11 @@ export class LLMFactory {
           });
         }
         addPayloadToTrace({ rawResult, prompt, result });
+        if (attemptsCallbacks) {
+          await attemptsCallbacks({
+            message: `Промпт обработан (попытка: ${currentAttempt + 1}/${maxRetries})...`,
+          });
+        }
         Logger.logInfo('LLM Request Completed', {
           prompt,
           result,
@@ -546,6 +553,12 @@ export class LLMFactory {
 
         return result;
       } catch (error: any) {
+        if (attemptsCallbacks) {
+          await attemptsCallbacks({
+            message: `Ошибка обработки промпта (попытка: ${currentAttempt + 1}/${maxRetries})...`,
+          });
+        }
+
         Logger.logError(
           `Message processing failed on attempt ${currentAttempt}`,
           {
