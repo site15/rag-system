@@ -25,6 +25,7 @@ export interface DialogMessage {
   question: string;
   answer: string;
   dialogId: string;
+  info: string;
 }
 
 // Response interface for the endpoint
@@ -76,6 +77,9 @@ export class LlmDialogService {
           answerSentAt: true,
           questionReceivedAt: true,
           dialogId: true,
+          provider: true,
+          model: true,
+          temperature: true,
         },
         orderBy: {
           createdAt: 'asc',
@@ -91,6 +95,7 @@ export class LlmDialogService {
         questionReceivedAt: row.questionReceivedAt,
         question: row.question,
         answer: row.answer,
+        info: `${row.provider}/${row.model}:${row.temperature}`,
         dialogId: row.dialogId!,
       }));
 

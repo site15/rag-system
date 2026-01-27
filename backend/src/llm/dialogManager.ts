@@ -115,13 +115,17 @@ export class DialogManager {
     // Insert the chat history record and get the ID
     const chatMessage = await PrismaService.instance.chatMessage.update({
       data: {
-        provider: llmProvider,
-        model: llmModel,
-        temperature: llmTemperature,
+        ...(llmProvider ? { provider: llmProvider } : {}),
+        ...(llmModel ? { model: llmModel } : {}),
+        ...(llmTemperature ? { temperature: llmTemperature } : {}),
         answer: answer,
-        category: detectedCategory,
-        transformedQuestion: transformedQuestion,
-        transformedEmbeddingQuery: transformedEmbeddingQuery,
+        ...(detectedCategory ? { category: detectedCategory } : {}),
+        ...(transformedQuestion
+          ? { transformedQuestion: transformedQuestion }
+          : {}),
+        ...(transformedEmbeddingQuery
+          ? { transformedEmbeddingQuery: transformedEmbeddingQuery }
+          : {}),
         isProcessing,
         answerSentAt: new Date(),
         trace: getTraceStack() as any,

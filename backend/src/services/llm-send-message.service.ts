@@ -176,9 +176,9 @@ export class LlmSendMessageService {
           selectedDocumentIds: [],
           isSuccess: false,
           isProcessing: false,
-          llmModel: llmConfig.model,
-          llmProvider: llmConfig.provider,
-          llmTemperature: llmConfig.temperature,
+          llmModel: undefined,
+          llmProvider: undefined,
+          llmTemperature: undefined,
         });
 
         return {
@@ -317,9 +317,9 @@ export class LlmSendMessageService {
         transformedQuestion: categorizedQuestion.transformedQuestion,
         transformedEmbeddingQuery: categorizedQuestion.transformedEmbedded,
         isProcessing: false,
-        llmModel: llmConfig.model,
-        llmProvider: llmConfig.provider,
-        llmTemperature: llmConfig.temperature,
+        llmModel: undefined,
+        llmProvider: undefined,
+        llmTemperature: undefined,
       });
 
       LLMQueryLogger.updateQueryReferences(

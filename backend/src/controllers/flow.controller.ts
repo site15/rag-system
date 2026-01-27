@@ -123,6 +123,10 @@ export class DialogMessage {
   @ApiProperty({ type: 'string' })
   @IsString()
   dialogId!: string;
+
+  @ApiProperty({ type: 'string' })
+  @IsString()
+  info!: string;
 }
 
 export class DialogFlowResponse {
@@ -209,6 +213,7 @@ export class FlowController {
         questionReceivedAt: m.questionReceivedAt,
         answerSentAt: m.answerSentAt,
         dialogId: m.dialogId,
+        info: m.info,
       })),
       meta: { curPage, perPage, totalResults: response.totalCount },
     };
@@ -260,6 +265,7 @@ export class FlowController {
       answer: result.answer,
       isProcessing: result.isProcessing,
       dialogId: result.dialogId!,
+      info: `${result.provider}/${result.model}:${result.temperature}`,
     };
   }
 
