@@ -458,10 +458,11 @@ export class LLMFactory {
 
   @Trace()
   static async invoke(
-    prompt: string,
+    prompt: string | 'ping',
     attemptsCallbacks?: (options: AttemptsCallbacksOptions) => Promise<any>,
     abortController?: AbortController,
   ) {
+    const isPing = prompt === 'ping';
     const maxRetries = 3;
 
     let currentAttempt = 0;
@@ -489,9 +490,9 @@ export class LLMFactory {
       try {
         const llm = LLMFactory.createLLM({ ...llmConfig, apiKey } as any);
 
-        if (attemptsCallbacks) {
+        if (attemptsCallbacks && !isPing) {
           await attemptsCallbacks({
-            message: `Обработка промпта (попытка: ${currentAttempt + 1}/${maxRetries})...`,
+            message: `🔍 Поиск ответа в чанке (попытка: ${currentAttempt + 1}/${maxRetries})...`,
           });
         }
 
@@ -536,10 +537,16 @@ export class LLMFactory {
           });
         }
         addPayloadToTrace({ rawResult, prompt, result });
-        if (attemptsCallbacks) {
-          await attemptsCallbacks({
-            message: `Промпт обработан (попытка: ${currentAttempt + 1}/${maxRetries})...`,
-          });
+        if (attemptsCallbacks && !isPing) {
+          if (!result) {
+            await attemptsCallbacks({
+              message: `❌ Ответ в чанке не найден (попытка: ${currentAttempt + 1}/${maxRetries})...`,
+            });
+          } else {
+            await attemptsCallbacks({
+              message: `✅ Ответ в чанке найден (попытка: ${currentAttempt + 1}/${maxRetries})...${result}`,
+            });
+          }
         }
         Logger.logInfo('LLM Request Completed', {
           prompt,
@@ -553,9 +560,9 @@ export class LLMFactory {
 
         return result;
       } catch (error: any) {
-        if (attemptsCallbacks) {
+        if (attemptsCallbacks && !isPing) {
           await attemptsCallbacks({
-            message: `Ошибка обработки промпта (попытка: ${currentAttempt + 1}/${maxRetries})...`,
+            message: `⚠️ Ошибка при поиске ответа в чанках (попытка: ${currentAttempt + 1}/${maxRetries})...`,
           });
         }
 
@@ -581,7 +588,7 @@ export class LLMFactory {
             maxRetries: maxRetries,
             currentAttempt,
           });
-          if (attemptsCallbacks) {
+          if (attemptsCallbacks && !isPing) {
             await attemptsCallbacks({
               ...llmConfig,
               currentAttempt,
@@ -602,7 +609,7 @@ export class LLMFactory {
 
         ({ apiKey, ...llmConfig } =
           await DefaultProvidersInitializer.getNextActiveProvider());
-        if (attemptsCallbacks) {
+        if (attemptsCallbacks && !isPing) {
           await attemptsCallbacks({
             ...llmConfig,
             currentAttempt,

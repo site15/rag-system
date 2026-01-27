@@ -95,7 +95,9 @@ export class LlmDialogService {
         questionReceivedAt: row.questionReceivedAt,
         question: row.question,
         answer: row.answer,
-        info: `${row.provider}/${row.model}:${row.temperature}`,
+        ...(row.provider && row.model && row.temperature
+          ? { info: `${row.provider}/${row.model}:${row.temperature}` }
+          : { info: '' }),
         dialogId: row.dialogId!,
       }));
 

@@ -47,16 +47,20 @@ export interface TraceStorage {
 }
 
 export function getTraceStack() {
-  const func = (trace: TraceNode[]): TraceNode[] => {
-    for (let index = 0; index < trace.length; index++) {
-      if (trace[index]?.children?.length) {
-        trace[index].children = [...func(trace[index]?.children)];
+  try {
+    const func = (trace: TraceNode[]): TraceNode[] => {
+      for (let index = 0; index < trace.length; index++) {
+        if (trace[index]?.children?.length) {
+          trace[index].children = [...func(trace[index]?.children)];
+        }
       }
-    }
-    return [...trace.filter((t) => t.payload || t?.children?.length)];
-  };
-  const result = func(getTraceStorage()?.getStore()?.stack || []);
-  return result.length ? result : null;
+      return [...trace.filter((t) => t.payload || t?.children?.length)];
+    };
+    const result = func(getTraceStorage()?.getStore()?.stack || []);
+    return result.length ? result : null;
+  } catch (error) {
+    return null;
+  }
 }
 
 /* ---------------- Default Storage ---------------- */

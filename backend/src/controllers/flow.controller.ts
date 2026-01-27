@@ -265,7 +265,9 @@ export class FlowController {
       answer: result.answer,
       isProcessing: result.isProcessing,
       dialogId: result.dialogId!,
-      info: `${result.provider}/${result.model}:${result.temperature}`,
+      ...(result.provider && result.model && result.temperature
+        ? { info: `${result.provider}/${result.model}:${result.temperature}` }
+        : { info: '' }),
     };
   }
 

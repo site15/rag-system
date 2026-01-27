@@ -431,7 +431,7 @@ export class LLMChunkProcessor {
         if (foundChunkIndex === -1) {
           if (attemptsCallbacks) {
             await attemptsCallbacks({
-              message: `Обработка чанка ${
+              message: `🕖 Обработка чанка ${
                 i + 1
               }/${totalChunks} для документа ${contextDocIndex}/${contextDocs.length}...`,
             });

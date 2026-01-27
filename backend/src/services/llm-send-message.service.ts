@@ -134,8 +134,8 @@ export class LlmSendMessageService {
         llmModel: options.model,
         llmProvider: options.provider,
         llmTemperature: options.temperature,
-        isSuccess: maxRetriesGreaterThanCurrentAttempt ? undefined : false,
-        isProcessing: maxRetriesGreaterThanCurrentAttempt ? undefined : false,
+        isSuccess: undefined,
+        isProcessing: undefined,
       });
     };
 
@@ -153,7 +153,7 @@ export class LlmSendMessageService {
       });
 
       await attemptsCallbacks({
-        message: 'Трансформация вопроса...',
+        message: '❔Трансформация вопроса...',
         model: llmConfig.model,
         provider: llmConfig.provider,
         temperature: llmConfig.temperature,
@@ -174,8 +174,8 @@ export class LlmSendMessageService {
           messageId,
           answer,
           selectedDocumentIds: [],
-          isSuccess: false,
-          isProcessing: false,
+          isSuccess: undefined,
+          isProcessing: undefined,
           llmModel: undefined,
           llmProvider: undefined,
           llmTemperature: undefined,
@@ -241,7 +241,7 @@ export class LlmSendMessageService {
       });
 
       await attemptsCallbacks({
-        message: 'Поиска ответа...',
+        message: '❗️Поиска ответа...',
         model: llmConfig.model,
         provider: llmConfig.provider,
         temperature: llmConfig.temperature,
@@ -271,7 +271,7 @@ export class LlmSendMessageService {
         .reduce((acc, curr) => ({ ...acc, ...curr }), {});
 
       await attemptsCallbacks({
-        message: 'Ответ получен...',
+        message: '🌟 Ответ получен...',
         model: llmConfig.model,
         provider: llmConfig.provider,
         temperature: llmConfig.temperature,
@@ -494,6 +494,7 @@ export class LlmSendMessageService {
         );
         throw new BadRequestException({
           //  success: false,
+          code: 'DIALOG_REACHED_MAX_FAILURES',
           dialogId,
           response: answer || 'No response generated',
           //    consecutiveFailures,

@@ -127,6 +127,6 @@ export class FailureTracker {
    * Get the maximum allowed consecutive failures from environment
    */
   public static getMaxConsecutiveFailures(): number {
-    return parseInt(process.env.MAX_CONSECUTIVE_FAILURES || '5', 10);
+    return parseInt(process.env.MAX_CONSECUTIVE_FAILURES || '7', 10);
   }
 }

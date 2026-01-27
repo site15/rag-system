@@ -107,7 +107,7 @@ export class DialogManager {
     detectedCategory?: string;
     transformedQuestion?: string;
     transformedEmbeddingQuery?: string;
-    isProcessing?: boolean;
+    isProcessing: boolean | undefined;
     llmProvider: string | undefined;
     llmModel: string | undefined;
     llmTemperature: number | undefined;
@@ -126,7 +126,7 @@ export class DialogManager {
         ...(transformedEmbeddingQuery
           ? { transformedEmbeddingQuery: transformedEmbeddingQuery }
           : {}),
-        isProcessing,
+        ...(isProcessing !== undefined ? { isProcessing: isProcessing } : {}),
         answerSentAt: new Date(),
         trace: getTraceStack() as any,
       },
