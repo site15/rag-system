@@ -122,7 +122,7 @@ export class LlmSendMessageService {
           options.message ||
           (maxRetriesGreaterThanCurrentAttempt
             ? Mustache.render(
-                `Переключаемся на {{provider}}/{{model}}… ({{attempt}}/{{max}})`,
+                `🔄 Переключаемся на {{provider}}/{{model}}… ({{attempt}}/{{max}})`,
                 {
                   provider: options.provider,
                   model: options.model,
