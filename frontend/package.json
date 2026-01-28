@@ -1,4 +1,16 @@
 {
+  "name": "rag-system-frontend",
+  "version": "1.0.0",
+  "description": "React Admin frontend for RAG system management and chat interface",
+  "author": {
+    "name": "EndyKaufman",
+    "email": "admin@site15.ru"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:site15/rag-system.git"
+  },
   "private": true,
   "type": "module",
   "scripts": {
@@ -42,6 +54,5 @@
     "typescript": "^5.1.6",
     "typescript-eslint": "^8.28.0",
     "vite": "^6.2.6"
-  },
-  "name": "frontend"
+  }
 }

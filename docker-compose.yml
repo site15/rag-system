@@ -27,16 +27,16 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
-    deploy:
-      resources:
-        # reservations:
-        #   devices:
-        #     - driver: nvidia
-        #       count: all
-        #       capabilities: [gpu]
-        limits:
-          cpus: "4"
-          memory: 8G
+    # deploy:
+    #   resources:
+    #     # reservations:
+    #     #   devices:
+    #     #     - driver: nvidia
+    #     #       count: all
+    #     #       capabilities: [gpu]
+    #     limits:
+    #       cpus: "4"
+    #       memory: 8G
 
   postgres:
     image: pgvector/pgvector:pg18

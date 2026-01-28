@@ -1,6 +1,12 @@
 # JavaScript Client Guide for Flow Controller API
 
-This comprehensive guide explains how to interact with the Flow Controller API using JavaScript's `fetch` API. The API uses `http://localhost:3000/api` as its base URL with API key authentication.
+This comprehensive guide explains how to interact with the Flow Controller API using JavaScript's `fetch` API. The API uses `http://localhost:23000/api` as its base URL with API key authentication.
+
+## 📦 Repository Information
+
+- **Author**: EndyKaufman <admin@site15.ru>
+- **Repository**: [git@github.com:site15/rag-system.git](https://github.com/site15/rag-system)
+- **License**: MIT
 
 ## Table of Contents
 - [Base API Configuration](#base-api-configuration)
@@ -13,10 +19,10 @@ This comprehensive guide explains how to interact with the Flow Controller API u
 
 ## Base API Configuration
 
-The API is available at: `http://localhost:3000/api`
+The API is available at: `http://localhost:23000/api`
 
 ```javascript
-const API_BASE_URL = 'http://localhost:3000/api'; // Base URL for all API calls
+const API_BASE_URL = 'http://localhost:23000/api'; // Base URL for all API calls
 const DEFAULT_TIMEOUT = 30000; // 30 seconds
 ```
 

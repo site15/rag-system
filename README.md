@@ -4,6 +4,12 @@
 
 Modern question-answering system based on Retrieval-Augmented Generation (RAG) with support for multiple LLM providers and vector databases.
 
+## 📦 Repository Info
+
+- **Author**: EndyKaufman <admin@site15.ru>
+- **Repository**: [git@github.com:site15/rag-system.git](https://github.com/site15/rag-system)
+- **License**: MIT
+
 ## 📋 Содержание / Table of Contents
 
 - [О проекте / About](#о-проекте--about)
@@ -54,20 +60,194 @@ rag-system/
 
 ```bash
 # Клонирование репозитория
-git clone <repository-url>
+git clone git@github.com:site15/rag-system.git
 cd rag-system
 
 # Установка зависимостей
 npm install
 
-# Запуск в режиме разработки
+# Копирование конфигурационных файлов
+# Backend
+cp backend/.env.example backend/.env
+# Frontend
+cp frontend/.env.example frontend/.env
+```
+
+### Запуск в режиме разработки / Development Mode
+
+```bash
+# Запуск всей системы в режиме разработки
 ./start-dev.sh
+
+# Или по отдельности:
+# Запуск Docker контейнеров (PostgreSQL, Ollama)
+docker compose up -d
+
+# Запуск backend и frontend в режиме разработки
+npx pm2 start ecosystem.config.json
+```
+
+### Остановка в режиме разработки / Stop Development Mode
+
+```bash
+# Остановка всей системы
+./stop-dev.sh
+
+# Или по отдельности:
+# Остановка Docker контейнеров
+docker compose down
+
+# Остановка backend и frontend
+npx pm2 delete all
+```
+
+### Запуск в режиме production / Production Mode
+
+```bash
+# Запуск всей системы в режиме production
+./start-prod.sh
+
+# Или по отдельности:
+# Запуск Docker контейнеров
+docker compose up -d
+
+# Сборка frontend
+npm run build --prefix frontend
+
+# Сборка и запуск backend
+npm run build --prefix backend
+npx pm2 start ecosystem-prod.config.json
+```
+
+### Остановка в режиме production / Stop Production Mode
+
+```bash
+# Остановка всей системы
+./stop-prod.sh
+
+# Или по отдельности:
+# Остановка Docker контейнеров
+docker compose down
+
+# Остановка backend
+npx pm2 delete all
 ```
 
 Система будет доступна по адресам:
-- Backend API: http://localhost:3000
-- Frontend: http://localhost:3001
-- Swagger: http://localhost:3000/swagger
+- Backend API: http://localhost:23000
+- Frontend: http://localhost:23001
+- Swagger: http://localhost:23000/swagger
+
+### Installation
+
+```bash
+# Clone repository
+git clone git@github.com:site15/rag-system.git
+cd rag-system
+
+# Install dependencies
+npm install
+
+# Copy configuration files
+# Backend
+cp backend/.env.example backend/.env
+# Frontend
+cp frontend/.env.example frontend/.env
+```
+
+### Development Mode
+
+```bash
+# Start entire system in development mode
+./start-dev.sh
+
+# Or separately:
+# Start Docker containers (PostgreSQL, Ollama)
+docker compose up -d
+
+# Start backend and frontend in development mode
+npx pm2 start ecosystem.config.json
+```
+
+### Stop Development Mode
+
+```bash
+# Stop entire system
+./stop-dev.sh
+
+# Or separately:
+# Stop Docker containers
+docker compose down
+
+# Stop backend and frontend
+npx pm2 delete all
+```
+
+### Production Mode
+
+```bash
+# Start entire system in production mode
+./start-prod.sh
+
+# Or separately:
+# Start Docker containers
+docker compose up -d
+
+# Build frontend
+npm run build --prefix frontend
+
+# Build and start backend
+npm run build --prefix backend
+npx pm2 start ecosystem-prod.config.json
+```
+
+### Stop Production Mode
+
+```bash
+# Stop entire system
+./stop-prod.sh
+
+# Or separately:
+# Stop Docker containers
+docker compose down
+
+# Stop backend
+npx pm2 delete all
+```
+
+### Полезные команды PM2 / Useful PM2 Commands
+
+```bash
+# Просмотр статуса всех приложений / View status of all applications
+npx pm2 list
+
+# Просмотр логов / View logs
+npx pm2 logs
+
+# Просмотр логов конкретного приложения / View logs for specific app
+npx pm2 logs rag-system-backend
+
+# Перезапуск приложения / Restart application
+npx pm2 restart rag-system-backend
+
+# Остановка конкретного приложения / Stop specific application
+npx pm2 stop rag-system-backend
+
+# Мониторинг ресурсов / Monitor resources
+npx pm2 monit
+```
+
+### Проверка статуса системы / System Status Check
+
+```bash
+# Проверить текущий статус всех компонентов системы
+./status.sh
+```
+
+The system will be available at:
+- Backend API: http://localhost:23000
+- Frontend: http://localhost:23001
+- Swagger: http://localhost:23000/swagger
 
 ## Подпроекты / Subprojects
 

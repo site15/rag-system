@@ -1,4 +1,20 @@
 {
+  "name": "rag-system",
+  "version": "1.0.0",
+  "description": "Modern question-answering system based on Retrieval-Augmented Generation (RAG) with support for multiple LLM providers and vector databases.",
+  "author": {
+    "name": "EndyKaufman",
+    "email": "admin@site15.ru"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:site15/rag-system.git"
+  },
+  "homepage": "https://github.com/site15/rag-system",
+  "bugs": {
+    "url": "https://github.com/site15/rag-system/issues"
+  },
   "devDependencies": {
     "husky": "^9.1.7"
   },

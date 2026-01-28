@@ -40,22 +40,33 @@ Backend представляет собой мощную систему на б�
 ### Переменные окружения (`.env`)
 ```env
 # База данных
-DATABASE_URL="postgresql://user:pass@localhost:5432/db"
+DATABASE_URL="postgresql://rag_system_user:c9pc5fQ81ME03VgfpU1Wuhlb3EjX069gC4QQ@localhost:25432/rag_system_db?schema=public"
+
+# Порт сервера
+PORT=23000
 
 # Провайдеры LLM
-CHAT_PROVIDER="openai"
-OPENAI_API_KEY="sk-..."
+CHAT_PROVIDER="ollama"
+# OPENAI_CHAT_API_KEY=sk-...
+# GROQ_CHAT_API_KEY=gsk_...
 
 # Провайдеры эмбеддингов
-EMBEDDINGS_PROVIDER="openai"
-EMBEDDINGS_API_KEY="sk-..."
+EMBEDDINGS_PROVIDER="ollama"
+OLLAMA_EMBEDDINGS_MODEL="nomic-embed-text"
+OLLAMA_EMBEDDINGS_BASE_URL="http://localhost:21434"
 
 # Ollama
-OLLAMA_BASE_URL="http://localhost:11434"
+OLLAMA_BASE_URL="http://localhost:21434"
 
 # Пути
-SOURCES_PATH="./sources"
-PROCESS_DOCUMENTS="true"
+SOURCES_PATH="../sources"
+PROCESS_DOCUMENTS="false"
+CREATE_DUMP_DOCUMENTS="false"
+
+# Безопасность
+ADMIN_API_KEY="a1a9a512-aceb-49cf-83ac-a0b534486e0b"
+CHECK_IP="false"
+ALLOWED_IPS="127.0.0.1,192.168.168.1,::1"
 ```
 
 ### Поддерживаемые провайдеры

@@ -1,5 +1,11 @@
 # Project Documentation Structure Summary
 
+## 📦 Repository Information
+
+- **Author**: EndyKaufman <admin@site15.ru>
+- **Repository**: [git@github.com:site15/rag-system.git](https://github.com/site15/rag-system)
+- **License**: MIT
+
 ## Created Documentation Files
 
 ### Root Level

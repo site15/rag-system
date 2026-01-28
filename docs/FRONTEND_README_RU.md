@@ -97,8 +97,11 @@ npm run serve
 
 ### Переменные окружения (`.env`)
 ```env
+# Порт сервера
+PORT=23001
+
 # Базовый URL бэкенда
-VITE_BACKEND_URL=http://localhost:3000
+VITE_API_URL=http://localhost:23000
 
 # API ключ (если требуется)
 VITE_API_KEY=your-api-key
@@ -115,10 +118,10 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 3001,
+    port: 23001,
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',
+        target: 'http://localhost:23000',
         changeOrigin: true
       }
     }
@@ -248,7 +251,7 @@ docker run -p 80:80 rag-frontend
 ```typescript
 // backend/src/main.ts
 app.enableCors({
-  origin: ['http://localhost:3001', 'https://your-domain.com'],
+  origin: ['http://localhost:23001', 'https://your-domain.com'],
   credentials: true,
 });
 ```
@@ -257,10 +260,10 @@ app.enableCors({
 ```typescript
 // src/services/api.ts
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_BACKEND_URL,
+  baseURL: import.meta.env.VITE_API_URL,
   timeout: 10000,
 });
-
+```
 // Добавление токена авторизации
 apiClient.interceptors.request.use(config => {
   const token = localStorage.getItem('token');
@@ -295,7 +298,7 @@ export const logger = {
 
 1. **CORS ошибка**
    ```
-   Access to fetch at 'http://localhost:3000' from origin 'http://localhost:3001' 
+   Access to fetch at 'http://localhost:23000' from origin 'http://localhost:23001' 
    has been blocked by CORS policy
    ```
    Решение: Проверьте настройки CORS в бэкенде.
