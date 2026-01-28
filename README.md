@@ -244,6 +244,13 @@ npx pm2 monit
 ./status.sh
 ```
 
+### Проверка ссылок на документацию / Documentation Link Verification
+
+```bash
+# Проверить, что все ссылки на документацию работают
+./scripts/check-doc-links.sh
+```
+
 The system will be available at:
 - Backend API: http://localhost:23000
 - Frontend: http://localhost:23001
@@ -285,23 +292,15 @@ System knowledge sources - documents, articles and other materials for training.
 
 ### Техническая документация / Technical Documentation
 
-📁 **Архитектура системы / System Architecture**
-- [RAG_ARCHITECTURE_OVERVIEW_RU.md](docs/RAG_ARCHITECTURE_OVERVIEW_RU.md) - Детализированное описание архитектуры
-- [RAG_ARCHITECTURE_OVERVIEW_EN.md](docs/RAG_ARCHITECTURE_OVERVIEW_EN.md) - Detailed architecture description
-
-📁 **Полная системная документация / Complete System Documentation**
-- [ДОКУМЕНТАЦИЯ_RAG_СИСТЕМЫ_RU.md](docs/ДОКУМЕНТАЦИЯ_RAG_СИСТЕМЫ_RU.md) - Комплексная документация на русском
-- [RAG_SYSTEM_DOCUMENTATION_EN.md](docs/RAG_SYSTEM_DOCUMENTATION_EN.md) - Comprehensive English documentation
+📁 **Архитектура и структура проекта / Project Architecture and Structure**
+- [FILES.md](docs/FILES.md) - Подробное описание файловой структуры и процесса разработки
+- [PROJECT_DOCUMENTATION_SUMMARY.md](docs/PROJECT_DOCUMENTATION_SUMMARY.md) - Сводка по всей документации проекта
 
 ### Additional Materials
 
 📁 **Technical Guides**
 - [FILES.md](docs/FILES.md) - Detailed file structure and development process description
 - [JAVASCRIPT_CLIENT_GUIDE.md](docs/JAVASCRIPT_CLIENT_GUIDE.md) - Guide for using JavaScript client with the API
-
-📁 **Технические руководства / Technical Guides**
-- [FILES.md](docs/FILES.md) - Подробное описание файловой структуры и процесса разработки
-- [JAVASCRIPT_CLIENT_GUIDE.md](docs/JAVASCRIPT_CLIENT_GUIDE.md) - Руководство по использованию JavaScript клиента для API
 
 ## Лицензия / License
 
