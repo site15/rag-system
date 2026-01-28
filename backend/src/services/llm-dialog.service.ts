@@ -4,39 +4,9 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { ERROR_MESSAGES } from '../llm/constants';
 import { Logger } from '../llm/logger';
+import { TraceNode } from '../trace/trace.module';
+import { DialogMessage, DialogMessagePrompt } from '../types/flow';
 import { PrismaService } from './prisma.service';
-
-// Request interface for getting dialog messages
-export interface DialogMessagesParams {
-  dialogId: string;
-}
-
-export interface DialogMessagesQuery {
-  limit?: string;
-  offset?: string;
-}
-
-// Response interface for individual messages
-export interface DialogMessage {
-  id: string;
-  isProcessing: boolean;
-  answerSentAt: Date | null;
-  questionReceivedAt: Date | null;
-  question: string;
-  answer: string;
-  dialogId: string;
-  info: string;
-}
-
-// Response interface for the endpoint
-export interface DialogMessagesResponse {
-  success: boolean;
-  dialogId: string;
-  messages: DialogMessage[];
-  totalCount: number;
-  skip: number;
-  take: number;
-}
 
 @Injectable()
 export class LlmDialogService {
@@ -47,11 +17,13 @@ export class LlmDialogService {
     take,
     skip,
     userId,
+    showPrompts,
   }: {
     dialogId: string;
     take: number;
     skip: number;
     userId: string;
+    showPrompts: boolean;
   }) {
     try {
       Logger.logInfo('Fetching dialog messages', {
@@ -80,6 +52,7 @@ export class LlmDialogService {
           provider: true,
           model: true,
           temperature: true,
+          ...(showPrompts ? { trace: true } : {}),
         },
         orderBy: {
           createdAt: 'asc',
@@ -88,6 +61,35 @@ export class LlmDialogService {
         skip,
       });
 
+      const getPrompts = (
+        trace: TraceNode[],
+        prompts: DialogMessagePrompt[] = [],
+      ): DialogMessagePrompt[] => {
+        for (let index = 0; index < trace.length; index++) {
+          if (trace[index]?.children?.length) {
+            getPrompts(trace[index]?.children, prompts);
+          }
+          if (trace[index].payload?.prompt) {
+            prompts.push({
+              duration:
+                trace[index].end && trace[index].start
+                  ? trace[index].end! - trace[index].start
+                  : 0,
+              ...(trace[index].payload?.provider &&
+              trace[index].payload?.model &&
+              trace[index].payload?.temperature
+                ? {
+                    info: `${trace[index].payload?.provider}/${trace[index].payload?.model}:${trace[index].payload?.temperature}`,
+                  }
+                : { info: '' }),
+              prompt: trace[index].payload?.prompt,
+              result: trace[index].payload?.result,
+            });
+          }
+        }
+        return prompts;
+      };
+
       const messages: DialogMessage[] = messagesResult.map((row) => ({
         id: row.id,
         isProcessing: row.isProcessing,
@@ -95,10 +97,13 @@ export class LlmDialogService {
         questionReceivedAt: row.questionReceivedAt,
         question: row.question,
         answer: row.answer,
+        dialogId: row.dialogId!,
         ...(row.provider && row.model && row.temperature
           ? { info: `${row.provider}/${row.model}:${row.temperature}` }
           : { info: '' }),
-        dialogId: row.dialogId!,
+        ...(showPrompts
+          ? { prompts: getPrompts((row.trace as unknown as TraceNode[]) || []) }
+          : {}),
       }));
 
       Logger.logInfo('Dialog messages retrieved successfully', {
@@ -107,7 +112,7 @@ export class LlmDialogService {
         totalCount,
       });
 
-      const response: DialogMessagesResponse = {
+      const response = {
         success: true,
         dialogId,
         messages,

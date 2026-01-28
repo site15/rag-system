@@ -47,6 +47,7 @@ export interface TraceStorage {
 }
 
 export function getTraceStack() {
+  return getTraceStorage()?.getStore()?.stack || []; /*
   try {
     const func = (trace: TraceNode[]): TraceNode[] => {
       for (let index = 0; index < trace.length; index++) {
@@ -60,7 +61,7 @@ export function getTraceStack() {
     return result.length ? result : null;
   } catch (error) {
     return null;
-  }
+  }*/
 }
 
 /* ---------------- Default Storage ---------------- */

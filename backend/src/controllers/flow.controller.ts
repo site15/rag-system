@@ -1,181 +1,22 @@
 import { Body, Controller, Get, Logger, Post, Query } from '@nestjs/common';
-import {
-  ApiCreatedResponse,
-  ApiOkResponse,
-  ApiProperty,
-  ApiPropertyOptional,
-  ApiTags,
-} from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import { IsDefined, IsNumber, IsOptional, IsString } from 'class-validator';
+import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { CurrentAppRequest } from '../decorators/current-app-request.decorator';
 import { DialogManager } from '../llm/dialogManager';
 import { LlmBootstrapService } from '../services/llm-bootstrap.service';
 import { LlmDialogService } from '../services/llm-dialog.service';
 import { LlmSendMessageService } from '../services/llm-send-message.service';
+import { getFirstSkipFromCurPerPage } from '../services/prisma.service';
 import {
-  FindManyArgs,
-  FindManyResponseMeta,
-  getFirstSkipFromCurPerPage,
-} from '../services/prisma.service';
+  CancelMessageArgs,
+  DialogFlowArgs,
+  DialogFlowResponse,
+  DialogMessage,
+  GetMessageTraceArgs,
+  GetMessageTraceResponse,
+  SendMessageFlowArgs,
+} from '../types/flow';
 import { AppRequest } from '../types/request';
 import { StatusResponse } from '../types/status-response';
-
-///////////
-
-export class Constant {
-  @ApiProperty({ type: 'string', required: true })
-  @IsDefined()
-  @IsString()
-  key!: string;
-
-  @ApiProperty({ type: 'string', required: true })
-  @IsDefined()
-  @IsString()
-  constant!: string;
-}
-
-export class SendMessageFlowArgs {
-  @ApiProperty({ type: 'string', required: true })
-  @IsDefined()
-  @IsString()
-  message!: string;
-
-  @ApiPropertyOptional({ type: 'string', required: false, nullable: true })
-  @IsOptional()
-  @IsString()
-  dialogId?: string;
-
-  @ApiPropertyOptional({ type: 'string', required: false, nullable: true })
-  @IsOptional()
-  provider?: string;
-
-  @ApiPropertyOptional({ type: 'string', required: false, nullable: true })
-  @IsOptional()
-  @IsString()
-  model?: string;
-
-  @ApiPropertyOptional({ type: 'number', required: false, nullable: true })
-  @IsOptional()
-  @IsNumber()
-  @Type(() => Number)
-  temperature?: number;
-
-  @ApiPropertyOptional({
-    type: () => [Constant],
-    required: false,
-    nullable: true,
-  })
-  @IsOptional()
-  @Type(() => Constant)
-  constants?: Constant[];
-}
-
-///////////
-
-export class DialogFlowArgs extends FindManyArgs {
-  @ApiProperty({ type: 'string' })
-  @IsDefined()
-  dialogId!: string;
-}
-
-export class DialogFlowResponseMeta extends FindManyResponseMeta {}
-
-export class DialogMessage {
-  @ApiProperty({
-    type: 'string',
-  })
-  @IsDefined()
-  id!: string;
-
-  @ApiProperty({
-    type: 'string',
-  })
-  @IsDefined()
-  question!: string;
-
-  @ApiProperty({
-    type: 'string',
-  })
-  @IsDefined()
-  answer!: string;
-
-  @ApiProperty({
-    type: 'boolean',
-  })
-  @IsDefined()
-  isProcessing!: boolean;
-
-  @ApiProperty({
-    type: 'string',
-    format: 'date-time',
-  })
-  @IsDefined()
-  questionReceivedAt!: Date | null;
-
-  @ApiProperty({
-    type: 'string',
-    format: 'date-time',
-  })
-  @IsDefined()
-  answerSentAt!: Date | null;
-
-  @ApiProperty({ type: 'string' })
-  @IsString()
-  dialogId!: string;
-
-  @ApiProperty({ type: 'string' })
-  @IsString()
-  info!: string;
-}
-
-export class DialogFlowResponse {
-  @ApiProperty({ type: () => [DialogMessage] })
-  @IsDefined()
-  items!: DialogMessage[];
-
-  @ApiProperty({ type: () => DialogFlowResponseMeta })
-  @IsDefined()
-  meta!: DialogFlowResponseMeta;
-}
-
-///////////
-
-export class GetMessageTraceArgs {
-  @ApiProperty({ type: 'string', required: true })
-  @IsDefined()
-  @IsString()
-  messageId!: string;
-}
-
-export class GetMessageTraceResponse {
-  @ApiProperty({
-    type: 'string',
-    nullable: true,
-  })
-  @IsDefined()
-  messageId!: string | null;
-
-  @ApiProperty({
-    type: 'object',
-    nullable: true,
-    description: 'Trace data for the message',
-    additionalProperties: true,
-  })
-  @IsDefined()
-  trace!: any | null;
-}
-
-///////////
-
-export class CancelMessageArgs {
-  @ApiProperty({ type: 'string', required: true })
-  @IsDefined()
-  @IsString()
-  messageId!: string;
-}
-
-///////////
 
 @ApiTags('flow')
 @Controller('flow')
@@ -203,6 +44,7 @@ export class FlowController {
             take,
             skip,
             userId: req.userId,
+            showPrompts: !!args.showPrompts,
           });
     return {
       items: (response.messages || []).map((m) => ({
@@ -214,6 +56,7 @@ export class FlowController {
         answerSentAt: m.answerSentAt,
         dialogId: m.dialogId,
         info: m.info,
+        prompts: m.prompts,
       })),
       meta: { curPage, perPage, totalResults: response.totalCount },
     };

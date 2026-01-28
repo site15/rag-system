@@ -15,6 +15,7 @@ import { DialogManager } from '../llm/dialogManager';
 import { DialogSummary } from '../llm/dialogSummary';
 import { EmbeddingsFactory } from '../llm/embeddingsFactory';
 import { LLMChunkProcessor } from '../llm/llmChunkProcessor';
+import { AttemptsCallbacksOptions, LLMFactory } from '../llm/llmFactory';
 import { Logger } from '../llm/logger';
 import { RAGSearcher } from '../llm/ragSearcher';
 import { DefaultProvidersInitializer } from '../llm/services/defaultProvidersInitializer';
@@ -29,7 +30,6 @@ import { SummarizationService } from '../llm/services/summarizationService';
 import { TextHelpers } from '../llm/textHelpers';
 import { DocWithMetadataAndId } from '../llm/types';
 import { addPayloadToTrace, Trace } from '../trace/trace.module';
-import { AttemptsCallbacksOptions, LLMFactory } from '../llm/llmFactory';
 
 type ProcessMessageResponse = {
   dialogId: string;

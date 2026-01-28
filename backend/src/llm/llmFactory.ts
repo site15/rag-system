@@ -17,6 +17,7 @@ import { Logger } from './logger';
 import { DefaultProvidersInitializer } from './services/defaultProvidersInitializer';
 import { ModelExecutionTracker } from './services/modelExecutionTracker';
 import { ChatConfig } from './types';
+import { basePath } from 'eslint-plugin-prettier/recommended';
 
 export type AttemptsCallbacksOptions = {
   message?: string;
@@ -510,6 +511,13 @@ export class LLMFactory {
         });
 
         const startTime = Date.now();
+        addPayloadToTrace({
+          provider: llmConfig?.provider,
+          model: llmConfig?.model,
+          temperature: llmConfig?.temperature,
+          chunkSize: llmConfig?.chunkSize,
+          baseUrl: llmConfig?.baseUrl,
+        });
         const rawResult = await LLMFactory.pingWrapper({
           ping: async (controller: AbortController) =>
             llm.invoke(
