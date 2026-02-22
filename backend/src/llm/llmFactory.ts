@@ -455,6 +455,15 @@ export class LLMFactory {
     if (response === '') {
       response = '[NOT_FOUND]';
     }
+
+    if (typeof response === 'string') {
+      response = response?.trim();
+    }
+
+    if (!response) {
+      response = '';
+    }
+
     return response;
   }
 

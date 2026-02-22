@@ -273,10 +273,13 @@ export class DialogManager {
   }) {
     Logger.logInfo('Получение истории диалога', { dialogId, limit });
 
-    const messages = await DialogManager.getDialogHistoryRaw({
+    let messages = await DialogManager.getDialogHistoryRaw({
       dialogId,
       limit,
     });
+    if (!messages[0]?.answer) {
+      messages = messages.slice(1);
+    }
 
     const history =
       messages.length > 1 || messages[0]?.answer
