@@ -4,10 +4,6 @@
       "name": "rag-system-backend-prod",
       "script": "cd backend && npm run start:prod",
       "watch": false,
-      "cwd": "./backend",
-      "instances": 1,
-      "exec_mode": "cluster",
-      "max_memory_restart": "1G",
       "env": {
         "NODE_ENV": "production"
       }
