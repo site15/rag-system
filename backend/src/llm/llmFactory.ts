@@ -556,10 +556,21 @@ export class LLMFactory {
         const rawResult = await LLMFactory.pingWrapper({
           ping: async (controller: AbortController) =>
             llm.invoke(
-              prompt,
-              abortController
-                ? { signal: controller.signal || abortController?.signal }
-                : undefined,
+              isPing
+                ? `Return exactly two characters: OK
+No quotes. No period. No newline. No extra text.`
+                : prompt,
+              {
+                ...(abortController
+                  ? { signal: controller.signal || abortController?.signal }
+                  : {}),
+                ...(isPing
+                  ? {
+                      temperature: 0,
+                      max_tokens: 2,
+                    }
+                  : {}),
+              },
             ),
           label: 'Invoke',
           timeout: 40_000,
