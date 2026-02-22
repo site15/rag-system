@@ -294,7 +294,9 @@ export class QuestionTransformer {
     return {
       detectedCategory,
       originalQuestion: question,
-      transformedQuestion: transformedQuestion.question,
+      transformedQuestion: `${transformedQuestion.question} (action:${
+        transformedEmbeddedActionBased.result.actionBased
+      },entity:${transformedEmbeddedActionBased.result.entityBased})`,
       logIds: [
         transformedQuestion.logId,
         transformedEmbeddedActionBased.logId,

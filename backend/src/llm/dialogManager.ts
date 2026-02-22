@@ -248,12 +248,15 @@ export class DialogManager {
       limit,
     });
 
-    const history = messages.reverse().map((x) =>
-      getConstant(GetConstantKey.DialogManager_historyTemplate, {
-        question: x.question,
-        answer: x.answer,
-      }),
-    );
+    const history =
+      messages.length > 1 || messages[0]?.answer
+        ? messages.reverse().map((x) =>
+            getConstant(GetConstantKey.DialogManager_historyTemplate, {
+              question: x.question,
+              answer: x.answer,
+            }),
+          )
+        : [];
 
     Logger.logInfo('История диалога получена', { count: history?.length });
     return { history, messages };
