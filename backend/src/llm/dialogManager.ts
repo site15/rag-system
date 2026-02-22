@@ -157,7 +157,6 @@ export class DialogManager {
             : {}),
           ...(isProcessing !== undefined ? { isProcessing: isProcessing } : {}),
           answerSentAt: new Date(),
-          trace: [...getTraceStack()] as any,
         },
         select: {
           id: true,
