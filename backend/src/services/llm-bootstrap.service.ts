@@ -51,8 +51,9 @@ export class LlmBootstrapService
       .pipe(
         concatMap(async (event: EventType | null) => {
           if (!event) return;
-          const message = await this.prismaService.chatMessage.findFirst({
+          const message = await this.prismaService.chatMessage.update({
             select: { constants: true },
+            data: { answer: '', answerSentAt: null },
             where: { id: event.messageId },
           });
           const storage = getTraceStorage();

@@ -113,29 +113,59 @@ export class DialogManager {
     llmTemperature: number | undefined;
   }) {
     // Insert the chat history record and get the ID
-    const chatMessage = await PrismaService.instance.chatMessage.update({
-      data: {
-        ...(llmProvider ? { provider: llmProvider } : {}),
-        ...(llmModel ? { model: llmModel } : {}),
-        ...(llmTemperature ? { temperature: llmTemperature } : {}),
-        answer: answer,
-        ...(detectedCategory ? { category: detectedCategory } : {}),
-        ...(transformedQuestion
-          ? { transformedQuestion: transformedQuestion }
-          : {}),
-        ...(transformedEmbeddingQuery
-          ? { transformedEmbeddingQuery: transformedEmbeddingQuery }
-          : {}),
-        ...(isProcessing !== undefined ? { isProcessing: isProcessing } : {}),
-        answerSentAt: new Date(),
-        trace: getTraceStack() as any,
-      },
-      select: {
-        id: true,
-        dialogId: true,
-      },
-      where: { id: messageId },
-    });
+    let chatMessage: {
+      dialogId: string | null;
+      id: string;
+    };
+    try {
+      chatMessage = await PrismaService.instance.chatMessage.update({
+        data: {
+          ...(llmProvider ? { provider: llmProvider } : {}),
+          ...(llmModel ? { model: llmModel } : {}),
+          ...(llmTemperature ? { temperature: llmTemperature } : {}),
+          answer: answer,
+          ...(detectedCategory ? { category: detectedCategory } : {}),
+          ...(transformedQuestion
+            ? { transformedQuestion: transformedQuestion }
+            : {}),
+          ...(transformedEmbeddingQuery
+            ? { transformedEmbeddingQuery: transformedEmbeddingQuery }
+            : {}),
+          ...(isProcessing !== undefined ? { isProcessing: isProcessing } : {}),
+          answerSentAt: new Date(),
+          trace: getTraceStack() as any,
+        },
+        select: {
+          id: true,
+          dialogId: true,
+        },
+        where: { id: messageId },
+      });
+    } catch (error) {
+      chatMessage = await PrismaService.instance.chatMessage.update({
+        data: {
+          ...(llmProvider ? { provider: llmProvider } : {}),
+          ...(llmModel ? { model: llmModel } : {}),
+          ...(llmTemperature ? { temperature: llmTemperature } : {}),
+          answer: answer,
+          ...(detectedCategory ? { category: detectedCategory } : {}),
+          ...(transformedQuestion
+            ? { transformedQuestion: transformedQuestion }
+            : {}),
+          ...(transformedEmbeddingQuery
+            ? { transformedEmbeddingQuery: transformedEmbeddingQuery }
+            : {}),
+          ...(isProcessing !== undefined ? { isProcessing: isProcessing } : {}),
+          answerSentAt: new Date(),
+          trace: [...getTraceStack()] as any,
+        },
+        select: {
+          id: true,
+          dialogId: true,
+        },
+        where: { id: messageId },
+      });
+    }
 
     if (chatMessage.dialogId) {
       // Track success/failure
