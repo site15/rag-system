@@ -147,7 +147,7 @@ export class DialogManager {
           ...(llmProvider ? { provider: llmProvider } : {}),
           ...(llmModel ? { model: llmModel } : {}),
           ...(llmTemperature ? { temperature: llmTemperature } : {}),
-          answer: answer,
+          answer: '',
           ...(detectedCategory ? { category: detectedCategory } : {}),
           ...(transformedQuestion
             ? { transformedQuestion: transformedQuestion }
@@ -157,6 +157,7 @@ export class DialogManager {
             : {}),
           ...(isProcessing !== undefined ? { isProcessing: isProcessing } : {}),
           answerSentAt: new Date(),
+          trace: getTraceStack() as any,
         },
         select: {
           id: true,

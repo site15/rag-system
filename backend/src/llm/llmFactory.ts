@@ -368,68 +368,92 @@ export class LLMFactory {
   static getResponseString(result: any) {
     let response: string;
 
+    let contentFromObject: any;
+
+    try {
+      contentFromObject = result.kwargs.content;
+    } catch (error) {
+      // Ignore error
+    }
+
+    try {
+      contentFromObject = result.content;
+    } catch (error) {
+      // Ignore error
+    }
+
+    if (contentFromObject) {
+      result = contentFromObject;
+    }
+
     if (typeof result === 'string') {
       response = result;
     } else {
-      let contentFromObject: any;
-      try {
-        contentFromObject = result.content;
-      } catch (error) {
-        // Ignore error
+      if (typeof result === 'object' && result.content) {
+        // Handle different content types
+        if (typeof result.content === 'string') {
+          response = result.content;
+        } else if (Array.isArray(result.content)) {
+          // For complex content arrays, convert to string
+          response = result.content
+            .map((item: any) => {
+              if (typeof item === 'string') return item;
+              if (item.type === 'text' && item.text) return item.text;
+              return JSON.stringify(item);
+            })
+            .join(' ');
+        } else {
+          response = JSON.stringify(result.content);
+        }
+      } else {
+        response = JSON.stringify(result);
       }
+
+      response = response?.trim();
+
+      if (!response) {
+        response = '';
+      }
+
+      try {
+        Logger.logInfo('Trying to parse response as JSON 1', { response });
+        response = JSON.parse(response as any);
+      } catch (error) {
+        // Logger.logError('Failed to parse response as JSON', { response, error });
+        // Ignore JSON parse error
+      }
+
+      try {
+        Logger.logInfo('Trying to parse response as JSON 2', { response });
+        response = JSON.parse((response as any).content);
+      } catch (error) {
+        // Logger.logError('Failed to parse response as JSON', { response, error });
+        // Ignore JSON parse error
+      }
+
+      try {
+        Logger.logInfo('Trying to parse response as JSON 3', { response });
+        response = JSON.parse(response).content;
+      } catch (error) {
+        // Logger.logError('Failed to parse response as JSON', { response, error });
+        // Ignore JSON parse error
+      }
+    }
+
+    if (typeof response !== 'string') {
+      // некий кривой случай бывает который ломает флоу, его отдельно обработаю
+      try {
+        contentFromObject = (response as any).kwargs.content;
+      } catch (error) {
+        response = '';
+      }
+
       if (contentFromObject) {
         response = contentFromObject;
-      } else {
-        if (typeof result === 'object' && result.content) {
-          // Handle different content types
-          if (typeof result.content === 'string') {
-            response = result.content;
-          } else if (Array.isArray(result.content)) {
-            // For complex content arrays, convert to string
-            response = result.content
-              .map((item: any) => {
-                if (typeof item === 'string') return item;
-                if (item.type === 'text' && item.text) return item.text;
-                return JSON.stringify(item);
-              })
-              .join(' ');
-          } else {
-            response = JSON.stringify(result.content);
-          }
-        } else {
-          response = JSON.stringify(result);
-        }
-
-        response = response?.trim();
-
-        if (!response) {
-          response = '';
-        }
-
-        try {
-          Logger.logInfo('Trying to parse response as JSON 1', { response });
-          response = JSON.parse(response as any);
-        } catch (error) {
-          // Logger.logError('Failed to parse response as JSON', { response, error });
-          // Ignore JSON parse error
-        }
-
-        try {
-          Logger.logInfo('Trying to parse response as JSON 2', { response });
-          response = JSON.parse((response as any).content);
-        } catch (error) {
-          // Logger.logError('Failed to parse response as JSON', { response, error });
-          // Ignore JSON parse error
-        }
-
-        try {
-          Logger.logInfo('Trying to parse response as JSON 3', { response });
-          response = JSON.parse(response).content;
-        } catch (error) {
-          // Logger.logError('Failed to parse response as JSON', { response, error });
-          // Ignore JSON parse error
-        }
       }
+    }
+    if (response === '') {
+      response = '[NOT_FOUND]';
     }
     return response;
   }
