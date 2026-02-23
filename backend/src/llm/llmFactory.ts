@@ -508,6 +508,10 @@ export class LLMFactory {
     abortController?: AbortController,
   ) {
     const isPing = prompt === 'ping';
+    if (isPing) {
+      prompt = `Return exactly two characters: OK
+No quotes. No period. No newline. No extra text.`;
+    }
     const maxRetries = 3;
 
     let currentAttempt = 0;
@@ -564,23 +568,17 @@ export class LLMFactory {
         });
         const rawResult = await LLMFactory.pingWrapper({
           ping: async (controller: AbortController) =>
-            llm.invoke(
-              isPing
-                ? `Return exactly two characters: OK
-No quotes. No period. No newline. No extra text.`
-                : prompt,
-              {
-                ...(abortController
-                  ? { signal: controller.signal || abortController?.signal }
-                  : {}),
-                ...(isPing
-                  ? {
-                      temperature: 0,
-                      max_tokens: 2,
-                    }
-                  : {}),
-              },
-            ),
+            llm.invoke(prompt, {
+              ...(abortController
+                ? { signal: controller.signal || abortController?.signal }
+                : {}),
+              ...(isPing
+                ? {
+                    temperature: 0,
+                    max_tokens: 2,
+                  }
+                : {}),
+            }),
           label: 'Invoke',
           timeout: 40_000,
         });

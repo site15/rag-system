@@ -251,7 +251,7 @@ export class QuestionTransformer {
     // For regular questions, determine if contextual rewriting is needed
     const isSelfContained = this.isQuestionSelfContained(question, history);
 
-    const [transformedQuestion, transformedEmbeddedActionBased] =
+    const [transformWithLLMQuestion, transformedEmbeddedActionBased] =
       await Promise.all([
         this.transformWithLLM({
           question,
@@ -278,27 +278,37 @@ export class QuestionTransformer {
 
     Logger.logInfo('Question transformation completed', {
       original: question,
-      transformedQuestion,
+      transformedQuestion: transformWithLLMQuestion,
       transformedEmbedded: transformedEmbeddedActionBased.result,
       category,
       detectedCategory,
       sourceFilter,
     });
+    if (!transformWithLLMQuestion.question) {
+      return undefined;
+    }
+
+    let transformedQuestion = transformWithLLMQuestion.question;
     if (
-      !transformedQuestion.question ||
-      !transformedEmbeddedActionBased.result?.actionBased ||
+      transformedEmbeddedActionBased.result?.actionBased ||
       !transformedEmbeddedActionBased.result?.actionBased
     ) {
-      return undefined;
+      const tags = [
+        transformedEmbeddedActionBased.result.actionBased
+          ? `action:${transformedEmbeddedActionBased.result.actionBased}`
+          : undefined,
+        transformedEmbeddedActionBased.result.entityBased
+          ? `entity:${transformedEmbeddedActionBased.result.entityBased}`
+          : undefined,
+      ].filter(Boolean);
+      transformedQuestion = `${transformWithLLMQuestion.question} (${tags.join(',')})`;
     }
     return {
       detectedCategory,
       originalQuestion: question,
-      transformedQuestion: `${transformedQuestion.question} (action:${
-        transformedEmbeddedActionBased.result.actionBased
-      },entity:${transformedEmbeddedActionBased.result.entityBased})`,
+      transformedQuestion,
       logIds: [
-        transformedQuestion.logId,
+        transformWithLLMQuestion.logId,
         transformedEmbeddedActionBased.logId,
         detectCategoryResult.logId,
       ],
