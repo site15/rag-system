@@ -34,6 +34,7 @@ export class LLMChunkProcessor {
     category,
     detectedCategory,
     attemptsCallbacks,
+    chunkSize,
   }: {
     dialogId: string;
     history: string[];
@@ -42,6 +43,7 @@ export class LLMChunkProcessor {
     category: Category;
     detectedCategory: Category;
     attemptsCallbacks?: (options: AttemptsCallbacksOptions) => Promise<any>;
+    chunkSize: number;
   }) {
     if (!contextDocs?.length) {
       Logger.logInfo('Нет документов в контексте');
@@ -71,9 +73,7 @@ export class LLMChunkProcessor {
     });
 
     const maxContextLength =
-      contextConfig.maxContextChars -
-      basePrompt.length -
-      contextConfig.promptReserveChars;
+      chunkSize - basePrompt.length - contextConfig.promptReserveChars;
     const { combinedContext, primaryDocId, includedDocsCount } =
       LLMChunkProcessor.buildCombinedContext({
         docs: sortedDocs,
@@ -84,7 +84,7 @@ export class LLMChunkProcessor {
     addPayloadToTrace({
       contextDocsCount: sortedDocs.length,
       includedDocsCount,
-      maxContextChars: contextConfig.maxContextChars,
+      chunkSize,
       combinedContextLength: combinedContext.length,
       primaryDocId,
     });

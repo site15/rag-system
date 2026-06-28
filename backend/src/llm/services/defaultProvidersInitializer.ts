@@ -1,7 +1,7 @@
 // defaultProvidersInitializer.ts - Service to initialize default providers in "ChatLlmModel" table
 import { PrismaService } from '../../services/prisma.service';
 import { ConfigManager } from '../config';
-import { PROVIDER_NAMES } from '../constants';
+import { DEFAULT_LLM_CHUNK_SIZE, PROVIDER_NAMES } from '../constants';
 import { Logger } from '../logger';
 
 export interface ProviderConfig {
@@ -34,7 +34,7 @@ export class DefaultProvidersInitializer {
           temperature: config.temperature,
           baseUrl: config.baseUrl,
 
-          chunkSize: config.chunkSize,
+          chunkSize: DEFAULT_LLM_CHUNK_SIZE,
           isActive:
             !!config.apiKey ||
             !!process.env.CHAT_PROVIDER?.split(',')?.includes(provider),
@@ -170,7 +170,7 @@ export class DefaultProvidersInitializer {
       provider: row.provider,
       model: row.model,
       temperature: row.temperature ?? envConfig.temperature,
-      chunkSize: envConfig.chunkSize ?? row.chunkSize,
+      chunkSize: row.chunkSize ?? DEFAULT_LLM_CHUNK_SIZE,
       baseUrl: row.baseUrl ?? envConfig.baseUrl,
       apiKey: envConfig.apiKey,
     };

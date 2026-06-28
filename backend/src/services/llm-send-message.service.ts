@@ -246,6 +246,7 @@ export class LlmSendMessageService {
         category: categorizedQuestion.category,
         detectedCategory: categorizedQuestion.detectedCategory,
         attemptsCallbacks,
+        chunkSize: llmConfig.chunkSize,
       });
 
       let answer = sanitizeLlmUserResponse(llmResult.response);

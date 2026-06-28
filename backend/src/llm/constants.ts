@@ -89,6 +89,9 @@ function parseEnvInt(name: string, defaultValue: number): number {
 }
 
 // RAG Search Configuration (overridable via env)
+/** Default max context chars per model when chunkSize is not set in ChatLlmModel */
+export const DEFAULT_LLM_CHUNK_SIZE = 100_000;
+
 export const RAG_SEARCH_CONFIG = {
   /** Default limit for global mode search */
   GLOBAL_SEARCH_LIMIT: parseEnvInt('RAG_GLOBAL_SEARCH_LIMIT', 150),

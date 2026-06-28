@@ -16,13 +16,11 @@ export class ConfigManager {
   }
 
   /**
-   * LLM context window limits (characters, not tokens).
-   * Used when packing retrieved chunks into a single prompt.
+   * LLM context packing limits (characters, not tokens).
+   * Max combined context size comes from ChatLlmModel.chunkSize in the database.
    */
   public static getLlmContextConfig() {
     return {
-      /** Max total chars for combined chunk context in one LLM call */
-      maxContextChars: this.parseEnvInt('LLM_MAX_CONTEXT_CHARS', 100_000),
       /** Reserved chars for prompt template (history, question, instructions) */
       promptReserveChars: this.parseEnvInt('LLM_CONTEXT_PROMPT_RESERVE', 2_000),
       /** Minimum context length even when prompt is very large */
@@ -67,7 +65,6 @@ export class ConfigManager {
         process.env[`${providerUpper}_CHAT_BASE_URL`] ||
         this.getDefaultBaseUrl(provider),
       apiKey: process.env[`${providerUpper}_CHAT_API_KEY`],
-      chunkSize: this.getLlmContextConfig().maxContextChars,
     };
   }
 

@@ -37,7 +37,6 @@ export type ChatConfig = {
   temperature: number;
   baseUrl: string;
   apiKey: string | undefined;
-  chunkSize: number | null;
 };
 
 export type EmbeddingsConfig = {
