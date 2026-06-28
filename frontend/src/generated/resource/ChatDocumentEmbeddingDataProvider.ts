@@ -11,7 +11,11 @@ import {
   UpdateManyResult,
   UpdateResult,
 } from "react-admin";
-import { CreateChatDocumentEmbeddingDto } from "../client";
+import {
+  CreateChatDocumentEmbeddingDto,
+  UpdateChatDocumentEmbeddingDto,
+} from "../client";
+import { pickDtoFields } from "./pick-dto-fields";
 import {
   chatDocumentEmbeddingControllerCreateOne,
   chatDocumentEmbeddingControllerDeleteOne,
@@ -19,6 +23,23 @@ import {
   chatDocumentEmbeddingControllerFindOne,
   chatDocumentEmbeddingControllerUpdateOne,
 } from "../client/sdk.gen";
+
+const chatDocumentEmbeddingCreateDtoFields = [
+  "content",
+  "graphContent",
+  "metadata",
+  "contentHash",
+  "provider",
+  "model",
+] as const;
+const chatDocumentEmbeddingUpdateDtoFields = [
+  "content",
+  "graphContent",
+  "metadata",
+  "contentHash",
+  "provider",
+  "model",
+] as const;
 
 export const ChatDocumentEmbeddingDataProvider: DataProvider<any> = {
   getList: async (_, params) => {
@@ -105,7 +126,10 @@ export const ChatDocumentEmbeddingDataProvider: DataProvider<any> = {
 
   create: async (_, params) => {
     const result = await chatDocumentEmbeddingControllerCreateOne({
-      body: params.data as CreateChatDocumentEmbeddingDto,
+      body: pickDtoFields<CreateChatDocumentEmbeddingDto>(
+        params.data,
+        chatDocumentEmbeddingCreateDtoFields,
+      ),
     });
 
     if (result?.error) {
@@ -118,7 +142,10 @@ export const ChatDocumentEmbeddingDataProvider: DataProvider<any> = {
   update: async (_, params) => {
     const result = await chatDocumentEmbeddingControllerUpdateOne({
       path: { id: params.id },
-      body: params.data,
+      body: pickDtoFields<UpdateChatDocumentEmbeddingDto>(
+        params.data,
+        chatDocumentEmbeddingUpdateDtoFields,
+      ),
     });
 
     if (result?.error) {
@@ -129,10 +156,14 @@ export const ChatDocumentEmbeddingDataProvider: DataProvider<any> = {
   },
 
   updateMany: async (_, params) => {
+    const body = pickDtoFields<UpdateChatDocumentEmbeddingDto>(
+      params.data,
+      chatDocumentEmbeddingUpdateDtoFields,
+    );
     const promises = params.ids.map((id) =>
       chatDocumentEmbeddingControllerUpdateOne({
         path: { id: String(id) },
-        body: params.data,
+        body,
       }),
     );
     const results = await Promise.all(promises);

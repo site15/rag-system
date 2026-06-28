@@ -56,33 +56,28 @@ spam, job, freelance, consulting, pricing, partnership, investment, hiring, inte
 
 ## Usage
 
-### Via Script
+### Via Script (recommended — offline)
 ```bash
 cd backend
 npm run fill-graph-content
 ```
 
+This runs independently of the main server. Document indexing (`PROCESS_DOCUMENTS=true`) no longer triggers graph extraction automatically.
+
 ### Programmatically
+```typescript
+import { GraphEmbedService } from './src/llm/graphEmbedService';
+
+const result = await GraphEmbedService.fillGraphEmbedDocuments();
+console.log(result);
+// Output: { success: true, processedCount: 42, totalCount: 45, errors: [] }
+```
+
+### Legacy wrapper
 ```typescript
 import { RAGApplication } from './src/llm/ragApplication';
 
-// Option 1: Auto-initialize embeddings (uses default configuration)
 const result = await RAGApplication.fillGraphEmbedDocuments();
-console.log(result);
-// Output: { success: true, processedCount: 42, totalCount: 45, errors: [] }
-
-// Option 2: Provide pre-initialized embeddings
-import { EmbeddingsFactory } from './src/llm/embeddingsFactory';
-import { ConfigManager } from './src/llm/config';
-
-const appConfig = ConfigManager.getAppConfig();
-const embeddingsConfig = ConfigManager.getEmbeddingsConfig(appConfig.embeddingsProvider);
-const embeddings = EmbeddingsFactory.createEmbeddings(
-  appConfig.embeddingsProvider,
-  embeddingsConfig
-);
-
-const result2 = await RAGApplication.fillGraphEmbedDocuments(embeddings);
 ```
 
 ## Configuration

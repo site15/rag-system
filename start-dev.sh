@@ -40,6 +40,9 @@ cd ./backend
 ./node_modules/.bin/prisma migrate deploy
 cd ..
 
+echo "▶ Importing ChatDocumentEmbedding dump (if empty)"
+./scripts/import-chat-document-embedding-dump.sh
+
 npx -y pm2 start ./ecosystem.config.json
 echo "✅ Done"
 

@@ -6,7 +6,7 @@
 import { getConstant, GetConstantKey } from '../utils/get-constant';
 import { getCategoryPrompt } from './getCategoryPrompt';
 import { getShortCategoryDescription } from './getShortCategoryDescription';
-import { Category } from './services/questionTransformer';
+import { Category } from './getCategoryByDetectedCategory';
 import { TextHelpers } from './textHelpers';
 import { removeCodeWrappers } from './utils';
 
@@ -28,7 +28,6 @@ export function createFriendlyFoundPrompt({
 }): string {
   return getConstant(GetConstantKey.Prompt_friendlyFoundTemplate, {
     isTelegram: category === 'telegram',
-    hasContext: !!chunk,
     context: removeCodeWrappers(chunk),
     question: question,
   });
@@ -52,7 +51,6 @@ export function createFriendlyNotFoundPrompt({
 }): string {
   return getConstant(GetConstantKey.Prompt_friendlyNotFoundTemplate, {
     isTelegram: category === 'telegram',
-    hasContext: !!chunk,
     context: removeCodeWrappers(chunk),
     question: question,
   });
@@ -76,7 +74,7 @@ export function createTelegramAnalysisPrompt({
   question: string;
 }): string {
   return getCategoryPrompt(Category.telegram, {
-    history: removeCodeWrappers(TextHelpers.concat(history, 'нет')),
+    history: removeCodeWrappers(TextHelpers.concat(history)),
     context: removeCodeWrappers(chunk || ''),
     question: question,
     isFollowUp: history?.[0],
@@ -125,7 +123,7 @@ export function createPortfolioAnalysisPrompt({
   question: string;
 }): string {
   return getCategoryPrompt(Category.portfolio, {
-    history: removeCodeWrappers(TextHelpers.concat(history, 'нет')),
+    history: removeCodeWrappers(TextHelpers.concat(history)),
     context: removeCodeWrappers(chunk || ''),
     question: question,
     isFollowUp: history?.[0],
@@ -150,7 +148,7 @@ export function createResumeAnalysisPrompt({
   question: string;
 }): string {
   return getCategoryPrompt(Category.resume, {
-    history: removeCodeWrappers(TextHelpers.concat(history, 'нет')),
+    history: removeCodeWrappers(TextHelpers.concat(history)),
     context: removeCodeWrappers(chunk || ''),
     question: question,
     isFollowUp: history?.[0],
@@ -174,7 +172,7 @@ export function createGenericAnalysisPrompt({
   question: string;
 }): string {
   return getCategoryPrompt(Category.none, {
-    history: removeCodeWrappers(TextHelpers.concat(history, 'нет')),
+    history: removeCodeWrappers(TextHelpers.concat(history)),
     context: removeCodeWrappers(chunk || ''),
     question: question,
     isFollowUp: history?.[0],
@@ -203,16 +201,17 @@ export function createContextualRewritePrompt({
 
   const isFollowUp = history?.[0];
 
-  const historyContext = isFollowUp
-    ? getConstant(GetConstantKey.Prompt_contextualRewriteHistoryTemplate, {
-        history: removeCodeWrappers(TextHelpers.concat(history)),
-      })
-    : '';
+  const historyContext = getConstant(
+    GetConstantKey.Prompt_contextualRewriteHistoryTemplate,
+    {
+      history: removeCodeWrappers(TextHelpers.concat(history ?? [])),
+    },
+  );
 
   return getConstant(GetConstantKey.Prompt_contextualRewriteTemplate, {
     hasCategory: hasCategory,
     categoryName: categoryName,
-    historyContext: historyContext,
+    historyContext,
     isFollowUp,
     question: question,
   });
@@ -237,17 +236,14 @@ export function createMinimalTransformationPrompt({
 }): string {
   const hasCategory = !!category;
 
-  const historyContext =
-    history && history?.length > 0
-      ? getConstant(
-          GetConstantKey.Prompt_minimalTransformationHistoryTemplate,
-          { history: removeCodeWrappers(TextHelpers.concat(history)) },
-        )
-      : '';
+  const historyContext = getConstant(
+    GetConstantKey.Prompt_minimalTransformationHistoryTemplate,
+    { history: removeCodeWrappers(TextHelpers.concat(history)) },
+  );
 
   return getConstant(GetConstantKey.Prompt_minimalTransformationTemplate, {
     hasCategory: hasCategory,
-    historyContext: historyContext,
+    historyContext,
     question: question,
   });
 }

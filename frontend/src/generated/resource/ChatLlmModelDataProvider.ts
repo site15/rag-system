@@ -11,7 +11,8 @@ import {
   UpdateManyResult,
   UpdateResult,
 } from "react-admin";
-import { CreateChatLlmModelDto } from "../client";
+import { CreateChatLlmModelDto, UpdateChatLlmModelDto } from "../client";
+import { pickDtoFields } from "./pick-dto-fields";
 import {
   chatLlmModelControllerCreateOne,
   chatLlmModelControllerDeleteOne,
@@ -19,6 +20,29 @@ import {
   chatLlmModelControllerFindOne,
   chatLlmModelControllerUpdateOne,
 } from "../client/sdk.gen";
+
+const chatLlmModelCreateDtoFields = [
+  "provider",
+  "model",
+  "temperature",
+  "chunkSize",
+  "baseUrl",
+  "startTime",
+  "endTime",
+  "lastRequestId",
+  "isActive",
+] as const;
+const chatLlmModelUpdateDtoFields = [
+  "provider",
+  "model",
+  "temperature",
+  "chunkSize",
+  "baseUrl",
+  "startTime",
+  "endTime",
+  "lastRequestId",
+  "isActive",
+] as const;
 
 export const ChatLlmModelDataProvider: DataProvider<any> = {
   getList: async (_, params) => {
@@ -105,7 +129,10 @@ export const ChatLlmModelDataProvider: DataProvider<any> = {
 
   create: async (_, params) => {
     const result = await chatLlmModelControllerCreateOne({
-      body: params.data as CreateChatLlmModelDto,
+      body: pickDtoFields<CreateChatLlmModelDto>(
+        params.data,
+        chatLlmModelCreateDtoFields,
+      ),
     });
 
     if (result?.error) {
@@ -118,7 +145,10 @@ export const ChatLlmModelDataProvider: DataProvider<any> = {
   update: async (_, params) => {
     const result = await chatLlmModelControllerUpdateOne({
       path: { id: params.id },
-      body: params.data,
+      body: pickDtoFields<UpdateChatLlmModelDto>(
+        params.data,
+        chatLlmModelUpdateDtoFields,
+      ),
     });
 
     if (result?.error) {
@@ -129,10 +159,14 @@ export const ChatLlmModelDataProvider: DataProvider<any> = {
   },
 
   updateMany: async (_, params) => {
+    const body = pickDtoFields<UpdateChatLlmModelDto>(
+      params.data,
+      chatLlmModelUpdateDtoFields,
+    );
     const promises = params.ids.map((id) =>
       chatLlmModelControllerUpdateOne({
         path: { id: String(id) },
-        body: params.data,
+        body,
       }),
     );
     const results = await Promise.all(promises);

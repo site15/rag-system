@@ -12,6 +12,9 @@ export interface LLMQueryLogEntry {
   errorMessage?: string;
   dialogId: string | undefined;
   messageId: string | undefined;
+  provider?: string;
+  model?: string;
+  temperature?: number;
 }
 
 export class LLMQueryLogger {
@@ -21,7 +24,10 @@ export class LLMQueryLogger {
    */
   static async logQuery(entry: LLMQueryLogEntry): Promise<string | null> {
     try {
-      const llmConfig = await DefaultProvidersInitializer.getActiveProvider();
+      const fallbackConfig =
+        entry.provider && entry.model
+          ? null
+          : await DefaultProvidersInitializer.getActiveProvider();
       const response = entry.response
         ? typeof entry.response === 'string'
           ? entry.response
@@ -39,8 +45,10 @@ export class LLMQueryLogger {
             errorMessage: entry.errorMessage || null,
             dialogId: entry.dialogId?.toString(),
             messageId: entry.messageId?.toString(),
-            model: llmConfig?.model || '',
-            provider: llmConfig?.provider || '',
+            model: entry.model || fallbackConfig?.model || '',
+            provider: entry.provider || fallbackConfig?.provider || '',
+            temperature:
+              entry.temperature ?? fallbackConfig?.temperature ?? null,
           },
           select: {
             id: true,
@@ -66,8 +74,7 @@ export class LLMQueryLogger {
         },
         (error as Error).stack,
       );
-      // Don't throw error to avoid breaking the main flow
-      throw error;
+      return null;
     }
   }
 

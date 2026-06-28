@@ -3,16 +3,30 @@ import { kebab } from 'case';
 import { TemplateHelpers } from './template-helpers';
 import { ModelParams } from './types';
 
+const formatDtoFieldNames = (fieldNames: string[]) =>
+  fieldNames.length
+    ? `[${fieldNames.map((name) => `'${name}'`).join(', ')}] as const`
+    : '[] as const';
+
 export const generateDataProvider = ({
   controller,
+  create,
+  update,
   templateHelpers,
 }: ModelParams & { templateHelpers: TemplateHelpers }): string => {
   const { model } = controller;
-  const { entityName, createDtoName } = templateHelpers;
+  const { entityName, createDtoName, updateDtoName } = templateHelpers;
 
   const modelName = model.name;
   const entityClassName = entityName(modelName);
   const createDtoClassName = createDtoName(modelName);
+  const updateDtoClassName = updateDtoName(modelName);
+  const createDtoFieldNames = formatDtoFieldNames(
+    create.fields.map((field) => field.name),
+  );
+  const updateDtoFieldNames = formatDtoFieldNames(
+    update.fields.map((field) => field.name),
+  );
   const dataProviderName = `${entityClassName}DataProvider`;
   const kebabModelName = kebab(modelName).toLowerCase();
 
@@ -32,7 +46,8 @@ export const generateDataProvider = ({
   UpdateManyResult,
   UpdateResult,
 } from "react-admin";
-import { ${createDtoClassName} } from "../client";
+import { ${createDtoClassName}, ${updateDtoClassName} } from "../client";
+import { pickDtoFields } from "./pick-dto-fields";
 import {
   ${camelModelName}ControllerCreateOne,
   ${camelModelName}ControllerDeleteOne,
@@ -40,6 +55,9 @@ import {
   ${camelModelName}ControllerFindOne,
   ${camelModelName}ControllerUpdateOne,
 } from "../client/sdk.gen";
+
+const ${camelModelName}CreateDtoFields = ${createDtoFieldNames};
+const ${camelModelName}UpdateDtoFields = ${updateDtoFieldNames};
 
 export const ${dataProviderName}: DataProvider<any> = {
   getList: async (_, params) => {
@@ -123,7 +141,10 @@ export const ${dataProviderName}: DataProvider<any> = {
 
   create: async (_, params) => {
     const result = await ${camelModelName}ControllerCreateOne({
-      body: params.data as ${createDtoClassName},
+      body: pickDtoFields<${createDtoClassName}>(
+        params.data,
+        ${camelModelName}CreateDtoFields,
+      ),
     });
 
     if (result?.error) {
@@ -136,7 +157,10 @@ export const ${dataProviderName}: DataProvider<any> = {
   update: async (_, params) => {
     const result = await ${camelModelName}ControllerUpdateOne({
       path: { id: params.id },
-      body: params.data,
+      body: pickDtoFields<${updateDtoClassName}>(
+        params.data,
+        ${camelModelName}UpdateDtoFields,
+      ),
     });
 
     if (result?.error) {
@@ -147,10 +171,14 @@ export const ${dataProviderName}: DataProvider<any> = {
   },
 
   updateMany: async (_, params) => {
+    const body = pickDtoFields<${updateDtoClassName}>(
+      params.data,
+      ${camelModelName}UpdateDtoFields,
+    );
     const promises = params.ids.map((id) =>
       ${camelModelName}ControllerUpdateOne({
         path: { id: String(id) },
-        body: params.data,
+        body,
       }),
     );
     const results = await Promise.all(promises);

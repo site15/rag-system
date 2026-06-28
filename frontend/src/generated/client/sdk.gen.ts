@@ -18,6 +18,9 @@ import type {
   AuthApiKeyControllerUpdateOneData,
   AuthApiKeyControllerUpdateOneErrors,
   AuthApiKeyControllerUpdateOneResponses,
+  AuthControllerInfoData,
+  AuthControllerInfoErrors,
+  AuthControllerInfoResponses,
   AuthSessionControllerCreateOneData,
   AuthSessionControllerCreateOneErrors,
   AuthSessionControllerCreateOneResponses,
@@ -1123,6 +1126,19 @@ export const chatEmbeddingModelControllerUpdateOne = <
       "Content-Type": "application/json",
       ...options.headers,
     },
+  });
+
+export const authControllerInfo = <ThrowOnError extends boolean = false>(
+  options?: Options<AuthControllerInfoData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    AuthControllerInfoResponses,
+    AuthControllerInfoErrors,
+    ThrowOnError
+  >({
+    security: [{ name: "x-api-key", type: "apiKey" }],
+    url: "/api/auth/info",
+    ...options,
   });
 
 export const flowControllerDialog = <ThrowOnError extends boolean = false>(

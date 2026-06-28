@@ -59,16 +59,20 @@
 Используй только Author Message.
 {{/isTelegram}}
 
+{{#question}}
 Вопрос:
-{{question}}
+{{question}}{{/question}}
 
+{{#history}}
 История:
-{{history}}
+{{history}}{{/history}}
 
+{{#context}}
 Контекст:
-{{context}}
+{{context}}{{/context}}
 
+{{#fact}}
 Факт:
-{{fact}}
+{{fact}}{{/fact}}
 
 Ответ:

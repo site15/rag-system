@@ -47,6 +47,9 @@ cd ./backend
 npm run build
 cd ..
 
+echo "▶ Importing ChatDocumentEmbedding dump (if empty)"
+./scripts/import-chat-document-embedding-dump.sh
+
 echo "▶ Starting backend"
 npx -y pm2 start ./ecosystem-prod.config.json
 echo "✅ Done"

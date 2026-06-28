@@ -1,4 +1,5 @@
+{{#history}}
 Conversation history:
 ```
 {{history}}
-```
+```{{/history}}

@@ -1,61 +1,67 @@
-import { Logger } from './logger';
-import { Category } from './services/questionTransformer';
+export enum Category {
+  telegram = 'telegram',
+  spam = 'spam',
+  job = 'job',
+  freelance = 'freelance',
+  consulting = 'consulting',
+  pricing = 'pricing',
+  partnership = 'partnership',
+  investment = 'investment',
+  hiring = 'hiring',
+  interview = 'interview',
+  speaking = 'speaking',
+  media = 'media',
+  support = 'support',
+  review = 'review',
+  decision = 'decision',
+  product = 'product',
+  access = 'access',
+  resume = 'resume',
+  portfolio = 'portfolio',
+  articles = 'articles',
+  life = 'life',
+  intro = 'intro',
+  greeting = 'greeting',
+  followup = 'followup',
+  gratitude = 'gratitude',
+  clarification = 'clarification',
+  none = 'none',
+  technology = 'technology',
+}
 
-export function getCategoryByDetectedCategory(detectedCategory: Category) {
-  let category: Category | undefined = undefined;
-  if (detectedCategory === Category.articles) {
-    category = Category.articles;
-  }
+const CATEGORY_SOURCE_MAP: Partial<Record<Category, Category>> = {
+  [Category.articles]: Category.articles,
+  [Category.technology]: Category.articles,
+  [Category.support]: Category.articles,
+  [Category.speaking]: Category.articles,
+  [Category.decision]: Category.portfolio,
+  [Category.portfolio]: Category.portfolio,
+  [Category.product]: Category.portfolio,
+  [Category.media]: Category.portfolio,
+  [Category.resume]: Category.resume,
+  [Category.pricing]: Category.resume,
+  [Category.interview]: Category.resume,
+  [Category.hiring]: Category.resume,
+  [Category.job]: Category.resume,
+  [Category.freelance]: Category.resume,
+  [Category.consulting]: Category.resume,
+  [Category.partnership]: Category.resume,
+  [Category.investment]: Category.resume,
+  [Category.intro]: Category.resume,
+  [Category.greeting]: Category.resume,
+  [Category.life]: Category.resume,
+  [Category.review]: Category.telegram,
+  [Category.access]: Category.telegram,
+  [Category.telegram]: Category.telegram,
+  [Category.spam]: Category.none,
+  [Category.gratitude]: Category.none,
+  [Category.none]: Category.none,
+  [Category.clarification]: Category.clarification,
+  [Category.followup]: Category.followup,
+};
 
-  if (
-    detectedCategory === Category.pricing ||
-    detectedCategory === Category.resume ||
-    detectedCategory === Category.interview ||
-    detectedCategory === Category.hiring ||
-    detectedCategory === Category.job ||
-    detectedCategory === Category.freelance ||
-    detectedCategory === Category.consulting ||
-    detectedCategory === Category.partnership ||
-    detectedCategory === Category.investment ||
-    detectedCategory === Category.intro ||
-    detectedCategory === Category.life ||
-    detectedCategory === Category.technology
-  ) {
-    category = Category.resume;
-  }
-
-  if (
-    detectedCategory === Category.decision ||
-    detectedCategory === Category.portfolio ||
-    detectedCategory === Category.product ||
-    detectedCategory === Category.media
-  ) {
-    category = Category.portfolio;
-  }
-
-  if (detectedCategory === Category.spam) {
-    category = Category.none;
-  }
-
-  if (
-    detectedCategory === Category.review ||
-    detectedCategory === Category.access
-  ) {
-    category = Category.telegram;
-  }
-
-  if (
-    detectedCategory === Category.clarification ||
-    detectedCategory === Category.followup
-  ) {
-    category = detectedCategory;
-  }
-
-  if (!category) {
-    category = Category.telegram;
-    Logger.logInfo(
-      'Not detected category, use telegram message for search answer',
-    );
-  }
-  return category;
+export function getCategoryByDetectedCategory(
+  detectedCategory: Category,
+): Category {
+  return CATEGORY_SOURCE_MAP[detectedCategory] ?? Category.none;
 }

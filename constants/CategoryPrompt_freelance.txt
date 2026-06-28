@@ -24,16 +24,20 @@
 [FOUND]
 [NOT_FOUND]
 
-Conversation history (use strictly for personal experience context): 
+{{#history}}
+Conversation history (use strictly for personal experience context):
 \`\`\`
 {{history}}
-\`\`\` 
+\`\`\`{{/history}}
 
+{{#context}}
 Контекст:
 \`\`\`
 {{context}}
-\`\`\`
+\`\`\`{{/context}}
 
+{{#question}}
 {{#isFollowUp}}Original question (follow-up): {{question}}{{/isFollowUp}}{{^isFollowUp}}Original question: {{question}}{{/isFollowUp}}
+{{/question}}
 
 Ответ:

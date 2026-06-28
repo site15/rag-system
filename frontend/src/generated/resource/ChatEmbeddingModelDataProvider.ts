@@ -11,7 +11,11 @@ import {
   UpdateManyResult,
   UpdateResult,
 } from "react-admin";
-import { CreateChatEmbeddingModelDto } from "../client";
+import {
+  CreateChatEmbeddingModelDto,
+  UpdateChatEmbeddingModelDto,
+} from "../client";
+import { pickDtoFields } from "./pick-dto-fields";
 import {
   chatEmbeddingModelControllerCreateOne,
   chatEmbeddingModelControllerDeleteOne,
@@ -19,6 +23,19 @@ import {
   chatEmbeddingModelControllerFindOne,
   chatEmbeddingModelControllerUpdateOne,
 } from "../client/sdk.gen";
+
+const chatEmbeddingModelCreateDtoFields = [
+  "name",
+  "provider",
+  "model",
+  "dimension",
+] as const;
+const chatEmbeddingModelUpdateDtoFields = [
+  "name",
+  "provider",
+  "model",
+  "dimension",
+] as const;
 
 export const ChatEmbeddingModelDataProvider: DataProvider<any> = {
   getList: async (_, params) => {
@@ -105,7 +122,10 @@ export const ChatEmbeddingModelDataProvider: DataProvider<any> = {
 
   create: async (_, params) => {
     const result = await chatEmbeddingModelControllerCreateOne({
-      body: params.data as CreateChatEmbeddingModelDto,
+      body: pickDtoFields<CreateChatEmbeddingModelDto>(
+        params.data,
+        chatEmbeddingModelCreateDtoFields,
+      ),
     });
 
     if (result?.error) {
@@ -118,7 +138,10 @@ export const ChatEmbeddingModelDataProvider: DataProvider<any> = {
   update: async (_, params) => {
     const result = await chatEmbeddingModelControllerUpdateOne({
       path: { id: params.id },
-      body: params.data,
+      body: pickDtoFields<UpdateChatEmbeddingModelDto>(
+        params.data,
+        chatEmbeddingModelUpdateDtoFields,
+      ),
     });
 
     if (result?.error) {
@@ -129,10 +152,14 @@ export const ChatEmbeddingModelDataProvider: DataProvider<any> = {
   },
 
   updateMany: async (_, params) => {
+    const body = pickDtoFields<UpdateChatEmbeddingModelDto>(
+      params.data,
+      chatEmbeddingModelUpdateDtoFields,
+    );
     const promises = params.ids.map((id) =>
       chatEmbeddingModelControllerUpdateOne({
         path: { id: String(id) },
-        body: params.data,
+        body,
       }),
     );
     const results = await Promise.all(promises);

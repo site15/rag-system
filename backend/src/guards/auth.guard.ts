@@ -13,7 +13,7 @@ import { AppRequest } from '../types/request';
 import { getRequestFromExecutionContext } from '../utils/get-request-fromExecution-context';
 import { getClientIp } from '../utils/request-ip';
 
-export const X_API_KEY_HEADER_NAME = 'x-api-key';
+export const X_API_KEY = 'x-api-key';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -22,10 +22,10 @@ export class AuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = getRequestFromExecutionContext(context) as AppRequest;
 
-    if (req.headers[X_API_KEY_HEADER_NAME]) {
+    if (req.headers[X_API_KEY]) {
       const apiKey = await this.prismaService.authApiKey.findFirst({
         select: { AuthUser: true },
-        where: { apiKey: req.headers[X_API_KEY_HEADER_NAME] },
+        where: { apiKey: req.headers[X_API_KEY] },
       });
       if (apiKey && apiKey.AuthUser) {
         req.userId = apiKey.AuthUser.id;

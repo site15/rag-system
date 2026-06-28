@@ -1,8 +1,7 @@
-import { Category } from './services/questionTransformer';
-import { getConstant, GetConstantKey } from '../utils/get-constant';
+import { GetConstantKey } from '../utils/get-constant';
+import { Category } from './getCategoryByDetectedCategory';
 
 export function getShortCategoryDescription(category: Category): string {
-  // Map category to constant key
   const categoryKeyMap: Record<Category, GetConstantKey> = {
     [Category.telegram]: GetConstantKey.CategoryDescription_telegram,
     [Category.spam]: GetConstantKey.CategoryDescription_spam,
@@ -26,6 +25,7 @@ export function getShortCategoryDescription(category: Category): string {
     [Category.articles]: GetConstantKey.CategoryDescription_articles,
     [Category.life]: GetConstantKey.CategoryDescription_life,
     [Category.intro]: GetConstantKey.CategoryDescription_intro,
+    [Category.greeting]: GetConstantKey.CategoryDescription_greeting,
     [Category.followup]: GetConstantKey.CategoryDescription_followup,
     [Category.gratitude]: GetConstantKey.CategoryDescription_gratitude,
     [Category.clarification]: GetConstantKey.CategoryDescription_clarification,
@@ -33,12 +33,5 @@ export function getShortCategoryDescription(category: Category): string {
     [Category.technology]: GetConstantKey.CategoryDescription_technology,
   };
 
-  // Load description synchronously
-  try {
-    return getConstant(categoryKeyMap[category]);
-  } catch (error) {
-    // console.error(`Failed to load description for category ${category}:`, error);
-    // Return empty string as fallback (matching original behavior)
-    return '';
-  }
+  return categoryKeyMap[category] ?? '';
 }

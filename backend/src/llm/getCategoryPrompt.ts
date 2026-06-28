@@ -1,5 +1,5 @@
-import { Category } from './services/questionTransformer';
 import { getConstant, GetConstantKey } from '../utils/get-constant';
+import { Category } from './getCategoryByDetectedCategory';
 
 export function getCategoryPrompt(category: Category, context?: any): string {
   // Map category to constant key
@@ -26,6 +26,7 @@ export function getCategoryPrompt(category: Category, context?: any): string {
     [Category.articles]: GetConstantKey.CategoryPrompt_articles,
     [Category.life]: GetConstantKey.CategoryPrompt_life,
     [Category.intro]: GetConstantKey.CategoryPrompt_intro,
+    [Category.greeting]: GetConstantKey.CategoryPrompt_greeting,
     [Category.followup]: GetConstantKey.CategoryPrompt_followup,
     [Category.gratitude]: GetConstantKey.CategoryPrompt_gratitude,
     [Category.clarification]: GetConstantKey.CategoryPrompt_clarification,

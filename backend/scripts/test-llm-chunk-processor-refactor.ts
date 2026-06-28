@@ -4,7 +4,7 @@
  * Test script to verify llmChunkProcessor Mustache refactoring
  */
 
-import { Category } from '../src/llm/services/questionTransformer';
+import { Category } from '../src/llm/getCategoryByDetectedCategory';
 import { LLMChunkProcessor } from '../src/llm/llmChunkProcessor';
 
 // Mock the DialogManager to avoid database calls

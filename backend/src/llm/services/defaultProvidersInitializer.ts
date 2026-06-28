@@ -71,17 +71,15 @@ export class DefaultProvidersInitializer {
         await PrismaService.instance.chatLlmModel.findFirst({
           where: {
             provider,
-            model,
-            temperature,
-            chunkSize,
+            // model,
+            // temperature,
+            // chunkSize,
             baseUrl,
           },
           select: {
             id: true,
           },
         });
-
-      const status = 'deactivated'; // Always set to deactivated when calling this method
 
       if (!existingRecord) {
         // Record doesn't exist, insert new one
@@ -91,7 +89,7 @@ export class DefaultProvidersInitializer {
             model: model,
             temperature: temperature,
             chunkSize: chunkSize || null,
-            status: status,
+            status: 'deactivated',
             isActive,
             baseUrl,
           },
@@ -158,56 +156,50 @@ export class DefaultProvidersInitializer {
     }
   }
 
-  static async getNextActiveProvider() {
-    try {
-      const activeProviders = await this.getSortedActiveProviders();
-
-      Logger.logInfo('activeProviders', activeProviders);
-
-      const provider = activeProviders?.[1] || null;
-
-      return {
-        ...ConfigManager.getChatConfig(provider?.provider),
-        ...(provider?.provider ? { provider: provider?.provider } : {}),
-        ...(provider?.model ? { model: provider.model } : {}),
-        ...(provider?.temperature ? { temperature: provider.temperature } : {}),
-        ...(provider?.chunkSize ? { chunkSize: provider.chunkSize } : {}),
-        ...(provider?.baseUrl ? { baseUrl: provider.baseUrl } : {}),
-        ...(provider?.id ? { id: provider.id } : {}),
-      };
-    } catch (error) {
-      Logger.logError('Failed to get next active provider', {
-        error: error instanceof Error ? error.message : String(error),
-      });
-      throw error;
-    }
+  private static buildProviderConfig(row: {
+    provider: string;
+    model: string;
+    temperature: number;
+    baseUrl: string | null;
+    chunkSize: number | null;
+    id: string;
+  }) {
+    const envConfig = ConfigManager.getChatConfig(row.provider);
+    return {
+      id: row.id,
+      provider: row.provider,
+      model: row.model,
+      temperature: row.temperature ?? envConfig.temperature,
+      chunkSize: envConfig.chunkSize ?? row.chunkSize,
+      baseUrl: row.baseUrl ?? envConfig.baseUrl,
+      apiKey: envConfig.apiKey,
+    };
   }
 
-  static async getActiveProvider(skipDefault = false) {
-    try {
-      const activeProviders = await this.getSortedActiveProviders();
+  static async getActiveProviderAtIndex(index = 0) {
+    const activeProviders = await this.getSortedActiveProviders();
 
-      Logger.logInfo('activeProviders', activeProviders);
+    Logger.logInfo('activeProviders', activeProviders);
 
-      const provider = activeProviders?.[0] || null;
-
-      Logger.logInfo('provider', provider);
-      return {
-        ...(!skipDefault
-          ? ConfigManager.getChatConfig(provider?.provider)
-          : {}),
-        ...(provider?.provider ? { provider: provider.provider } : {}),
-        ...(provider?.model ? { model: provider.model } : {}),
-        ...(provider?.temperature ? { temperature: provider.temperature } : {}),
-        ...(provider?.chunkSize ? { chunkSize: provider.chunkSize } : {}),
-        ...(provider?.baseUrl ? { baseUrl: provider.baseUrl } : {}),
-        ...(provider?.id ? { id: provider.id } : {}),
-      };
-    } catch (error) {
-      Logger.logError('Failed to get next active provider', {
-        error: error instanceof Error ? error.message : String(error),
-      });
-      throw error;
+    const row = activeProviders[index];
+    if (!row) {
+      throw new Error(
+        index === 0
+          ? 'No active LLM model configured. Enable at least one model in ChatLlmModel.'
+          : `No more active LLM models available (requested index ${index}).`,
+      );
     }
+
+    const config = this.buildProviderConfig(row);
+    Logger.logInfo('provider', config);
+    return config;
+  }
+
+  static async getActiveProvider() {
+    return this.getActiveProviderAtIndex(0);
+  }
+
+  static async getNextActiveProvider(currentIndex = 0) {
+    return this.getActiveProviderAtIndex(currentIndex + 1);
   }
 }

@@ -64,7 +64,7 @@ PROCESS_DOCUMENTS="false"
 CREATE_DUMP_DOCUMENTS="false"
 
 # Безопасность
-ADMIN_API_KEY="a1a9a512-aceb-49cf-83ac-a0b534486e0b"
+ADMIN_API_KEYS="a1a9a512-aceb-49cf-83ac-a0b534486e0b"
 CHECK_IP="false"
 ALLOWED_IPS="127.0.0.1,192.168.168.1,::1"
 ```

@@ -35,6 +35,7 @@ export const ERROR_MESSAGES = {
     A4F: 'CHAT_API_KEY is required for A4F.co provider',
     Z_AI: 'CHAT_API_KEY is required for Z.AI provider',
     DEEPSEEK: 'CHAT_API_KEY is required for DeepSeek provider',
+    OPENROUTER: 'CHAT_API_KEY is required for OpenRouter provider',
     ANTHROPIC: 'CHAT_API_KEY is required for Anthropic provider',
     GEMINI: 'CHAT_API_KEY is required for Gemini provider',
     HUGGINGFACE: 'CHAT_API_KEY is required for Hugging Face provider',
@@ -45,6 +46,8 @@ export const ERROR_MESSAGES = {
     EMBEDDINGS_A4F: 'EMBEDDINGS_API_KEY is required for A4F.co provider',
     EMBEDDINGS_Z_AI: 'EMBEDDINGS_API_KEY is required for Z.AI provider',
     EMBEDDINGS_DEEPSEEK: 'EMBEDDINGS_API_KEY is required for DeepSeek provider',
+    EMBEDDINGS_OPENROUTER:
+      'EMBEDDINGS_API_KEY is required for OpenRouter provider',
     EMBEDDINGS_GENERIC:
       'EMBEDDINGS_API_KEY is required for OpenAI and DeepSeek providers',
   } as const,
@@ -66,6 +69,7 @@ export const PROVIDER_NAMES = {
   A4F: 'a4f',
   Z_AI: 'z_ai',
   DEEPSEEK: 'deepseek',
+  OPENROUTER: 'openrouter',
   ANTHROPIC: 'anthropic',
   GEMINI: 'gemini',
   HUGGINGFACE: 'huggingface',
@@ -75,13 +79,25 @@ export const PROVIDER_NAMES = {
   LM_STUDIO: 'lm_studio',
 } as const;
 
-// RAG Search Configuration
+function parseEnvInt(name: string, defaultValue: number): number {
+  const raw = process.env[name];
+  if (raw === undefined || raw.trim() === '') {
+    return defaultValue;
+  }
+  const parsed = parseInt(raw, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : defaultValue;
+}
+
+// RAG Search Configuration (overridable via env)
 export const RAG_SEARCH_CONFIG = {
   /** Default limit for global mode search */
-  GLOBAL_SEARCH_LIMIT: 10,
+  GLOBAL_SEARCH_LIMIT: parseEnvInt('RAG_GLOBAL_SEARCH_LIMIT', 150),
 
   /** Default limit for telegram mode search */
-  TELEGRAM_SEARCH_LIMIT: 10,
+  TELEGRAM_SEARCH_LIMIT: parseEnvInt('RAG_TELEGRAM_SEARCH_LIMIT', 150),
+
+  /** Max cosine distance (pgvector <=>); lower = more similar */
+  MAX_COSINE_DISTANCE: 1.0,
 
   /** Filter pattern for excluding telegram documents in global mode */
   GLOBAL_TELEGRAM_EXCLUDE_PATTERN: '%/telegram/%',
@@ -94,6 +110,15 @@ export const RAG_SEARCH_CONFIG = {
 
   /** Filter rule for including telegram documents */
   TELEGRAM_INCLUDE_RULE: 'ilike' as const,
+
+  /** Batch size for embedding documents during ingestion */
+  EMBED_BATCH_SIZE: 16,
+
+  /** RRF constant for hybrid search fusion */
+  RRF_K: 60,
+
+  /** How many candidates to fetch per channel before RRF merge */
+  HYBRID_FETCH_MULTIPLIER: 3,
 } as const;
 
 // LLM Response Processing

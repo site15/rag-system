@@ -4,7 +4,7 @@ import { getTraceStack } from '../trace/trace.module';
 import { getConstant, GetConstantKey } from '../utils/get-constant';
 import { Logger } from './logger';
 import { FailureTracker } from './services/failureTracker';
-import { Category } from './services/questionTransformer';
+import { Category } from './getCategoryByDetectedCategory';
 
 export class DialogManager {
   public static async createDialog(userId: string): Promise<string> {

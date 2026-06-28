@@ -37,12 +37,15 @@
 ФОРМАТ ОТВЕТА:
 <одна короткая фраза>
 
+{{#history}}
 История:
 \`\`\`
 {{history}}
-\`\`\` 
+\`\`\`{{/history}}
 
+{{#question}}
 Сообщение:
 {{#isFollowUp}}Original question (follow-up): {{question}}{{/isFollowUp}}{{^isFollowUp}}Original question: {{question}}{{/isFollowUp}}
+{{/question}}
 
 Ответ:

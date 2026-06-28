@@ -27,11 +27,11 @@ export type AggregateChatMessage = {
 };
 
 export type ChatMessageAvgAggregateOutputType = {
-  temperature: runtime.Decimal | null;
+  temperature: number | null;
 };
 
 export type ChatMessageSumAggregateOutputType = {
-  temperature: runtime.Decimal | null;
+  temperature: number | null;
 };
 
 export type ChatMessageMinAggregateOutputType = {
@@ -46,7 +46,7 @@ export type ChatMessageMinAggregateOutputType = {
   transformedEmbeddingQuery: string | null;
   provider: string | null;
   model: string | null;
-  temperature: runtime.Decimal | null;
+  temperature: number | null;
   isGoodResponse: boolean | null;
   isBadResponse: boolean | null;
   isProcessing: boolean | null;
@@ -69,7 +69,7 @@ export type ChatMessageMaxAggregateOutputType = {
   transformedEmbeddingQuery: string | null;
   provider: string | null;
   model: string | null;
-  temperature: runtime.Decimal | null;
+  temperature: number | null;
   isGoodResponse: boolean | null;
   isBadResponse: boolean | null;
   isProcessing: boolean | null;
@@ -291,7 +291,7 @@ export type ChatMessageGroupByOutputType = {
   transformedEmbeddingQuery: string | null;
   provider: string | null;
   model: string | null;
-  temperature: runtime.Decimal | null;
+  temperature: number | null;
   isGoodResponse: boolean;
   isBadResponse: boolean;
   trace: runtime.JsonValue | null;
@@ -343,13 +343,7 @@ export type ChatMessageWhereInput = {
     | null;
   provider?: Prisma.StringNullableFilter<"ChatMessage"> | string | null;
   model?: Prisma.StringNullableFilter<"ChatMessage"> | string | null;
-  temperature?:
-    | Prisma.DecimalNullableFilter<"ChatMessage">
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: Prisma.FloatNullableFilter<"ChatMessage"> | number | null;
   isGoodResponse?: Prisma.BoolFilter<"ChatMessage"> | boolean;
   isBadResponse?: Prisma.BoolFilter<"ChatMessage"> | boolean;
   trace?: Prisma.JsonNullableFilter<"ChatMessage">;
@@ -435,13 +429,7 @@ export type ChatMessageWhereUniqueInput = Prisma.AtLeast<
       | null;
     provider?: Prisma.StringNullableFilter<"ChatMessage"> | string | null;
     model?: Prisma.StringNullableFilter<"ChatMessage"> | string | null;
-    temperature?:
-      | Prisma.DecimalNullableFilter<"ChatMessage">
-      | runtime.Decimal
-      | runtime.DecimalJsLike
-      | number
-      | string
-      | null;
+    temperature?: Prisma.FloatNullableFilter<"ChatMessage"> | number | null;
     isGoodResponse?: Prisma.BoolFilter<"ChatMessage"> | boolean;
     isBadResponse?: Prisma.BoolFilter<"ChatMessage"> | boolean;
     trace?: Prisma.JsonNullableFilter<"ChatMessage">;
@@ -546,11 +534,8 @@ export type ChatMessageScalarWhereWithAggregatesInput = {
     | string
     | null;
   temperature?:
-    | Prisma.DecimalNullableWithAggregatesFilter<"ChatMessage">
-    | runtime.Decimal
-    | runtime.DecimalJsLike
+    | Prisma.FloatNullableWithAggregatesFilter<"ChatMessage">
     | number
-    | string
     | null;
   isGoodResponse?: Prisma.BoolWithAggregatesFilter<"ChatMessage"> | boolean;
   isBadResponse?: Prisma.BoolWithAggregatesFilter<"ChatMessage"> | boolean;
@@ -592,12 +577,7 @@ export type ChatMessageCreateInput = {
   transformedEmbeddingQuery?: string | null;
   provider?: string | null;
   model?: string | null;
-  temperature?:
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: number | null;
   isGoodResponse?: boolean;
   isBadResponse?: boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
@@ -626,12 +606,7 @@ export type ChatMessageUncheckedCreateInput = {
   transformedEmbeddingQuery?: string | null;
   provider?: string | null;
   model?: string | null;
-  temperature?:
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: number | null;
   isGoodResponse?: boolean;
   isBadResponse?: boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
@@ -662,13 +637,7 @@ export type ChatMessageUpdateInput = {
     | null;
   provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
-  temperature?:
-    | Prisma.NullableDecimalFieldUpdateOperationsInput
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null;
   isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
@@ -715,13 +684,7 @@ export type ChatMessageUncheckedUpdateInput = {
     | null;
   provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
-  temperature?:
-    | Prisma.NullableDecimalFieldUpdateOperationsInput
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null;
   isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
@@ -760,12 +723,7 @@ export type ChatMessageCreateManyInput = {
   transformedEmbeddingQuery?: string | null;
   provider?: string | null;
   model?: string | null;
-  temperature?:
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: number | null;
   isGoodResponse?: boolean;
   isBadResponse?: boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
@@ -794,13 +752,7 @@ export type ChatMessageUpdateManyMutationInput = {
     | null;
   provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
-  temperature?:
-    | Prisma.NullableDecimalFieldUpdateOperationsInput
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null;
   isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
@@ -843,13 +795,7 @@ export type ChatMessageUncheckedUpdateManyInput = {
     | null;
   provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
-  temperature?:
-    | Prisma.NullableDecimalFieldUpdateOperationsInput
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null;
   isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
@@ -1188,12 +1134,12 @@ export type ChatMessageUncheckedUpdateManyWithoutDialogNestedInput = {
     | Prisma.ChatMessageScalarWhereInput[];
 };
 
-export type NullableDecimalFieldUpdateOperationsInput = {
-  set?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
-  increment?: runtime.Decimal | runtime.DecimalJsLike | number | string;
-  decrement?: runtime.Decimal | runtime.DecimalJsLike | number | string;
-  multiply?: runtime.Decimal | runtime.DecimalJsLike | number | string;
-  divide?: runtime.Decimal | runtime.DecimalJsLike | number | string;
+export type NullableFloatFieldUpdateOperationsInput = {
+  set?: number | null;
+  increment?: number;
+  decrement?: number;
+  multiply?: number;
+  divide?: number;
 };
 
 export type NullableDateTimeFieldUpdateOperationsInput = {
@@ -1268,12 +1214,7 @@ export type ChatMessageCreateWithoutAuthUserInput = {
   transformedEmbeddingQuery?: string | null;
   provider?: string | null;
   model?: string | null;
-  temperature?:
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: number | null;
   isGoodResponse?: boolean;
   isBadResponse?: boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
@@ -1300,12 +1241,7 @@ export type ChatMessageUncheckedCreateWithoutAuthUserInput = {
   transformedEmbeddingQuery?: string | null;
   provider?: string | null;
   model?: string | null;
-  temperature?:
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: number | null;
   isGoodResponse?: boolean;
   isBadResponse?: boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
@@ -1388,13 +1324,7 @@ export type ChatMessageScalarWhereInput = {
     | null;
   provider?: Prisma.StringNullableFilter<"ChatMessage"> | string | null;
   model?: Prisma.StringNullableFilter<"ChatMessage"> | string | null;
-  temperature?:
-    | Prisma.DecimalNullableFilter<"ChatMessage">
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: Prisma.FloatNullableFilter<"ChatMessage"> | number | null;
   isGoodResponse?: Prisma.BoolFilter<"ChatMessage"> | boolean;
   isBadResponse?: Prisma.BoolFilter<"ChatMessage"> | boolean;
   trace?: Prisma.JsonNullableFilter<"ChatMessage">;
@@ -1429,12 +1359,7 @@ export type ChatMessageCreateWithoutDialogInput = {
   transformedEmbeddingQuery?: string | null;
   provider?: string | null;
   model?: string | null;
-  temperature?:
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: number | null;
   isGoodResponse?: boolean;
   isBadResponse?: boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
@@ -1461,12 +1386,7 @@ export type ChatMessageUncheckedCreateWithoutDialogInput = {
   transformedEmbeddingQuery?: string | null;
   provider?: string | null;
   model?: string | null;
-  temperature?:
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: number | null;
   isGoodResponse?: boolean;
   isBadResponse?: boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
@@ -1534,12 +1454,7 @@ export type ChatMessageCreateWithoutChatMessageDocumentEmbeddingInput = {
   transformedEmbeddingQuery?: string | null;
   provider?: string | null;
   model?: string | null;
-  temperature?:
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: number | null;
   isGoodResponse?: boolean;
   isBadResponse?: boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
@@ -1568,12 +1483,7 @@ export type ChatMessageUncheckedCreateWithoutChatMessageDocumentEmbeddingInput =
     transformedEmbeddingQuery?: string | null;
     provider?: string | null;
     model?: string | null;
-    temperature?:
-      | runtime.Decimal
-      | runtime.DecimalJsLike
-      | number
-      | string
-      | null;
+    temperature?: number | null;
     isGoodResponse?: boolean;
     isBadResponse?: boolean;
     trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
@@ -1633,13 +1543,7 @@ export type ChatMessageUpdateWithoutChatMessageDocumentEmbeddingInput = {
     | null;
   provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
-  temperature?:
-    | Prisma.NullableDecimalFieldUpdateOperationsInput
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null;
   isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
@@ -1687,11 +1591,8 @@ export type ChatMessageUncheckedUpdateWithoutChatMessageDocumentEmbeddingInput =
     provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     temperature?:
-      | Prisma.NullableDecimalFieldUpdateOperationsInput
-      | runtime.Decimal
-      | runtime.DecimalJsLike
+      | Prisma.NullableFloatFieldUpdateOperationsInput
       | number
-      | string
       | null;
     isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
@@ -1728,12 +1629,7 @@ export type ChatMessageCreateWithoutChatLlmRequestInput = {
   transformedEmbeddingQuery?: string | null;
   provider?: string | null;
   model?: string | null;
-  temperature?:
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: number | null;
   isGoodResponse?: boolean;
   isBadResponse?: boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
@@ -1761,12 +1657,7 @@ export type ChatMessageUncheckedCreateWithoutChatLlmRequestInput = {
   transformedEmbeddingQuery?: string | null;
   provider?: string | null;
   model?: string | null;
-  temperature?:
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: number | null;
   isGoodResponse?: boolean;
   isBadResponse?: boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
@@ -1824,13 +1715,7 @@ export type ChatMessageUpdateWithoutChatLlmRequestInput = {
     | null;
   provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
-  temperature?:
-    | Prisma.NullableDecimalFieldUpdateOperationsInput
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null;
   isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
@@ -1876,13 +1761,7 @@ export type ChatMessageUncheckedUpdateWithoutChatLlmRequestInput = {
     | null;
   provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
-  temperature?:
-    | Prisma.NullableDecimalFieldUpdateOperationsInput
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null;
   isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
@@ -1919,12 +1798,7 @@ export type ChatMessageCreateManyAuthUserInput = {
   transformedEmbeddingQuery?: string | null;
   provider?: string | null;
   model?: string | null;
-  temperature?:
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: number | null;
   isGoodResponse?: boolean;
   isBadResponse?: boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
@@ -1953,13 +1827,7 @@ export type ChatMessageUpdateWithoutAuthUserInput = {
     | null;
   provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
-  temperature?:
-    | Prisma.NullableDecimalFieldUpdateOperationsInput
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null;
   isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
@@ -2004,13 +1872,7 @@ export type ChatMessageUncheckedUpdateWithoutAuthUserInput = {
     | null;
   provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
-  temperature?:
-    | Prisma.NullableDecimalFieldUpdateOperationsInput
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null;
   isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
@@ -2054,13 +1916,7 @@ export type ChatMessageUncheckedUpdateManyWithoutAuthUserInput = {
     | null;
   provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
-  temperature?:
-    | Prisma.NullableDecimalFieldUpdateOperationsInput
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null;
   isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
@@ -2096,12 +1952,7 @@ export type ChatMessageCreateManyDialogInput = {
   transformedEmbeddingQuery?: string | null;
   provider?: string | null;
   model?: string | null;
-  temperature?:
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: number | null;
   isGoodResponse?: boolean;
   isBadResponse?: boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
@@ -2130,13 +1981,7 @@ export type ChatMessageUpdateWithoutDialogInput = {
     | null;
   provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
-  temperature?:
-    | Prisma.NullableDecimalFieldUpdateOperationsInput
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null;
   isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
@@ -2181,13 +2026,7 @@ export type ChatMessageUncheckedUpdateWithoutDialogInput = {
     | null;
   provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
-  temperature?:
-    | Prisma.NullableDecimalFieldUpdateOperationsInput
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null;
   isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
@@ -2231,13 +2070,7 @@ export type ChatMessageUncheckedUpdateManyWithoutDialogInput = {
     | null;
   provider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
-  temperature?:
-    | Prisma.NullableDecimalFieldUpdateOperationsInput
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null;
   isGoodResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   isBadResponse?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   trace?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
@@ -2522,7 +2355,7 @@ export type $ChatMessagePayload<
       transformedEmbeddingQuery: string | null;
       provider: string | null;
       model: string | null;
-      temperature: runtime.Decimal | null;
+      temperature: number | null;
       isGoodResponse: boolean;
       isBadResponse: boolean;
       trace: runtime.JsonValue | null;
@@ -3193,7 +3026,7 @@ export interface ChatMessageFieldRefs {
   readonly transformedEmbeddingQuery: Prisma.FieldRef<"ChatMessage", "String">;
   readonly provider: Prisma.FieldRef<"ChatMessage", "String">;
   readonly model: Prisma.FieldRef<"ChatMessage", "String">;
-  readonly temperature: Prisma.FieldRef<"ChatMessage", "Decimal">;
+  readonly temperature: Prisma.FieldRef<"ChatMessage", "Float">;
   readonly isGoodResponse: Prisma.FieldRef<"ChatMessage", "Boolean">;
   readonly isBadResponse: Prisma.FieldRef<"ChatMessage", "Boolean">;
   readonly trace: Prisma.FieldRef<"ChatMessage", "Json">;

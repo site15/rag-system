@@ -30,14 +30,14 @@ export type ChatLlmRequestAvgAggregateOutputType = {
   requestLength: number | null;
   responseLength: number | null;
   executionTimeMs: number | null;
-  temperature: runtime.Decimal | null;
+  temperature: number | null;
 };
 
 export type ChatLlmRequestSumAggregateOutputType = {
   requestLength: number | null;
   responseLength: number | null;
   executionTimeMs: number | null;
-  temperature: runtime.Decimal | null;
+  temperature: number | null;
 };
 
 export type ChatLlmRequestMinAggregateOutputType = {
@@ -49,7 +49,7 @@ export type ChatLlmRequestMinAggregateOutputType = {
   executionTimeMs: number | null;
   provider: string | null;
   model: string | null;
-  temperature: runtime.Decimal | null;
+  temperature: number | null;
   isSuccess: boolean | null;
   errorMessage: string | null;
   dialogId: string | null;
@@ -67,7 +67,7 @@ export type ChatLlmRequestMaxAggregateOutputType = {
   executionTimeMs: number | null;
   provider: string | null;
   model: string | null;
-  temperature: runtime.Decimal | null;
+  temperature: number | null;
   isSuccess: boolean | null;
   errorMessage: string | null;
   dialogId: string | null;
@@ -270,7 +270,7 @@ export type ChatLlmRequestGroupByOutputType = {
   executionTimeMs: number;
   provider: string;
   model: string;
-  temperature: runtime.Decimal | null;
+  temperature: number | null;
   isSuccess: boolean;
   errorMessage: string | null;
   dialogId: string | null;
@@ -310,13 +310,7 @@ export type ChatLlmRequestWhereInput = {
   executionTimeMs?: Prisma.IntFilter<"ChatLlmRequest"> | number;
   provider?: Prisma.StringFilter<"ChatLlmRequest"> | string;
   model?: Prisma.StringFilter<"ChatLlmRequest"> | string;
-  temperature?:
-    | Prisma.DecimalNullableFilter<"ChatLlmRequest">
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: Prisma.FloatNullableFilter<"ChatLlmRequest"> | number | null;
   isSuccess?: Prisma.BoolFilter<"ChatLlmRequest"> | boolean;
   errorMessage?: Prisma.StringNullableFilter<"ChatLlmRequest"> | string | null;
   dialogId?: Prisma.UuidNullableFilter<"ChatLlmRequest"> | string | null;
@@ -366,13 +360,7 @@ export type ChatLlmRequestWhereUniqueInput = Prisma.AtLeast<
     executionTimeMs?: Prisma.IntFilter<"ChatLlmRequest"> | number;
     provider?: Prisma.StringFilter<"ChatLlmRequest"> | string;
     model?: Prisma.StringFilter<"ChatLlmRequest"> | string;
-    temperature?:
-      | Prisma.DecimalNullableFilter<"ChatLlmRequest">
-      | runtime.Decimal
-      | runtime.DecimalJsLike
-      | number
-      | string
-      | null;
+    temperature?: Prisma.FloatNullableFilter<"ChatLlmRequest"> | number | null;
     isSuccess?: Prisma.BoolFilter<"ChatLlmRequest"> | boolean;
     errorMessage?:
       | Prisma.StringNullableFilter<"ChatLlmRequest">
@@ -434,11 +422,8 @@ export type ChatLlmRequestScalarWhereWithAggregatesInput = {
   provider?: Prisma.StringWithAggregatesFilter<"ChatLlmRequest"> | string;
   model?: Prisma.StringWithAggregatesFilter<"ChatLlmRequest"> | string;
   temperature?:
-    | Prisma.DecimalNullableWithAggregatesFilter<"ChatLlmRequest">
-    | runtime.Decimal
-    | runtime.DecimalJsLike
+    | Prisma.FloatNullableWithAggregatesFilter<"ChatLlmRequest">
     | number
-    | string
     | null;
   isSuccess?: Prisma.BoolWithAggregatesFilter<"ChatLlmRequest"> | boolean;
   errorMessage?:
@@ -472,12 +457,7 @@ export type ChatLlmRequestCreateInput = {
   executionTimeMs: number;
   provider: string;
   model: string;
-  temperature?:
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: number | null;
   isSuccess?: boolean;
   errorMessage?: string | null;
   createdAt?: Date | string;
@@ -495,12 +475,7 @@ export type ChatLlmRequestUncheckedCreateInput = {
   executionTimeMs: number;
   provider: string;
   model: string;
-  temperature?:
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: number | null;
   isSuccess?: boolean;
   errorMessage?: string | null;
   dialogId?: string | null;
@@ -518,13 +493,7 @@ export type ChatLlmRequestUpdateInput = {
   executionTimeMs?: Prisma.IntFieldUpdateOperationsInput | number;
   provider?: Prisma.StringFieldUpdateOperationsInput | string;
   model?: Prisma.StringFieldUpdateOperationsInput | string;
-  temperature?:
-    | Prisma.NullableDecimalFieldUpdateOperationsInput
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null;
   isSuccess?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   errorMessage?:
     | Prisma.NullableStringFieldUpdateOperationsInput
@@ -545,13 +514,7 @@ export type ChatLlmRequestUncheckedUpdateInput = {
   executionTimeMs?: Prisma.IntFieldUpdateOperationsInput | number;
   provider?: Prisma.StringFieldUpdateOperationsInput | string;
   model?: Prisma.StringFieldUpdateOperationsInput | string;
-  temperature?:
-    | Prisma.NullableDecimalFieldUpdateOperationsInput
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null;
   isSuccess?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   errorMessage?:
     | Prisma.NullableStringFieldUpdateOperationsInput
@@ -572,12 +535,7 @@ export type ChatLlmRequestCreateManyInput = {
   executionTimeMs: number;
   provider: string;
   model: string;
-  temperature?:
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: number | null;
   isSuccess?: boolean;
   errorMessage?: string | null;
   dialogId?: string | null;
@@ -595,13 +553,7 @@ export type ChatLlmRequestUpdateManyMutationInput = {
   executionTimeMs?: Prisma.IntFieldUpdateOperationsInput | number;
   provider?: Prisma.StringFieldUpdateOperationsInput | string;
   model?: Prisma.StringFieldUpdateOperationsInput | string;
-  temperature?:
-    | Prisma.NullableDecimalFieldUpdateOperationsInput
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null;
   isSuccess?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   errorMessage?:
     | Prisma.NullableStringFieldUpdateOperationsInput
@@ -620,13 +572,7 @@ export type ChatLlmRequestUncheckedUpdateManyInput = {
   executionTimeMs?: Prisma.IntFieldUpdateOperationsInput | number;
   provider?: Prisma.StringFieldUpdateOperationsInput | string;
   model?: Prisma.StringFieldUpdateOperationsInput | string;
-  temperature?:
-    | Prisma.NullableDecimalFieldUpdateOperationsInput
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null;
   isSuccess?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   errorMessage?:
     | Prisma.NullableStringFieldUpdateOperationsInput
@@ -945,12 +891,7 @@ export type ChatLlmRequestCreateWithoutDialogInput = {
   executionTimeMs: number;
   provider: string;
   model: string;
-  temperature?:
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: number | null;
   isSuccess?: boolean;
   errorMessage?: string | null;
   createdAt?: Date | string;
@@ -967,12 +908,7 @@ export type ChatLlmRequestUncheckedCreateWithoutDialogInput = {
   executionTimeMs: number;
   provider: string;
   model: string;
-  temperature?:
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: number | null;
   isSuccess?: boolean;
   errorMessage?: string | null;
   messageId?: string | null;
@@ -1039,13 +975,7 @@ export type ChatLlmRequestScalarWhereInput = {
   executionTimeMs?: Prisma.IntFilter<"ChatLlmRequest"> | number;
   provider?: Prisma.StringFilter<"ChatLlmRequest"> | string;
   model?: Prisma.StringFilter<"ChatLlmRequest"> | string;
-  temperature?:
-    | Prisma.DecimalNullableFilter<"ChatLlmRequest">
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: Prisma.FloatNullableFilter<"ChatLlmRequest"> | number | null;
   isSuccess?: Prisma.BoolFilter<"ChatLlmRequest"> | boolean;
   errorMessage?: Prisma.StringNullableFilter<"ChatLlmRequest"> | string | null;
   dialogId?: Prisma.UuidNullableFilter<"ChatLlmRequest"> | string | null;
@@ -1063,12 +993,7 @@ export type ChatLlmRequestCreateWithoutHistoryInput = {
   executionTimeMs: number;
   provider: string;
   model: string;
-  temperature?:
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: number | null;
   isSuccess?: boolean;
   errorMessage?: string | null;
   createdAt?: Date | string;
@@ -1085,12 +1010,7 @@ export type ChatLlmRequestUncheckedCreateWithoutHistoryInput = {
   executionTimeMs: number;
   provider: string;
   model: string;
-  temperature?:
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: number | null;
   isSuccess?: boolean;
   errorMessage?: string | null;
   dialogId?: string | null;
@@ -1150,12 +1070,7 @@ export type ChatLlmRequestCreateManyDialogInput = {
   executionTimeMs: number;
   provider: string;
   model: string;
-  temperature?:
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: number | null;
   isSuccess?: boolean;
   errorMessage?: string | null;
   messageId?: string | null;
@@ -1172,13 +1087,7 @@ export type ChatLlmRequestUpdateWithoutDialogInput = {
   executionTimeMs?: Prisma.IntFieldUpdateOperationsInput | number;
   provider?: Prisma.StringFieldUpdateOperationsInput | string;
   model?: Prisma.StringFieldUpdateOperationsInput | string;
-  temperature?:
-    | Prisma.NullableDecimalFieldUpdateOperationsInput
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null;
   isSuccess?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   errorMessage?:
     | Prisma.NullableStringFieldUpdateOperationsInput
@@ -1198,13 +1107,7 @@ export type ChatLlmRequestUncheckedUpdateWithoutDialogInput = {
   executionTimeMs?: Prisma.IntFieldUpdateOperationsInput | number;
   provider?: Prisma.StringFieldUpdateOperationsInput | string;
   model?: Prisma.StringFieldUpdateOperationsInput | string;
-  temperature?:
-    | Prisma.NullableDecimalFieldUpdateOperationsInput
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null;
   isSuccess?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   errorMessage?:
     | Prisma.NullableStringFieldUpdateOperationsInput
@@ -1224,13 +1127,7 @@ export type ChatLlmRequestUncheckedUpdateManyWithoutDialogInput = {
   executionTimeMs?: Prisma.IntFieldUpdateOperationsInput | number;
   provider?: Prisma.StringFieldUpdateOperationsInput | string;
   model?: Prisma.StringFieldUpdateOperationsInput | string;
-  temperature?:
-    | Prisma.NullableDecimalFieldUpdateOperationsInput
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null;
   isSuccess?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   errorMessage?:
     | Prisma.NullableStringFieldUpdateOperationsInput
@@ -1250,12 +1147,7 @@ export type ChatLlmRequestCreateManyHistoryInput = {
   executionTimeMs: number;
   provider: string;
   model: string;
-  temperature?:
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: number | null;
   isSuccess?: boolean;
   errorMessage?: string | null;
   dialogId?: string | null;
@@ -1272,13 +1164,7 @@ export type ChatLlmRequestUpdateWithoutHistoryInput = {
   executionTimeMs?: Prisma.IntFieldUpdateOperationsInput | number;
   provider?: Prisma.StringFieldUpdateOperationsInput | string;
   model?: Prisma.StringFieldUpdateOperationsInput | string;
-  temperature?:
-    | Prisma.NullableDecimalFieldUpdateOperationsInput
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null;
   isSuccess?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   errorMessage?:
     | Prisma.NullableStringFieldUpdateOperationsInput
@@ -1298,13 +1184,7 @@ export type ChatLlmRequestUncheckedUpdateWithoutHistoryInput = {
   executionTimeMs?: Prisma.IntFieldUpdateOperationsInput | number;
   provider?: Prisma.StringFieldUpdateOperationsInput | string;
   model?: Prisma.StringFieldUpdateOperationsInput | string;
-  temperature?:
-    | Prisma.NullableDecimalFieldUpdateOperationsInput
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null;
   isSuccess?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   errorMessage?:
     | Prisma.NullableStringFieldUpdateOperationsInput
@@ -1324,13 +1204,7 @@ export type ChatLlmRequestUncheckedUpdateManyWithoutHistoryInput = {
   executionTimeMs?: Prisma.IntFieldUpdateOperationsInput | number;
   provider?: Prisma.StringFieldUpdateOperationsInput | string;
   model?: Prisma.StringFieldUpdateOperationsInput | string;
-  temperature?:
-    | Prisma.NullableDecimalFieldUpdateOperationsInput
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
+  temperature?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null;
   isSuccess?: Prisma.BoolFieldUpdateOperationsInput | boolean;
   errorMessage?:
     | Prisma.NullableStringFieldUpdateOperationsInput
@@ -1499,7 +1373,7 @@ export type $ChatLlmRequestPayload<
       executionTimeMs: number;
       provider: string;
       model: string;
-      temperature: runtime.Decimal | null;
+      temperature: number | null;
       isSuccess: boolean;
       errorMessage: string | null;
       dialogId: string | null;
@@ -2144,7 +2018,7 @@ export interface ChatLlmRequestFieldRefs {
   readonly executionTimeMs: Prisma.FieldRef<"ChatLlmRequest", "Int">;
   readonly provider: Prisma.FieldRef<"ChatLlmRequest", "String">;
   readonly model: Prisma.FieldRef<"ChatLlmRequest", "String">;
-  readonly temperature: Prisma.FieldRef<"ChatLlmRequest", "Decimal">;
+  readonly temperature: Prisma.FieldRef<"ChatLlmRequest", "Float">;
   readonly isSuccess: Prisma.FieldRef<"ChatLlmRequest", "Boolean">;
   readonly errorMessage: Prisma.FieldRef<"ChatLlmRequest", "String">;
   readonly dialogId: Prisma.FieldRef<"ChatLlmRequest", "String">;

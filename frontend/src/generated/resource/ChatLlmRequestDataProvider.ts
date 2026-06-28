@@ -11,7 +11,8 @@ import {
   UpdateManyResult,
   UpdateResult,
 } from "react-admin";
-import { CreateChatLlmRequestDto } from "../client";
+import { CreateChatLlmRequestDto, UpdateChatLlmRequestDto } from "../client";
+import { pickDtoFields } from "./pick-dto-fields";
 import {
   chatLlmRequestControllerCreateOne,
   chatLlmRequestControllerDeleteOne,
@@ -19,6 +20,29 @@ import {
   chatLlmRequestControllerFindOne,
   chatLlmRequestControllerUpdateOne,
 } from "../client/sdk.gen";
+
+const chatLlmRequestCreateDtoFields = [
+  "request",
+  "response",
+  "requestLength",
+  "responseLength",
+  "executionTimeMs",
+  "provider",
+  "model",
+  "temperature",
+  "errorMessage",
+] as const;
+const chatLlmRequestUpdateDtoFields = [
+  "request",
+  "response",
+  "requestLength",
+  "responseLength",
+  "executionTimeMs",
+  "provider",
+  "model",
+  "temperature",
+  "errorMessage",
+] as const;
 
 export const ChatLlmRequestDataProvider: DataProvider<any> = {
   getList: async (_, params) => {
@@ -105,7 +129,10 @@ export const ChatLlmRequestDataProvider: DataProvider<any> = {
 
   create: async (_, params) => {
     const result = await chatLlmRequestControllerCreateOne({
-      body: params.data as CreateChatLlmRequestDto,
+      body: pickDtoFields<CreateChatLlmRequestDto>(
+        params.data,
+        chatLlmRequestCreateDtoFields,
+      ),
     });
 
     if (result?.error) {
@@ -118,7 +145,10 @@ export const ChatLlmRequestDataProvider: DataProvider<any> = {
   update: async (_, params) => {
     const result = await chatLlmRequestControllerUpdateOne({
       path: { id: params.id },
-      body: params.data,
+      body: pickDtoFields<UpdateChatLlmRequestDto>(
+        params.data,
+        chatLlmRequestUpdateDtoFields,
+      ),
     });
 
     if (result?.error) {
@@ -129,10 +159,14 @@ export const ChatLlmRequestDataProvider: DataProvider<any> = {
   },
 
   updateMany: async (_, params) => {
+    const body = pickDtoFields<UpdateChatLlmRequestDto>(
+      params.data,
+      chatLlmRequestUpdateDtoFields,
+    );
     const promises = params.ids.map((id) =>
       chatLlmRequestControllerUpdateOne({
         path: { id: String(id) },
-        body: params.data,
+        body,
       }),
     );
     const results = await Promise.all(promises);

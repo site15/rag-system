@@ -11,7 +11,8 @@ import {
   UpdateManyResult,
   UpdateResult,
 } from "react-admin";
-import { CreateAuthUserDto } from "../client";
+import { CreateAuthUserDto, UpdateAuthUserDto } from "../client";
+import { pickDtoFields } from "./pick-dto-fields";
 import {
   authUserControllerCreateOne,
   authUserControllerDeleteOne,
@@ -19,6 +20,19 @@ import {
   authUserControllerFindOne,
   authUserControllerUpdateOne,
 } from "../client/sdk.gen";
+
+const authUserCreateDtoFields = [
+  "anonymousId",
+  "supabaseUserId",
+  "supabaseUserData",
+  "isActive",
+] as const;
+const authUserUpdateDtoFields = [
+  "anonymousId",
+  "supabaseUserId",
+  "supabaseUserData",
+  "isActive",
+] as const;
 
 export const AuthUserDataProvider: DataProvider<any> = {
   getList: async (_, params) => {
@@ -105,7 +119,10 @@ export const AuthUserDataProvider: DataProvider<any> = {
 
   create: async (_, params) => {
     const result = await authUserControllerCreateOne({
-      body: params.data as CreateAuthUserDto,
+      body: pickDtoFields<CreateAuthUserDto>(
+        params.data,
+        authUserCreateDtoFields,
+      ),
     });
 
     if (result?.error) {
@@ -118,7 +135,10 @@ export const AuthUserDataProvider: DataProvider<any> = {
   update: async (_, params) => {
     const result = await authUserControllerUpdateOne({
       path: { id: params.id },
-      body: params.data,
+      body: pickDtoFields<UpdateAuthUserDto>(
+        params.data,
+        authUserUpdateDtoFields,
+      ),
     });
 
     if (result?.error) {
@@ -129,10 +149,14 @@ export const AuthUserDataProvider: DataProvider<any> = {
   },
 
   updateMany: async (_, params) => {
+    const body = pickDtoFields<UpdateAuthUserDto>(
+      params.data,
+      authUserUpdateDtoFields,
+    );
     const promises = params.ids.map((id) =>
       authUserControllerUpdateOne({
         path: { id: String(id) },
-        body: params.data,
+        body,
       }),
     );
     const results = await Promise.all(promises);

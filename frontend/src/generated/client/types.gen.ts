@@ -367,7 +367,7 @@ export type CreateChatMessageDto = {
   transformedEmbeddingQuery?: string | null;
   provider?: string | null;
   model?: string | null;
-  temperature?: string | null;
+  temperature?: number | null;
   trace?: {
     [key: string]: unknown;
   } | null;
@@ -472,7 +472,7 @@ export type CreateChatLlmRequestDto = {
   executionTimeMs: number;
   provider: string;
   model: string;
-  temperature?: string | null;
+  temperature?: number | null;
   errorMessage?: string | null;
 };
 
@@ -534,7 +534,7 @@ export type FindManyChatLlmModelResponse = {
 export type CreateChatLlmModelDto = {
   provider: string;
   model: string;
-  temperature?: string | null;
+  temperature?: number | null;
   chunkSize?: number | null;
   baseUrl?: string | null;
   startTime?: string | null;
@@ -618,6 +618,13 @@ export type UpdateChatEmbeddingModelDto = {
   dimension?: number;
 };
 
+export type DialogMessagePrompt = {
+  prompt: string;
+  result: string;
+  duration: number;
+  info: string;
+};
+
 export type DialogMessage = {
   id: string;
   question: string;
@@ -626,6 +633,8 @@ export type DialogMessage = {
   questionReceivedAt: string;
   answerSentAt: string;
   dialogId: string;
+  info: string;
+  prompts: Array<DialogMessagePrompt>;
 };
 
 export type DialogFlowResponseMeta = {
@@ -1778,6 +1787,27 @@ export type ChatEmbeddingModelControllerUpdateOneResponses = {
 export type ChatEmbeddingModelControllerUpdateOneResponse =
   ChatEmbeddingModelControllerUpdateOneResponses[keyof ChatEmbeddingModelControllerUpdateOneResponses];
 
+export type AuthControllerInfoData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/api/auth/info";
+};
+
+export type AuthControllerInfoErrors = {
+  default: AuthUser;
+};
+
+export type AuthControllerInfoError =
+  AuthControllerInfoErrors[keyof AuthControllerInfoErrors];
+
+export type AuthControllerInfoResponses = {
+  200: AuthUser;
+};
+
+export type AuthControllerInfoResponse =
+  AuthControllerInfoResponses[keyof AuthControllerInfoResponses];
+
 export type FlowControllerDialogData = {
   body?: never;
   path?: never;
@@ -1787,6 +1817,7 @@ export type FlowControllerDialogData = {
     searchText?: string;
     sort?: string;
     dialogId: string;
+    showPrompts?: boolean | null;
   };
   url: "/api/flow/dialog";
 };

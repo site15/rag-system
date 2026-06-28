@@ -22,8 +22,11 @@ STRICT RULES:
 
 Conversation history is provided ONLY to understand references (e.g., "он", "нём"), NOT to change wording or roles.
 
-{{categoryInstruction}}{{historyContext}}
+{{#historyContext}}
+{{historyContext}}{{/historyContext}}
 
+{{#question}}
 Original question: {{question}}
+{{/question}}
 
 Transformed question:

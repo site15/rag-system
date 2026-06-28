@@ -30,11 +30,14 @@
 [FOUND]
 [NOT_FOUND]
 
+{{#history}}
 История:
 \`\`\`
 {{history}}
-\`\`\` 
+\`\`\`{{/history}}
 
+{{#question}}
 {{#isFollowUp}}Original question (follow-up): {{question}}{{/isFollowUp}}{{^isFollowUp}}Original question: {{question}}{{/isFollowUp}}
+{{/question}}
 
 Ответ:

@@ -28,9 +28,13 @@
     "generate": "npm run generate --prefix backend && npm run generate --prefix frontend && npm run build --prefix frontend",
     "generate:backend": "npm run generate --prefix backend",
     "generate:frontend": "npm run generate --prefix frontend && npm run build --prefix frontend",
+    "start:dev:force": "export FORCE_CHAT_DOCUMENT_EMBEDDING_DUMP_IMPORT=1 && ./start-dev.sh",
     "start:dev": "./start-dev.sh",
     "stop:dev": "./stop-dev.sh",
+    "restart:dev": "./stop-dev.sh && ./start-dev.sh",
+    "start:prod:force": "export FORCE_CHAT_DOCUMENT_EMBEDDING_DUMP_IMPORT=1 && ./start-prod.sh",
     "start:prod": "./start-prod.sh",
-    "stop:prod": "./stop-prod.sh"
+    "stop:prod": "./stop-prod.sh",
+    "fill-graph-content": "npm run fill-graph-content --prefix backend"
   }
 }

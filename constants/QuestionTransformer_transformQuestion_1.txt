@@ -39,7 +39,8 @@ ACTION-BASED
 Контекст:
 {{history}}
 
+{{#question}}
 Вопрос:
-{{question}}
+{{question}}{{/question}}
 
 Результат:

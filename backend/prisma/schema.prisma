@@ -167,7 +167,7 @@ model ChatMessage {
   transformedEmbeddingQuery String?  @db.Text
   provider                  String?  @db.VarChar(50)
   model                     String?  @db.VarChar(100)
-  temperature               Decimal? @db.Decimal(3, 2)
+  temperature               Float?
   isGoodResponse            Boolean  @default(false)
   isBadResponse             Boolean  @default(false)
   trace                     Json?
@@ -224,7 +224,7 @@ model ChatLlmRequest {
   executionTimeMs Int
   provider        String   @db.VarChar(50)
   model           String   @db.VarChar(100)
-  temperature     Decimal? @db.Decimal(3, 2)
+  temperature     Float?
   isSuccess       Boolean  @default(true) @map("success")
   errorMessage    String?  @db.Text
   dialogId        String?  @db.Uuid
@@ -250,7 +250,7 @@ model ChatLlmModel {
   id            String    @id(map: "PK_CHAT_LLM_MODELS") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   provider      String    @db.VarChar(50)
   model         String    @db.VarChar(100)
-  temperature   Decimal?  @db.Decimal(3, 2)
+  temperature   Float?
   chunkSize     Int?
   baseUrl       String?   @db.VarChar(255)
   startTime     DateTime? @default(now()) @db.Timestamptz(6)

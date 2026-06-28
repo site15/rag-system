@@ -6,6 +6,44 @@ import { PROVIDER_NAMES } from './constants';
  * Configuration manager for provider-specific environment variables
  */
 export class ConfigManager {
+  private static parseEnvInt(name: string, defaultValue: number): number {
+    const raw = process.env[name];
+    if (raw === undefined || raw.trim() === '') {
+      return defaultValue;
+    }
+    const parsed = parseInt(raw, 10);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : defaultValue;
+  }
+
+  /**
+   * LLM context window limits (characters, not tokens).
+   * Used when packing retrieved chunks into a single prompt.
+   */
+  public static getLlmContextConfig() {
+    return {
+      /** Max total chars for combined chunk context in one LLM call */
+      maxContextChars: this.parseEnvInt('LLM_MAX_CONTEXT_CHARS', 100_000),
+      /** Reserved chars for prompt template (history, question, instructions) */
+      promptReserveChars: this.parseEnvInt('LLM_CONTEXT_PROMPT_RESERVE', 2_000),
+      /** Minimum context length even when prompt is very large */
+      minContextChars: this.parseEnvInt('LLM_MIN_CONTEXT_CHARS', 1_000),
+    };
+  }
+
+  /**
+   * Console logging for LLM requests.
+   * Set LLM_LOG_FULL_PROMPT=false in production to hide prompt/response bodies.
+   */
+  public static getLlmLoggingConfig() {
+    const raw = process.env.LLM_LOG_FULL_PROMPT;
+    return {
+      logFullPromptInConsole:
+        raw === undefined || raw.trim() === ''
+          ? true
+          : raw.toLowerCase() === 'true',
+    };
+  }
+
   /**
    * Get proxy configuration
    */
@@ -29,7 +67,7 @@ export class ConfigManager {
         process.env[`${providerUpper}_CHAT_BASE_URL`] ||
         this.getDefaultBaseUrl(provider),
       apiKey: process.env[`${providerUpper}_CHAT_API_KEY`],
-      chunkSize: 8000,
+      chunkSize: this.getLlmContextConfig().maxContextChars,
     };
   }
 
@@ -66,6 +104,8 @@ export class ConfigManager {
         return 'mistralai/Mistral-7B-Instruct-v0.1';
       case PROVIDER_NAMES.DEEPSEEK:
         return 'deepseek-chat';
+      case PROVIDER_NAMES.OPENROUTER:
+        return 'openrouter/free';
       case PROVIDER_NAMES.A4F:
         return 'provider-2/mistral-small-3.1-24b-instruct';
       case PROVIDER_NAMES.Z_AI:
@@ -112,6 +152,8 @@ export class ConfigManager {
         return 'https://router.huggingface.co/models/';
       case PROVIDER_NAMES.DEEPSEEK:
         return 'https://api.deepseek.com';
+      case PROVIDER_NAMES.OPENROUTER:
+        return 'https://openrouter.ai/api/v1';
       case PROVIDER_NAMES.A4F:
         return 'https://api.a4f.co/v1';
       case PROVIDER_NAMES.Z_AI:
@@ -134,6 +176,8 @@ export class ConfigManager {
       case PROVIDER_NAMES.Z_AI:
       case PROVIDER_NAMES.DEEPSEEK:
         return 'text-embedding-3-small';
+      case PROVIDER_NAMES.OPENROUTER:
+        return 'openai/text-embedding-3-small';
       case PROVIDER_NAMES.OLLAMA:
       default:
         return 'nomic-embed-text';

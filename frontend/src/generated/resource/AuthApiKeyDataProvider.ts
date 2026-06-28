@@ -11,7 +11,8 @@ import {
   UpdateManyResult,
   UpdateResult,
 } from "react-admin";
-import { CreateAuthApiKeyDto } from "../client";
+import { CreateAuthApiKeyDto, UpdateAuthApiKeyDto } from "../client";
+import { pickDtoFields } from "./pick-dto-fields";
 import {
   authApiKeyControllerCreateOne,
   authApiKeyControllerDeleteOne,
@@ -19,6 +20,9 @@ import {
   authApiKeyControllerFindOne,
   authApiKeyControllerUpdateOne,
 } from "../client/sdk.gen";
+
+const authApiKeyCreateDtoFields = ["apiKey", "isActive"] as const;
+const authApiKeyUpdateDtoFields = ["apiKey", "isActive"] as const;
 
 export const AuthApiKeyDataProvider: DataProvider<any> = {
   getList: async (_, params) => {
@@ -105,7 +109,10 @@ export const AuthApiKeyDataProvider: DataProvider<any> = {
 
   create: async (_, params) => {
     const result = await authApiKeyControllerCreateOne({
-      body: params.data as CreateAuthApiKeyDto,
+      body: pickDtoFields<CreateAuthApiKeyDto>(
+        params.data,
+        authApiKeyCreateDtoFields,
+      ),
     });
 
     if (result?.error) {
@@ -118,7 +125,10 @@ export const AuthApiKeyDataProvider: DataProvider<any> = {
   update: async (_, params) => {
     const result = await authApiKeyControllerUpdateOne({
       path: { id: params.id },
-      body: params.data,
+      body: pickDtoFields<UpdateAuthApiKeyDto>(
+        params.data,
+        authApiKeyUpdateDtoFields,
+      ),
     });
 
     if (result?.error) {
@@ -129,10 +139,14 @@ export const AuthApiKeyDataProvider: DataProvider<any> = {
   },
 
   updateMany: async (_, params) => {
+    const body = pickDtoFields<UpdateAuthApiKeyDto>(
+      params.data,
+      authApiKeyUpdateDtoFields,
+    );
     const promises = params.ids.map((id) =>
       authApiKeyControllerUpdateOne({
         path: { id: String(id) },
-        body: params.data,
+        body,
       }),
     );
     const results = await Promise.all(promises);

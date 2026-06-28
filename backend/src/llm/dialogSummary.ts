@@ -2,7 +2,6 @@
 import { PrismaService } from '../services/prisma.service';
 import { Trace } from '../trace/trace.module';
 import { DialogManager } from './dialogManager';
-import { LLMFactory } from './llmFactory';
 import { LLMLogger } from './llmLogger';
 import { Logger } from './logger';
 import { createDialogSummaryPrompt } from './prompt';
@@ -45,7 +44,6 @@ export class DialogSummary {
       metadata: { dialogId, operation: 'summarization' },
       dialogId,
       messageId,
-      callback: (prompt) => LLMFactory.invoke(prompt),
     });
 
     Logger.logInfo('Получен ответ от LLM для суммаризации', {

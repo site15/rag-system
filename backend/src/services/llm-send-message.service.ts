@@ -23,13 +23,19 @@ import { FailureTracker } from '../llm/services/failureTracker';
 import { LLMQueryLogger } from '../llm/services/llmQueryLogger';
 import {
   CategorizedQuestion,
-  Category,
   QuestionTransformer,
 } from '../llm/services/questionTransformer';
 import { SummarizationService } from '../llm/services/summarizationService';
 import { TextHelpers } from '../llm/textHelpers';
 import { DocWithMetadataAndId } from '../llm/types';
+import {
+  getProhibitedContentMessage,
+  isLlmUnsafeContentResponse,
+  isProhibitedContentError,
+  sanitizeLlmUserResponse,
+} from '../llm/llmResponseSanitizer';
 import { addPayloadToTrace, Trace } from '../trace/trace.module';
+import { Category } from '../llm/getCategoryByDetectedCategory';
 
 type ProcessMessageResponse = {
   dialogId: string;
@@ -167,34 +173,12 @@ export class LlmSendMessageService {
         history,
       });
 
-      if (!categorizedQuestion) {
-        const answer = this.getRandomFallbackMessage();
-
-        await DialogManager.updateMessage({
-          messageId,
-          answer,
-          selectedDocumentIds: [],
-          isSuccess: undefined,
-          isProcessing: undefined,
-          llmModel: undefined,
-          llmProvider: undefined,
-          llmTemperature: undefined,
-        });
-
-        return {
-          //  success: true,
-          dialogId,
-          response: answer || 'No response generated',
-          sources: [],
-          messageId,
-        };
-      }
-
       const processedQuestion = categorizedQuestion.transformedQuestion;
 
       addPayloadToTrace({
         userMessage: message,
         transformedUserMessage: processedQuestion,
+        searchQuery: categorizedQuestion.searchQuery,
         detectedUserMessageCategory: categorizedQuestion.detectedCategory,
         commonUserMessageCategory: categorizedQuestion.category,
       });
@@ -202,22 +186,15 @@ export class LlmSendMessageService {
       Logger.logInfo('Question transformation completed', {
         original: message,
         transformed: processedQuestion,
+        searchQuery: categorizedQuestion.searchQuery,
         category: categorizedQuestion.category,
         sourceFilter: categorizedQuestion.sourceFilter,
-      });
-
-      const normalizedQuestionArray = TextHelpers.normalizeTextMy(
-        categorizedQuestion.transformedEmbedded,
-      ).split(', ');
-
-      addPayloadToTrace({
-        normalizedUserMessageArray: normalizedQuestionArray,
       });
 
       const getDialogFoundDocuments =
         await DialogManager.getDialogFoundDocuments(dialogId);
 
-      contextDocs =
+      const previousDocs =
         (await RAGSearcher.getDocsByIds({
           ids:
             getDialogFoundDocuments
@@ -225,15 +202,29 @@ export class LlmSendMessageService {
               .filter((id) => id !== null && id !== undefined) || [],
         })) || [];
 
-      for (let index = 0; index < normalizedQuestionArray.length; index++) {
-        let docsWithMeta = await this.searchContextDocs({
-          normalizedQuestion: normalizedQuestionArray[index],
-          categorizedQuestion,
-        });
+      let retrievedDocs = await this.searchContextDocs({
+        searchQuery: categorizedQuestion.searchQuery,
+        categorizedQuestion,
+      });
 
-        // Update prompt log data with context documents
-        contextDocs = contextDocs.concat(docsWithMeta);
+      if (
+        !retrievedDocs.length &&
+        categorizedQuestion.searchQuery !== message.trim()
+      ) {
+        Logger.logInfo('Повторный поиск по оригинальному вопросу');
+        retrievedDocs = await this.searchContextDocs({
+          searchQuery: TextHelpers.normalizeTextMy(message),
+          categorizedQuestion: {
+            ...categorizedQuestion,
+            sourceFilter: null,
+          },
+        });
       }
+
+      contextDocs = RAGSearcher.dedupeAndRankDocs(
+        [...previousDocs, ...retrievedDocs],
+        categorizedQuestion.searchLimit,
+      );
 
       Logger.logInfo('[GLOBAL] Отправка запроса к LLM', {
         contextDocsCount: contextDocs.length,
@@ -257,9 +248,15 @@ export class LlmSendMessageService {
         attemptsCallbacks,
       });
 
-      let answer = llmResult.response;
-      let isSuccess =
-        answer !== null && answer !== undefined && answer?.trim() !== '';
+      let answer = sanitizeLlmUserResponse(llmResult.response);
+      let isSuccess = answer !== null && answer.trim() !== '';
+      const isProhibitedContent =
+        answer === getProhibitedContentMessage() ||
+        isLlmUnsafeContentResponse(llmResult.response);
+
+      if (isProhibitedContent) {
+        isSuccess = false;
+      }
 
       addPayloadToTrace({
         isSuccess,
@@ -284,11 +281,7 @@ export class LlmSendMessageService {
       /**
        * NOT FOUND
        */
-      if (
-        !answer ||
-        answer.trim() === 'undefined' ||
-        answer.trim() === 'null'
-      ) {
+      if (!answer && !isProhibitedContent) {
         // No answer found in both global and telegram modes
 
         const noAnswerResponse = await LLMChunkProcessor.frendlyNotFound({
@@ -297,9 +290,14 @@ export class LlmSendMessageService {
           question: message,
         });
 
-        answer = noAnswerResponse.foundText;
+        answer = sanitizeLlmUserResponse(noAnswerResponse.foundText);
+        if (!answer) {
+          answer = this.getRandomFallbackMessage();
+        }
         foundLogIds.push(noAnswerResponse.logId);
       }
+
+      answer = answer ?? this.getRandomFallbackMessage();
 
       ///
       // Extract document IDs from the contextDocs array
@@ -315,7 +313,7 @@ export class LlmSendMessageService {
         isSuccess,
         detectedCategory: categorizedQuestion.detectedCategory,
         transformedQuestion: categorizedQuestion.transformedQuestion,
-        transformedEmbeddingQuery: categorizedQuestion.transformedEmbedded,
+        transformedEmbeddingQuery: categorizedQuestion.searchQuery,
         isProcessing: false,
         llmModel: undefined,
         llmProvider: undefined,
@@ -358,6 +356,27 @@ export class LlmSendMessageService {
         messageId,
       };
     } catch (error: any) {
+      if (isProhibitedContentError(error)) {
+        const prohibitedMessage = getProhibitedContentMessage();
+
+        await DialogManager.updateMessage({
+          messageId,
+          answer: prohibitedMessage,
+          isSuccess: false,
+          isProcessing: false,
+          llmModel: undefined,
+          llmProvider: undefined,
+          llmTemperature: undefined,
+        });
+
+        return {
+          dialogId,
+          response: prohibitedMessage,
+          sources: [],
+          messageId,
+        };
+      }
+
       // Check if it's a rate limit error
       this.handleAfterProcessMessageError(error, contextDocs);
       throw error;
@@ -423,42 +442,48 @@ export class LlmSendMessageService {
 
   @Trace()
   private async searchContextDocs({
-    normalizedQuestion,
+    searchQuery,
     categorizedQuestion,
   }: {
-    normalizedQuestion: string;
+    searchQuery: string;
     categorizedQuestion: CategorizedQuestion;
-  }) {
-    let contextDocs: DocWithMetadataAndId[] = [];
-    addPayloadToTrace({ normalizedQuestion });
-    const qEmbedding = await EmbeddingsFactory.embedQuery(normalizedQuestion);
+  }): Promise<DocWithMetadataAndId[]> {
+    addPayloadToTrace({ searchQuery });
+
+    const qEmbedding = await EmbeddingsFactory.embedQuery(searchQuery);
 
     Logger.logInfo('Поиск похожих документов', {
       embeddingLength: qEmbedding.length,
-      normalizedQuestion,
+      searchQuery,
+      category: categorizedQuestion.category,
+      sourceFilter: categorizedQuestion.sourceFilter,
     });
-    /**
-     * GLOBAL MODE
-     */
-    // Use the transformed question and apply category-based filtering if available
+
     if (categorizedQuestion.sourceFilter) {
-      contextDocs = await RAGSearcher.similaritySearch({
+      return RAGSearcher.hybridSearch({
         queryEmbedding: qEmbedding,
+        queryText: searchQuery,
         limit: categorizedQuestion.searchLimit,
         filterBySource: categorizedQuestion.sourceFilter.pattern,
         filterBySourceRule: categorizedQuestion.sourceFilter.rule,
-        queryEmbeddingText: normalizedQuestion,
-      });
-    } else {
-      contextDocs = await RAGSearcher.similaritySearch({
-        queryEmbedding: qEmbedding,
-        limit: RAG_SEARCH_CONFIG.TELEGRAM_SEARCH_LIMIT,
-        filterBySource: RAG_SEARCH_CONFIG.GLOBAL_TELEGRAM_EXCLUDE_PATTERN,
-        filterBySourceRule: RAG_SEARCH_CONFIG.GLOBAL_TELEGRAM_EXCLUDE_RULE,
-        queryEmbeddingText: normalizedQuestion,
       });
     }
-    return contextDocs;
+
+    if (categorizedQuestion.category === Category.telegram) {
+      return RAGSearcher.hybridSearch({
+        queryEmbedding: qEmbedding,
+        queryText: searchQuery,
+        limit: categorizedQuestion.searchLimit,
+        filterBySource: RAG_SEARCH_CONFIG.TELEGRAM_INCLUDE_PATTERN,
+        filterBySourceRule: RAG_SEARCH_CONFIG.TELEGRAM_INCLUDE_RULE,
+      });
+    }
+
+    return RAGSearcher.hybridSearch({
+      queryEmbedding: qEmbedding,
+      queryText: searchQuery,
+      limit: categorizedQuestion.searchLimit,
+    });
   }
 
   private async prepareDialog({

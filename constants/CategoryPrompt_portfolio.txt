@@ -49,16 +49,20 @@ Q: "USES(OBJ_A, TECH_X)?"
 TEXT: "Project Z was implemented using TECH_X in production."
 → [FOUND] Project Z uses TECH_X in production
 
-Conversation history (use strictly for personal experience context): 
+{{#history}}
+Conversation history (use strictly for personal experience context):
 \`\`\`
 {{history}}
-\`\`\` 
+\`\`\`{{/history}}
 
+{{#context}}
 Контекст:
 \`\`\`
 {{context}}
-\`\`\`
+\`\`\`{{/context}}
 
+{{#question}}
 {{#isFollowUp}}Original question (follow-up): {{question}}{{/isFollowUp}}{{^isFollowUp}}Original question: {{question}}{{/isFollowUp}}
+{{/question}}
 
 Ответ:

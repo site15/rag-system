@@ -11,7 +11,8 @@ import {
   UpdateManyResult,
   UpdateResult,
 } from "react-admin";
-import { CreateChatPromptDto } from "../client";
+import { CreateChatPromptDto, UpdateChatPromptDto } from "../client";
+import { pickDtoFields } from "./pick-dto-fields";
 import {
   chatPromptControllerCreateOne,
   chatPromptControllerDeleteOne,
@@ -19,6 +20,9 @@ import {
   chatPromptControllerFindOne,
   chatPromptControllerUpdateOne,
 } from "../client/sdk.gen";
+
+const chatPromptCreateDtoFields = ["key", "prompt"] as const;
+const chatPromptUpdateDtoFields = ["key", "prompt"] as const;
 
 export const ChatPromptDataProvider: DataProvider<any> = {
   getList: async (_, params) => {
@@ -105,7 +109,10 @@ export const ChatPromptDataProvider: DataProvider<any> = {
 
   create: async (_, params) => {
     const result = await chatPromptControllerCreateOne({
-      body: params.data as CreateChatPromptDto,
+      body: pickDtoFields<CreateChatPromptDto>(
+        params.data,
+        chatPromptCreateDtoFields,
+      ),
     });
 
     if (result?.error) {
@@ -118,7 +125,10 @@ export const ChatPromptDataProvider: DataProvider<any> = {
   update: async (_, params) => {
     const result = await chatPromptControllerUpdateOne({
       path: { id: params.id },
-      body: params.data,
+      body: pickDtoFields<UpdateChatPromptDto>(
+        params.data,
+        chatPromptUpdateDtoFields,
+      ),
     });
 
     if (result?.error) {
@@ -129,10 +139,14 @@ export const ChatPromptDataProvider: DataProvider<any> = {
   },
 
   updateMany: async (_, params) => {
+    const body = pickDtoFields<UpdateChatPromptDto>(
+      params.data,
+      chatPromptUpdateDtoFields,
+    );
     const promises = params.ids.map((id) =>
       chatPromptControllerUpdateOne({
         path: { id: String(id) },
-        body: params.data,
+        body,
       }),
     );
     const results = await Promise.all(promises);

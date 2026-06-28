@@ -1620,22 +1620,6 @@ export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<
 >;
 
 /**
- * Reference to a field of type 'Decimal'
- */
-export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<
-  $PrismaModel,
-  'Decimal'
->;
-
-/**
- * Reference to a field of type 'Decimal[]'
- */
-export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<
-  $PrismaModel,
-  'Decimal[]'
->;
-
-/**
  * Reference to a field of type 'Float'
  */
 export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<
@@ -1649,6 +1633,22 @@ export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<
 export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<
   $PrismaModel,
   'Float[]'
+>;
+
+/**
+ * Reference to a field of type 'Decimal'
+ */
+export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<
+  $PrismaModel,
+  'Decimal'
+>;
+
+/**
+ * Reference to a field of type 'Decimal[]'
+ */
+export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<
+  $PrismaModel,
+  'Decimal[]'
 >;
 
 /**

@@ -1,2 +1,4 @@
+{{#question}}
 Пользователь: {{question}}
+{{/question}}
 Ассистент: {{answer}}

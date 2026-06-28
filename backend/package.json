@@ -24,11 +24,12 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "test:e2e": "jest --config ./test/jest-e2e.json --setupFiles dotenv/config",
     "prisma:migrate": "./node_modules/.bin/prisma migrate deploy",
-    "generate": "./node_modules/.bin/prisma generate",
+    "generate": "openapi-ts && sed -i '/@ts-expect-error/d' test/generated/client/client/client.gen.ts && ./node_modules/.bin/prisma generate",
     "prisma:create": "./node_modules/.bin/prisma migrate dev --name ",
-    "prisma:reset": "./node_modules/.bin/prisma migrate reset"
+    "prisma:reset": "./node_modules/.bin/prisma migrate reset",
+    "fill-graph-content": "dotenv -e .env -- ts-node scripts/fill-graph-content.ts"
   },
   "dependencies": {
     "@fastify/static": "^9.0.0",
@@ -71,7 +72,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
-    "@hey-api/openapi-ts": "0.90.3",
+    "@hey-api/openapi-ts": "0.96.1",
     "@nestjs/cli": "^11.0.0",
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.0.1",

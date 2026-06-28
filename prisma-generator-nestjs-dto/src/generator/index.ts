@@ -14,6 +14,7 @@ import { generatePlainDto } from './generate-plain-dto';
 import { generateEnums } from './generate-enums';
 import { generateController } from './generate-controller';
 import { generateDataProvider } from './generate-data-provider';
+import { generatePickDtoFields } from './generate-pick-dto-fields';
 import { generateList } from './generate-list';
 import { generateForm } from './generate-form';
 import { generateResourcesIndex } from './generate-resources';
@@ -70,6 +71,7 @@ export const run = ({
     outputApiPropertyType,
     generateFileTypes,
     generateControllers = false,
+    generateDataProviders = false,
     generateForms = false,
     generateLists = false,
     frontendOutput,
@@ -406,6 +408,13 @@ export const run = ({
 
   // Generate additional files
   const additionalFiles = [];
+
+  if (generateDataProviders && frontendOutput) {
+    additionalFiles.push({
+      fileName: path.join(frontendOutput, 'resource', 'pick-dto-fields.ts'),
+      content: generatePickDtoFields(),
+    });
+  }
 
   // Generate resources.ts file if Forms and Lists were generated
   if (generateForms && generateLists && frontendOutput) {

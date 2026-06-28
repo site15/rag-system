@@ -1,4 +1,5 @@
+{{#history}}
 Conversation history (use only for context of prior assistant experience):
 ```
 {{history}}
-```
+```{{/history}}

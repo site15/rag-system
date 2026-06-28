@@ -91,10 +91,12 @@
 Без комментариев.
 Без дополнительного текста.
 
+{{#historyContext}}
 История:
-{{historyContext}}
+{{historyContext}}{{/historyContext}}
 
+{{#question}}
 Входной текст:
-{{question}}
+{{question}}{{/question}}
 
 Ответ:

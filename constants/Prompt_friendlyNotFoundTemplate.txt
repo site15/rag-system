@@ -51,13 +51,14 @@
 
 {{#isTelegram}}Используй только Author Message для ответа.{{/isTelegram}}
 
-{{#hasContext}}
+{{#context}}
 Контекст:
 ```
 {{context}}
-```{{/hasContext}}
+```{{/context}}
 
+{{#question}}
 Вопрос:
-{{question}}
+{{question}}{{/question}}
 
 Ответ:

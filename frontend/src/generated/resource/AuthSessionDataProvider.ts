@@ -11,7 +11,8 @@ import {
   UpdateManyResult,
   UpdateResult,
 } from "react-admin";
-import { CreateAuthSessionDto } from "../client";
+import { CreateAuthSessionDto, UpdateAuthSessionDto } from "../client";
+import { pickDtoFields } from "./pick-dto-fields";
 import {
   authSessionControllerCreateOne,
   authSessionControllerDeleteOne,
@@ -19,6 +20,9 @@ import {
   authSessionControllerFindOne,
   authSessionControllerUpdateOne,
 } from "../client/sdk.gen";
+
+const authSessionCreateDtoFields = ["isActive"] as const;
+const authSessionUpdateDtoFields = ["isActive"] as const;
 
 export const AuthSessionDataProvider: DataProvider<any> = {
   getList: async (_, params) => {
@@ -105,7 +109,10 @@ export const AuthSessionDataProvider: DataProvider<any> = {
 
   create: async (_, params) => {
     const result = await authSessionControllerCreateOne({
-      body: params.data as CreateAuthSessionDto,
+      body: pickDtoFields<CreateAuthSessionDto>(
+        params.data,
+        authSessionCreateDtoFields,
+      ),
     });
 
     if (result?.error) {
@@ -118,7 +125,10 @@ export const AuthSessionDataProvider: DataProvider<any> = {
   update: async (_, params) => {
     const result = await authSessionControllerUpdateOne({
       path: { id: params.id },
-      body: params.data,
+      body: pickDtoFields<UpdateAuthSessionDto>(
+        params.data,
+        authSessionUpdateDtoFields,
+      ),
     });
 
     if (result?.error) {
@@ -129,10 +139,14 @@ export const AuthSessionDataProvider: DataProvider<any> = {
   },
 
   updateMany: async (_, params) => {
+    const body = pickDtoFields<UpdateAuthSessionDto>(
+      params.data,
+      authSessionUpdateDtoFields,
+    );
     const promises = params.ids.map((id) =>
       authSessionControllerUpdateOne({
         path: { id: String(id) },
-        body: params.data,
+        body,
       }),
     );
     const results = await Promise.all(promises);

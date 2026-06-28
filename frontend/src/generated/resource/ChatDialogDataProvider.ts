@@ -11,7 +11,8 @@ import {
   UpdateManyResult,
   UpdateResult,
 } from "react-admin";
-import { CreateChatDialogDto } from "../client";
+import { CreateChatDialogDto, UpdateChatDialogDto } from "../client";
+import { pickDtoFields } from "./pick-dto-fields";
 import {
   chatDialogControllerCreateOne,
   chatDialogControllerDeleteOne,
@@ -19,6 +20,9 @@ import {
   chatDialogControllerFindOne,
   chatDialogControllerUpdateOne,
 } from "../client/sdk.gen";
+
+const chatDialogCreateDtoFields = ["title", "summary"] as const;
+const chatDialogUpdateDtoFields = ["title", "summary"] as const;
 
 export const ChatDialogDataProvider: DataProvider<any> = {
   getList: async (_, params) => {
@@ -105,7 +109,10 @@ export const ChatDialogDataProvider: DataProvider<any> = {
 
   create: async (_, params) => {
     const result = await chatDialogControllerCreateOne({
-      body: params.data as CreateChatDialogDto,
+      body: pickDtoFields<CreateChatDialogDto>(
+        params.data,
+        chatDialogCreateDtoFields,
+      ),
     });
 
     if (result?.error) {
@@ -118,7 +125,10 @@ export const ChatDialogDataProvider: DataProvider<any> = {
   update: async (_, params) => {
     const result = await chatDialogControllerUpdateOne({
       path: { id: params.id },
-      body: params.data,
+      body: pickDtoFields<UpdateChatDialogDto>(
+        params.data,
+        chatDialogUpdateDtoFields,
+      ),
     });
 
     if (result?.error) {
@@ -129,10 +139,14 @@ export const ChatDialogDataProvider: DataProvider<any> = {
   },
 
   updateMany: async (_, params) => {
+    const body = pickDtoFields<UpdateChatDialogDto>(
+      params.data,
+      chatDialogUpdateDtoFields,
+    );
     const promises = params.ids.map((id) =>
       chatDialogControllerUpdateOne({
         path: { id: String(id) },
-        body: params.data,
+        body,
       }),
     );
     const results = await Promise.all(promises);

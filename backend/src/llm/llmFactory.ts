@@ -6,6 +6,7 @@ import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { ChatGroq } from '@langchain/groq';
 import { ChatOpenAI } from '@langchain/openai';
 import { HttpsProxyAgent } from 'https-proxy-agent';
+import Mustache from 'mustache';
 import { addPayloadToTrace, Trace } from '../trace/trace.module';
 import { ConfigManager } from './config';
 import {
@@ -14,10 +15,15 @@ import {
   RATE_LIMIT_CONSTANTS,
 } from './constants';
 import { Logger } from './logger';
+import {
+  isLlmSafeMisfireResponse,
+  isLlmUnsafeContentResponse,
+  ProhibitedContentError,
+} from './llmResponseSanitizer';
 import { DefaultProvidersInitializer } from './services/defaultProvidersInitializer';
+import { LLMQueryLogger } from './services/llmQueryLogger';
 import { ModelExecutionTracker } from './services/modelExecutionTracker';
 import { ChatConfig } from './types';
-import { basePath } from 'eslint-plugin-prettier/recommended';
 
 export type AttemptsCallbacksOptions = {
   message?: string;
@@ -28,6 +34,23 @@ export type AttemptsCallbacksOptions = {
   baseUrl?: string;
   currentAttempt?: number;
   maxRetries?: number;
+};
+
+export type InvokeOptions = {
+  dialogId?: string;
+  messageId?: string;
+  metadata?: Record<string, unknown>;
+  persistToDb?: boolean;
+  logId?: { value?: string };
+};
+
+type LlmConfigSlice = {
+  id?: string;
+  chunkSize?: number;
+  temperature?: number;
+  model?: string;
+  provider?: string;
+  baseUrl?: string;
 };
 
 export class LLMFactory {
@@ -174,6 +197,45 @@ export class LLMFactory {
         openaiOptions.configuration.httpsAgent = proxyAgent;
       }
 
+      return new ChatOpenAI(openaiOptions);
+    } else if (chatConfig.provider === PROVIDER_NAMES.OPENROUTER) {
+      // OpenRouter uses OpenAI-compatible API
+      if (!apiKey) {
+        throw new Error(ERROR_MESSAGES.PROVIDER_ERRORS.OPENROUTER);
+      }
+
+      const proxyUrl =
+        ConfigManager.getProxyConfig().httpsProxy ||
+        ConfigManager.getProxyConfig().httpProxy;
+
+      let proxyAgent = null;
+      if (proxyUrl) {
+        try {
+          proxyAgent = new HttpsProxyAgent(proxyUrl);
+          Logger.logInfo('Created proxy agent');
+        } catch (error) {
+          if ((error as any).code === RATE_LIMIT_CONSTANTS.ERROR_CODE) {
+            throw error;
+          }
+          Logger.logError('Failed to create proxy agent');
+        }
+      }
+
+      const openaiOptions: any = {
+        modelName: model,
+        temperature: temperature ? +temperature : 1,
+        openAIApiKey: apiKey,
+        configuration: {
+          baseURL: baseUrl,
+        },
+      };
+
+      if (proxyAgent) {
+        openaiOptions.configuration.httpAgent = proxyAgent;
+        openaiOptions.configuration.httpsAgent = proxyAgent;
+      }
+
+      Logger.logInfo('Creating ChatOpenAI instance for OpenRouter');
       return new ChatOpenAI(openaiOptions);
     } else if (chatConfig.provider === PROVIDER_NAMES.ANTHROPIC) {
       // Anthropic uses Anthropic API
@@ -501,11 +563,112 @@ export class LLMFactory {
     return LLMFactory.getResponseString(rawResult);
   }
 
+  private static redactForConsole<T>(value: T): T | '[redacted]' {
+    if (ConfigManager.getLlmLoggingConfig().logFullPromptInConsole) {
+      return value;
+    }
+    if (value === undefined || value === null || value === '') {
+      return value;
+    }
+    return '[redacted]';
+  }
+
+  private static buildInvokeLogContext({
+    llmConfig,
+    attempt,
+    maxRetries,
+    prompt,
+    isPing,
+    options,
+  }: {
+    llmConfig: LlmConfigSlice | undefined;
+    attempt: number;
+    maxRetries: number;
+    prompt: string;
+    isPing: boolean;
+    options?: InvokeOptions;
+  }) {
+    return {
+      provider: llmConfig?.provider,
+      model: llmConfig?.model,
+      temperature: llmConfig?.temperature,
+      chunkSize: llmConfig?.chunkSize,
+      baseUrl: llmConfig?.baseUrl,
+      attempt: `${attempt}/${maxRetries}`,
+      prompt: isPing ? '[ping]' : LLMFactory.redactForConsole(prompt),
+      promptLength: isPing ? undefined : prompt?.length,
+      metadata: options?.metadata,
+      dialogId: options?.dialogId,
+      messageId: options?.messageId,
+    };
+  }
+
+  private static shouldPersistInvokeLog(
+    isPing: boolean,
+    options?: InvokeOptions,
+  ): boolean {
+    return !isPing && !!options && options.persistToDb !== false;
+  }
+
+  private static async persistInvokeLog({
+    prompt,
+    response,
+    startTime,
+    llmConfig,
+    success,
+    errorMessage,
+    isPing,
+    options,
+  }: {
+    prompt: string;
+    response: string;
+    startTime: number;
+    llmConfig: LlmConfigSlice | undefined;
+    success: boolean;
+    errorMessage?: string;
+    isPing: boolean;
+    options?: InvokeOptions;
+  }): Promise<string | null> {
+    if (!LLMFactory.shouldPersistInvokeLog(isPing, options)) {
+      return null;
+    }
+
+    try {
+      const logId = await LLMQueryLogger.logQuery({
+        request: prompt,
+        response,
+        requestLength: prompt?.length,
+        responseLength: response?.length,
+        executionTimeMs: Date.now() - startTime,
+        success,
+        errorMessage,
+        dialogId: options?.dialogId,
+        messageId: options?.messageId,
+        provider: llmConfig?.provider,
+        model: llmConfig?.model,
+        temperature: llmConfig?.temperature,
+      });
+
+      if (logId && options?.logId) {
+        options.logId.value = logId;
+      }
+
+      return logId;
+    } catch (dbError) {
+      Logger.logError('Failed to log LLM query to database', {
+        error: (dbError as Error).message,
+        promptLength: prompt?.length,
+      });
+      return null;
+    }
+  }
+
   @Trace()
   static async invoke(
     prompt: string | 'ping',
     attemptsCallbacks?: (options: AttemptsCallbacksOptions) => Promise<any>,
     abortController?: AbortController,
+    options?: InvokeOptions,
   ) {
     const isPing = prompt === 'ping';
     if (isPing) {
@@ -513,27 +676,18 @@ export class LLMFactory {
 No quotes. No period. No newline. No extra text.`;
     }
     const maxRetries = 3;
+    const requestPrompt = prompt;
+    let invokeStartTime = Date.now();
 
     let currentAttempt = 0;
+    let providerIndex = 0;
     let apiKey: string | undefined = undefined;
-    let llmConfig:
-      | {
-          id?: string;
-          chunkSize?: number;
-          temperature?: number;
-          model?: string;
-          provider?: string;
-          baseUrl?: string;
-        }
-      | undefined = undefined;
+    let llmConfig: LlmConfigSlice | undefined = undefined;
 
     ({ apiKey, ...llmConfig } =
-      await DefaultProvidersInitializer.getActiveProvider(true));
-
-    if (!llmConfig?.provider || (llmConfig?.provider && !apiKey)) {
-      ({ apiKey, ...llmConfig } =
-        await DefaultProvidersInitializer.getNextActiveProvider());
-    }
+      await DefaultProvidersInitializer.getActiveProviderAtIndex(
+        providerIndex,
+      ));
 
     while (currentAttempt < maxRetries) {
       try {
@@ -545,20 +699,25 @@ No quotes. No period. No newline. No extra text.`;
           });
         }
 
-        Logger.logInfo(
-          `Processing message attempt ${currentAttempt + 1}/${maxRetries}`,
-          {
-            llmConfig: llmConfig,
-            attempt: currentAttempt + 1,
-          },
-        );
+        const attemptNumber = currentAttempt + 1;
+        invokeStartTime = Date.now();
+
+        Logger.logInfo('LLM Request Initiated', {
+          ...LLMFactory.buildInvokeLogContext({
+            llmConfig,
+            attempt: attemptNumber,
+            maxRetries,
+            prompt: requestPrompt,
+            isPing,
+            options,
+          }),
+        });
 
         addPayloadToTrace({
           currentAttempt,
           maxRetries,
         });
 
-        const startTime = Date.now();
         addPayloadToTrace({
           provider: llmConfig?.provider,
           model: llmConfig?.model,
@@ -585,10 +744,13 @@ No quotes. No period. No newline. No extra text.`;
 
         const result = LLMFactory.getResponseString(rawResult);
 
-        // groq иногда начинает слать все время в ответ "safe",
-        // когда ловим такое то считаем что запрос был плохой и запускаем процедуру смены провайдера ллм
-        if (result === 'safe') {
+        if (isLlmSafeMisfireResponse(result)) {
+          // groq и safeguard-модели иногда отдают "safe" вместо нормального ответа
           throw new Error('Safe content detected');
+        }
+
+        if (result && isLlmUnsafeContentResponse(result)) {
+          throw new ProhibitedContentError();
         }
 
         if (!result) {
@@ -597,7 +759,11 @@ No quotes. No period. No newline. No extra text.`;
             result,
           });
         }
-        addPayloadToTrace({ rawResult, prompt, result });
+        addPayloadToTrace({
+          rawResult: LLMFactory.redactForConsole(rawResult),
+          prompt: LLMFactory.redactForConsole(prompt),
+          result: LLMFactory.redactForConsole(result),
+        });
         if (attemptsCallbacks && !isPing) {
           if (!result) {
             await attemptsCallbacks({
@@ -610,10 +776,29 @@ No quotes. No period. No newline. No extra text.`;
           }
         }
         Logger.logInfo('LLM Request Completed', {
-          prompt,
-          result,
-          executionTime: Date.now() - startTime,
+          ...LLMFactory.buildInvokeLogContext({
+            llmConfig,
+            attempt: attemptNumber,
+            maxRetries,
+            prompt: requestPrompt,
+            isPing,
+            options,
+          }),
+          result: LLMFactory.redactForConsole(result),
+          responseLength: result?.length,
+          executionTime: Date.now() - invokeStartTime,
         });
+
+        await LLMFactory.persistInvokeLog({
+          prompt: requestPrompt,
+          response: result,
+          startTime: invokeStartTime,
+          llmConfig,
+          success: true,
+          isPing,
+          options,
+        });
+
         // Mark execution as successful
         if (llmConfig?.id) {
           await ModelExecutionTracker.completeExecution(llmConfig?.id);
@@ -621,6 +806,10 @@ No quotes. No period. No newline. No extra text.`;
 
         return result;
       } catch (error: any) {
+        if (error instanceof ProhibitedContentError) {
+          throw error;
+        }
+
         if (attemptsCallbacks && !isPing) {
           await attemptsCallbacks({
             message: `⚠️ Ошибка при поиске ответа в чанках (попытка: ${currentAttempt + 1}/${maxRetries})...`,
@@ -649,6 +838,20 @@ No quotes. No period. No newline. No extra text.`;
             maxRetries: maxRetries,
             currentAttempt,
           });
+
+          await LLMFactory.persistInvokeLog({
+            prompt: requestPrompt,
+            response: Mustache.render('ERROR: {{errorMessage}}', {
+              errorMessage: error.message,
+            }),
+            startTime: invokeStartTime,
+            llmConfig,
+            success: false,
+            errorMessage: error.message,
+            isPing,
+            options,
+          });
+
           if (attemptsCallbacks && !isPing) {
             await attemptsCallbacks({
               ...llmConfig,
@@ -668,8 +871,15 @@ No quotes. No period. No newline. No extra text.`;
           );
         }
 
-        ({ apiKey, ...llmConfig } =
-          await DefaultProvidersInitializer.getNextActiveProvider());
+        providerIndex++;
+        try {
+          ({ apiKey, ...llmConfig } =
+            await DefaultProvidersInitializer.getActiveProviderAtIndex(
+              providerIndex,
+            ));
+        } catch {
+          throw error;
+        }
         if (attemptsCallbacks && !isPing) {
           await attemptsCallbacks({
             ...llmConfig,

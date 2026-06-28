@@ -90,16 +90,20 @@
 Вопрос: "что делал с кверком?"
 Ответ: [NOT_FOUND]
 
+{{#history}}
 Conversation history (use strictly for personal experience context):
 \`\`\`
 {{history}}
-\`\`\` 
+\`\`\`{{/history}}
 
+{{#context}}
 Контекст:
 \`\`\`
 {{context}}
-\`\`\`
+\`\`\`{{/context}}
 
+{{#question}}
 {{#isFollowUp}}Original question (follow-up): {{question}}{{/isFollowUp}}{{^isFollowUp}}Original question: {{question}}{{/isFollowUp}}
+{{/question}}
 
 Ответ:

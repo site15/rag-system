@@ -12,15 +12,38 @@ import { Logger } from './logger';
 import { EmbeddingsConfig } from './types';
 
 export class EmbeddingsFactory {
-  public static async embedQuery(response: string) {
-    const embeddingModel = EmbeddingsFactory.createEmbeddings(
-      ConfigManager.getEmbeddingsConfig(),
-    );
-    return await embeddingModel.embedQuery(response);
+  private static cachedInstance: {
+    key: string;
+    embeddings: OpenAIEmbeddings | OllamaEmbeddings;
+  } | null = null;
+
+  public static getEmbeddings(): OpenAIEmbeddings | OllamaEmbeddings {
+    const config = ConfigManager.getEmbeddingsConfig();
+    const cacheKey = JSON.stringify(config);
+    if (
+      !EmbeddingsFactory.cachedInstance ||
+      EmbeddingsFactory.cachedInstance.key !== cacheKey
+    ) {
+      EmbeddingsFactory.cachedInstance = {
+        key: cacheKey,
+        embeddings: EmbeddingsFactory.createEmbeddings(config),
+      };
+    }
+    return EmbeddingsFactory.cachedInstance.embeddings;
+  }
+
+  public static async embedQuery(response: string): Promise<number[]> {
+    return EmbeddingsFactory.getEmbeddings().embedQuery(response);
+  }
+
+  public static async embedDocuments(texts: string[]): Promise<number[][]> {
+    if (!texts.length) {
+      return [];
+    }
+    return EmbeddingsFactory.getEmbeddings().embedDocuments(texts);
   }
 
   public static createEmbeddings(embeddingsConfig: EmbeddingsConfig) {
-    // Get provider-specific configuration
     const config = embeddingsConfig;
     const embeddingsModel = config.model;
     const embeddingsBaseUrl = config.baseUrl;
@@ -33,17 +56,14 @@ export class EmbeddingsFactory {
     });
 
     if (config.provider === PROVIDER_NAMES.A4F) {
-      // A4F.co uses OpenAI-compatible API for embeddings
       if (!embeddingsApiKey) {
         throw new Error(ERROR_MESSAGES.PROVIDER_ERRORS.EMBEDDINGS_A4F);
       }
 
-      // Determine which proxy URL to use
       const proxyUrl =
         ConfigManager.getProxyConfig().httpsProxy ||
         ConfigManager.getProxyConfig().httpProxy;
 
-      // Create proxy agent if proxy is configured
       let proxyAgent = null;
       if (proxyUrl) {
         try {
@@ -54,7 +74,6 @@ export class EmbeddingsFactory {
             throw error;
           }
           Logger.logError('Failed to create proxy agent:', error);
-          // Continue without proxy
         }
       }
 
@@ -66,7 +85,6 @@ export class EmbeddingsFactory {
         },
       };
 
-      // Add proxy agent if available
       if (proxyAgent) {
         openaiOptions.configuration.httpAgent = proxyAgent;
         openaiOptions.configuration.httpsAgent = proxyAgent;
@@ -74,17 +92,14 @@ export class EmbeddingsFactory {
 
       return new OpenAIEmbeddings(openaiOptions);
     } else if (config.provider === PROVIDER_NAMES.Z_AI) {
-      // Z.AI uses OpenAI-compatible API for embeddings
       if (!embeddingsApiKey) {
         throw new Error(ERROR_MESSAGES.PROVIDER_ERRORS.EMBEDDINGS_Z_AI);
       }
 
-      // Determine which proxy URL to use
       const proxyUrl =
         ConfigManager.getProxyConfig().httpsProxy ||
         ConfigManager.getProxyConfig().httpProxy;
 
-      // Create proxy agent if proxy is configured
       let proxyAgent = null;
       if (proxyUrl) {
         try {
@@ -95,7 +110,6 @@ export class EmbeddingsFactory {
             throw error;
           }
           Logger.logError('Failed to create proxy agent:', error);
-          // Continue without proxy
         }
       }
 
@@ -107,7 +121,6 @@ export class EmbeddingsFactory {
         },
       };
 
-      // Add proxy agent if available
       if (proxyAgent) {
         openaiOptions.configuration.httpAgent = proxyAgent;
         openaiOptions.configuration.httpsAgent = proxyAgent;
@@ -115,17 +128,14 @@ export class EmbeddingsFactory {
 
       return new OpenAIEmbeddings(openaiOptions);
     } else if (config.provider === PROVIDER_NAMES.DEEPSEEK) {
-      // DeepSeek uses OpenAI-compatible API for embeddings
       if (!embeddingsApiKey) {
         throw new Error(ERROR_MESSAGES.PROVIDER_ERRORS.EMBEDDINGS_DEEPSEEK);
       }
 
-      // Determine which proxy URL to use
       const proxyUrl =
         ConfigManager.getProxyConfig().httpsProxy ||
         ConfigManager.getProxyConfig().httpProxy;
 
-      // Create proxy agent if proxy is configured
       let proxyAgent = null;
       if (proxyUrl) {
         try {
@@ -136,7 +146,6 @@ export class EmbeddingsFactory {
             throw error;
           }
           Logger.logError('Failed to create proxy agent:', error);
-          // Continue without proxy
         }
       }
 
@@ -148,7 +157,42 @@ export class EmbeddingsFactory {
         },
       };
 
-      // Add proxy agent if available
+      if (proxyAgent) {
+        openaiOptions.configuration.httpAgent = proxyAgent;
+        openaiOptions.configuration.httpsAgent = proxyAgent;
+      }
+
+      return new OpenAIEmbeddings(openaiOptions);
+    } else if (config.provider === PROVIDER_NAMES.OPENROUTER) {
+      if (!embeddingsApiKey) {
+        throw new Error(ERROR_MESSAGES.PROVIDER_ERRORS.EMBEDDINGS_OPENROUTER);
+      }
+
+      const proxyUrl =
+        ConfigManager.getProxyConfig().httpsProxy ||
+        ConfigManager.getProxyConfig().httpProxy;
+
+      let proxyAgent = null;
+      if (proxyUrl) {
+        try {
+          proxyAgent = new HttpsProxyAgent(proxyUrl);
+          Logger.logInfo('Created proxy agent for URL:', proxyUrl);
+        } catch (error) {
+          if ((error as any).code === RATE_LIMIT_CONSTANTS.ERROR_CODE) {
+            throw error;
+          }
+          Logger.logError('Failed to create proxy agent:', error);
+        }
+      }
+
+      const openaiOptions: any = {
+        modelName: embeddingsModel,
+        openAIApiKey: embeddingsApiKey,
+        configuration: {
+          baseURL: embeddingsBaseUrl,
+        },
+      };
+
       if (proxyAgent) {
         openaiOptions.configuration.httpAgent = proxyAgent;
         openaiOptions.configuration.httpsAgent = proxyAgent;
@@ -156,16 +200,12 @@ export class EmbeddingsFactory {
 
       return new OpenAIEmbeddings(openaiOptions);
     } else if (config.provider === PROVIDER_NAMES.ANTHROPIC) {
-      // Anthropic does not provide embedding services, so throw an error
       throw new Error(ERROR_MESSAGES.UNSUPPORTED_EMBEDDINGS.ANTHROPIC);
     } else if (config.provider === PROVIDER_NAMES.GEMINI) {
-      // Google Gemini does not provide embedding services in the same way, so throw an error
       throw new Error(ERROR_MESSAGES.UNSUPPORTED_EMBEDDINGS.GEMINI);
     } else if (config.provider === PROVIDER_NAMES.HUGGINGFACE) {
-      // Hugging Face does not provide embedding services in the same way, so throw an error
       throw new Error(ERROR_MESSAGES.UNSUPPORTED_EMBEDDINGS.HUGGINGFACE);
     } else if (config.provider === PROVIDER_NAMES.GROQ) {
-      // Groq does not provide embedding services in the same way, so throw an error
       throw new Error(ERROR_MESSAGES.UNSUPPORTED_EMBEDDINGS.GROQ);
     } else if (config.provider === PROVIDER_NAMES.OLLAMA) {
       return new OllamaEmbeddings({
@@ -173,19 +213,16 @@ export class EmbeddingsFactory {
         baseUrl: embeddingsBaseUrl,
       });
     } else {
-      // For other providers like openai or deepseek, use OpenAIEmbeddings
       if (!embeddingsApiKey) {
         throw new Error(
           'EMBEDDINGS_API_KEY is required for OpenAI and DeepSeek providers',
         );
       }
 
-      // Determine which proxy URL to use
       const proxyUrl =
         ConfigManager.getProxyConfig().httpsProxy ||
         ConfigManager.getProxyConfig().httpProxy;
 
-      // Create proxy agent if proxy is configured
       let proxyAgent = null;
       if (proxyUrl) {
         try {
@@ -196,7 +233,6 @@ export class EmbeddingsFactory {
             throw error;
           }
           Logger.logError('Failed to create proxy agent:', error);
-          // Continue without proxy
         }
       }
 
@@ -208,7 +244,6 @@ export class EmbeddingsFactory {
         },
       };
 
-      // Add proxy agent if available
       if (proxyAgent) {
         openaiOptions.configuration.httpAgent = proxyAgent;
         openaiOptions.configuration.httpsAgent = proxyAgent;

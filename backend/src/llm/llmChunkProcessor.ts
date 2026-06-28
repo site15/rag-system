@@ -1,11 +1,13 @@
 // llmChunkProcessor.ts
-import Mustache from 'mustache';
 import { addPayloadToTrace, Trace } from '../trace/trace.module';
 import { getConstant, GetConstantKey } from '../utils/get-constant';
 import { DialogManager } from './dialogManager';
-import { getCategoryByDetectedCategory } from './getCategoryByDetectedCategory';
+import {
+  Category,
+  getCategoryByDetectedCategory,
+} from './getCategoryByDetectedCategory';
 import { getCategoryPrompt } from './getCategoryPrompt';
-import { AttemptsCallbacksOptions, LLMFactory } from './llmFactory';
+import { AttemptsCallbacksOptions } from './llmFactory';
 import { LLMLogger } from './llmLogger';
 import { Logger } from './logger';
 import {
@@ -13,45 +15,16 @@ import {
   createFriendlyFoundPrompt,
   createFriendlyNotFoundPrompt,
 } from './prompt';
-import { RAGSearcher } from './ragSearcher';
-import { DefaultProvidersInitializer } from './services/defaultProvidersInitializer';
-import { FailureTracker } from './services/failureTracker';
-import { Category } from './services/questionTransformer';
+import { ConfigManager } from './config';
 import { TextHelpers } from './textHelpers';
 import { DocWithMetadataAndId } from './types';
 import { removeCodeWrappers } from './utils';
+import {
+  sanitizeLlmUserResponse,
+  toHumanLlmResponse,
+} from './llmResponseSanitizer';
 
-// Constants are now loaded externally via getConstant()
 export class LLMChunkProcessor {
-  private static isAuthorMessageContent(chunk: string): boolean {
-    // Check if the chunk contains Author Message content
-    return chunk.includes(
-      getConstant(GetConstantKey.LlmChunkProcessor_authorMessageHeader),
-    );
-  }
-
-  private static extractAuthorMessageContent(chunk: string): string {
-    const authorMessageHeader = getConstant(
-      GetConstantKey.LlmChunkProcessor_authorMessageHeader,
-    );
-    const finalAnswerInstruction = getConstant(
-      GetConstantKey.LlmChunkProcessor_finalAnswerInstruction,
-    );
-
-    if (chunk.includes(authorMessageHeader)) {
-      try {
-        const authorMatch = chunk
-          .replace(finalAnswerInstruction, '')
-          .split(authorMessageHeader)[1]
-          .split('\n--\n')[0];
-        return authorMatch?.trim();
-      } catch (error) {
-        return chunk?.trim();
-      }
-    }
-    return chunk.trim();
-  }
-
   @Trace()
   public static async askLLMChunked({
     dialogId,
@@ -70,542 +43,191 @@ export class LLMChunkProcessor {
     detectedCategory: Category;
     attemptsCallbacks?: (options: AttemptsCallbacksOptions) => Promise<any>;
   }) {
+    if (!contextDocs?.length) {
+      Logger.logInfo('Нет документов в контексте');
+      return { response: null, answerDocumentId: undefined, logIds: [] };
+    }
+
+    const sortedDocs = [...contextDocs].sort(
+      (a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity),
+    );
+
     const foundLogIds: (string | undefined)[] = [];
-    // Process contextDocs in parallel
-    const results = await LLMChunkProcessor.processContextDocsInParallel({
-      contextDocs,
-      question,
+
+    if (attemptsCallbacks) {
+      await attemptsCallbacks({
+        message: `🕖 Анализ ${sortedDocs.length} документов...`,
+      });
+    }
+
+    const contextConfig = ConfigManager.getLlmContextConfig();
+
+    const basePrompt = await LLMChunkProcessor.generatePrompt({
       history,
-      category,
-      dialogId,
+      question,
+      source: sortedDocs[0].source,
       detectedCategory,
+      dialogId,
+    });
+
+    const maxContextLength =
+      contextConfig.maxContextChars -
+      basePrompt.length -
+      contextConfig.promptReserveChars;
+    const { combinedContext, primaryDocId, includedDocsCount } =
+      LLMChunkProcessor.buildCombinedContext({
+        docs: sortedDocs,
+        category,
+        maxLength: Math.max(maxContextLength, contextConfig.minContextChars),
+      });
+
+    addPayloadToTrace({
+      contextDocsCount: sortedDocs.length,
+      includedDocsCount,
+      maxContextChars: contextConfig.maxContextChars,
+      combinedContextLength: combinedContext.length,
+      primaryDocId,
+    });
+
+    const chunkPrompt = await LLMChunkProcessor.generatePrompt({
+      chunk: combinedContext,
+      history,
+      question,
+      source: sortedDocs[0].source,
+      detectedCategory,
+      dialogId,
+    });
+
+    const { content: text, logId } = await LLMLogger.callWithLogging({
+      prompt: chunkPrompt,
+      metadata: {
+        operation: 'batch_context_processing',
+        dialogId,
+        contextDocsCount: sortedDocs.length,
+      },
+      dialogId,
+      messageId: undefined,
       attemptsCallbacks,
     });
 
-    // Find the first successful result
-    const successfulResult = results.find(
-      (result) => result.success && result.foundText,
-    );
+    foundLogIds.push(logId);
+    addPayloadToTrace({ batchPromptResult: text });
 
-    if (successfulResult?.foundText) {
-      addPayloadToTrace({ foundText: successfulResult.foundText });
-
-      Logger.logInfo('Найден успешный результат', {
-        contextIndex: successfulResult.contextIndex,
-        foundText: successfulResult.foundText,
-      });
-
+    if (!text?.startsWith('[FOUND]')) {
+      Logger.logInfo('Информация по вопросу не найдена в контексте');
       return {
-        response: successfulResult.foundText,
-        answerDocumentId: successfulResult.documentId,
-        logIds: [
-          ...results.map((r) => r.foundLogIds).flat(),
-          ...foundLogIds,
-        ].filter(Boolean),
+        response: null,
+        answerDocumentId: undefined,
+        logIds: foundLogIds.filter(Boolean),
       };
     }
 
-    addPayloadToTrace({ foundText: null });
+    const fact = text.replace(/^\[FOUND]\s*/, '');
 
-    Logger.logInfo('Информация по вопросу не найдена в контексте');
+    const finalAnswerPrompt = createFinalAnswerPrompt({
+      question,
+      context: removeCodeWrappers(combinedContext),
+      fact,
+      category,
+      history: removeCodeWrappers(TextHelpers.concat(history)),
+    });
+
+    const { content: finalAnswer, logId: finalLogId } =
+      await LLMLogger.callWithLogging({
+        prompt: finalAnswerPrompt,
+        messageId: undefined,
+        dialogId,
+        attemptsCallbacks,
+      });
+
+    foundLogIds.push(finalLogId);
+
+    Logger.logInfo('Найден успешный результат', {
+      primaryDocId,
+      answerLength: finalAnswer?.length,
+    });
+
     return {
-      response: null,
-      answerDocumentId: undefined,
-      logIds: [
-        ...results.map((r) => r.foundLogIds).flat(),
-        ...foundLogIds,
-      ].filter(Boolean),
+      response: sanitizeLlmUserResponse(finalAnswer),
+      answerDocumentId: primaryDocId,
+      logIds: foundLogIds.filter(Boolean),
     };
   }
 
-  @Trace()
-  private static async processContextDocsInParallel({
-    contextDocs,
-    question,
-    history,
-    category,
-    dialogId,
-    detectedCategory,
-    attemptsCallbacks,
-  }: {
-    contextDocs: DocWithMetadataAndId[];
-    question: string;
-    history: string[];
-    category: Category;
-    dialogId: string;
-    detectedCategory: Category;
-    attemptsCallbacks?: (options: AttemptsCallbacksOptions) => Promise<any>;
-  }) {
-    Logger.logInfo('Начало обработки запроса с чанками', {
-      dialogId,
-      contextDocsCount: contextDocs?.length,
-      historyLength: history?.length,
-      question,
-    });
+  private static formatDocContent(
+    doc: DocWithMetadataAndId,
+    category: Category,
+  ): string {
+    if (category === 'telegram') {
+      const semanticMatch = doc.content.match(
+        new RegExp(
+          getConstant(GetConstantKey.LlmChunkProcessor_semanticSearchRegex),
+        ),
+      );
+      const authorMatch = doc.content.match(
+        new RegExp(
+          getConstant(GetConstantKey.LlmChunkProcessor_authorMessageRegex),
+        ),
+      );
 
-    const maxParallelThreads =
-      parseInt(process.env.PARALLEL_THREADS || '1', 10) || 1;
-    Logger.logInfo('Количество параллельных потоков', { maxParallelThreads });
+      const semantic = semanticMatch ? semanticMatch[1]?.trim() : '';
+      const author = authorMatch ? authorMatch[1]?.trim() : '';
 
-    const foundLogIds: (string | undefined)[] = [];
-    // Process each context doc in parallel, up to maxParallelThreads at a time
-    const results: Array<{
-      success: boolean;
-      foundText?: string;
-      foundLogIds: (string | undefined)[];
-      foundChunkIndex?: number;
-      chunks?: string[];
-      contextIndex?: number;
-      documentId?: string;
-    }> = [];
-
-    // Process in batches using a proper worker pool
-    // todo: maxParallelThreads not work correct
-    for (let i = 0; i < contextDocs?.length; i += maxParallelThreads) {
-      const batch = contextDocs.slice(i, i + maxParallelThreads);
-
-      // Process batch in parallel
-      const batchPromises = batch.map(async (doc, batchIndex) => {
-        return LLMChunkProcessor.processSingleContextDoc({
-          contextDoc: doc,
-          question,
-          history,
-          category,
-          contextDocIndex: i + batchIndex,
-          dialogId,
-          contextDocs,
-          index: i,
-          detectedCategory,
-          attemptsCallbacks,
+      if (semantic || author) {
+        return getConstant(GetConstantKey.LlmChunkProcessor_semanticTemplate, {
+          source: doc.source,
+          fromLine: doc.fromLine,
+          toLine: doc.toLine,
+          semantic,
+          author,
         });
-      });
-
-      try {
-        const firstSuccess = await Promise.any(
-          batchPromises.map((p, idx) =>
-            p.then((result) => {
-              if (!result.success) {
-                throw new Error();
-              }
-              return { result, batchIndex: idx, completed: true };
-            }),
-          ),
-        );
-
-        addPayloadToTrace({
-          firstSuccess,
-        });
-
-        if (
-          firstSuccess &&
-          firstSuccess.result.success &&
-          firstSuccess.result.foundText
-        ) {
-          Logger.logInfo('Найден успешный результат, отмена остальных', {
-            contextIndex: firstSuccess.result.contextIndex,
-          });
-
-          let surroundingChunks = firstSuccess.result.foundText;
-
-          if (
-            firstSuccess.result.chunks &&
-            firstSuccess.result.foundChunkIndex !== undefined
-          ) {
-            const currentChunk =
-              firstSuccess.result.chunks[firstSuccess.result.foundChunkIndex];
-            surroundingChunks = LLMChunkProcessor.extractAuthorMessageContent(
-              currentChunk.content,
-            );
-          }
-
-          // пока вырубили, так как ранее уже нормальное сформировали
-          // const ret = await LLMChunkProcessor.frendlyFound({
-          //   category,
-          //   surroundingChunks,
-          //   question,
-          //   dialogId,
-          // });
-          // const friendlyText = ret.foundText;
-          // foundLogIds.push(ret.logId);
-          //
-          // Logger.logInfo('Дружеский ответ LLM', {
-          //   foundText: friendlyText,
-          //   chunk: surroundingChunks,
-          // });
-
-          // Return a special result indicating that friendly response was already generated
-          return [
-            {
-              success: true,
-              foundText: firstSuccess.result.foundText, // Return the friendly response instead of raw found text
-              foundLogIds: [
-                ...(firstSuccess.result.foundLogIds || []),
-                ...foundLogIds,
-              ],
-              foundChunkIndex: firstSuccess.result.foundChunkIndex,
-              chunks: firstSuccess.result.chunks,
-              contextIndex: firstSuccess.result.contextIndex,
-              documentId: firstSuccess.result.documentId, // Include the document ID
-            },
-          ];
-        }
-      } catch (error) {
-        if (
-          (error as any).code === 'RATE_LIMIT_EXCEEDED' ||
-          error.message?.includes('429')
-        ) {
-          throw error;
-        }
-        // If race fails, continue with normal processing
       }
     }
 
-    return results;
+    return getConstant(GetConstantKey.LlmChunkProcessor_simpleTemplate, {
+      source: doc.source,
+      fromLine: doc.fromLine,
+      toLine: doc.toLine,
+      content: doc.content,
+    });
   }
 
-  @Trace()
-  private static async processSingleContextDoc({
-    contextDoc,
-    question,
-    history,
+  private static buildCombinedContext({
+    docs,
     category,
-    contextDocIndex,
-    dialogId,
-    contextDocs,
-    index,
-    detectedCategory,
-    attemptsCallbacks,
+    maxLength,
   }: {
-    contextDoc: DocWithMetadataAndId;
-    question: string;
-    history: string[];
+    docs: DocWithMetadataAndId[];
     category: Category;
-    contextDocIndex: number;
-    dialogId: string;
-    contextDocs: DocWithMetadataAndId[];
-    index: number;
-    detectedCategory: Category;
-    attemptsCallbacks?: (options: AttemptsCallbacksOptions) => Promise<any>;
-  }): Promise<{
-    success: boolean;
-    foundText?: string;
-    foundLogIds?: (string | undefined)[];
-    foundChunkIndex?: number;
-    chunks?: {
-      content: string;
-      meta: {
-        loc: {
-          lines: {
-            from: number;
-            to: number;
-          };
-        };
-      };
-    }[];
-    contextIndex: number;
-    documentId: string;
-  }> {
-    let foundLogIds: (string | undefined)[] = [];
-    try {
-      // --- Разделяем контент на Semantic Search Content и Author Message ---
-      let processedContent = '';
-      if (category === 'telegram') {
-        const semanticMatch = contextDoc.content.match(
-          new RegExp(
-            getConstant(GetConstantKey.LlmChunkProcessor_semanticSearchRegex),
-          ),
-        );
-        const authorMatch = contextDoc.content.match(
-          new RegExp(
-            getConstant(GetConstantKey.LlmChunkProcessor_authorMessageRegex),
-          ),
-        );
+    maxLength: number;
+  }): {
+    combinedContext: string;
+    primaryDocId: string;
+    includedDocsCount: number;
+  } {
+    const parts: string[] = [];
+    let totalLength = 0;
+    let primaryDocId = docs[0].id;
 
-        const semantic = semanticMatch ? semanticMatch[1]?.trim() : '';
-        const author = authorMatch ? authorMatch[1]?.trim() : '';
+    for (const doc of docs) {
+      const header = `\n---\n[id: ${doc.id}, source: ${doc.source}, distance: ${doc.distance ?? 'n/a'}]\n`;
+      const body = LLMChunkProcessor.formatDocContent(doc, category);
+      const block = header + body;
 
-        if (semantic || author) {
-          processedContent = getConstant(
-            GetConstantKey.LlmChunkProcessor_semanticTemplate,
-            {
-              source: contextDoc.source,
-              fromLine: contextDoc.fromLine,
-              toLine: contextDoc.toLine,
-              semantic: semantic,
-              author: author,
-            },
-          );
-        } else {
-          processedContent = getConstant(
-            GetConstantKey.LlmChunkProcessor_simpleTemplate,
-            {
-              source: contextDoc.source,
-              fromLine: contextDoc.fromLine,
-              toLine: contextDoc.toLine,
-              content: contextDoc.content,
-            },
-          );
-        }
-      } else {
-        processedContent = getConstant(
-          GetConstantKey.LlmChunkProcessor_simpleTemplate,
-          {
-            source: contextDoc.source,
-            fromLine: contextDoc.fromLine,
-            toLine: contextDoc.toLine,
-            content: contextDoc.content,
-          },
-        );
+      if (parts.length > 0 && totalLength + block.length > maxLength) {
+        break;
       }
 
-      // --- Разбиваем на чанки ---
-      const basePrompt = await LLMChunkProcessor.generatePrompt({
-        history,
-        question,
-        source: contextDoc.source,
-        detectedCategory,
-        dialogId,
-      });
-
-      const basePromptLength = basePrompt?.length;
-
-      addPayloadToTrace({
-        contextDocsCount: contextDocs?.length,
-        basePromptLength,
-        basePrompt,
-      });
-
-      if (index === 0) {
-        const combinedContent = TextHelpers.concat(
-          contextDocs.map((doc) => {
-            return Mustache.render(
-              '[id: {{id}}, source: {{source}}, fromLine: {{fromLine}}, toLine: {{toLine}}, distance: {{distance}}]\n{{content}}',
-              {
-                id: doc.id,
-                source: doc.source,
-                fromLine: doc.fromLine,
-                toLine: doc.toLine,
-                distance: doc.distance,
-                content: doc.content,
-              },
-            );
-          }),
-        );
-        contextDocs = [
-          {
-            id: 'empty',
-            content: combinedContent,
-            source: 'Combined',
-            fromLine: 0,
-            toLine: 0,
-            distance: 0,
-          },
-        ];
-      }
-
-      const provider = await DefaultProvidersInitializer.getActiveProvider();
-      Logger.logInfo(
-        `chatChunkSize: "${provider.chunkSize}", basePromptLength: "${basePromptLength}"`,
-      );
-      if (!provider.chunkSize) {
-        throw new Error('No chunk size found, using default value');
-      }
-      const max = +provider.chunkSize - basePromptLength - 100;
-      const chunks =
-        max > 0
-          ? RAGSearcher.splitTextIntoChunksWithMeta(processedContent, max)
-          : [];
-      const totalChunks = chunks?.length;
-
-      Logger.logInfo(`Обработка чанков для контекста ${contextDocIndex}`, {
-        totalChunks: totalChunks,
-        processedContentLength: processedContent?.length,
-      });
-
-      addPayloadToTrace({ totalChunks });
-
-      let foundChunkIndex = -1;
-      let foundText = '';
-
-      for (let i = 0; i < totalChunks; i++) {
-        if (foundChunkIndex === -1) {
-          if (attemptsCallbacks) {
-            await attemptsCallbacks({
-              message: `🕖 Обработка чанка ${
-                i + 1
-              }/${totalChunks} для документа ${contextDocIndex}/${contextDocs.length}...`,
-            });
-          }
-
-          const chunk = chunks[i];
-
-          // Check consecutive failures to determine if we should bypass pre-filter
-          let bypassPreFilter = false;
-          try {
-            const consecutiveFailures =
-              await FailureTracker.getConsecutiveFailures(dialogId);
-            bypassPreFilter = consecutiveFailures >= 3;
-
-            if (bypassPreFilter) {
-              Logger.logInfo(
-                `Bypassing pre-filter due to ${consecutiveFailures} consecutive failures`,
-                {
-                  dialogId,
-                  consecutiveFailures,
-                  contextIndex: contextDocIndex,
-                },
-              );
-            }
-          } catch (error) {
-            Logger.logError('Failed to check consecutive failures', {
-              error: (error as Error).message,
-              dialogId,
-            });
-          }
-
-          Logger.logInfo(
-            `Обработка чанка ${
-              i + 1
-            }/${totalChunks} для контекста ${contextDocIndex}`,
-            {
-              totalChunks: totalChunks,
-              chunkLength: chunk.content?.length,
-            },
-          );
-
-          const chunkPrompt = await LLMChunkProcessor.generatePrompt({
-            chunk: chunk.content,
-            history,
-            question,
-            source: contextDoc.source,
-            detectedCategory,
-            dialogId,
-          });
-
-          addPayloadToTrace({
-            [`chunk${i}Prompt`]: chunkPrompt,
-            [`chunk${i}PromptLength`]: chunkPrompt?.length,
-          });
-
-          const { content: text, logId } = await LLMLogger.callWithLogging({
-            prompt: chunkPrompt,
-            metadata: {
-              contextIndex: contextDocIndex,
-              chunkIndex: i,
-              operation: 'chunk_processing',
-              dialogId,
-            },
-            dialogId,
-            messageId: undefined,
-            callback: (prompt) => LLMFactory.invoke(prompt, attemptsCallbacks),
-          });
-
-          addPayloadToTrace({
-            [`chunk${i}PromptResult`]: text,
-          });
-
-          foundLogIds.push(logId);
-
-          Logger.logInfo(
-            `Ответ LLM для чанка ${i + 1} контекста ${contextDocIndex}`,
-            { text },
-          );
-
-          if (text?.startsWith('[FOUND]')) {
-            // For telegram mode, ensure the result comes from Author Message
-            if (
-              category === 'telegram' &&
-              !LLMChunkProcessor.isAuthorMessageContent(chunk.content)
-            ) {
-              Logger.logInfo(
-                'Отброшен [FOUND] из Semantic Search Content, разрешены только Author Message',
-                {
-                  contextIndex: contextDocIndex,
-                  chunkIndex: i,
-                },
-              );
-              continue; // Skip this result, continue looking
-            }
-
-            foundText = text?.replace(/^\[FOUND]\s*/, '');
-            foundChunkIndex = i;
-
-            const finalAnswerPrompt = createFinalAnswerPrompt({
-              question,
-              context: removeCodeWrappers(chunk.content),
-              fact: foundText,
-              category,
-              history: removeCodeWrappers(TextHelpers.concat(history)),
-            });
-
-            addPayloadToTrace({
-              [`chunk${i}FinalAnswerPrompt`]: finalAnswerPrompt,
-            });
-
-            const { content, logId } = await LLMLogger.callWithLogging({
-              prompt: finalAnswerPrompt,
-              messageId: undefined,
-              dialogId,
-              callback: (prompt) =>
-                LLMFactory.invoke(prompt, attemptsCallbacks),
-            });
-
-            foundText = content;
-
-            addPayloadToTrace({
-              [`chunk${i}FinalAnswerPromptResult`]: foundText,
-            });
-
-            foundLogIds.push(logId);
-            break;
-          }
-        }
-      }
-
-      Logger.logInfo('foundLogIds', foundLogIds);
-
-      if (foundText) {
-        addPayloadToTrace({
-          [`chunk${foundChunkIndex}FinalAnswerPromptResult`]: foundText,
-        });
-        return {
-          foundLogIds,
-          success: true,
-          foundText,
-          foundChunkIndex,
-          chunks,
-          contextIndex: contextDocIndex,
-          documentId: contextDoc.id, // Include the document ID for tracking
-        };
-      }
-
-      return {
-        foundLogIds,
-        success: false,
-        contextIndex: contextDocIndex,
-        documentId: contextDoc.id, // Include the document ID for tracking
-      };
-    } catch (error) {
-      if (
-        (error as any).code === 'RATE_LIMIT_EXCEEDED' ||
-        error.message?.includes('429')
-      ) {
-        throw error;
-      }
-      Logger.logError(`Ошибка при обработке контекста ${contextDocIndex}`, {
-        error: (error as Error).message,
-      });
-      Logger.logInfo('foundLogId', foundLogIds);
-      return {
-        foundLogIds,
-        success: false,
-        foundText: undefined,
-        foundChunkIndex: undefined,
-        chunks: undefined,
-        contextIndex: contextDocIndex,
-        documentId: contextDoc.id,
-      };
+      parts.push(block);
+      totalLength += block.length;
+      primaryDocId = doc.id;
     }
+
+    return {
+      combinedContext: parts.join('\n'),
+      primaryDocId,
+      includedDocsCount: parts.length,
+    };
   }
 
   @Trace()
@@ -634,10 +256,9 @@ export class LLMChunkProcessor {
       },
       dialogId,
       messageId: undefined,
-      callback: (prompt) => LLMFactory.invoke(prompt),
     });
 
-    return { foundText, logId };
+    return { foundText: toHumanLlmResponse(foundText), logId };
   }
 
   @Trace()
@@ -662,10 +283,9 @@ export class LLMChunkProcessor {
       },
       dialogId,
       messageId: undefined,
-      callback: (prompt) => LLMFactory.invoke(prompt),
     });
 
-    return { foundText, logId };
+    return { foundText: toHumanLlmResponse(foundText), logId };
   }
 
   private static async generatePrompt({
@@ -689,7 +309,6 @@ export class LLMChunkProcessor {
     ) {
       const lastHistory = await DialogManager.getDialogRawHistory(dialogId, 5);
       const lastHistoryItem = lastHistory.filter((r) => r.answer);
-      Logger.logInfo('Last history item', lastHistoryItem);
 
       if (lastHistoryItem?.length) {
         detectedCategory = getCategoryByDetectedCategory(
@@ -709,15 +328,12 @@ export class LLMChunkProcessor {
         if (summary) {
           history = [summary];
         }
-        /**
-         * Если слишком много уточнений, то меняем категорию на resume
-         */
         detectedCategory = Category.resume;
       }
     }
 
     const templateData = {
-      history: removeCodeWrappers(TextHelpers.concat(history, 'нет')),
+      history: removeCodeWrappers(TextHelpers.concat(history)),
       context: removeCodeWrappers(chunk || ''),
       question: question,
       isFollowUp: history?.[0],

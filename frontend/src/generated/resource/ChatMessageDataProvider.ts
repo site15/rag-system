@@ -11,7 +11,8 @@ import {
   UpdateManyResult,
   UpdateResult,
 } from "react-admin";
-import { CreateChatMessageDto } from "../client";
+import { CreateChatMessageDto, UpdateChatMessageDto } from "../client";
+import { pickDtoFields } from "./pick-dto-fields";
 import {
   chatMessageControllerCreateOne,
   chatMessageControllerDeleteOne,
@@ -19,6 +20,37 @@ import {
   chatMessageControllerFindOne,
   chatMessageControllerUpdateOne,
 } from "../client/sdk.gen";
+
+const chatMessageCreateDtoFields = [
+  "question",
+  "answer",
+  "category",
+  "transformedQuestion",
+  "transformedEmbeddingQuery",
+  "provider",
+  "model",
+  "temperature",
+  "trace",
+  "constants",
+  "questionReceivedAt",
+  "answerSentAt",
+  "deletedAt",
+] as const;
+const chatMessageUpdateDtoFields = [
+  "question",
+  "answer",
+  "category",
+  "transformedQuestion",
+  "transformedEmbeddingQuery",
+  "provider",
+  "model",
+  "temperature",
+  "trace",
+  "constants",
+  "questionReceivedAt",
+  "answerSentAt",
+  "deletedAt",
+] as const;
 
 export const ChatMessageDataProvider: DataProvider<any> = {
   getList: async (_, params) => {
@@ -105,7 +137,10 @@ export const ChatMessageDataProvider: DataProvider<any> = {
 
   create: async (_, params) => {
     const result = await chatMessageControllerCreateOne({
-      body: params.data as CreateChatMessageDto,
+      body: pickDtoFields<CreateChatMessageDto>(
+        params.data,
+        chatMessageCreateDtoFields,
+      ),
     });
 
     if (result?.error) {
@@ -118,7 +153,10 @@ export const ChatMessageDataProvider: DataProvider<any> = {
   update: async (_, params) => {
     const result = await chatMessageControllerUpdateOne({
       path: { id: params.id },
-      body: params.data,
+      body: pickDtoFields<UpdateChatMessageDto>(
+        params.data,
+        chatMessageUpdateDtoFields,
+      ),
     });
 
     if (result?.error) {
@@ -129,10 +167,14 @@ export const ChatMessageDataProvider: DataProvider<any> = {
   },
 
   updateMany: async (_, params) => {
+    const body = pickDtoFields<UpdateChatMessageDto>(
+      params.data,
+      chatMessageUpdateDtoFields,
+    );
     const promises = params.ids.map((id) =>
       chatMessageControllerUpdateOne({
         path: { id: String(id) },
-        body: params.data,
+        body,
       }),
     );
     const results = await Promise.all(promises);

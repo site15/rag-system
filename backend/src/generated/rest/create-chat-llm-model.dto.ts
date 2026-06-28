@@ -2,9 +2,9 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   IsBoolean,
   IsDateString,
-  IsDecimal,
   IsInt,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator';
@@ -23,13 +23,13 @@ export class CreateChatLlmModelDto {
   @IsString()
   model!: string;
   @ApiProperty({
-    type: 'string',
+    type: 'number',
     format: 'float',
     required: false,
     nullable: true,
   })
   @IsOptional()
-  @IsDecimal()
+  @IsNumber()
   temperature?: number | null;
   @ApiProperty({
     type: 'integer',

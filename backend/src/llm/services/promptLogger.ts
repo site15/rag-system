@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { Logger } from '../logger';
 import { DocWithMetadataAndId } from '../types';
-import { Category } from './questionTransformer';
+import { Category } from '../getCategoryByDetectedCategory';
 
 export interface PromptLogData {
   dialogId: string;
