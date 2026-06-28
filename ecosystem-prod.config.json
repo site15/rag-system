@@ -2,7 +2,8 @@
   "apps": [
     {
       "name": "rag-system-backend-prod",
-      "script": "cd backend && npm run start:prod",
+      "script": "./scripts/pm2-backend-prod.sh",
+      "interpreter": "/bin/bash",
       "watch": false,
       "env": {
         "NODE_ENV": "production"

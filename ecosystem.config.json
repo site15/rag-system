@@ -2,7 +2,8 @@
   "apps": [
     {
       "name": "rag-system-backend",
-      "script": "cd backend && npm run start:dev",
+      "script": "./scripts/pm2-backend-dev.sh",
+      "interpreter": "/bin/bash",
       "watch": false,
       "env": {
         "NODE_ENV": "development"
@@ -10,7 +11,8 @@
     },
     {
       "name": "rag-system-frontend",
-      "script": "cd frontend && npm run dev",
+      "script": "./scripts/pm2-frontend-dev.sh",
+      "interpreter": "/bin/bash",
       "watch": false,
       "env": {
         "NODE_ENV": "development"
