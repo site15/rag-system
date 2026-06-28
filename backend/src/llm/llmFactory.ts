@@ -760,9 +760,9 @@ No quotes. No period. No newline. No extra text.`;
           });
         }
         addPayloadToTrace({
-          rawResult: LLMFactory.redactForConsole(rawResult),
-          prompt: LLMFactory.redactForConsole(prompt),
-          result: LLMFactory.redactForConsole(result),
+          rawResult,
+          prompt,
+          result,
         });
         if (attemptsCallbacks && !isPing) {
           if (!result) {
