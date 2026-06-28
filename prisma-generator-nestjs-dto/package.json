@@ -35,8 +35,8 @@
     "test:watch": "vitest",
     "cleanup:generated": "rimraf src/@generated",
     "pregenerate": "npm run cleanup:generated",
-    "generate": "npx prisma generate",
-    "generate:mongo": "npx prisma generate --schema ./prisma/mongodb.prisma",
+    "generate": "prisma generate",
+    "generate:mongo": "prisma generate --schema ./prisma/mongodb.prisma",
     "prepare": "npm run build"
   },
   "repository": {

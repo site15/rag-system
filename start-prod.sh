@@ -51,7 +51,7 @@ echo "▶ Importing ChatDocumentEmbedding dump (if empty)"
 ./scripts/import-chat-document-embedding-dump.sh
 
 echo "▶ Starting backend"
-npx -y pm2 start ./ecosystem-prod.config.json
+./node_modules/.bin/pm2 start ./ecosystem-prod.config.json
 echo "✅ Done"
 
 

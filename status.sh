@@ -14,8 +14,8 @@ echo
 
 # Check PM2 processes
 echo "🔧 PM2 Processes:"
-if npx pm2 list >/dev/null 2>&1; then
-    npx pm2 list
+if ./node_modules/.bin/pm2 list >/dev/null 2>&1; then
+    ./node_modules/.bin/pm2 list
 else
     echo "PM2 not running or no processes found"
 fi

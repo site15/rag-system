@@ -109,10 +109,10 @@ run_root systemctl enable "$SERVICE_NAME"
 run_root systemctl restart "$SERVICE_NAME" || run_root systemctl start "$SERVICE_NAME"
 
 echo "▶ Настройка PM2 ($MODE, $ECOSYSTEM)..."
-run_pm2_user "npx -y pm2 start ./$ECOSYSTEM --update-env || true"
-run_pm2_user "npx -y pm2 save"
+run_pm2_user "./node_modules/.bin/pm2 start ./$ECOSYSTEM --update-env || true"
+run_pm2_user "./node_modules/.bin/pm2 save"
 
-STARTUP_OUTPUT="$(run_pm2_user "npx -y pm2 startup systemd -u '$PM2_USER' --hp '$PM2_HOME'" 2>&1 || true)"
+STARTUP_OUTPUT="$(run_pm2_user "./node_modules/.bin/pm2 startup systemd -u '$PM2_USER' --hp '$PM2_HOME'" 2>&1 || true)"
 STARTUP_CMD="$(echo "$STARTUP_OUTPUT" | grep -E '^sudo env PATH' | tail -1 || true)"
 
 if [[ -n "$STARTUP_CMD" ]]; then
@@ -122,14 +122,14 @@ else
   echo "ℹ️  PM2 startup уже настроен или команда не требуется"
 fi
 
-run_pm2_user "npx -y pm2 save"
+run_pm2_user "./node_modules/.bin/pm2 save"
 
 echo ""
 echo "✅ Автозапуск настроен"
 echo "   Docker Compose: systemctl status $SERVICE_NAME"
-echo "   PM2:            sudo -u $PM2_USER npx pm2 list"
+echo "   PM2:            sudo -u $PM2_USER ./node_modules/.bin/pm2 list"
 echo ""
 echo "Проверка после перезагрузки:"
 echo "   sudo reboot"
 echo "   sudo systemctl status $SERVICE_NAME"
-echo "   sudo -u $PM2_USER npx pm2 list"
+echo "   sudo -u $PM2_USER ./node_modules/.bin/pm2 list"
