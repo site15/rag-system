@@ -57,6 +57,42 @@ function isSafeMisfireText(response: string): boolean {
   return SAFE_MISFIRE_PATTERN.test(response);
 }
 
+function normalizeLlmResponseText(response: unknown): string {
+  if (response === null || response === undefined) {
+    return '';
+  }
+
+  if (typeof response === 'string') {
+    return response;
+  }
+
+  if (
+    typeof response === 'number' ||
+    typeof response === 'boolean' ||
+    typeof response === 'bigint'
+  ) {
+    return String(response);
+  }
+
+  if (typeof response === 'object') {
+    const record = response as Record<string, unknown>;
+    for (const key of ['content', 'text', 'answer'] as const) {
+      const value = record[key];
+      if (typeof value === 'string') {
+        return value;
+      }
+    }
+
+    try {
+      return JSON.stringify(response);
+    } catch {
+      return '';
+    }
+  }
+
+  return '';
+}
+
 function getJsonSafetyVerdict(response: string): LlmSafetyVerdict | null {
   try {
     const parsed = JSON.parse(response) as { violation?: unknown };
@@ -82,10 +118,8 @@ function getJsonSafetyVerdict(response: string): LlmSafetyVerdict | null {
   return null;
 }
 
-export function getLlmSafetyVerdict(
-  response: string | null | undefined,
-): LlmSafetyVerdict {
-  const trimmed = response?.trim();
+export function getLlmSafetyVerdict(response: unknown): LlmSafetyVerdict {
+  const trimmed = normalizeLlmResponseText(response).trim();
   if (!trimmed) {
     return 'none';
   }
@@ -115,22 +149,16 @@ export function getLlmSafetyVerdict(
  * Ответы Llama Guard и аналогичных safeguard-моделей, которые иногда
  * попадают вместо нормального текста для пользователя.
  */
-export function isLlmSafetyClassifierResponse(
-  response: string | null | undefined,
-): boolean {
+export function isLlmSafetyClassifierResponse(response: unknown): boolean {
   const verdict = getLlmSafetyVerdict(response);
   return verdict !== 'none';
 }
 
-export function isLlmUnsafeContentResponse(
-  response: string | null | undefined,
-): boolean {
+export function isLlmUnsafeContentResponse(response: unknown): boolean {
   return getLlmSafetyVerdict(response) === 'unsafe_content';
 }
 
-export function isLlmSafeMisfireResponse(
-  response: string | null | undefined,
-): boolean {
+export function isLlmSafeMisfireResponse(response: unknown): boolean {
   return getLlmSafetyVerdict(response) === 'safe_misfire';
 }
 
@@ -140,10 +168,8 @@ export function getBotFallbackMessage(): string {
   ];
 }
 
-export function sanitizeLlmUserResponse(
-  response: string | null | undefined,
-): string | null {
-  const trimmed = response?.trim();
+export function sanitizeLlmUserResponse(response: unknown): string | null {
+  const trimmed = normalizeLlmResponseText(response).trim();
   if (!trimmed || trimmed === 'undefined' || trimmed === 'null') {
     return null;
   }
@@ -160,9 +186,7 @@ export function sanitizeLlmUserResponse(
   return trimmed;
 }
 
-export function toHumanLlmResponse(
-  response: string | null | undefined,
-): string {
+export function toHumanLlmResponse(response: unknown): string {
   const verdict = getLlmSafetyVerdict(response);
   if (verdict === 'unsafe_content') {
     return getProhibitedContentMessage();

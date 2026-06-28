@@ -23,6 +23,13 @@ describe('llmResponseSanitizer', () => {
     ] as const)('classifies %s as %s', (response, verdict) => {
       expect(getLlmSafetyVerdict(response)).toBe(verdict);
     });
+
+    it('handles non-string responses without throwing', () => {
+      expect(getLlmSafetyVerdict({ violation: 0 })).toBe('safe_misfire');
+      expect(getLlmSafetyVerdict({ answer: 'Привет!' })).toBe('none');
+      expect(getLlmSafetyVerdict(null)).toBe('none');
+      expect(getLlmSafetyVerdict(undefined)).toBe('none');
+    });
   });
 
   describe('isLlmSafetyClassifierResponse', () => {

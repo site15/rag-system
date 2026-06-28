@@ -519,7 +519,23 @@ export class LLMFactory {
     }
 
     if (typeof response === 'string') {
-      response = response?.trim();
+      response = response.trim();
+    } else if (response !== null && response !== undefined) {
+      if (typeof response === 'object') {
+        const candidate =
+          (response as { content?: unknown; text?: unknown; answer?: unknown })
+            .content ??
+          (response as { text?: unknown }).text ??
+          (response as { answer?: unknown }).answer;
+
+        if (typeof candidate === 'string') {
+          response = candidate.trim();
+        } else {
+          response = JSON.stringify(response);
+        }
+      } else {
+        response = String(response);
+      }
     }
 
     if (!response) {
