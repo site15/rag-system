@@ -1,5 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 import {
+  getLlmSafetyMisfireMessage,
   getLlmSafetyVerdict,
   getProhibitedContentMessage,
   isLlmSafeMisfireResponse,
@@ -80,11 +81,11 @@ describe('llmResponseSanitizer', () => {
       );
     });
 
-    it('returns fallback for safe misfire', () => {
-      const result = toHumanLlmResponse('safe');
-      expect(result).not.toBe('safe');
-      expect(result).not.toBe(getProhibitedContentMessage());
-      expect(result.length).toBeGreaterThan(0);
+    it('returns user message with reason for safe misfire', () => {
+      expect(toHumanLlmResponse('safe')).toBe(getLlmSafetyMisfireMessage());
+      expect(toHumanLlmResponse('User Safety: safe')).toBe(
+        getLlmSafetyMisfireMessage(),
+      );
     });
 
     it('returns original response when it is valid', () => {

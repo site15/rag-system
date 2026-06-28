@@ -16,9 +16,9 @@ import {
 } from './constants';
 import { Logger } from './logger';
 import {
-  isLlmSafeMisfireResponse,
-  isLlmUnsafeContentResponse,
-  ProhibitedContentError,
+  getLlmSafetyReplacementReason,
+  getLlmSafetyVerdict,
+  toHumanLlmResponse,
 } from './llmResponseSanitizer';
 import { DefaultProvidersInitializer } from './services/defaultProvidersInitializer';
 import { LLMQueryLogger } from './services/llmQueryLogger';
@@ -742,15 +742,28 @@ No quotes. No period. No newline. No extra text.`;
           timeout: 40_000,
         });
 
-        const result = LLMFactory.getResponseString(rawResult);
+        let result = LLMFactory.getResponseString(rawResult);
+        const safetyVerdict = getLlmSafetyVerdict(result);
 
-        if (isLlmSafeMisfireResponse(result)) {
-          // groq и safeguard-модели иногда отдают "safe" вместо нормального ответа
-          throw new Error('Safe content detected');
-        }
+        if (safetyVerdict !== 'none') {
+          const safetyReason = getLlmSafetyReplacementReason(safetyVerdict);
+          const userResponse = toHumanLlmResponse(result);
 
-        if (result && isLlmUnsafeContentResponse(result)) {
-          throw new ProhibitedContentError();
+          Logger.logInfo('LLM safety response replaced with user message', {
+            verdict: safetyVerdict,
+            reason: safetyReason,
+            rawResult: LLMFactory.redactForConsole(result),
+            userResponse: LLMFactory.redactForConsole(userResponse),
+          });
+
+          addPayloadToTrace({
+            llmSafetyVerdict: safetyVerdict,
+            llmSafetyReason: safetyReason,
+            llmSafetyRawResult: result,
+            llmSafetyUserResponse: userResponse,
+          });
+
+          result = userResponse;
         }
 
         if (!result) {
@@ -806,10 +819,6 @@ No quotes. No period. No newline. No extra text.`;
 
         return result;
       } catch (error: any) {
-        if (error instanceof ProhibitedContentError) {
-          throw error;
-        }
-
         if (attemptsCallbacks && !isPing) {
           await attemptsCallbacks({
             message: `⚠️ Ошибка при поиске ответа в чанках (попытка: ${currentAttempt + 1}/${maxRetries})...`,

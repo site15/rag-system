@@ -31,6 +31,20 @@ export function getProhibitedContentMessage(): string {
   return 'Ваш запрос не может быть обработан, так как он содержит запрещённый контент. Пожалуйста, переформулируйте вопрос.';
 }
 
+export function getLlmSafetyMisfireMessage(): string {
+  return 'Не удалось сформировать ответ: модель вернула служебный результат проверки безопасности вместо текста. Попробуйте переформулировать вопрос.';
+}
+
+export function getLlmSafetyReplacementReason(
+  verdict: Exclude<LlmSafetyVerdict, 'none'>,
+): string {
+  if (verdict === 'unsafe_content') {
+    return 'Модель классифицировала ответ как небезопасный';
+  }
+
+  return 'Модель вернула служебный вердикт безопасности вместо ответа';
+}
+
 function stripSafetyPrefix(response: string): string {
   return response.replace(SAFETY_PREFIX_PATTERN, '').trim();
 }
@@ -154,5 +168,5 @@ export function toHumanLlmResponse(
     return getProhibitedContentMessage();
   }
 
-  return sanitizeLlmUserResponse(response) ?? getBotFallbackMessage();
+  return sanitizeLlmUserResponse(response) ?? getLlmSafetyMisfireMessage();
 }
