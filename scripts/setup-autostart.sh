@@ -56,6 +56,37 @@ if [[ -z "$PM2_HOME" ]]; then
   exit 1
 fi
 
+resolve_node_bin() {
+  if command -v node >/dev/null 2>&1; then
+    command -v node
+    return 0
+  fi
+  local candidate
+  for candidate in \
+    "$PM2_HOME/.nvm/versions/node/"*/bin/node \
+    /usr/local/bin/node \
+    /usr/bin/node; do
+    if [[ -x "$candidate" ]]; then
+      echo "$candidate"
+      return 0
+    fi
+  done
+  return 1
+}
+
+NODE_BIN="$(resolve_node_bin || true)"
+PM2_BIN="$ROOT_DIR/node_modules/pm2/bin/pm2"
+
+if [[ -z "$NODE_BIN" ]]; then
+  echo "❌ node не найден (nvm, /usr/local/bin или /usr/bin)" >&2
+  exit 1
+fi
+
+if [[ ! -f "$PM2_BIN" ]]; then
+  echo "❌ pm2 не установлен. Выполните: npm install" >&2
+  exit 1
+fi
+
 if [[ "$EUID" -ne 0 ]] && ! sudo -n true 2>/dev/null; then
   echo "⚠️  Для настройки systemd нужны права sudo."
   echo "   Запустите: sudo npm run setup:autostart"
@@ -71,7 +102,12 @@ run_root() {
 }
 
 run_pm2_user() {
-  run_root sudo -u "$PM2_USER" env HOME="$PM2_HOME" bash -lc "cd '$ROOT_DIR' && $*"
+  run_root sudo -u "$PM2_USER" env \
+    HOME="$PM2_HOME" \
+    NODE_BIN="$NODE_BIN" \
+    PM2_BIN="$PM2_BIN" \
+    ROOT_DIR="$ROOT_DIR" \
+    bash -c 'cd "$ROOT_DIR" && "$NODE_BIN" "$PM2_BIN" "$@"' _ "$@"
 }
 
 if [[ "$MODE" == "prod" ]]; then
@@ -109,10 +145,10 @@ run_root systemctl enable "$SERVICE_NAME"
 run_root systemctl restart "$SERVICE_NAME" || run_root systemctl start "$SERVICE_NAME"
 
 echo "▶ Настройка PM2 ($MODE, $ECOSYSTEM)..."
-run_pm2_user "./node_modules/.bin/pm2 start ./$ECOSYSTEM --update-env || true"
-run_pm2_user "./node_modules/.bin/pm2 save"
+run_pm2_user start "./$ECOSYSTEM" --update-env || true
+run_pm2_user save
 
-STARTUP_OUTPUT="$(run_pm2_user "./node_modules/.bin/pm2 startup systemd -u '$PM2_USER' --hp '$PM2_HOME'" 2>&1 || true)"
+STARTUP_OUTPUT="$(run_pm2_user startup systemd -u "$PM2_USER" --hp "$PM2_HOME" 2>&1 || true)"
 STARTUP_CMD="$(echo "$STARTUP_OUTPUT" | grep -E '^sudo env PATH' | tail -1 || true)"
 
 if [[ -n "$STARTUP_CMD" ]]; then
@@ -122,14 +158,14 @@ else
   echo "ℹ️  PM2 startup уже настроен или команда не требуется"
 fi
 
-run_pm2_user "./node_modules/.bin/pm2 save"
+run_pm2_user save
 
 echo ""
 echo "✅ Автозапуск настроен"
 echo "   Docker Compose: systemctl status $SERVICE_NAME"
-echo "   PM2:            sudo -u $PM2_USER ./node_modules/.bin/pm2 list"
+echo "   PM2:            cd $ROOT_DIR && $NODE_BIN $PM2_BIN list"
 echo ""
 echo "Проверка после перезагрузки:"
 echo "   sudo reboot"
 echo "   sudo systemctl status $SERVICE_NAME"
-echo "   sudo -u $PM2_USER ./node_modules/.bin/pm2 list"
+echo "   cd $ROOT_DIR && $NODE_BIN $PM2_BIN list"
